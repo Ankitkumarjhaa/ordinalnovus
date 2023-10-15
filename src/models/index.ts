@@ -5,7 +5,9 @@ import { APIKeySchema } from "./APIKey";
 import { TXCacheSchema } from "./tx";
 import { BlocksSchema } from "./block";
 
-const Inscription = models.Inscription || model("Inscription", inscriptionSchema);
+const Inscription =
+  models.Inscription || model("Inscription", inscriptionSchema);
+
 const Collection = models.Collection || model("Collection", collectionSchema);
 const APIKey = models.APIKey || model("APIKey", APIKeySchema);
 const Tx = models.Tx || model("Tx", TXCacheSchema);

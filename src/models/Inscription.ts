@@ -1,20 +1,56 @@
-import mongoose from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
+import { model, models } from "mongoose";
+// Define the schema for the "attribute" subdocument
+interface Attribute {
+  key: string;
+  value: string;
+}
 
-const Schema = mongoose.Schema;
+const attributeSchema = new Schema({
+  key: { type: String, required: true },
+  value: { type: String, required: true },
+});
 
+// Define the main schema
 export const inscriptionSchema = new mongoose.Schema(
   {
-    inscriptionId: {
+    number: { type: Number, required: true, unique: true },
+    inscription_id: {
       type: String,
-      required: false,
       unique: true,
+      required: true,
+      validate: {
+        validator: (value: string) => /^[a-f0-9]+i\d+$/.test(value),
+        message: () =>
+          "inscription_id should be in the format: c17dd02a7f216f4b438ab1a303f518abfc4d4d01dcff8f023cf87c4403cb54cai0",
+      },
     },
     content: { type: String },
-    sha: { type: String },
-    officialCollection: { type: Schema.Types.ObjectId, ref: "Collection" },
-    name: { type: String },
-    attributes: { type: Schema.Types.Mixed },
-    preview: { type: String },
+    sha: {
+      type: String,
+      sparse: true,
+      validate: {
+        validator: (value: string) => /^[a-f0-9]+$/.test(value),
+        message: () => "sha should consist of hexadecimal characters only.",
+      },
+    },
+    location: {
+      type: String,
+      validate: {
+        validator: (value: string) => /^[\da-f]+:\d+:\d+$/.test(value),
+        message: () => "location should have two ':' followed by numbers.",
+      },
+    },
+    output: {
+      type: String,
+      validate: {
+        validator: (value: string) => /^[\da-f]+:\d+$/.test(value),
+        message: () => "output should have one ':' followed by a number.",
+      },
+    },
+    timestamp: {
+      type: Date,
+    },
     flagged: { type: Boolean, default: false },
     banned: { type: Boolean, default: false, required: true },
     reason: { type: String },
@@ -22,6 +58,16 @@ export const inscriptionSchema = new mongoose.Schema(
     block: { type: Number },
     content_length: { type: Number },
     content_type: { type: String },
+    // collection detail
+    official_collection: {
+      type: Schema.Types.ObjectId,
+      ref: "Collection",
+      sparse: true,
+    },
+    collection_item_name: { type: String },
+    collection_item_number: { type: Number },
+    attributes: { type: [attributeSchema] },
+    // sat details
     cycle: { type: Number },
     decimal: { type: String },
     degree: { type: String },
@@ -30,15 +76,11 @@ export const inscriptionSchema = new mongoose.Schema(
     genesis_fee: { type: Number },
     genesis_height: { type: Number },
     genesis_transaction: { type: String },
-    location: { type: String },
-    number: { type: Number, required: true },
     percentile: { type: String },
     period: { type: Number },
     rarity: { type: String },
     sat: { type: Number },
     sat_name: { type: String },
-    timestamp: { type: Date },
-    // dynamic
     sat_offset: { type: Number },
     lists: [{ type: Schema.Types.ObjectId, ref: "Collection" }],
     tags: {
@@ -46,32 +88,75 @@ export const inscriptionSchema = new mongoose.Schema(
       required: false,
       validate: {
         validator: function (tags: any[]) {
-          const pattern = /^[a-z-]+$/;
+          const pattern = /^[^A-Z]+$/;
           return tags.every((tag) => pattern.test(tag));
         },
+
         message: () =>
           `Tags should only contain lowercase letters and hyphens.`,
       },
     },
-    error: { type: Boolean, default: false },
-    // New fields
+    error: {
+      type: Boolean,
+      default: false,
+      validate: {
+        validator: function (this: any, value: boolean) {
+          if (value) console.log(this.inscription_id, "error here");
+          return !value || (value === true && !!this.error_tag);
+        },
+        message: 'If "error" is set to true, "error_tag" must be provided.',
+      },
+    },
+    error_tag: { type: String, default: null },
     offset: { type: Number },
-    output: { type: String },
     output_value: { type: Number },
-    address: { type: String },
-    listed: { type: Boolean },
-    listedAt: { type: Date },
-    listedPrice: { type: Number }, //in sats
-    listedMakerFeeBp: { type: Number },
-    tapInternalKey: { type: String },
-    listedSellerReceiveAddress: { type: String },
-    signedPsbt: { type: String },
-    unSignedPsbt: { type: String },
-    satBlockTime: { type: Date },
+    address: {
+      type: String,
+      validate: {
+        validator: function (this: any, value: string) {
+          return (
+            !value ||
+            (value &&
+              this.output &&
+              this.location &&
+              this.output_value !== null)
+          );
+        },
+        message:
+          'If "address" is provided, "output", "location", and "output_value" must also be provided.',
+      },
+    },
+    listed: {
+      type: Boolean,
+      validate: {
+        validator: function (this: any, value: boolean) {
+          return (
+            !value ||
+            (value &&
+              this.listedAt &&
+              this.listedPrice &&
+              this.listedMakerFeeBp &&
+              this.tapInternalKey &&
+              this.listedSellerReceiveAddress &&
+              this.signedPsbt &&
+              this.unSignedPsbt)
+          );
+        },
+        message:
+          'If "listed" is true, all related "listed_" fields must also be provided.',
+      },
+    },
+    listed_at: { type: Date },
+    listed_price: { type: Number }, // in sats
+    listed_maker_fee_bp: { type: Number },
+    tap_internal_key: { type: String },
+    listed_seller_receive_address: { type: String },
+    signed_psbt: { type: String },
+    unsigned_psbt: { type: String },
+    sat_block_time: { type: Date },
     sattributes: [{ type: String }],
-    lastChecked: { type: Date },
+    last_checked: { type: Date },
     version: { type: Number },
-    brc20: { type: Boolean, default: false },
     token: { type: Boolean, default: false },
   },
   {
@@ -79,23 +164,28 @@ export const inscriptionSchema = new mongoose.Schema(
   }
 );
 
-// Keep these indexes as they are frequently used in queries.
-inscriptionSchema.index({ number: 1 }, { sparse: true });
-inscriptionSchema.index({ address: 1, number: 1 });
-inscriptionSchema.index({ sha: 1 }, { sparse: true });
-inscriptionSchema.index({ genesis_transaction: 1 }, { sparse: true });
-inscriptionSchema.index({ inscriptionId: 1 }, { sparse: true });
-inscriptionSchema.index({ officialCollection: 1 }, { sparse: true });
-inscriptionSchema.index({ sat_name: 1 }, { sparse: true });
-inscriptionSchema.index({ version: 1, sha: 1, content_type: 1, number: 1 });
+// Text index for content search
+inscriptionSchema.index({ content: "text" });
 
-inscriptionSchema.index({
-  content: "text",
-  content_type: "text",
-  sat_name: "text",
-  sha: "text",
-  name: "text",
-});
+// Compound index for error and error_tag
+inscriptionSchema.index({ error: 1, error_tag: 1 });
 
-//temporary index. remove after rarity added till 25Million
-inscriptionSchema.index({ genesis_transaction: 1, error: 1 });
+// Compound index for collection_item_name and collection_item_number
+// This will also help in sorting based on collection_item_number
+inscriptionSchema.index({ collection_item_name: 1, collection_item_number: 1 });
+
+// Additional indexes based on new requirements
+inscriptionSchema.index({ sat: 1, sat_name: 1 });
+inscriptionSchema.index({ lists: 1 });
+inscriptionSchema.index({ listed: 1 });
+inscriptionSchema.index({ official_collection: 1, listed: 1 }); // for docs that are listed from a certain collection
+
+// Sorting by price
+inscriptionSchema.index({ listed_price: 1 });
+
+// Existing and other necessary indexes
+inscriptionSchema.index({ inscription_id: 1 });
+inscriptionSchema.index({ sha: 1 });
+inscriptionSchema.index({ address: 1 });
+inscriptionSchema.index({ tag: 1 });
+inscriptionSchema.index({ number: 1 });

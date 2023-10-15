@@ -1,6 +1,6 @@
 "use server";
 import axios from "axios";
-const api = process.env.NEXT_PUBLIC_API;
+const api = process.env.NEXT_PUBLIC_URL + "/api";
 
 const checkApis = async () => {
   const apiCalls = [
@@ -97,7 +97,7 @@ const checkApis = async () => {
         });
     })(),
     (() => {
-      const url = `${api}/v2/search?id=12&apikey=${process.env.API_KEY}`;
+      const url = `${api}/v2/search/inscription?id=12&apikey=${process.env.API_KEY}`;
       // console.log("Fetching data from:", url);
       return axios
         .get(url)
