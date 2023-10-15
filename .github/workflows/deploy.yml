@@ -14,7 +14,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Build backend image
+      - name: Build Ordinalnovus image
         run: |
           TAG_NAME="latest"
           MONGODB_STRING=$MONGODB_URI
@@ -22,16 +22,16 @@ jobs:
             TAG_NAME="dev"
             MONGODB_STRING="mongodb://ordinalnovus_dev:xERD56_gth@192.168.1.33:27017/ordinalnovus_dev?retryWrites=true&w=majority&authMechanism=DEFAULT"
           fi
-          docker build -t crypticmetadev/on-backend:$TAG_NAME . \
+          docker build -t crypticmetadev/ordinalnovus:$TAG_NAME . \
             --build-arg MONGODB_URI=$MONGODB_STRING
 
       - name: Log in to Docker registry
         run: docker login -u crypticmetadev -p ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Push backend image to Docker registry
+      - name: Push ordinalnovus image to Docker registry
         run: |
           TAG_NAME="latest"
           if [ "${{ github.ref }}" == "refs/heads/dev" ]; then
             TAG_NAME="dev"
           fi
-          docker push crypticmetadev/on-backend:$TAG_NAME
+          docker push crypticmetadev/ordinalnovus:$TAG_NAME
