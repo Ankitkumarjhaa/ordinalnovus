@@ -1,0 +1,25 @@
+# Exclude development-specific files and directories
+node_modules
+npm-debug.log
+yarn-error.log
+.env
+
+# Exclude Next.js build output
+.next
+
+# Exclude version control directories
+.git
+.gitignore
+
+# Exclude IDE-specific directories
+.vscode
+
+# Exclude editor temporary files
+*.swp
+*.swo
+*.swn
+*.swl
+
+# Exclude system and temporary files
+.DS_Store
+Thumbs.db
