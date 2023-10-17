@@ -9,7 +9,9 @@ import { IInscription } from "@/types/Ordinals";
 // Function to fetch details of a single inscription
 async function fetchInscriptionDetails(
   inscriptionId: string
-): Promise<Partial<IInscription> | { error: true; error_tag: string }> {
+): Promise<
+  Partial<IInscription> | { error: true; error_tag: string; error_retry: 1 }
+> {
   try {
     const { data } = await axios.get(
       `${process.env.NEXT_PUBLIC_PROVIDER}/api/inscription/${inscriptionId}`
@@ -27,7 +29,7 @@ async function fetchInscriptionDetails(
       error.response &&
       (error.response.status === 500 || error.response.status === 502)
     ) {
-      return { error: true, error_tag: "server error" };
+      return { error: true, error_tag: "server error", error_retry: 1 };
     }
     throw error;
   }

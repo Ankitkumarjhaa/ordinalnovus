@@ -107,6 +107,7 @@ export const inscriptionSchema = new mongoose.Schema(
         message: 'If "error" is set to true, "error_tag" must be provided.',
       },
     },
+    error_retry: { type: Number, default: 0 },
     error_tag: { type: String, default: null },
     offset: { type: Number },
     output_value: { type: Number },
