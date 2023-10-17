@@ -234,9 +234,6 @@ const handlePreSaveLogic = async (bulkDocs: Array<Partial<any>>) => {
       // Set the version based on the counter in shaMap
       doc.version = shaMap[doc.sha];
 
-      if (i == 198) {
-        console.log({ sha: doc.sha, version: doc.version, number: doc.number });
-      }
     }
 
     // Modify the tags if content_type exists and contains a "/"
