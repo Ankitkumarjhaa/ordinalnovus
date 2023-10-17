@@ -1,22 +1,6 @@
 # Use an official Node.js runtime as the base image
 FROM node:16.8-slim
 
-# Accept environment variables as build arguments
-ARG NEXT_PUBLIC_PROVIDER
-ARG NEXT_PUBLIC_URL
-ARG NEXT_PUBLIC_API
-ARG API_KEY
-ARG MONGODB_URI
-ARG REDIS_URL
-
-# Set the build arguments as environment variables in the image
-ENV NEXT_PUBLIC_PROVIDER=$NEXT_PUBLIC_PROVIDER
-ENV NEXT_PUBLIC_URL=$NEXT_PUBLIC_URL
-ENV NEXT_PUBLIC_API=$NEXT_PUBLIC_API
-ENV API_KEY=$API_KEY
-ENV MONGODB_URI=$MONGODB_URI
-ENV REDIS_URL=$REDIS_URL
-
 # Set the working directory in the container
 WORKDIR /usr/src/app
 
@@ -48,8 +32,8 @@ RUN apt-get update && apt-get install -y \
     libdrm2 \
     libgbm1
 
-# Expose port 8080
-EXPOSE 8080
+# Expose port 3000
+EXPOSE 3000
 
 # CMD to run your application
 CMD ["yarn", "start"]
