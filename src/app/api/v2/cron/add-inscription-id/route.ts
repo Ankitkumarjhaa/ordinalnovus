@@ -176,6 +176,7 @@ export const dynamic = "force-dynamic";
 
 const handlePreSaveLogic = async (bulkDocs: Array<Partial<any>>) => {
   const transformedBulkOps: any[] = [];
+  const shaMap: { [sha: string]: number } = {};
 
   for (let i = 0; i < bulkDocs.length; i++) {
     let bulkDoc = { ...bulkDocs[i] };
@@ -218,8 +219,24 @@ const handlePreSaveLogic = async (bulkDocs: Array<Partial<any>>) => {
         sha: doc.sha,
       });
 
-      doc.version =
-        documentsWithSameSha.length > 0 ? documentsWithSameSha.length + 1 : 1;
+      // If the SHA exists in DB, initialize or update the counter in shaMap
+      if (documentsWithSameSha.length > 0) {
+        shaMap[doc.sha] = documentsWithSameSha.length;
+      }
+
+      // If the SHA exists in the current bulkDocs, update the counter in shaMap
+      if (shaMap[doc.sha] != null) {
+        shaMap[doc.sha]++;
+      } else {
+        shaMap[doc.sha] = 1;
+      }
+
+      // Set the version based on the counter in shaMap
+      doc.version = shaMap[doc.sha];
+
+      if (i == 198) {
+        console.log({ sha: doc.sha, version: doc.version, number: doc.number });
+      }
     }
 
     // Modify the tags if content_type exists and contains a "/"
