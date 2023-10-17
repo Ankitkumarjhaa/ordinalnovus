@@ -59,3 +59,5 @@ async function dbConnect(): Promise<Mongoose> {
 }
 
 export default dbConnect;
+
+export const dynamic = "force-dynamic";
