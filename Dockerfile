@@ -4,6 +4,10 @@ FROM node:16.8-slim
 # Set the working directory in the container
 WORKDIR /usr/src/app
 
+ARG MONGODB_URI
+
+ENV MONGODB_URI=$MONGODB_URI
+
 # Install git, gnupg, nano, and Playwright dependencies
 RUN apt-get update && \
     apt-get install -y git nano curl gnupg libxss1 libasound2 libxtst6 libatk-bridge2.0-0 libgtk-3-0
