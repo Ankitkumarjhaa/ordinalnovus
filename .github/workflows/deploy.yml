@@ -20,9 +20,9 @@ jobs:
           MONGODB_STRING=$MONGODB_URI
           if [ "${{ github.ref }}" == "refs/heads/dev" ]; then
             TAG_NAME="dev"
-            MONGODB_STRING = MONGODB_STRING="mongodb://192.168.1.33:27017/ordinalnovus_dev"
+            MONGODB_STRING="mongodb://192.168.1.33:27017/ordinalnovus_dev"
           fi
-          docker build -t crypticmetadev/ordinalnovus:$TAG_NAME .\
+          docker build -t crypticmetadev/ordinalnovus:$TAG_NAME . \
             --build-arg MONGODB_URI=$MONGODB_STRING
 
       - name: Log in to Docker registry
