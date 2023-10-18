@@ -186,7 +186,7 @@ inscriptionSchema.index({ listed_price: 1 });
 
 // Existing and other necessary indexes
 inscriptionSchema.index({ inscription_id: 1 });
-inscriptionSchema.index({ sha: 1 });
+inscriptionSchema.index({ sha: 1, version: 1 });
 inscriptionSchema.index({ address: 1 });
 inscriptionSchema.index({ tag: 1 });
 inscriptionSchema.index({ number: 1 });

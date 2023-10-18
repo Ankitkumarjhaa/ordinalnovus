@@ -6,42 +6,6 @@ import { IVIN, IVOUT, MempoolBlockTx } from "@/types/Tx";
 import { ObjectId } from "mongodb";
 import moment from "moment";
 
-// Fetch Inscriptions
-async function fetchInscriptions(output: string): Promise<any[]> {
-  try {
-    const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_PROVIDER}/api/output/${output}`
-    );
-    return response.data?.inscriptions || [];
-  } catch (error) {
-    console.error(`Error fetching inscriptions for output ${output}:`, error);
-    throw new Error("Failed to fetch inscriptions");
-  }
-}
-
-// Construct Transaction Data
-function constructTxData(
-  inscriptions: any[],
-  inputs: IVIN[],
-  outputs: IVOUT[]
-): any {
-  if (inscriptions.length !== 1) return null;
-  return {
-    from: inputs[2]?.prevout?.scriptpubkey_address,
-    to: outputs[1].scriptpubkey_address,
-    price: outputs[2].value,
-    inscriptions,
-  };
-}
-
-// Fetch Inscription Details
-async function fetchInscriptionDetails(inscriptionId: string): Promise<any> {
-  const response = await axios.get(
-    `${process.env.NEXT_PUBLIC_PROVIDER}/api/inscription/${inscriptionId}`
-  );
-  return response.data;
-}
-
 async function fetchBlockhashFromHeight(height: number): Promise<string> {
   const tipResponse = await axios.get(
     "https://mempool.space/api/block-height/" + height
@@ -112,10 +76,10 @@ async function verifyPreviousBlockhash(blockhash: string): Promise<void> {
 
 async function addBlockTxToDB(blockhash: string) {
   const dbBlockDetail = await Block.findOne({ id: blockhash });
+  console.log(dbBlockDetail, "DB To process");
   const bulkOps: Array<any> = [];
   const newTxIds: string[] = [];
   const inscriptionTxIds: { txid: string; inscriptions: any }[] = [];
-  const bulkOpsInscription: Array<any> = [];
 
   const blockTxsResponse = await axios.get(
     `https://mempool.space/api/block/${blockhash}/txs`
@@ -123,100 +87,56 @@ async function addBlockTxToDB(blockhash: string) {
   const blockTxsData: MempoolBlockTx[] = blockTxsResponse.data;
 
   const existingTxIds = await Tx.find(
-    { parsed: true, blockhash: new ObjectId(dbBlockDetail._id) },
+    { blockhash: new ObjectId(dbBlockDetail._id) },
     "txid"
   );
 
   const existingTxIdSet = new Set(existingTxIds.map((tx) => tx.txid));
 
   console.log({
-    confirmedTxInLatestBlock: blockTxsData.length,
-    totalTxInLatestBlock: dbBlockDetail.tx_count,
-    existingTxOfThisBlockInDB: existingTxIds.length,
+    txsSentByMempool: blockTxsData.length,
+    txMempoolShouldBe: dbBlockDetail.tx_count,
+    existingTxInDB: existingTxIds.length,
   });
 
   for (const item of blockTxsData) {
-    const { vin: inputs, vout: outputs, txid } = item;
+    const {
+      vin: inputs,
+      vout: outputs,
+      txid,
+      version,
+      size,
+      weight,
+      fee,
+      status,
+    } = item;
 
     if (existingTxIdSet.has(txid)) continue;
 
-    // console.log("checking... ", txid);
-    if (outputs.length >= 4 && inputs.length >= 3) {
-      const inscriptions = await fetchInscriptions(`${txid}:1`);
+    newTxIds.push(txid);
 
-      if (inscriptions && inscriptions.length) {
-        const txData = constructTxData(inscriptions, inputs, outputs);
-
-        bulkOps.push({
-          insertOne: {
-            document: {
-              ...txData,
-              txid,
-              blockhash: new ObjectId(dbBlockDetail._id),
-              tag: "sale",
-              parsed: true,
-            },
-          },
-        });
-
-        inscriptionTxIds.push({
+    bulkOps.push({
+      insertOne: {
+        document: {
           txid,
-          inscriptions,
-        });
-      } else {
-        bulkOps.push({
-          insertOne: {
-            document: {
-              txid,
-              blockhash: new ObjectId(dbBlockDetail._id),
-              parsed: true,
-            },
-          },
-        });
-      }
-    } else {
-      bulkOps.push({
-        insertOne: {
-          document: {
-            txid,
-            blockhash: new ObjectId(dbBlockDetail._id),
-            parsed: true,
-          },
+          blockhash: new ObjectId(dbBlockDetail._id),
+          parsed: false,
+          version,
+          size,
+          weight,
+          fee,
+          status,
+          vin: inputs,
+          vout: outputs,
+          height: dbBlockDetail.height,
         },
-      });
-
-      newTxIds.push(txid);
-    }
+      },
+    });
   }
 
   if (bulkOps.length > 0) {
-    await Tx.bulkWrite(bulkOps, { ordered: false });
-  }
-
-  for (const { txid, inscriptions } of inscriptionTxIds) {
-    for (const inscriptionId of inscriptions) {
-      const inscriptionDetails = await fetchInscriptionDetails(inscriptionId);
-      const { address, location, offset, output, output_value } =
-        inscriptionDetails;
-
-      // Update Inscription Collection
-      bulkOpsInscription.push({
-        updateOne: {
-          filter: { inscription_id: inscriptionId },
-          update: {
-            address,
-            location,
-            offset,
-            output,
-            output_value,
-          },
-        },
-      });
-    }
-  }
-
-  if (bulkOpsInscription.length > 0) {
-    await Inscription.bulkWrite(bulkOpsInscription, { ordered: false });
+    console.log(bulkOps.length, " tx are being added");
+    await Tx.bulkWrite(bulkOps);
   }
 
   return { newTxIds, inscriptionTxIds };
@@ -255,16 +175,6 @@ async function getLatestBlockHeight(): Promise<number> {
 export async function GET(req: NextRequest, res: NextResponse) {
   try {
     await dbConnect();
-    const oneDayAgo = moment().subtract(1, "days").toDate();
-
-    const query = {
-      parsed: true,
-      price: { $exists: false },
-      createdAt: { $lt: oneDayAgo },
-    };
-
-    await Tx.deleteMany(query);
-
     let latestBlockHeight: number;
     let lastSavedBlockHeight: number;
 
