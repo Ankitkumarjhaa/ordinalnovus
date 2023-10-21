@@ -5,7 +5,7 @@ export interface IInscription {
   inscriptionId?: string;
   content?: string;
   sha?: string;
-  officialCollection?: ICollection;
+  official_collection?: ICollection;
   name?: string;
   attributes?: any;
   preview?: string;

@@ -148,7 +148,7 @@ export default function StatusPage() {
         apiStatus={apiStatus.inscription}
         apiRoute="/inscription"
         apiMethod="GET"
-        apiQueryParams="apiKey (required), sha, inscriptionId, content_type, _id, officialCollection, sat, sat_name, rarity, block, content, content_type, sat_offset, number, show, _limit, _start, _sort"
+        apiQueryParams="apiKey (required), sha, inscriptionId, content_type, _id, official_collection, sat, sat_name, rarity, block, content, content_type, sat_offset, number, show, _limit, _start, _sort"
         apiResponse={`{
     "inscriptions": [
         {
@@ -257,7 +257,7 @@ export default function StatusPage() {
                     }
                 ],
                 "name": "Bitcoin JPEG #875",
-                "officialCollection": {
+                "official_collection": {
                     "_id": "648fc1ade01b2b2af58959f9",
                     "name": "Bitcoin JPEGs",
                     "inscription_icon": {

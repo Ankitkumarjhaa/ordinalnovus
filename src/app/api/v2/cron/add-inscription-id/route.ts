@@ -47,7 +47,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     });
     const start = highestInscription
       ? highestInscription.inscription_number
-      : 299;
+      : -1;
     // const { data } = await axios.get(
     //   `${process.env.NEXT_PUBLIC_PROVIDER}/api/feed`
     // );

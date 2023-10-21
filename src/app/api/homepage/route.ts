@@ -15,47 +15,6 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
 
   // Connect to the database
   await dbConnect();
-  async function renameFields() {
-    const result = await Inscription.updateMany(
-      {},
-      {
-        $rename: {
-          inscriptionId: "inscription_id",
-          officialCollection: "official_collection",
-          itemNumber: "item_number",
-          updatedBy: "updated_by",
-          contentLength: "content_length",
-          contentType: "content_type",
-          genesisAddress: "genesis_address",
-          genesisFee: "genesis_fee",
-          genesisHeight: "genesis_height",
-          genesisTransaction: "genesis_transaction",
-          satName: "sat_name",
-          satOffset: "sat_offset",
-          outputValue: "output_value",
-          listedAt: "listed_at",
-          listedPrice: "listed_price",
-          listedMakerFeeBp: "listed_maker_fee_bp",
-          tapInternalKey: "tap_internal_key",
-          listedSellerReceiveAddress: "listed_seller_receive_address",
-          signedPsbt: "signed_psbt",
-          unSignedPsbt: "un_signed_psbt",
-          satBlockTime: "sat_block_time",
-          lastChecked: "last_checked",
-        },
-      }
-    );
-
-    // console.log(`Updated ${result.nModified} documents`);
-    // Return data in the desired format
-    return NextResponse.json({
-      statusCode: 200,
-      message: "success",
-      data: result,
-    });
-  }
-
-  await renameFields();
 
   // Create a unique cache key for this request
   const cacheKey = "homepageData";

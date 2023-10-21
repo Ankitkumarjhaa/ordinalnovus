@@ -4,6 +4,7 @@ import dbConnect from "@/lib/dbConnect";
 import apiKeyMiddleware from "@/newMiddlewares/apikeyMiddleware";
 import { CustomError } from "@/utils";
 import { IInscription } from "@/types/Ordinals";
+import { Inscription } from "@/models";
 
 type Data = {
   statusCode: number;
@@ -21,34 +22,16 @@ async function fetchLatestInscriptionData(inscriptionId: string) {
 async function fetchInscriptions(query: any, page: number, limit: number) {
   console.log("Fetching Inscriptions...");
 
+  console.log({ query }, "sending to fetch");
+
   const skip = (page - 1) * limit;
-  const url = `${process.env.NEXT_PUBLIC_URL}/api/inscription`;
-  console.log(
-    {
-      ...query,
-      apiKey: process.env.API_KEY,
-      _start: skip,
-      _limit: limit,
-      show: "all",
-    },
-    "QUERY"
-  );
-
   try {
-    const response = await axios.get(url, {
-      params: {
-        ...query,
-        apiKey: process.env.API_KEY,
-        _start: skip,
-        _limit: limit,
-        match: "regex",
-        show: "all",
-      },
-      headers: { "Content-Type": "application/json" },
-    });
+    const response = await Inscription.find({ ...query })
+      .limit(limit || 20)
+      .select("-created_at -updated_at -error_tag -error-retry -error ");
 
-    const inscriptions = response.data.inscriptions;
-    const totalCount = response.data.pagination.total;
+    const inscriptions = response || [];
+    const totalCount = response.length;
 
     return { inscriptions, totalCount };
   } catch (error) {
@@ -81,9 +64,9 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
     let query;
 
     if (/^[0-9A-Fa-f]{64}i\d$/gm.test(id)) {
-      query = { inscriptionId: id };
+      query = { inscription_id: id };
     } else if (!isNaN(Number(id))) {
-      query = { number: Number(id) };
+      query = { inscription_number: Number(id) };
     } else if (/^[0-9a-f]{64}$/i.test(id)) {
       query = { sha: id };
     } else if (isNaN(Number(id))) {
@@ -93,7 +76,6 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
       };
     }
 
-    console.log(query, "SEARCH Inscription QUERY");
     await dbConnect();
 
     const { inscriptions, totalCount } = await fetchInscriptions(
@@ -105,23 +87,11 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
     console.log(inscriptions.length, " inscriptions found in db");
 
     if (inscriptions.length) {
-      console.log(
-        "if inscriptions have been found in db, fetch latest data as well"
-      );
-      let updatedInscriptions: IInscription[] = [];
-      await Promise.all(
-        inscriptions.map(async (item: IInscription) => {
-          //@ts-ignore
-          const iData = await fetchLatestInscriptionData(item.inscriptionId);
-          item.address = iData.address;
-          updatedInscriptions.push(item);
-        })
-      );
       return NextResponse.json({
         statusCode: 200,
         message: "Fetched Latest Inscription data successfully",
         data: {
-          inscriptions: updatedInscriptions,
+          inscriptions,
           pagination: {
             page,
             limit,
@@ -129,12 +99,13 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
           },
         },
       });
-    } else if (/^[0-9A-Fa-f]{64}i\d$/gm.test(id)) {
-      console.log(
-        "if no inscription data in db and id is inscriptionId, try fetching latest data"
+    } else if (/^-?\d+$/.test(id)) {
+      const { data } = await axios.get(
+        `${process.env.NEXT_PUBLIC_PROVIDER}/api/inscriptions/${id}`
       );
-      const iData = await fetchLatestInscriptionData(id);
-      iData.inscriptionId = id;
+      const inscription_id = data.inscriptions[0];
+      const iData = await fetchLatestInscriptionData(inscription_id);
+      iData.inscription_id = inscription_id;
       return NextResponse.json({
         statusCode: 200,
         message: "Fetched Latest Inscription data successfully",
@@ -147,6 +118,33 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
           },
         },
       });
+    } else if (/^[0-9A-Fa-f]{64}i\d$/gm.test(id)) {
+      console.log(
+        "if no inscription data in db and id is inscriptionId, try fetching latest data"
+      );
+      const iData = await fetchLatestInscriptionData(id);
+      iData.inscription_id = id;
+      return NextResponse.json({
+        statusCode: 200,
+        message: "Fetched Latest Inscription data successfully",
+        data: {
+          inscriptions: [iData],
+          pagination: {
+            page,
+            limit,
+            total: totalCount,
+          },
+        },
+      });
+    } else {
+      return NextResponse.json(
+        {
+          message: "ID is inavlid",
+        },
+        {
+          status: 500,
+        }
+      );
     }
   } catch (error: any) {
     if (!error?.status) console.error("Catch Error: ", error);

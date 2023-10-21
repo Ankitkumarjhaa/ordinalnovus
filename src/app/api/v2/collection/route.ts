@@ -20,10 +20,11 @@ async function getCollections(query: any) {
       .limit(query.limit)
       .exec();
 
-    if (coll.length > 0) return coll;
-    else {
-      throw new CustomError("Collection Not Found", 404);
-    }
+    return coll;
+    // if (coll.length > 0);
+    // else {
+    //   throw new CustomError("Collection Not Found", 404);
+    // }
   } catch (error) {
     throw new CustomError("Collection Not Found", 404);
   }
@@ -53,17 +54,17 @@ async function getInscriptionsRange(collections: any) {
     if (collection.updated === collection.supply) {
       // Find the inscription with the lowest number
       const lowestInscription = await Inscription.findOne({
-        officialCollection: collection._id,
+        official_collection: collection._id,
       })
-        .sort("number")
-        .select("number");
+        .sort("inscription_number")
+        .select("inscription_number");
 
       // Find the inscription with the highest number
       const highestInscription = await Inscription.findOne({
-        officialCollection: collection._id,
+        official_collection: collection._id,
       })
-        .sort("-number") // Sorting in descending order
-        .select("number"); // Select only the 'number' field
+        .sort("-inscription_number") // Sorting in descending order
+        .select("inscription_number"); // Select only the 'number' field
 
       // Update the collection with new min and max
       collection.min = lowestInscription.number;

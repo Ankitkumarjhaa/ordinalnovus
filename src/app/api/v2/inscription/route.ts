@@ -9,7 +9,7 @@ import { CustomError } from "@/utils";
 
 const getProjectionFields = (show: string) => {
   if (show === "prune") {
-    return "inscriptionId number lastChecked content_type rarity timestamp sha address signedPsbt listedPrice listedAt";
+    return "inscription_id number content_type rarity timestamp sha address signed_psbt listed_price listed_at";
   } else if (show === "all") {
     return "-_id -__v -created_at -updated_at";
   } else {
@@ -56,28 +56,28 @@ const buildPipeline = (query: any) => {
     {
       $lookup: {
         from: "collections",
-        localField: "officialCollection",
+        localField: "official_collection",
         foreignField: "_id",
-        as: "officialCollection",
+        as: "official_collection",
       },
     },
     {
       $unwind: {
-        path: "$officialCollection",
+        path: "$official_collection",
         preserveNullAndEmptyArrays: true,
       },
     },
     {
       $lookup: {
         from: "inscriptions",
-        localField: "officialCollection.inscription_icon",
+        localField: "official_collection.inscription_icon",
         foreignField: "_id",
-        as: "officialCollection.inscription_icon",
+        as: "official_collection.inscription_icon",
       },
     },
     {
       $unwind: {
-        path: "$officialCollection.inscription_icon",
+        path: "$official_collection.inscription_icon",
         preserveNullAndEmptyArrays: true,
       },
     },
@@ -89,16 +89,16 @@ const buildPipeline = (query: any) => {
         created_at: 0,
         updated_at: 0,
         __v: 0,
-        "officialCollection._id": 0,
-        "officialCollection.__v": 0,
-        "officialCollection.updated_at": 0,
-        "officialCollection.created_at": 0,
-        "officialCollection.errored": 0,
-        "officialCollection.updated": 0,
-        "officialCollection.erroredInscriptions": 0,
-        "officialCollection.updatedBy": 0,
-        "officialCollection.inscription_icon.created_at": 0,
-        "officialCollection.inscription_icon.updated_at": 0,
+        "official_collection._id": 0,
+        "official_collection.__v": 0,
+        "official_collection.updated_at": 0,
+        "official_collection.created_at": 0,
+        "official_collection.errored": 0,
+        "official_collection.updated": 0,
+        "official_collection.erroredInscriptions": 0,
+        "official_collection.updatedBy": 0,
+        "official_collection.inscription_icon.created_at": 0,
+        "official_collection.inscription_icon.updated_at": 0,
       },
     },
   ];
@@ -114,7 +114,7 @@ const fetchInscriptions = async (
   if (
     query.sort &&
     (query.sort.name === 1 || query.sort.name === -1) &&
-    query.find.officialCollection
+    query.find.official_collection
   ) {
     console.log("\nusing aggregation pipeline becuase sort = name & slug used");
     return await Inscription.aggregate(pipeline).exec();
@@ -123,12 +123,12 @@ const fetchInscriptions = async (
       .select(projectionFields)
       .where(query.where)
       .populate({
-        path: "officialCollection",
+        path: "official_collection",
         select:
-          "name inscriptionId inscription_icon supply slug description _id verified featured",
+          "name inscription_id inscription_icon supply slug description _id verified featured",
         populate: {
           path: "inscription_icon",
-          select: "inscriptionId content_type",
+          select: "inscription_id content_type",
         },
       })
       .sort(query.sort)
@@ -163,7 +163,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
       }).select("name");
 
       if (!collection) throw new CustomError("Collection Not Found", 404);
-      query.find.officialCollection = collection._id;
+      query.find.official_collection = collection._id;
     }
     const projectionFields = getProjectionFields(query.show as string);
     const pipeline = buildPipeline(query);

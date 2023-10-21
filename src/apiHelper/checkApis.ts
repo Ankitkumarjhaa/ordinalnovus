@@ -37,7 +37,7 @@ const checkApis = async () => {
         });
     })(),
     (() => {
-      const url = `${api}/apikey/09b92b2d-1311-47d8-9131-fade4e2e15ca`;
+      const url = `${api}/apikey/64897623-31ea-4735-9f1b-7b6f53c6e0bd`;
       // console.log("Fetching data from:", url);
       return axios
         .get(url)
