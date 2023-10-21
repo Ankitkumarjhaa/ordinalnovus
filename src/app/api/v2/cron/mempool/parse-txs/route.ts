@@ -5,8 +5,9 @@ import { Tx, Inscription } from "@/models";
 import { IVIN, IVOUT } from "@/types/Tx";
 import * as cheerio from "cheerio";
 import moment from "moment";
+import { IInscription } from "@/types/Ordinals";
 
-async function fetchInscriptions(output: string): Promise<string[]> {
+async function fetchInscriptionsFromOrd(output: string): Promise<string[]> {
   try {
     console.log("fetching...", `https://ordinals.com/output/${output}`);
     const response = await axios.get(`https://ordinals.com/output/${output}`);
@@ -23,6 +24,23 @@ async function fetchInscriptions(output: string): Promise<string[]> {
 
     console.log("found ", inscriptionIds);
     return inscriptionIds;
+  } catch (error) {
+    console.error(`Error fetching inscriptions for output ${output}:`, error);
+    throw new Error("Failed to fetch inscriptions");
+  }
+}
+
+async function fetchInscriptions(output: string): Promise<string[]> {
+  try {
+    console.log(
+      "fetching...",
+      `${process.env.NEXT_PUBLIC_PROVIDER}/api/output/${output}`
+    );
+    const response = await axios.get(
+      `${process.env.NEXT_PUBLIC_PROVIDER}/api/output/${output}`
+    );
+    return response.data.inscriptions;
+    // return inscriptionIds;
   } catch (error) {
     console.error(`Error fetching inscriptions for output ${output}:`, error);
     throw new Error("Failed to fetch inscriptions");
@@ -73,7 +91,7 @@ function constructTxData(
     };
 }
 
-async function fetchInscriptionDetails(tokenId: string) {
+async function fetchInscriptionDetailsFromOrd(tokenId: string) {
   const url = `https://ordinals.com/inscription/${tokenId}`;
 
   try {
@@ -110,6 +128,29 @@ async function fetchInscriptionDetails(tokenId: string) {
     throw new Error(
       `Failed to fetch Inscription data for inscription: ${tokenId}`
     );
+  }
+}
+
+// Function to fetch details of a single inscription
+async function fetchInscriptionDetails(
+  inscriptionId: string
+): Promise<
+  Partial<IInscription> | { error: true; error_tag: string; error_retry: 1 }
+> {
+  try {
+    const { data } = await axios.get(
+      `${process.env.NEXT_PUBLIC_PROVIDER}/api/inscription/${inscriptionId}`
+    );
+
+    return {
+      output_value: data.output_value,
+      location: data.location,
+      address: data.address,
+      output: data.output,
+      offset: data.offset,
+    };
+  } catch (error: any) {
+    throw error;
   }
 }
 
@@ -220,10 +261,24 @@ async function parseTxData(sort: 1 | -1) {
       // Create an array of Promises
       const fetchDetailsPromises: Promise<any>[] = inscriptions.map(
         async (inscriptionId: any) => {
+          let inscriptionDetails = {};
           // Your async logic here
-          const inscriptionDetails = await fetchInscriptionDetails(
-            inscriptionId
-          );
+          try {
+            inscriptionDetails = await fetchInscriptionDetails(inscriptionId);
+          } catch (error) {
+            console.error(
+              `[Ordinalnovus is down] Failed to fetch details using fetchInscriptionDetails for ID: ${inscriptionId}, error: ${error}`
+            );
+            try {
+              inscriptionDetails = await fetchInscriptionDetailsFromOrd(
+                inscriptionId
+              );
+            } catch (secondError) {
+              console.error(
+                `[Ordinals is down] Failed to fetch details using fetchInscriptionDetailsFromOrd for ID: ${inscriptionId}, error: ${secondError}`
+              );
+            }
+          }
           return {
             inscriptionId,
             details: inscriptionDetails,

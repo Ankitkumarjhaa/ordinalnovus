@@ -14,7 +14,7 @@ const attributeSchema = new Schema({
 // Define the main schema
 export const inscriptionSchema = new mongoose.Schema(
   {
-    number: { type: Number, required: true, unique: true },
+    inscription_number: { type: Number, required: true },
     inscription_id: {
       type: String,
       unique: true,
@@ -51,6 +51,15 @@ export const inscriptionSchema = new mongoose.Schema(
     timestamp: {
       type: Date,
     },
+    children: { type: Array },
+    next: { type: String },
+    previous: { type: String },
+    parent: { type: String },
+
+    genesis_address: { type: String },
+    genesis_fee: { type: Number },
+    genesis_height: { type: Number },
+    genesis_transaction: { type: String },
     flagged: { type: Boolean, default: false },
     banned: { type: Boolean, default: false, required: true },
     reason: { type: String },
@@ -68,18 +77,18 @@ export const inscriptionSchema = new mongoose.Schema(
     collection_item_number: { type: Number },
     attributes: { type: [attributeSchema] },
     // sat details
+
+    sat_timestamp: {
+      type: Date,
+    },
     cycle: { type: Number },
     decimal: { type: String },
     degree: { type: String },
     epoch: { type: Number },
-    genesis_address: { type: String },
-    genesis_fee: { type: Number },
-    genesis_height: { type: Number },
-    genesis_transaction: { type: String },
     percentile: { type: String },
     period: { type: Number },
     rarity: { type: String },
-    sat: { type: Number },
+    sat_number: { type: Number },
     sat_name: { type: String },
     sat_offset: { type: Number },
     lists: [{ type: Schema.Types.ObjectId, ref: "Collection" }],
@@ -127,6 +136,8 @@ export const inscriptionSchema = new mongoose.Schema(
           'If "address" is provided, "output", "location", and "output_value" must also be provided.',
       },
     },
+
+    // Listings
     listed: {
       type: Boolean,
       validate: {
@@ -176,7 +187,7 @@ inscriptionSchema.index({ error: 1, error_tag: 1 });
 inscriptionSchema.index({ collection_item_name: 1, collection_item_number: 1 });
 
 // Additional indexes based on new requirements
-inscriptionSchema.index({ sat: 1, sat_name: 1 });
+inscriptionSchema.index({ sat: 1, sat_name: 1, rarity: 1 });
 inscriptionSchema.index({ lists: 1 });
 inscriptionSchema.index({ listed: 1 });
 inscriptionSchema.index({ official_collection: 1, listed: 1 }); // for docs that are listed from a certain collection
@@ -185,8 +196,8 @@ inscriptionSchema.index({ official_collection: 1, listed: 1 }); // for docs that
 inscriptionSchema.index({ listed_price: 1 });
 
 // Existing and other necessary indexes
-inscriptionSchema.index({ inscription_id: 1 });
+inscriptionSchema.index({ inscription_id: 1, previous: 1, next: 1 });
 inscriptionSchema.index({ sha: 1, version: 1 });
 inscriptionSchema.index({ address: 1 });
 inscriptionSchema.index({ tag: 1 });
-inscriptionSchema.index({ number: 1 });
+inscriptionSchema.index({ inscription_number: 1 });

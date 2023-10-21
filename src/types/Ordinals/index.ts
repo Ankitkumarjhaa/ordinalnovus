@@ -26,6 +26,7 @@ export interface IInscription {
   genesis_transaction?: string;
   location?: string;
   number: number; //required
+  inscription_number: number;
   percentile?: string;
   period?: number;
   rarity?: string;
@@ -156,8 +157,6 @@ export interface WitnessUtxo {
   value: number;
 }
 
-
-
 export interface IListingState {
   seller: {
     makerFeeBp: number;
@@ -180,7 +179,7 @@ export interface IListingState {
     unsignedBuyingPSBTInputSize?: number;
     signedBuyingPSBTBase64?: string;
     buyerDummyUTXOs?: UTXO[];
-    buyerPaymentUTXOs?: AddressTxsUtxo[] ; // after the selection
+    buyerPaymentUTXOs?: AddressTxsUtxo[]; // after the selection
     mergedSignedBuyingPSBTBase64?: string;
   };
 }

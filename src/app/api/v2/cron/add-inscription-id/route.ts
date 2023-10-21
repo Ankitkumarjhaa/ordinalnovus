@@ -18,11 +18,12 @@ async function fetchInscriptionDetails(
     );
     if (!data.sat) throw Error("server down");
     const dateObject = new Date(data.timestamp);
+    const dateSatObject = new Date(data.sat_timestamp);
 
     return {
       ...data,
       timestamp: dateObject,
-      preview: data._links.preview.href.split("/")[2],
+      sat_timestamp: dateSatObject,
     };
   } catch (error: any) {
     if (
@@ -37,112 +38,121 @@ async function fetchInscriptionDetails(
 
 // Main handler function
 export async function GET(req: NextRequest): Promise<NextResponse> {
-  await dbConnect();
+  const bulkOps: any[] = [];
 
   try {
-    const highestInscription = await Inscription.findOne().sort({ number: -1 });
-    const start = highestInscription ? highestInscription.number + 1 : 0;
-    const { data } = await axios.get(
-      `${process.env.NEXT_PUBLIC_PROVIDER}/api/feed`
-    );
-    const total = data.total;
-    const bulkOps: any[] = [];
+    await dbConnect();
+    const highestInscription = await Inscription.findOne().sort({
+      inscription_number: -1,
+    });
+    const start = highestInscription
+      ? highestInscription.inscription_number
+      : 299;
+    // const { data } = await axios.get(
+    //   `${process.env.NEXT_PUBLIC_PROVIDER}/api/feed`
+    // );
+    // const total = data.total;
     const savedInscriptionIds: string[] = [];
 
+    const url = `${process.env.NEXT_PUBLIC_PROVIDER}/api/inscriptions/${
+      start + 300
+    }/300`;
+    console.log(url, "URL");
+    const inscriptionsRes = await axios.get(url);
+    const inscriptionIdList = inscriptionsRes.data.inscriptions.reverse();
+
     // Fetch inscriptions asynchronously
-    const promises = Array.from(
-      { length: Math.min(200, total - start) },
-      async (_, i) => {
-        const currentNumber = start + i;
-        const url = `${process.env.NEXT_PUBLIC_PROVIDER}/api/inscriptions/${currentNumber}`;
-        const { data } = await axios.get(url);
-        const inscriptionId = data.inscriptions[0];
+    const promises = inscriptionIdList.map(async (inscriptionId: string) => {
+      if (!inscriptionId) return;
+      let tags = [];
+      let content = null;
+      let sha;
+      let token = false;
+      let contentType = null;
+      let contentResponse = null;
 
-        if (!inscriptionId) return;
-        let tags = [];
-        let content = null;
-        let sha;
-        let token = false;
-        let contentType = null;
-        let contentResponse = null;
+      try {
+        contentResponse = await fetchContentFromProviders(inscriptionId);
+        contentType = contentResponse.headers["content-type"];
 
-        try {
-          contentResponse = await fetchContentFromProviders(inscriptionId);
-          contentType = contentResponse.headers["content-type"];
+        if (/text|html|json|javascript/.test(contentType)) {
+          content = contentResponse.data;
 
-          if (/text|html|json|javascript/.test(contentType)) {
-            content = contentResponse.data;
-
-            try {
-              if (/^\d+\.bitmap$/.test(content)) {
-                tags.push("bitmap");
-              } else if (/^[a-zA-Z0-9]+\.sats$/.test(content)) {
-                tags.push("domain");
-              }
-              const parsedContent = JSON.parse(content.toString("utf-8"));
-
-              if (parsedContent.p === "brc-20") {
-                tags.push("brc-20");
-                tags.push("token");
-                token = true;
-              }
-              if (
-                parsedContent.p === "brc-21" ||
-                parsedContent.p.includes("orc")
-              ) {
-                tags.push("token");
-                token = true;
-              }
-            } catch (error) {}
-
-            if (!token) {
-              // if content is not a token
-              if (typeof content === "object") {
-                content = contentResponse.data.toString("utf-8");
-              }
-              sha = crypto
-                .createHash("sha256")
-                .update(content, "utf8")
-                .digest("hex");
+          try {
+            if (/^\d+\.bitmap$/.test(content)) {
+              tags.push("bitmap");
+            } else if (/^[a-zA-Z0-9]+\.sats$/.test(content)) {
+              tags.push("domain");
             }
-          } else if (!token && !/video|audio/.test(contentType)) {
-            // if content is not a token or video/audio
+            const parsedContent = JSON.parse(content.toString("utf-8"));
+
+            if (parsedContent.p === "brc-20") {
+              tags.push("brc-20");
+              tags.push("token");
+              token = true;
+            }
+            if (
+              parsedContent.p === "brc-21" ||
+              parsedContent.p.includes("orc")
+            ) {
+              tags.push("token");
+              token = true;
+            }
+          } catch (error) {}
+
+          if (!token) {
+            // if content is not a token
+            if (typeof content === "object") {
+              content = contentResponse.data.toString("utf-8");
+            }
             sha = crypto
               .createHash("sha256")
-              .update(contentResponse.data)
+              .update(content, "utf8")
               .digest("hex");
           }
-        } catch (e) {}
-
-        let inscriptionDetails = {};
-        if (!token) {
-          // if content is not a token
-          inscriptionDetails = await fetchInscriptionDetails(inscriptionId);
+        } else if (!token && !/video|audio/.test(contentType)) {
+          // if content is not a token or video/audio
+          sha = crypto
+            .createHash("sha256")
+            .update(contentResponse.data)
+            .digest("hex");
         }
-        bulkOps.push({
-          insertOne: {
-            document: {
-              inscription_id: inscriptionId,
-              number: currentNumber,
-              content_type: contentType,
-              ...(token || !contentResponse
-                ? {}
-                : { content: contentResponse.data.toString("utf-8") }), // Only store content if it's not a token
-              sha,
-              token,
-              ...inscriptionDetails,
-            },
-          },
-        });
-        savedInscriptionIds.push(inscriptionId);
+      } catch (e) {}
+
+      let inscriptionDetails = {};
+      if (!token) {
+        // if content is not a token
+        inscriptionDetails = await fetchInscriptionDetails(inscriptionId);
       }
-    );
+      bulkOps.push({
+        insertOne: {
+          document: {
+            inscription_id: inscriptionId,
+            content_type: contentType,
+            ...(token ||
+            !contentResponse ||
+            !sha ||
+            /image|audio|zip|video/.test(contentType)
+              ? {}
+              : { content: contentResponse.data.toString("utf-8") }),
+            sha,
+            token,
+            ...inscriptionDetails,
+          },
+        },
+      });
+
+      savedInscriptionIds.push(inscriptionId);
+    });
 
     await Promise.all(promises);
 
     // Sort the bulkOps array based on the 'number' field in ascending order
     bulkOps.sort((a, b) => {
-      return a.insertOne.document.number - b.insertOne.document.number;
+      return (
+        a.insertOne.document.inscription_number -
+        b.insertOne.document.inscription_number
+      );
     });
 
     const transformedBulkDocs = await handlePreSaveLogic(bulkOps);
@@ -167,7 +177,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     console.error(error);
     return NextResponse.json({
       status: 400,
-      body: { message: "Error fetching and saving inscriptions" },
+      body: { message: "Error fetching and saving inscriptions", bulkOps },
     });
   }
 }
@@ -183,16 +193,20 @@ const handlePreSaveLogic = async (bulkDocs: Array<Partial<any>>) => {
     const insertOne = bulkDoc.insertOne;
     const doc = insertOne.document;
 
+    if (i == 0) {
+      console.log(doc, "doc");
+    }
+
     // Check for previous document if this is a new document
-    if (i === 0 && doc.number > 0) {
+    if (i === 0 && doc.inscription_number > 0) {
       const prevDocument = await Inscription.findOne({
-        number: doc.number - 1,
+        inscription_number: doc.inscription_number - 1,
       });
 
       if (!prevDocument || !prevDocument.inscription_id) {
         throw new Error(
           `A document with number ${
-            doc.number - 1
+            doc.inscription_number - 1
           } does not exist or inscriptionId is missing in it`
         );
       }
@@ -202,12 +216,12 @@ const handlePreSaveLogic = async (bulkDocs: Array<Partial<any>>) => {
       const prevDoc = prevInsertOne.document;
       if (
         !prevDoc ||
-        prevDoc.number !== doc.number - 1 ||
+        prevDoc.inscription_number !== doc.inscription_number - 1 ||
         !prevDoc.inscription_id
       ) {
         throw new Error(
           `A document with number ${
-            doc.number - 1
+            doc.inscription_number - 1
           } does not exist or inscription_id is missing in it`
         );
       }
@@ -233,7 +247,6 @@ const handlePreSaveLogic = async (bulkDocs: Array<Partial<any>>) => {
 
       // Set the version based on the counter in shaMap
       doc.version = shaMap[doc.sha];
-
     }
 
     // Modify the tags if content_type exists and contains a "/"
