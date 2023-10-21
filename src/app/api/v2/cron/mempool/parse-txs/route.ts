@@ -380,9 +380,5 @@ export async function GET(req: NextRequest, res: NextResponse) {
       { message: "Error fetching and saving txids" },
       { status: 500 }
     );
-  } finally {
-    return NextResponse.json({
-      message: "Processing completed, check logs for details",
-    });
   }
 }
