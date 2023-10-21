@@ -353,21 +353,22 @@ async function parseTxData(sort: 1 | -1) {
 // API Handler
 export async function GET(req: NextRequest, res: NextResponse) {
   try {
+    console.log(`***** Parse Txs [CRONJOB] Called *****`);
     await dbConnect();
     const oneDayAgo = moment().subtract(1, "days").toDate();
 
     const query = {
       parsed: true,
-      price: { $exists: false },
+      tag: { $exists: false },
       createdAt: { $lt: oneDayAgo },
     };
 
-    await Tx.deleteMany(query);
+    await Tx.deleteMany({ ...query });
 
-    console.log(`***** Parse Txs [CRONJOB] Called *****`);
+    console.log("Starting parsing...");
 
-    const result = await parseTxData(1);
-    // const result = await Promise.all([parseTxData(1), parseTxData(-1)]);
+    // const result = await parseTxData(1);
+    const result = await Promise.allSettled([parseTxData(1), parseTxData(-1)]);
 
     return NextResponse.json({
       message: "Processing completed, check logs for details",
