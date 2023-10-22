@@ -53,7 +53,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     // );
     // const total = data.total;
     const savedInscriptionIds: string[] = [];
-    const BATCH = 200;
+    const BATCH = 300;
 
     const url = `${process.env.NEXT_PUBLIC_PROVIDER}/api/inscriptions/${
       start + BATCH
@@ -139,16 +139,12 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             document: {
               inscription_id: inscriptionId,
               content_type: contentType,
-              ...(!contentResponse || /image|audio|zip|video/.test(contentType)
+              ...(token ||
+              !contentResponse ||
+              !sha ||
+              /image|audio|zip|video/.test(contentType)
                 ? {}
-                : !sha &&
-                  ["text/plain;charset=utf-8", "application/json"].includes(
-                    contentType
-                  )
-                ? { content: contentResponse.data.toString("utf-8") }
-                : sha
-                ? { content: contentResponse.data.toString("utf-8") }
-                : {}),
+                : { content: contentResponse.data.toString("utf-8") }),
               sha,
               token,
               ...inscriptionDetails,
@@ -180,6 +176,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       };
     });
 
+    // await deleteInscriptionsAboveThreshold();
+
     // Perform the bulk insert after transformations are done
     if (bulkWriteOperations.length > 0)
       await Inscription.bulkWrite(bulkWriteOperations);
@@ -200,19 +198,34 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 export const dynamic = "force-dynamic";
 
 const handlePreSaveLogic = async (bulkDocs: Array<Partial<any>>) => {
+  console.time("Total Time Taken for handlePreSaveLogic");
+
   const transformedBulkOps: any[] = [];
   const shaMap: { [sha: string]: number } = {};
 
+  // Pre-compute the maximum existing version for each unique SHA
+  const uniqueShas = [
+    ...new Set(bulkDocs.map((doc) => doc.insertOne.document.sha)),
+  ];
+  for (const sha of uniqueShas) {
+    if (sha) {
+      const latestDocumentWithSameSha = await Inscription.findOne({
+        sha: sha,
+      }).sort({ version: -1 });
+      shaMap[sha] = latestDocumentWithSameSha
+        ? latestDocumentWithSameSha.version
+        : 0;
+    }
+  }
+
   for (let i = 0; i < bulkDocs.length; i++) {
+    // console.time(`Time Taken for Loop Iteration ${i}`);
+
     let bulkDoc = { ...bulkDocs[i] };
     const insertOne = bulkDoc.insertOne;
     const doc = insertOne.document;
 
-    if (i == 0) {
-      console.log(doc, "doc");
-    }
-
-    // Check for previous document if this is a new document
+    // console.time("Check for Previous Document");
     if (i === 0 && doc.inscription_number > 0) {
       const prevDocument = await Inscription.findOne({
         inscription_number: doc.inscription_number - 1,
@@ -241,30 +254,23 @@ const handlePreSaveLogic = async (bulkDocs: Array<Partial<any>>) => {
         );
       }
     }
+    // console.timeEnd("Check for Previous Document");
 
-    // Increment the version if the SHA exists
+    // Updated SHA version logic
+    // console.time("Increment the version if the SHA exists");
     if (doc.sha && !doc.token) {
-      const documentsWithSameSha = await Inscription.find({
-        sha: doc.sha,
-      });
+      // console.log(doc.sha, " Working on this SHA");
 
-      // If the SHA exists in DB, initialize or update the counter in shaMap
-      if (documentsWithSameSha.length > 0) {
-        shaMap[doc.sha] = documentsWithSameSha.length;
-      }
-
-      // If the SHA exists in the current bulkDocs, update the counter in shaMap
       if (shaMap[doc.sha] != null) {
         shaMap[doc.sha]++;
       } else {
         shaMap[doc.sha] = 1;
       }
-
-      // Set the version based on the counter in shaMap
       doc.version = shaMap[doc.sha];
     }
+    // console.timeEnd("Increment the version if the SHA exists");
 
-    // Modify the tags if content_type exists and contains a "/"
+    // console.time("Modify the tags");
     if (doc.content_type && doc.content_type.includes("/")) {
       const contentTypeParts = doc.content_type.split("/");
       doc.tags = doc.tags
@@ -278,9 +284,31 @@ const handlePreSaveLogic = async (bulkDocs: Array<Partial<any>>) => {
             contentTypeParts[1].toLowerCase(),
           ];
     }
+    // console.timeEnd("Modify the tags");
 
     transformedBulkOps.push(doc);
+
+    // console.timeEnd(`Time Taken for Loop Iteration ${i}`);
   }
 
+  // console.log(uniqueShas, "UNIQUESHAS");
+  console.log(shaMap, "SHAMAP");
+  console.timeEnd("Total Time Taken for handlePreSaveLogic");
   return transformedBulkOps;
+};
+
+const deleteInscriptionsAboveThreshold = async () => {
+  console.time("Time Taken for Deleting Documents");
+
+  try {
+    const result = await Inscription.deleteMany({
+      inscription_number: { $gt: 700000 },
+    });
+
+    console.log(`Successfully deleted ${result.deletedCount} documents.`);
+  } catch (err) {
+    console.error("An error occurred while deleting documents:", err);
+  }
+
+  console.timeEnd("Time Taken for Deleting Documents");
 };
