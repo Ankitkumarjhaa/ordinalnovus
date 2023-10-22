@@ -53,97 +53,106 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     // );
     // const total = data.total;
     const savedInscriptionIds: string[] = [];
+    const BATCH = 300;
 
     const url = `${process.env.NEXT_PUBLIC_PROVIDER}/api/inscriptions/${
-      start + 300
-    }/300`;
+      start + BATCH
+    }/${BATCH}`;
     console.log(url, "URL");
     const inscriptionsRes = await axios.get(url);
     const inscriptionIdList = inscriptionsRes.data.inscriptions.reverse();
 
     // Fetch inscriptions asynchronously
-    const promises = inscriptionIdList.map(async (inscriptionId: string) => {
-      if (!inscriptionId) return;
-      let tags = [];
-      let content = null;
-      let sha;
-      let token = false;
-      let contentType = null;
-      let contentResponse = null;
+    const promises = inscriptionIdList.map(
+      async (inscriptionId: string, index: number) => {
+        if (!inscriptionId) return;
+        let tags = [];
+        let content = null;
+        let sha;
+        let token = false;
+        let contentType = null;
+        let contentResponse = null;
 
-      try {
-        contentResponse = await fetchContentFromProviders(inscriptionId);
-        contentType = contentResponse.headers["content-type"];
+        try {
+          contentResponse = await fetchContentFromProviders(inscriptionId);
+          contentType = contentResponse.headers["content-type"];
 
-        if (/text|html|json|javascript/.test(contentType)) {
-          content = contentResponse.data;
+          if (/text|html|json|javascript/.test(contentType)) {
+            content = contentResponse.data;
 
-          try {
-            if (/^\d+\.bitmap$/.test(content)) {
-              tags.push("bitmap");
-            } else if (/^[a-zA-Z0-9]+\.sats$/.test(content)) {
-              tags.push("domain");
+            try {
+              if (/^\d+\.bitmap$/.test(content)) {
+                tags.push("bitmap");
+              } else if (/^[a-zA-Z0-9]+\.sats$/.test(content)) {
+                tags.push("domain");
+              }
+              const parsedContent = JSON.parse(content.toString("utf-8"));
+
+              if (parsedContent.p === "brc-20") {
+                tags.push("brc-20");
+                tags.push("token");
+                token = true;
+              }
+              if (
+                parsedContent.p === "brc-21" ||
+                parsedContent.p.includes("orc")
+              ) {
+                tags.push("token");
+                token = true;
+              }
+            } catch (error) {}
+
+            if (!token) {
+              // if content is not a token
+              if (typeof content === "object") {
+                content = contentResponse.data.toString("utf-8");
+              }
+              sha = crypto
+                .createHash("sha256")
+                .update(content, "utf8")
+                .digest("hex");
             }
-            const parsedContent = JSON.parse(content.toString("utf-8"));
-
-            if (parsedContent.p === "brc-20") {
-              tags.push("brc-20");
-              tags.push("token");
-              token = true;
-            }
-            if (
-              parsedContent.p === "brc-21" ||
-              parsedContent.p.includes("orc")
-            ) {
-              tags.push("token");
-              token = true;
-            }
-          } catch (error) {}
-
-          if (!token) {
-            // if content is not a token
-            if (typeof content === "object") {
-              content = contentResponse.data.toString("utf-8");
-            }
+          } else if (!token && !/video|audio/.test(contentType)) {
+            // if content is not a token or video/audio
             sha = crypto
               .createHash("sha256")
-              .update(content, "utf8")
+              .update(contentResponse.data)
               .digest("hex");
           }
-        } else if (!token && !/video|audio/.test(contentType)) {
-          // if content is not a token or video/audio
-          sha = crypto
-            .createHash("sha256")
-            .update(contentResponse.data)
-            .digest("hex");
+        } catch (e) {}
+
+        let inscriptionDetails: any = {};
+        if (!token) {
+          // if content is not a token
+          inscriptionDetails = await fetchInscriptionDetails(inscriptionId);
+        } else {
+          inscriptionDetails.inscription_number = start + 1 + index;
         }
-      } catch (e) {}
-
-      let inscriptionDetails = {};
-      if (!token) {
-        // if content is not a token
-        inscriptionDetails = await fetchInscriptionDetails(inscriptionId);
-      }
-      bulkOps.push({
-        insertOne: {
-          document: {
-            inscription_id: inscriptionId,
-            content_type: contentType,
-            ...(token ||
-            !contentResponse ||
-            !sha ||
-            /image|audio|zip|video/.test(contentType)
-              ? {}
-              : { content: contentResponse.data.toString("utf-8") }),
-            sha,
-            token,
-            ...inscriptionDetails,
+        bulkOps.push({
+          insertOne: {
+            document: {
+              inscription_id: inscriptionId,
+              content_type: contentType,
+              ...(!contentResponse || /image|audio|zip|video/.test(contentType)
+                ? {}
+                : !sha &&
+                  ["text/plain;charset=utf-8", "application/json"].includes(
+                    contentType
+                  )
+                ? { content: contentResponse.data.toString("utf-8") }
+                : sha
+                ? { content: contentResponse.data.toString("utf-8") }
+                : {}),
+              sha,
+              token,
+              ...inscriptionDetails,
+            },
           },
-        },
-      });
+        });
 
-      savedInscriptionIds.push(inscriptionId);
-    });
+        savedInscriptionIds.push(inscriptionId);
+      }
+    );
 
     await Promise.all(promises);
 
@@ -228,7 +237,7 @@ const handlePreSaveLogic = async (bulkDocs: Array<Partial<any>>) => {
     }
 
     // Increment the version if the SHA exists
-    if (doc.sha) {
+    if (doc.sha && !doc.token) {
       const documentsWithSameSha = await Inscription.find({
         sha: doc.sha,
       });
