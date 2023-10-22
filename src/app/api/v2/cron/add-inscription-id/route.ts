@@ -106,6 +106,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
                 tags.push("token");
                 token = true;
               }
+              if (parsedContent.p && parsedContent.tick && parsedContent.amt) {
+                token = true;
+                tags.push("token");
+              }
             } catch (error) {}
 
             if (!token) {

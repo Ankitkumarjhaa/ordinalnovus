@@ -70,17 +70,17 @@ export async function fetchContentFromProviders(contentId: string) {
 export const determineTypesFromId = (id: string): string[] => {
   // Check if ID is a positive number
   if (!isNaN(Number(id)) && Number(id) < 0) {
-    return ["inscription_number"];
+    return ["inscription number"];
   }
 
   if (!isNaN(Number(id)) && Number(id) > 0) {
-    return ["inscription_number", "sat"];
+    return ["inscription number", "sat"];
   }
 
   // Check if ID is an inscription_id
   const inscriptionRegex = /[0-9a-fA-F]{64}i[0-9]+$/;
   if (inscriptionRegex.test(id)) {
-    return ["inscription_id"];
+    return ["inscription id"];
   }
 
   // Check if ID is a sha
@@ -89,33 +89,28 @@ export const determineTypesFromId = (id: string): string[] => {
     return ["sha"];
   }
 
-  // Check if ID ends with .sats or .bitmap
-  if (id.endsWith(".sats")) {
-    return ["content", "bitmap"];
+  // Check for strings ending with ' token'
+  const tokenRegex = /\btoken$/i;
+  if (tokenRegex.test(id)) {
+    return ["token"];
   }
 
-  if (id.endsWith(".bitmap")) {
-    return ["content", "bitmap"];
+  if (/(\d+\.bitmap)$/.test(id)) {
+    return ["bitmap"];
+  }
+
+  // Add a new check for string.string pattern
+  const stringDotStringRegex = /^[a-zA-Z0-9]+\.[a-zA-Z0-9]+$/;
+  if (stringDotStringRegex.test(id)) {
+    return ["domain"];
   }
 
   // Check if ID is a normal string without special characters
   const normalStringRegex = /^[a-zA-Z0-9]*$/;
   if (normalStringRegex.test(id)) {
-    return ["collection", "sat_name", "content"];
+    return ["collection", "sat name", "content"];
   }
 
   // Fallback for normal strings
   return ["collection", "content"];
 };
-
-// Example usages
-console.log(determineTypesFromId("123")); // ["number", "sat"]
-console.log(determineTypesFromId("-123")); // ["collection", "content"]
-console.log(
-  determineTypesFromId(
-    "bcb2ae35b97ea56d086e4dad5ac1471f8c25e6ec2730f050a399208da04befe4i0"
-  )
-); // ["inscriptionId"]
-console.log(determineTypesFromId("aabbccddeeff00112233445566778899")); // ["collection", "content"]
-console.log(determineTypesFromId("myString.sats")); // ["content", "bitmap"]
-console.log(determineTypesFromId("myString.bitmap")); // ["content", "bitmap"]
