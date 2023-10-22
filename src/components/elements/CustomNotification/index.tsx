@@ -1,6 +1,6 @@
 import { Snackbar, SnackbarContent } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
-import { removeNotification } from "../../../stores/reducers/notificationReducer";
+import { removeNotification } from "@/stores/reducers/notificationReducer";
 import React from "react";
 
 const CustomNotification = () => {

@@ -60,7 +60,7 @@ async function fetchInscriptionData(outputString: string) {
 
 // Function to fetch content of an inscription
 async function fetchInscriptionContent(inscriptionId: string) {
-  const url = `${process.env.NEXT_PUBLIC_API}/content/${inscriptionId}`;
+  const url = `${process.env.NEXT_PUBLIC_URL}/api/content/${inscriptionId}`;
   const response = await axios.get(url);
   return response.data;
 }

@@ -47,7 +47,7 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
   // Fetch recent inscriptions from the external API
   try {
     const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_API}/ordapi/feed?apiKey=${process.env.API_KEY}`
+      `${process.env.NEXT_PUBLIC_URL}/api/ordapi/feed?apiKey=${process.env.API_KEY}`
     );
     const recentInscriptions: RecentInscription[] = response?.data || [];
 

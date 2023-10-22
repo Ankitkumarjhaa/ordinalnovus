@@ -81,10 +81,16 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             content = contentResponse.data;
 
             try {
-              if (/^\d+\.bitmap$/.test(content)) {
-                tags.push("bitmap");
-              } else if (/^[a-zA-Z0-9]+\.sats$/.test(content)) {
+              // Check if content is a domain pattern (string.btc, string.sats, or string.sat)
+              const domainPattern = /^[a-zA-Z0-9]+\.(btc|sats|sat)$/;
+              if (domainPattern.test(content)) {
                 tags.push("domain");
+              }
+
+              // Check if content is a bitmap pattern (number followed by .bitmap)
+              const bitmapPattern = /^\d+\.bitmap$/;
+              if (bitmapPattern.test(content)) {
+                tags.push("bitmap");
               }
               const parsedContent = JSON.parse(content.toString("utf-8"));
 
