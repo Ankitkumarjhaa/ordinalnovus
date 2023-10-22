@@ -8,6 +8,7 @@ import Hero from "./Hero";
 import Recent from "./RecentlyInscribed";
 // import CustomCard from "@/components/elements/CustomCardSmall";
 type Data = {
+  percentParsed: number;
   featured: ICollection[];
   verified: ICollection[];
   orders: Order[];
@@ -105,6 +106,13 @@ function Homepage({ data }: HomepageProps) {
     <div className="pt-16">
       <div className="bg-yellow-700 w-full my-2 text-center py-1 text-xs uppercase font-bold text-white">
         Under development{" "}
+      </div>
+      <div className="bg-yellow-700 w-full my-2 text-center text-xs uppercase font-bold text-white flex justify-start">
+        <span
+          className={`bg-green-300 w-[${data.percentParsed}%] py-1 text-green-900`}
+        >
+          indexing... {data.percentParsed}%
+        </span>
       </div>
       <Hero data={data.featured} />
       {/* <div className="flex flex-wrap">
