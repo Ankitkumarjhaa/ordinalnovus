@@ -53,7 +53,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     // );
     // const total = data.total;
     const savedInscriptionIds: string[] = [];
-    const BATCH = 300;
+    const BATCH = 200;
 
     const url = `${process.env.NEXT_PUBLIC_PROVIDER}/api/inscriptions/${
       start + BATCH
