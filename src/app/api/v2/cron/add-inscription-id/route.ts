@@ -81,12 +81,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             content = contentResponse.data;
 
             try {
-              // Check if content is a domain pattern (string.btc, string.sats, or string.sat)
-              const domainPattern = /^[a-zA-Z0-9]+\.(btc|sats|sat)$/;
-              if (domainPattern.test(content)) {
-                tags.push("domain");
-              }
-
               // Check if content is a bitmap pattern (number followed by .bitmap)
               const bitmapPattern = /^\d+\.bitmap$/;
               if (bitmapPattern.test(content)) {
@@ -98,19 +92,20 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
                 tags.push("brc-20");
                 tags.push("token");
                 token = true;
-              }
-              if (
+              } else if (
                 parsedContent.p === "brc-21" ||
                 parsedContent.p.includes("orc")
               ) {
                 tags.push("token");
                 token = true;
-              }
-              if (parsedContent.p && parsedContent.tick && parsedContent.amt) {
+              } else if (
+                parsedContent.p &&
+                parsedContent.tick &&
+                parsedContent.amt
+              ) {
                 token = true;
                 tags.push("token");
-              }
-              if (
+              } else if (
                 parsedContent.p === "sns" &&
                 parsedContent.op === "reg" &&
                 parsedContent.name
@@ -158,6 +153,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
                 : { content: contentResponse.data.toString("utf-8") }),
               sha,
               token,
+              tags,
               ...inscriptionDetails,
             },
           },

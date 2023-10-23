@@ -199,5 +199,5 @@ inscriptionSchema.index({ listed_price: 1 });
 inscriptionSchema.index({ inscription_id: 1, previous: 1, next: 1 });
 inscriptionSchema.index({ sha: 1, version: 1 });
 inscriptionSchema.index({ address: 1 });
-inscriptionSchema.index({ tag: 1 });
+inscriptionSchema.index({ tags: 1 });
 inscriptionSchema.index({ inscription_number: 1 });
