@@ -110,6 +110,13 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
                 token = true;
                 tags.push("token");
               }
+              if (
+                parsedContent.p === "sns" &&
+                parsedContent.op === "reg" &&
+                parsedContent.name
+              ) {
+                tags.push("domain");
+              }
             } catch (error) {}
 
             if (!token) {
