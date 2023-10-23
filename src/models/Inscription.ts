@@ -73,7 +73,7 @@ export const inscriptionSchema = new mongoose.Schema(
       ref: "Collection",
       sparse: true,
     },
-    collection_item_name: { type: String },
+    collection_item_name: { type: String, set: (v: string) => v.trim() },
     collection_item_number: { type: Number },
     attributes: { type: [attributeSchema] },
     // sat details
@@ -161,7 +161,7 @@ export const inscriptionSchema = new mongoose.Schema(
     listed_at: { type: Date },
     listed_price: { type: Number }, // in sats
     listed_maker_fee_bp: { type: Number },
-    tap_internal_key: { type: String },
+    tap_internal_key: { type: String, set: (v: string) => v.trim() },
     listed_seller_receive_address: { type: String },
     signed_psbt: { type: String },
     unsigned_psbt: { type: String },
@@ -170,7 +170,7 @@ export const inscriptionSchema = new mongoose.Schema(
     last_checked: { type: Date },
     version: { type: Number },
     token: { type: Boolean, default: false },
-    domain_name: { type: String },
+    domain_name: { type: String, set: (v: string) => v.trim() },
   },
   {
     timestamps: { createdAt: "created_at", updatedAt: "updated_at" },
