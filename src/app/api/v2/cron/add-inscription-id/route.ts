@@ -72,6 +72,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         let token = false;
         let contentType = null;
         let contentResponse = null;
+        let domain_name = null;
 
         try {
           contentResponse = await fetchContentFromProviders(inscriptionId);
@@ -111,6 +112,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
                 parsedContent.name
               ) {
                 tags.push("domain");
+                domain_name = parsedContent.name;
               }
             } catch (error) {}
 
@@ -154,6 +156,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
               sha,
               token,
               tags,
+              domain_name,
               ...inscriptionDetails,
             },
           },

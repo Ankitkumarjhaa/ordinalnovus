@@ -170,6 +170,7 @@ export const inscriptionSchema = new mongoose.Schema(
     last_checked: { type: Date },
     version: { type: Number },
     token: { type: Boolean, default: false },
+    domain_name: { type: String },
   },
   {
     timestamps: { createdAt: "created_at", updatedAt: "updated_at" },
@@ -189,6 +190,7 @@ inscriptionSchema.index({ collection_item_name: 1, collection_item_number: 1 });
 // Additional indexes based on new requirements
 inscriptionSchema.index({ sat: 1, sat_name: 1, rarity: 1 });
 inscriptionSchema.index({ lists: 1 });
+inscriptionSchema.index({ domain_name: 1 });
 inscriptionSchema.index({ listed: 1 });
 inscriptionSchema.index({ official_collection: 1, listed: 1 }); // for docs that are listed from a certain collection
 
