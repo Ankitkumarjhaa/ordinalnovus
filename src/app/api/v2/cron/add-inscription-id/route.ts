@@ -16,7 +16,23 @@ async function fetchInscriptionDetails(
     const { data } = await axios.get(
       `${process.env.NEXT_PUBLIC_PROVIDER}/api/inscription/${inscriptionId}`
     );
-    if (!data.sat) throw Error("server down");
+    if (!data.sat) {
+      console.log(data, "DATA");
+      if (
+        !data.inscription_number &&
+        !data.genesis_transaction &&
+        !data.genesis_height
+      )
+        throw Error("server down");
+      else {
+        return {
+          ...data,
+          error: true,
+          error_tag: "unbound item",
+          error_retry: 1,
+        };
+      }
+    }
     const dateObject = new Date(data.timestamp);
     const dateSatObject = new Date(data.sat_timestamp);
 

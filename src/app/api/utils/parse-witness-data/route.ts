@@ -129,13 +129,14 @@ function hasInscription(witness: string[]): boolean {
 export interface ParsedInscription {
   contentType: string;
   base64Data: any;
+  data: any;
   // fields: { [key: string]: Uint8Array };
   getDataUri: () => string;
 }
 
-function parseInscription(transaction: {
+export function parseInscription(transaction: {
   vin: { witness?: string[] }[];
-}): ParsedInscription | null {
+}) {
   const witness = transaction.vin[0]?.witness;
   if (!witness) {
     return null;
@@ -198,6 +199,11 @@ function parseInscription(transaction: {
     return {
       contentType,
       base64Data,
+      data: {
+        ...((contentType.includes("text") || contentType.includes("json")) && {
+          string: base64ToString(base64Data),
+        }),
+      },
       // contentString,
       // fields,
       getDataUri: (): string => {
@@ -209,4 +215,9 @@ function parseInscription(transaction: {
     console.error(ex);
     return null;
   }
+}
+
+function base64ToString(base64: string): string {
+  const buffer = Buffer.from(base64, "base64");
+  return buffer.toString("utf-8");
 }

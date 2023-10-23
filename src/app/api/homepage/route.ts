@@ -55,7 +55,6 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
     const response = await axios.get(
       `${process.env.NEXT_PUBLIC_URL}/api/ordapi/feed?apiKey=${process.env.API_KEY}`
     );
-    // await removeNullFields();
     const recentInscriptions: RecentInscription[] = response?.data || [];
 
     // Add the recentInscriptions to the data
@@ -81,20 +80,44 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
     );
   }
 }
-const removeNullFields = async () => {
-  const updateQuery = {
-    $unset: {
-      domain_name: null,
-      // Add as many fields as you want
-    },
-  };
+// const removeNullFields = async () => {
+//   const updateQuery = {
+//     $unset: {
+//       domain_name: null,
+//       // Add as many fields as you want
+//     },
+//   };
 
-  const condition = {
-    $or: [
-      { domain_name: null },
-      // Add conditions for all fields you've included in `updateQuery`
-    ],
-  };
-  await Inscription.updateMany(condition, updateQuery);
-};
+//   const condition = {
+//     $or: [
+//       { domain_name: null },
+//       // Add conditions for all fields you've included in `updateQuery`
+//     ],
+//   };
+//   await Inscription.updateMany(condition, updateQuery);
+// };
+
+// const trimFieldWhitespace = async () => {
+//   try {
+//     const cursor = await Inscription.find({
+//       domain_name: { $exists: true },
+//     }).cursor();
+
+//     for await (const doc of cursor) {
+//       const value = doc.domain_name;
+//       if (typeof value === "string") {
+//         const trimmedValue = value.trim();
+//         if (value !== trimmedValue) {
+//           await Inscription.updateOne(
+//             { _id: doc._id },
+//             { $set: { domain_name: trimmedValue } }
+//           );
+//         }
+//       }
+//     }
+//   } catch (error) {
+//     console.error("An error occurred:", error);
+//   }
+// };
+
 export const dynamic = "force-dynamic";
