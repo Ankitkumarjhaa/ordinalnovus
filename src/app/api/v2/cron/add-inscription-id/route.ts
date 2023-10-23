@@ -153,10 +153,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
               /image|audio|zip|video/.test(contentType)
                 ? {}
                 : { content: contentResponse.data.toString("utf-8") }),
-              sha,
-              token,
+              ...(sha && { sha }),
+              ...(token && { token }),
+              ...(domain_name && { domain_name }),
               tags,
-              domain_name,
               ...inscriptionDetails,
             },
           },
