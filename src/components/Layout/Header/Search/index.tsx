@@ -109,8 +109,8 @@ function Search() {
               url = `/search/inscription?id=${id}`;
             }
             return (
-              <Link shallow href={url}>
-                <div className="cursor-pointer" key={item}>
+              <Link key={item} shallow href={url}>
+                <div className="cursor-pointer">
                   <div className="bg-primary text-xs items-center flex justify-start font-bold p-2 capitalize text-white">
                     {item === "sat" && <FaBtc className="mr-2" />}
                     {item.includes("number") && <Bs123 className="mr-2" />}
