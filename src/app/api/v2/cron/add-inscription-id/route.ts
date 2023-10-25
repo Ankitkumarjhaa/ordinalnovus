@@ -64,10 +64,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const start = highestInscription
       ? highestInscription.inscription_number
       : -1;
-    // const { data } = await axios.get(
-    //   `${process.env.NEXT_PUBLIC_PROVIDER}/api/feed`
-    // );
-    // const total = data.total;
+
     const savedInscriptionIds: string[] = [];
     const BATCH = 300;
 
@@ -127,8 +124,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
                 parsedContent.op === "reg" &&
                 parsedContent.name
               ) {
-                tags.push("domain");
-                domain_name = parsedContent.name;
+                if (typeof parsedContent.name === "string") {
+                  tags.push("domain");
+                  domain_name = parsedContent.name;
+                }
               }
             } catch (error) {}
 

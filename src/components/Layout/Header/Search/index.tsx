@@ -7,6 +7,17 @@ import SearchCard from "./SearchCard";
 import CustomButton from "@/components/elements/CustomButton";
 import debounce from "lodash.debounce";
 import { determineTypesFromId } from "@/utils";
+import { FaBtc } from "react-icons/fa";
+import { SiHiveBlockchain } from "react-icons/si";
+import {
+  Bs123,
+  BsFillCollectionFill,
+  BsTextParagraph,
+  BsBrowserChrome,
+} from "react-icons/bs";
+import { HiDocument } from "react-icons/hi";
+import { RiCharacterRecognitionFill } from "react-icons/ri";
+import Link from "next/link";
 
 function Search() {
   const [id, setId] = useState("");
@@ -66,6 +77,7 @@ function Search() {
         className="relative w-full flex justify-between items-center border xl:border-2 border-accent rounded-md"
       >
         <input
+          onBlur={() => setId("")}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               // handleSearch();
@@ -73,7 +85,7 @@ function Search() {
           }}
           className="w-full px-4 py-2 bg-transparent text-white placeholder-brand_text_primary focus:outline-none focus:shadow-outline"
           type="text"
-          placeholder="Enter ID / Sats / Number / Collection"
+          placeholder="Enter ID / Sats / Number / Collection / bitmap / domain"
           value={id}
           onChange={handleIDChange}
         />
@@ -89,14 +101,44 @@ function Search() {
       </div>
       {id && possibleTypes.length > 0 && (
         <div className="absolute top-[100%] bg-secondary w-full max-h-[50vh] overflow-y-scroll small-scrollbar">
-          {possibleTypes.map((item: string, idx: number) => (
-            <div className="cursor-pointer" key={item}>
-              <div className="bg-primary text-xs font-bold p-2 capitalize text-white">
-                {item}
-              </div>
-              <p className="p-2 hover:bg-blue-900 ">{id}</p>
-            </div>
-          ))}
+          {possibleTypes.map((item: string, idx: number) => {
+            let url = "";
+            if (item === "sat") {
+              url = `/search/sat?id=${id}`;
+            } else if (item.includes("inscription number")) {
+              url = `/search/inscription?id=${id}`;
+            }
+            return (
+              <Link shallow href={url}>
+                <div className="cursor-pointer" key={item}>
+                  <div className="bg-primary text-xs items-center flex justify-start font-bold p-2 capitalize text-white">
+                    {item === "sat" && <FaBtc className="mr-2" />}
+                    {item.includes("number") && <Bs123 className="mr-2" />}
+                    {item.includes("inscription id") && (
+                      <HiDocument className="mr-2" />
+                    )}
+                    {item.includes("collection") && (
+                      <BsFillCollectionFill className="mr-2" />
+                    )}
+                    {item.includes("content") && (
+                      <BsTextParagraph className="mr-2" />
+                    )}
+                    {item.includes("sat name") && (
+                      <RiCharacterRecognitionFill className="mr-2" />
+                    )}
+                    {item.includes("domain") && (
+                      <BsBrowserChrome className="mr-2" />
+                    )}
+                    {item.includes("bitmap") && (
+                      <SiHiveBlockchain className="mr-2" />
+                    )}
+                    {item}
+                  </div>
+                  <p className="p-2 hover:bg-gray-800 text-gray-200 ">{id}</p>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       )}
       {collections && id && (
