@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
 import dbConnect from "@/lib/dbConnect";
 import moment from "moment";
-import { parseInscription } from "@/app/api/utils/parse-witness-data/route";
 import { Inscription, Tx } from "@/models";
 import { IVOUT } from "@/types/Tx";
 
@@ -69,7 +68,7 @@ async function parseTxData(sort: 1 | -1) {
     const nonParsedTxs = await Tx.find({
       parsed: false,
     })
-      .limit(20)
+      .limit(200)
       .sort({ created_at: sort });
 
     const txBulkOps = [];
@@ -178,12 +177,11 @@ export async function GET(req: NextRequest, res: NextResponse) {
       createdAt: { $lt: fiveDayAgo },
     };
 
-    // await Tx.deleteMany({ ...query });
+    await Tx.deleteMany({ ...query });
 
     console.log("Starting parsing...");
-    // await resetParsedAndRemoveFields(); // Calling the new function
-    const result = await parseTxData(1);
-    // const result = await Promise.allSettled([parseTxData(1), parseTxData(-1)]);
+    // const result = await parseTxData(1);
+    const result = await Promise.allSettled([parseTxData(1), parseTxData(-1)]);
 
     return NextResponse.json({
       message: "Processing completed, check logs for details",
