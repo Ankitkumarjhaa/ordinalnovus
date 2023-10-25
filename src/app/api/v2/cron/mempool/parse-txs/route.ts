@@ -1,353 +1,168 @@
 import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
 import dbConnect from "@/lib/dbConnect";
-import { Tx, Inscription } from "@/models";
-import { IVIN, IVOUT } from "@/types/Tx";
-import * as cheerio from "cheerio";
 import moment from "moment";
-import { IInscription } from "@/types/Ordinals";
+import { parseInscription } from "@/app/api/utils/parse-witness-data/route";
+import { Inscription, Tx } from "@/models";
+import { IVOUT } from "@/types/Tx";
 
-async function fetchInscriptionsFromOrd(output: string): Promise<string[]> {
+interface IInscriptionDetails {
+  inscription_id: string;
+  body: {
+    location: string;
+    offset: number;
+    address: string;
+    output: string;
+    output_value: number;
+    listed: boolean;
+    listed_at: Date;
+    listed_price: number;
+    listed_maker_fee_bp: number;
+    tap_internal_key: string;
+    listed_seller_receive_address: string;
+    signed_psbt: string;
+    unsigned_psbt: string;
+  };
+}
+
+async function fetchInscriptionsFromOutput(
+  output: string
+): Promise<IInscriptionDetails[]> {
   try {
-    console.log("fetching...", `https://ordinals.com/output/${output}`);
-    const response = await axios.get(`https://ordinals.com/output/${output}`);
-    const htmlText = response.data;
-
-    const inscriptionIds: string[] = [];
-    const regex = /href=\/inscription\/([a-zA-Z0-9]+i\d+)/g;
-    let match;
-
-    while ((match = regex.exec(htmlText)) !== null) {
-      console.log(match[1], "match");
-      inscriptionIds.push(match[1]);
+    const apiUrl = `${process.env.NEXT_PUBLIC_PROVIDER}/api/output/${output}`;
+    console.log(apiUrl, "apiUrl");
+    const { data } = await axios.get(apiUrl);
+    if (!data.inscription_details?.length) {
+      return [];
     }
+    const details = data.inscription_details.map((i: any) => ({
+      inscription_id: i.inscription_id,
+      body: {
+        location: i.location,
+        offset: Number(i.offset),
+        address: data.address,
+        output: i.output,
+        output_value: Number(i.output_value.value),
+        listed: false,
+        listed_at: new Date(),
+        listed_price: 0,
+        listed_maker_fee_bp: 0,
+        tap_internal_key: "",
+        listed_seller_receive_address: "",
+        signed_psbt: "",
+        unsigned_psbt: "",
+      },
+    }));
 
-    console.log("found ", inscriptionIds);
-    return inscriptionIds;
+    return details;
   } catch (error) {
     console.error(`Error fetching inscriptions for output ${output}:`, error);
     throw new Error("Failed to fetch inscriptions");
   }
 }
-
-async function fetchInscriptions(output: string): Promise<string[]> {
-  try {
-    console.log(
-      "fetching...",
-      `${process.env.NEXT_PUBLIC_PROVIDER}/api/output/${output}`
-    );
-    const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_PROVIDER}/api/output/${output}`
-    );
-    return response.data.inscriptions;
-    // return inscriptionIds;
-  } catch (error) {
-    console.error(`Error fetching inscriptions for output ${output}:`, error);
-    throw new Error("Failed to fetch inscriptions");
-  }
-}
-
-// Construct Transaction Data
-function constructTxData(
-  inscriptions: any[],
-  inputs: IVIN[],
-  outputs: IVOUT[],
-  outputIndex?: number[]
-): any {
-  let tag = "other";
-  if (inscriptions.length !== 1) return null;
-
-  // Add a condition to check if the value in vin and vout are equal
-  for (let i = 0; i < inputs.length; i++) {
-    for (let j = 0; j < outputs.length; j++) {
-      if (inputs[i]?.prevout?.value === outputs[j]?.value) {
-        if (
-          inputs[i]?.prevout?.value === outputs[j]?.value &&
-          inputs[i]?.prevout?.scriptpubkey_address?.startsWith("bc1p") &&
-          outputs[j]?.scriptpubkey_address?.startsWith("bc1p")
-        )
-          tag = "transfer";
-      }
-    }
-  }
-
-  if (
-    outputs[1] &&
-    outputs[1].scriptpubkey_address &&
-    outputs[1].scriptpubkey_address.startsWith("bc1p") &&
-    outputs[2]?.value !== undefined
-  )
-    return {
-      from: inputs[2]?.prevout?.scriptpubkey_address,
-      to: outputs[1].scriptpubkey_address,
-      price: outputs[2].value,
-      tag: "sale",
-      inscriptions,
-    };
-  else
-    return {
-      inscriptions,
-      tag,
-    };
-}
-
-async function fetchInscriptionDetailsFromOrd(tokenId: string) {
-  const url = `https://ordinals.com/inscription/${tokenId}`;
-
-  try {
-    const response = await axios.get(url);
-    const $ = cheerio.load(response.data);
-
-    const data = {
-      id: $(".monospace").eq(0).text(),
-      address: $(".monospace").eq(1).text(),
-      output_value: Number(
-        $("dt")
-          .filter((_, el) => $(el).text() === "output value")
-          .next()
-          .text()
-      ),
-      contentType: $("dt")
-        .filter((_, el) => $(el).text() === "content type")
-        .next()
-        .text(),
-      timestamp: $("time").text(),
-      location: $("dt")
-        .filter((_, el) => $(el).text() === "location")
-        .next()
-        .text(),
-      output: $('a.monospace[href^="/output"]').text(),
-      offset: $("dt")
-        .filter((_, el) => $(el).text() === "offset")
-        .next()
-        .text(),
-    };
-
-    return data;
-  } catch (error) {
-    throw new Error(
-      `Failed to fetch Inscription data for inscription: ${tokenId}`
-    );
-  }
-}
-
-// Function to fetch details of a single inscription
-async function fetchInscriptionDetails(
-  inscriptionId: string
-): Promise<
-  Partial<IInscription> | { error: true; error_tag: string; error_retry: 1 }
-> {
-  try {
-    const { data } = await axios.get(
-      `${process.env.NEXT_PUBLIC_PROVIDER}/api/inscription/${inscriptionId}`
-    );
-
-    return {
-      output_value: data.output_value,
-      location: data.location,
-      address: data.address,
-      output: data.output,
-      offset: data.offset,
-    };
-  } catch (error: any) {
-    throw error;
-  }
-}
-
-// Parse Transactions to Database
 
 async function parseTxData(sort: 1 | -1) {
-  const bulkOps: Array<any> = [];
-  const inscriptionTxIds: { txid: string; inscriptions: any }[] = [];
-  const bulkOpsInscription: Array<any> = [];
+  try {
+    const CHUNK_SIZE = 10; // Define a suitable chunk size
+    const modifiedTxIds: string[] = [];
+    const modifiedInscriptionIds: string[] = [];
+    const nonParsedTxs = await Tx.find({
+      parsed: false,
+    })
+      .limit(20)
+      .sort({ created_at: sort });
 
-  const unparsedTxs = await Tx.find({ parsed: false })
-    .limit(200)
-    .sort({ height: sort });
-  if (!unparsedTxs.length) {
-    return NextResponse.json({
-      message: "No Transactions left to parse",
-      //    InscriptionData: result,
-    });
-  }
-  console.log(
-    `Parsing ${unparsedTxs.length} Transactions. starting: ${unparsedTxs[0].txid} height: ${unparsedTxs[0].height}`
-  );
+    const txBulkOps = [];
+    const inscriptionBulkOps: any = [];
+    let isInscribed = false;
 
-  const fetchInscriptionsPromises: Promise<any>[] = [];
-  const txIndexMap: {
-    [key: string]: { txid: string; inputs: any; outputs: any; index: number };
-  } = {};
-
-  // Initialize a set to keep track of transactions that are updated
-  const updatedTxSet = new Set<string>();
-
-  for (const { vin: inputs, vout: outputs, txid } of unparsedTxs) {
-    if (
-      //(inputs.length === 1 || inputs.length === 4) &&
-      outputs.length <= 10
-    )
-      outputs.forEach((output: any, i: number) => {
-        if (output?.scriptpubkey_address?.startsWith("bc1p")) {
-          const key = `${txid}:${i}`;
-          fetchInscriptionsPromises.push(fetchInscriptions(key));
-          txIndexMap[key] = { txid, inputs, outputs, index: i };
-        }
-      });
-  }
-
-  console.log("Possible inscriptions output");
-  async function fetchAllInscriptions(
-    fetchInscriptionsPromises: Promise<any>[]
-  ) {
-    const chunkSize = 50;
-    let allInscriptions: any[] = [];
-
-    for (let i = 0; i < fetchInscriptionsPromises.length; i += chunkSize) {
-      const chunk = fetchInscriptionsPromises.slice(i, i + chunkSize);
-      const chunkResults = await Promise.all(chunk);
-      allInscriptions = allInscriptions.concat(chunkResults);
+    if (!nonParsedTxs.length) {
+      return {
+        message: "No Transactions left to parse",
+      };
     }
 
-    return allInscriptions;
-  }
+    console.log(
+      `Parsing ${nonParsedTxs.length} Transactions. starting: ${nonParsedTxs[0].txid}`
+    );
 
-  // Usage in your main function
-  const allInscriptions = await fetchAllInscriptions(fetchInscriptionsPromises);
+    for (const tx of nonParsedTxs) {
+      const { txid, vout, vin, _id } = tx;
+      modifiedTxIds.push(txid);
+      let inscriptionIds: string[] = [];
 
-  // console.log(allInscriptions, "found inscriptions");
-  // Remove empty items
-  const filteredInscriptions = allInscriptions.filter(
-    (ins) => ins && ins.length > 0
-  );
+      if (vout.length < 10) {
+        const chunkedOutputs = [];
 
-  for (const [index, inscriptions] of filteredInscriptions.entries()) {
-    const key = Object.keys(txIndexMap)[index];
-    const { txid, inputs, outputs, index: outputIndex } = txIndexMap[key];
-    const outputsWithInscriptions: { [key: string]: any } = {};
+        for (let i = 0; i < vout.length; i += CHUNK_SIZE) {
+          chunkedOutputs.push(vout.slice(i, i + CHUNK_SIZE));
+        }
 
-    if (inscriptions && inscriptions.length > 0) {
-      // Storing the output index that has inscriptions
-      if (!outputsWithInscriptions[txid]) {
-        outputsWithInscriptions[txid] = [];
+        for (const chunk of chunkedOutputs) {
+          const outputPromises = chunk.map(async (v: IVOUT, index: number) => {
+            if (v?.scriptpubkey_address?.startsWith("bc1p")) {
+              return fetchInscriptionsFromOutput(`${txid}:${index}`);
+            }
+            return [];
+          });
+
+          const chunkedInscriptions = (
+            await Promise.all(outputPromises)
+          ).flat();
+
+          isInscribed = chunkedInscriptions.some((i) =>
+            i.inscription_id.startsWith(txid)
+          );
+
+          inscriptionIds = chunkedInscriptions.map((i) => {
+            modifiedInscriptionIds.push(i.inscription_id);
+            return i.inscription_id;
+          });
+
+          chunkedInscriptions.forEach((i) => {
+            inscriptionBulkOps.push({
+              updateOne: {
+                filter: { inscription_id: i.inscription_id },
+                update: { $set: i.body },
+              },
+            });
+          });
+        }
       }
-      outputsWithInscriptions[txid].push(outputIndex);
 
-      const txData = constructTxData(inscriptions, inputs, outputs);
-      console.log(txData, "txdata");
-      bulkOps.push({
+      txBulkOps.push({
         updateOne: {
-          filter: { txid: txid },
+          filter: { _id },
           update: {
             $set: {
-              ...txData,
+              ...(inscriptionIds.length && { inscriptions: inscriptionIds }),
+              ...(inscriptionIds.length > 0
+                ? { tag: isInscribed ? "inscribed" : "others" }
+                : {}),
               parsed: true,
             },
           },
         },
       });
-
-      updatedTxSet.add(txid);
-
-      console.log("bulkops pushed");
-
-      inscriptionTxIds.push({
-        txid,
-        inscriptions,
-      });
-
-      console.log("create promises");
-
-      // Create an array of Promises
-      const fetchDetailsPromises: Promise<any>[] = inscriptions.map(
-        async (inscriptionId: any) => {
-          let inscriptionDetails = {};
-          // Your async logic here
-          try {
-            inscriptionDetails = await fetchInscriptionDetails(inscriptionId);
-          } catch (error) {
-            console.error(
-              `[Ordinalnovus is down] Failed to fetch details using fetchInscriptionDetails for ID: ${inscriptionId}, error: ${error}`
-            );
-            try {
-              inscriptionDetails = await fetchInscriptionDetailsFromOrd(
-                inscriptionId
-              );
-            } catch (secondError) {
-              console.error(
-                `[Ordinals is down] Failed to fetch details using fetchInscriptionDetailsFromOrd for ID: ${inscriptionId}, error: ${secondError}`
-              );
-            }
-          }
-          return {
-            inscriptionId,
-            details: inscriptionDetails,
-          };
-        }
-      );
-
-      console.log("first");
-
-      // Wait for all Promises to resolve
-      const allInscriptionDetails = await Promise.all(fetchDetailsPromises);
-      console.log(allInscriptionDetails, "allInsDetails");
-
-      // Loop through all resolved data
-      allInscriptionDetails.forEach(({ inscriptionId, details }) => {
-        const { address, location, offset, output, output_value } = details;
-        console.log(
-          {
-            update: {
-              address,
-              location,
-              offset,
-              output,
-              output_value,
-            },
-            filter: { inscription_id: inscriptionId },
-          },
-          "inscription data update"
-        );
-        bulkOpsInscription.push({
-          updateOne: {
-            filter: { inscription_id: inscriptionId },
-            update: {
-              address,
-              location,
-              offset,
-              output,
-              output_value,
-            },
-          },
-        });
-      });
     }
-  }
 
-  // Update the transactions that are not in updatedTxSet with parsed=true
-  unparsedTxs.forEach(({ txid }) => {
-    if (!updatedTxSet.has(txid)) {
-      bulkOps.push({
-        updateOne: {
-          filter: { txid },
-          update: { $set: { parsed: true } },
-          // upsert: true,
-        },
-      });
+    if (txBulkOps.length > 0) {
+      await Tx.bulkWrite(txBulkOps);
     }
-  });
 
-  if (bulkOps.length > 0) {
-    console.log("update tx data");
-    await Tx.bulkWrite(bulkOps, { ordered: false });
+    if (inscriptionBulkOps.length > 0) {
+      await Inscription.bulkWrite(inscriptionBulkOps);
+    }
+
+    return {
+      modifiedTxIds,
+      modifiedInscriptionIds,
+      inscriptionBulkOps,
+      txBulkOps,
+    };
+  } catch (error) {
+    console.error("Error in parsing transactions:", error);
   }
-
-  if (bulkOpsInscription.length > 0) {
-    console.log("update ins data");
-    await Inscription.bulkWrite(bulkOpsInscription, { ordered: false });
-  }
-
-  return inscriptionTxIds;
 }
 
 // API Handler
@@ -355,20 +170,20 @@ export async function GET(req: NextRequest, res: NextResponse) {
   try {
     console.log(`***** Parse Txs [CRONJOB] Called *****`);
     await dbConnect();
-    const oneDayAgo = moment().subtract(1, "days").toDate();
+    const fiveDayAgo = moment().subtract(5, "days").toDate();
 
     const query = {
       parsed: true,
       tag: { $exists: false },
-      createdAt: { $lt: oneDayAgo },
+      createdAt: { $lt: fiveDayAgo },
     };
 
-    await Tx.deleteMany({ ...query });
+    // await Tx.deleteMany({ ...query });
 
     console.log("Starting parsing...");
-
-    // const result = await parseTxData(1);
-    const result = await Promise.allSettled([parseTxData(1), parseTxData(-1)]);
+    // await resetParsedAndRemoveFields(); // Calling the new function
+    const result = await parseTxData(1);
+    // const result = await Promise.allSettled([parseTxData(1), parseTxData(-1)]);
 
     return NextResponse.json({
       message: "Processing completed, check logs for details",
@@ -379,6 +194,30 @@ export async function GET(req: NextRequest, res: NextResponse) {
     return NextResponse.json(
       { message: "Error fetching and saving txids" },
       { status: 500 }
+    );
+  }
+}
+
+async function resetParsedAndRemoveFields() {
+  try {
+    await dbConnect();
+    const updateQuery = {
+      $set: { parsed: false },
+      $unset: {
+        inscriptions: "",
+        from: "",
+        to: "",
+        price: "",
+        tag: "",
+      },
+    };
+    const updateOptions = { multi: true };
+    const result: any = await Tx.updateMany({}, updateQuery, updateOptions);
+    console.log(`${result.nModified} documents were updated.`);
+  } catch (error) {
+    console.error(
+      "Error in resetting parsed field and removing specific fields:",
+      error
     );
   }
 }

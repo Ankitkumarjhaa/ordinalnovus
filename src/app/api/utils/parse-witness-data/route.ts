@@ -147,7 +147,7 @@ export function parseInscription(transaction: {
   pointer = getInitialPosition();
 
   if (pointer === -1) {
-    console.log("No Inscription found! " + txWitness);
+    console.log("No Inscription found! ");
     return null;
   }
 
