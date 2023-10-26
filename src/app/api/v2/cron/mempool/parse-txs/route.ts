@@ -70,7 +70,8 @@ async function parseTxData(sort: 1 | -1, skip: number) {
       parsed: false,
     })
       .limit(LIMIT)
-      .sort({ createdAt: sort });
+      .sort({ createdAt: sort })
+      .skip(skip);
 
     const txBulkOps = [];
     const inscriptionBulkOps: any = [];
