@@ -4,6 +4,7 @@ import dbConnect from "@/lib/dbConnect";
 import moment from "moment";
 import { Inscription, Tx } from "@/models";
 import { IVOUT } from "@/types/Tx";
+import { parseInscription } from "@/app/api/utils/parse-witness-data/route";
 
 interface IInscriptionDetails {
   inscription_id: string;
@@ -29,7 +30,7 @@ async function fetchInscriptionsFromOutput(
 ): Promise<IInscriptionDetails[]> {
   try {
     const apiUrl = `${process.env.NEXT_PUBLIC_PROVIDER}/api/output/${output}`;
-    // console.log(apiUrl, "apiUrl");
+    console.log(apiUrl, "apiUrl");
     const { data } = await axios.get(apiUrl);
     if (!data.inscription_details?.length) {
       return [];
@@ -60,22 +61,18 @@ async function fetchInscriptionsFromOutput(
   }
 }
 
-const LIMIT = 50;
+const LIMIT = 100;
 async function parseTxData(sort: 1 | -1, skip: number) {
   try {
-    const CHUNK_SIZE = 10; // Define a suitable chunk size
     const modifiedTxIds: string[] = [];
     const modifiedInscriptionIds: string[] = [];
-    const nonParsedTxs = await Tx.find({
-      parsed: false,
-    })
+    const nonParsedTxs = await Tx.find({ parsed: false })
       .limit(LIMIT)
       .sort({ createdAt: sort })
       .skip(skip);
 
     const txBulkOps = [];
     const inscriptionBulkOps: any = [];
-    let isInscribed = false;
 
     if (!nonParsedTxs.length) {
       return {
@@ -91,45 +88,33 @@ async function parseTxData(sort: 1 | -1, skip: number) {
       const { txid, vout, vin, _id } = tx;
       modifiedTxIds.push(txid);
       let inscriptionIds: string[] = [];
+      let isInscribed = false;
 
-      if (vout.length < 10) {
-        const chunkedOutputs = [];
-
-        for (let i = 0; i < vout.length; i += CHUNK_SIZE) {
-          chunkedOutputs.push(vout.slice(i, i + CHUNK_SIZE));
+      const outputPromises = vout.map(async (v: IVOUT, index: number) => {
+        if (v?.scriptpubkey_address?.startsWith("bc1p")) {
+          const isInscribeTx = parseInscription({ vin });
+          if (!isInscribeTx?.base64Data)
+            return fetchInscriptionsFromOutput(`${txid}:${index}`);
         }
+        return [];
+      });
 
-        for (const chunk of chunkedOutputs) {
-          const outputPromises = chunk.map(async (v: IVOUT, index: number) => {
-            if (v?.scriptpubkey_address?.startsWith("bc1p")) {
-              return fetchInscriptionsFromOutput(`${txid}:${index}`);
-            }
-            return [];
-          });
+      const inscriptions = (await Promise.all(outputPromises)).flat();
+      isInscribed = inscriptions.some((i) => i.inscription_id.startsWith(txid));
 
-          const chunkedInscriptions = (
-            await Promise.all(outputPromises)
-          ).flat();
+      inscriptionIds = inscriptions.map((i) => {
+        modifiedInscriptionIds.push(i.inscription_id);
+        return i.inscription_id;
+      });
 
-          isInscribed = chunkedInscriptions.some((i) =>
-            i.inscription_id.startsWith(txid)
-          );
-
-          inscriptionIds = chunkedInscriptions.map((i) => {
-            modifiedInscriptionIds.push(i.inscription_id);
-            return i.inscription_id;
-          });
-
-          chunkedInscriptions.forEach((i) => {
-            inscriptionBulkOps.push({
-              updateOne: {
-                filter: { inscription_id: i.inscription_id },
-                update: { $set: i.body },
-              },
-            });
-          });
-        }
-      }
+      inscriptions.forEach((i) => {
+        inscriptionBulkOps.push({
+          updateOne: {
+            filter: { inscription_id: i.inscription_id },
+            update: { $set: i.body },
+          },
+        });
+      });
 
       txBulkOps.push({
         updateOne: {
@@ -165,6 +150,113 @@ async function parseTxData(sort: 1 | -1, skip: number) {
     console.error("Error in parsing transactions:", error);
   }
 }
+
+// async function parseTxData(sort: 1 | -1, skip: number) {
+//   try {
+//     const CHUNK_SIZE = 50; // Define a suitable chunk size
+//     const modifiedTxIds: string[] = [];
+//     const modifiedInscriptionIds: string[] = [];
+//     const nonParsedTxs = await Tx.find({
+//       parsed: false,
+//     })
+//       .limit(LIMIT)
+//       .sort({ createdAt: sort })
+//       .skip(skip);
+
+//     const txBulkOps = [];
+//     const inscriptionBulkOps: any = [];
+//     let isInscribed = false;
+
+//     if (!nonParsedTxs.length) {
+//       return {
+//         message: "No Transactions left to parse",
+//       };
+//     }
+
+//     console.log(
+//       `Parsing ${nonParsedTxs.length} Transactions. starting: ${nonParsedTxs[0].txid}`
+//     );
+
+//     for (const tx of nonParsedTxs) {
+//       const { txid, vout, vin, _id } = tx;
+//       modifiedTxIds.push(txid);
+//       let inscriptionIds: string[] = [];
+
+//       if (vout.length < 10) {
+//         const chunkedOutputs = [];
+
+//         for (let i = 0; i < vout.length; i += CHUNK_SIZE) {
+//           chunkedOutputs.push(vout.slice(i, i + CHUNK_SIZE));
+//         }
+
+//         for (const chunk of chunkedOutputs) {
+//           const outputPromises = chunk.map(async (v: IVOUT, index: number) => {
+//             if (v?.scriptpubkey_address?.startsWith("bc1p")) {
+//               const isInscribeTx = await parseInscription({ vin });
+//               if (!isInscribeTx?.base64Data)
+//                 return fetchInscriptionsFromOutput(`${txid}:${index}`);
+//             }
+//             return [];
+//           });
+
+//           const chunkedInscriptions = (
+//             await Promise.all(outputPromises)
+//           ).flat();
+
+//           isInscribed = chunkedInscriptions.some((i) =>
+//             i.inscription_id.startsWith(txid)
+//           );
+
+//           inscriptionIds = chunkedInscriptions.map((i) => {
+//             modifiedInscriptionIds.push(i.inscription_id);
+//             return i.inscription_id;
+//           });
+
+//           chunkedInscriptions.forEach((i) => {
+//             inscriptionBulkOps.push({
+//               updateOne: {
+//                 filter: { inscription_id: i.inscription_id },
+//                 update: { $set: i.body },
+//               },
+//             });
+//           });
+//         }
+//       }
+
+//       txBulkOps.push({
+//         updateOne: {
+//           filter: { _id },
+//           update: {
+//             $set: {
+//               ...(inscriptionIds.length && { inscriptions: inscriptionIds }),
+//               ...(inscriptionIds.length > 0
+//                 ? { tag: isInscribed ? "inscribed" : "others" }
+//                 : {}),
+//               parsed: true,
+//             },
+//           },
+//         },
+//       });
+//     }
+
+//     if (txBulkOps.length > 0) {
+//       await Tx.bulkWrite(txBulkOps);
+//     }
+
+//     if (inscriptionBulkOps.length > 0) {
+//       await Inscription.bulkWrite(inscriptionBulkOps);
+//     }
+
+//     return {
+//       modifiedTxIds,
+//       modifiedInscriptionIds,
+//       inscriptionBulkOps,
+//       txBulkOps,
+//     };
+//   } catch (error) {
+//     console.error("Error in parsing transactions:", error);
+//   }
+// }
 
 // API Handler
 export async function GET(req: NextRequest, res: NextResponse) {

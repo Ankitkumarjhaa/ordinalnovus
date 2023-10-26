@@ -215,7 +215,9 @@ export async function GET(req: NextRequest, res: NextResponse) {
         const operationMessage = await upsertBlockData(currentBlockHash);
 
         // Verify the previous blockhash
-        await verifyPreviousBlockhash(currentBlockHash);
+
+        if (latestBlockHeight !== lastSavedBlockHeight)
+          await verifyPreviousBlockhash(currentBlockHash);
 
         // Add transactions for the current block to the database
         await addBlockTxToDB(currentBlockHash);
