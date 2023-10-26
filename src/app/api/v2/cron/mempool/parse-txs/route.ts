@@ -91,10 +91,10 @@ async function parseTxData(sort: 1 | -1, skip: number) {
       let isInscribed = false;
 
       const outputPromises = vout.map(async (v: IVOUT, index: number) => {
-        if (v?.scriptpubkey_address?.startsWith("bc1p")) {
-          const isInscribeTx = parseInscription({ vin });
-          if (!isInscribeTx?.base64Data)
-            return fetchInscriptionsFromOutput(`${txid}:${index}`);
+        if (v?.scriptpubkey_address?.startsWith("bc1p") && index < 10) {
+          // const isInscribeTx = parseInscription({ vin });
+          // if (!isInscribeTx?.base64Data)
+          return fetchInscriptionsFromOutput(`${txid}:${index}`);
         }
         return [];
       });
