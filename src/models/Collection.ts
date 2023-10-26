@@ -1,5 +1,5 @@
 // models/Collection.js
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 const { Schema } = mongoose;
 const { ObjectId } = Schema.Types;
 const urlValidator = {
@@ -10,6 +10,17 @@ const urlValidator = {
   },
   message: (props: any) => `${props.value} is not a valid URL.`,
 };
+
+interface SupplyValidatorContext {
+  updated: number;
+  errored: number;
+}
+
+function supplyValidator(this: SupplyValidatorContext, value: number): boolean {
+  const total = this.updated + this.errored;
+  return value <= total;
+}
+
 export const collectionSchema = new Schema(
   {
     name: {
@@ -23,6 +34,12 @@ export const collectionSchema = new Schema(
       type: Number,
       required: false,
       min: 0,
+      default: 0,
+      validate: {
+        validator: supplyValidator,
+        message: () =>
+          `Supply cannot be greater than the sum of updated and errored.`,
+      },
     },
     slug: {
       type: String,
@@ -48,7 +65,7 @@ export const collectionSchema = new Schema(
     flagged: { type: Boolean, default: false },
     banned: { type: Boolean, default: false },
     verified: { type: Boolean, default: false },
-    updatedBy: { type: String, required: false },
+    updated_by: { type: String, required: false },
     type: {
       type: String,
       enum: ["official", "list"],
@@ -66,11 +83,12 @@ export const collectionSchema = new Schema(
           `Tags should only contain lowercase letters and hyphens.`,
       },
     },
-    favourites: [{ type: String }],
-    volume: { type: Number, default: 0 },
+    favorites: [{ type: String }],
     updated: { type: Number, default: 0 },
     errored: { type: Number, default: 0 },
-    erroredInscriptions: [{ type: String }],
+    error: { type: Boolean, default: false },
+    errored_inscriptions: [{ type: String }],
+    error_tag: { type: String, default: "" },
     min: { type: Number },
     max: { type: Number },
     priority: { type: Number, default: 0 },
@@ -79,10 +97,6 @@ export const collectionSchema = new Schema(
     timestamps: { createdAt: "created_at", updatedAt: "updated_at" },
   }
 );
-collectionSchema.index({ featured: 1 });
-collectionSchema.index({ verified: 1 });
+collectionSchema.index({ featured: 1, verified: 1, priority: 1, live: 1 });
 collectionSchema.index({ tags: 1 });
-collectionSchema.index({ priority: 1 });
-collectionSchema.index({ live: 1 });
-collectionSchema.index({ verified: 1 });
 collectionSchema.index({ slug: 1 });

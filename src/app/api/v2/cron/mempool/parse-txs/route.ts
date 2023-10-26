@@ -29,7 +29,7 @@ async function fetchInscriptionsFromOutput(
 ): Promise<IInscriptionDetails[]> {
   try {
     const apiUrl = `${process.env.NEXT_PUBLIC_PROVIDER}/api/output/${output}`;
-    console.log(apiUrl, "apiUrl");
+    // console.log(apiUrl, "apiUrl");
     const { data } = await axios.get(apiUrl);
     if (!data.inscription_details?.length) {
       return [];
@@ -60,7 +60,8 @@ async function fetchInscriptionsFromOutput(
   }
 }
 
-async function parseTxData(sort: 1 | -1) {
+const LIMIT = 50;
+async function parseTxData(sort: 1 | -1, skip: number) {
   try {
     const CHUNK_SIZE = 10; // Define a suitable chunk size
     const modifiedTxIds: string[] = [];
@@ -68,8 +69,8 @@ async function parseTxData(sort: 1 | -1) {
     const nonParsedTxs = await Tx.find({
       parsed: false,
     })
-      .limit(200)
-      .sort({ created_at: sort });
+      .limit(LIMIT)
+      .sort({ createdAt: sort });
 
     const txBulkOps = [];
     const inscriptionBulkOps: any = [];
@@ -181,7 +182,12 @@ export async function GET(req: NextRequest, res: NextResponse) {
 
     console.log("Starting parsing...");
     // const result = await parseTxData(1);
-    const result = await Promise.allSettled([parseTxData(1), parseTxData(-1)]);
+    const result = await Promise.allSettled([
+      parseTxData(1, 0),
+      parseTxData(1, LIMIT),
+      parseTxData(-1, 0),
+      parseTxData(-1, LIMIT),
+    ]);
 
     return NextResponse.json({
       message: "Processing completed, check logs for details",

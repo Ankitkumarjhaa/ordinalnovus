@@ -1,5 +1,5 @@
 # Use an official Node.js runtime as the base image
-FROM node:16.8-slim
+FROM node:18.18-slim
 
 USER root
 
