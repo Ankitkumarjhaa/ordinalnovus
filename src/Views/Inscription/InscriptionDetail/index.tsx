@@ -9,10 +9,9 @@ import { AiFillCheckCircle } from "react-icons/ai";
 import { BsFillShareFill } from "react-icons/bs";
 import { FaFlag } from "react-icons/fa";
 import { TfiReload } from "react-icons/tfi";
-// import DisplayProperties from "../DisplayProperties";
+import DisplayProperties from "./DisplayProperties";
 import { useRouter } from "next/navigation";
 import { RootState } from "@/stores";
-import { Order } from "@/types/Ordinals/Orders";
 import Link from "next/link";
 // import ListInscription from "../ListInscription";
 // import BuyInscription from "../BuyInscription";
@@ -34,11 +33,11 @@ function InscriptionDetail({ data }: InscriptionProps) {
     <div className="p-6 md:pt-0 pb-6 flex-1">
       <div className="pb-2 border-b xl:border-b-2 border-accent">
         <div className="relative">
-          <div className="hidden md:block md:absolute top-0 right-0 ml-2">
+          {/* <div className="hidden md:block md:absolute top-0 right-0 ml-2">
             <div className="bg-accent w-[30px] h-[30px] rounded-lg center p-1">
               <FaFlag className="text-white " />
             </div>
-          </div>
+          </div> */}
           <h3 className="text-3xl font-extrabold text-white">
             Inscription {data?.inscription_number}
           </h3>
@@ -54,12 +53,14 @@ function InscriptionDetail({ data }: InscriptionProps) {
           </Link>
         )}
         <div className="flex justify-between items-center">
-          <p className="text-gray-300 text-xs">{data.timestamp}</p>
+          <p className="text-gray-300 text-xs">
+            {moment(data.timestamp).format()}
+          </p>
           <div className="flex items-center justify-between">
             <div
               onClick={() => {
                 copy(
-                  `${process.env.NEXT_PUBLIC_URL}/search/${data?.inscription_id}`
+                  `${process.env.NEXT_PUBLIC_URL}/inscription/${data?.inscription_id}`
                 );
                 dispatch(
                   addNotification({
@@ -99,7 +100,9 @@ function InscriptionDetail({ data }: InscriptionProps) {
         )}
         {/* <ListInscription data={data} /> */}
       </div>
-      <div className="pt-2">{/* <DisplayProperties data={data} /> */}</div>
+      <div className="pt-2">
+        <DisplayProperties data={data} />
+      </div>
     </div>
   );
 }

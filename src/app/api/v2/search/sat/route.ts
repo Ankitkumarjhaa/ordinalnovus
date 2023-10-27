@@ -47,7 +47,7 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
     // console.log(satData, "satdata");
     if (satData.inscriptions.length > 0) {
       satData.inscriptions = await Inscription.find({
-        inscriptionId: { $in: satData.inscriptions },
+        inscription_id: { $in: satData.inscriptions },
       })
         .select(
           "token inscription_id content content_type version official_collection tags address"

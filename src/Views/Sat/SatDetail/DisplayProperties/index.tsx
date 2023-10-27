@@ -1,82 +1,36 @@
 "use client";
-import { IInscription } from "@/types/Ordinals";
-import { shortenString } from "@/utils";
+import { ISat } from "@/types/Ordinals";
 import copy from "copy-to-clipboard";
 import React from "react";
 import { useDispatch } from "react-redux";
 import { addNotification } from "@/stores/reducers/notificationReducer";
 import { Tooltip } from "@mui/material";
-type InscriptionProps = {
-  data: IInscription;
+type SatProps = {
+  data: ISat;
 };
-function DisplayProperties({ data }: InscriptionProps) {
+function DisplayProperties({ data }: SatProps) {
   const dispatch = useDispatch();
 
   const properties: any = [
     {
-      label: "ID",
-      value: data?.inscription_id || "none",
-      shortenValue: data?.inscription_id
-        ? shortenString(data?.inscription_id || "none")
-        : null,
-    },
-    {
-      label: "Address",
-      value: data?.address || "none",
-      shortenValue: data?.address
-        ? shortenString(data?.address || "none")
-        : null,
-    },
-    {
-      label: "Number",
-      value: data?.inscription_number || 0,
-      shortenValue: data?.inscription_number
-        ? shortenString(data?.inscription_number?.toString() || "")
-        : null,
-    },
-    {
-      label: "UTXO",
-      value: data?.output || "none",
-      shortenValue: data?.output ? shortenString(data?.output || "none") : null,
-    },
-    {
-      label: "Content Type",
-      value: data?.content_type || "none",
-      shortenValue: data?.content_type?.split(";")[0]
-        ? shortenString(data?.content_type?.split(";")[0] || "none")
-        : null,
-    },
-    {
       label: "Block",
       value: data?.block || "none",
     },
-    { label: "Offset", value: data?.offset || 0 },
     {
       label: "Sat Offset",
-      value: data?.sat_offset || 0,
+      value: data?.offset || 0,
     },
     {
-      label: "sha",
-      value: data?.sha ? data?.sha : null,
-      shortenValue: data?.sha ? shortenString(data?.sha || "none") : null,
+      label: "Sat Cycle",
+      value: data?.cycle || 0,
     },
-    { label: "Output Value", value: data?.output_value || 0 },
     {
-      label: "Sat",
-      value: data?.sat || null,
-      shortenValue: data?.sat
-        ? shortenString(String(data?.sat) || "none")
-        : null,
+      label: "Sat Epoch",
+      value: data?.epoch || 0,
     },
     { label: "Rarity", value: data?.rarity || null },
-    {
-      label: "Collection",
-      value: data?.official_collection?.name || null,
-      shortenValue: data?.official_collection?.name
-        ? shortenString(String(data?.official_collection?.name) || "none")
-        : null,
-    },
   ];
+
   return (
     <div className="flex items-center justify-start flex-wrap">
       {properties.map(

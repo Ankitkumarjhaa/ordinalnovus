@@ -43,6 +43,7 @@
     "playwright": "^1.37.1",
     "postcss": "^8.4.21",
     "react": "18.2.0",
+    "react-anime": "^4.1.1",
     "react-dom": "18.2.0",
     "react-icons": "^4.8.0",
     "react-markdown": "^9.0.0",

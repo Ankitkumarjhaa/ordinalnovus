@@ -109,16 +109,17 @@ function Search() {
         />
       </div>
       {id && possibleTypes.length > 0 && (
-        <div className="absolute top-[100%] bg-secondary w-full max-h-[50vh] overflow-y-scroll small-scrollbar">
+        <div className="absolute top-[100%] bg-secondary w-full max-h-[50vh] overflow-y-auto overflow-x-hidden small-scrollbar p-1">
           {possibleTypes.map((item: string, idx: number) => {
             let url = "";
-            if (item === "sat") {
+            if (item.includes("sat name")) {
               url = `/sat/${id}`;
             } else if (item.includes("inscription number")) {
               url = `/inscription/${id}`;
             }
+
             return (
-              <Link key={item} shallow href={url}>
+              <Link tabIndex={idx} key={item} shallow href={url}>
                 <div className="cursor-pointer">
                   <div className="bg-primary text-xs items-center flex justify-start font-bold p-2 capitalize text-white">
                     {item === "sat" && <FaBtc className="mr-2" />}

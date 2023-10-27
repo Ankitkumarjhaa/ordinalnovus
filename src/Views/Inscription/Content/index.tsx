@@ -3,8 +3,9 @@ import React from "react";
 import { IInscription } from "@/types/Ordinals";
 import CardContent from "@components/elements/CustomCardSmall/CardContent";
 import { ImEnlarge } from "react-icons/im";
-import { BsDownload } from "react-icons/bs";
+import { BsDownload, BsChevronLeft, BsChevronRight } from "react-icons/bs";
 import Modal from "@mui/material/Modal";
+import Link from "next/link";
 type ContentProps = {
   data: IInscription;
 };
@@ -24,12 +25,22 @@ function Content({ data }: ContentProps) {
       </div>
       {
         <div className="w-full mt-2 py-4 px-2 border-2 center border-accent rounded-2xl ">
+          <Link shallow href={`/inscription/${data.previous}`}>
+            <div className="mx-4 cursor-pointer">
+              <BsChevronLeft className="hover:text-white" />
+            </div>
+          </Link>
           <div onClick={handleOpen} className="mx-4 cursor-pointer">
             <ImEnlarge className="hover:text-white" />
           </div>
           <div className="mx-4 cursor-pointer">
             <BsDownload className="hover:text-white" />
           </div>
+          <Link shallow href={`/inscription/${data.next}`}>
+            <div className="mx-4 cursor-pointer">
+              <BsChevronRight className="hover:text-white" />
+            </div>
+          </Link>
           <Modal open={open} onClose={handleClose}>
             <div
               className="absolute top-0 bottom-0 right-0 left-0 bg-black bg-opacity-90"

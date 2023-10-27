@@ -1,5 +1,6 @@
 // models/Collection.js
 import mongoose from "mongoose";
+import { Inscription } from ".";
 const { Schema } = mongoose;
 const { ObjectId } = Schema.Types;
 const urlValidator = {
@@ -101,4 +102,21 @@ export const collectionSchema = new Schema(
 );
 collectionSchema.index({ featured: 1, verified: 1, priority: 1, live: 1 });
 collectionSchema.index({ tags: 1 });
+collectionSchema.index({ name: "text" });
 collectionSchema.index({ slug: 1 });
+
+collectionSchema.pre(
+  "deleteOne",
+  { document: true, query: false },
+  async function (next) {
+    const collectionId = this._id;
+
+    // Assuming Inscription is already imported
+    await Inscription.updateMany(
+      { official_collection: collectionId },
+      { $set: { official_collection: null } }
+    );
+
+    next();
+  }
+);

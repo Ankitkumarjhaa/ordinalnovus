@@ -96,18 +96,20 @@ export interface ICollection {
 }
 
 export interface ISat {
-  _links: any;
-  block: number;
-  cycle: number;
+  number: number;
   decimal: string;
   degree: string;
-  epoch: number;
   name: string;
-  offset: number;
-  percentile: string;
+  block: number;
+  cycle: number;
+  epoch: number;
   period: number;
+  offset: number;
   rarity: string;
-  timestamp: string;
+  percentile: string;
+  satpoint: null | any; //TODO: Replace 'any' with the actual type if known
+  timestamp: Date;
+  inscriptions: IInscription[];
 }
 
 export interface RecentInscription {
