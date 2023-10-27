@@ -84,16 +84,21 @@ async function fetchInscriptionDetails(
     }
 
     return {
-      sat: data.sat,
       inscription_id: inscription.inscription_id,
       inscription_number: inscription.inscription_number,
       timestamp: moment.unix(data.timestamp),
-      sat_timestamp: moment.unix(data.sat_timestamp),
-      address: data.address,
-      location: data.location,
-      output: data.output,
-      offset: data.offset,
-      output_value: data.output_value,
+
+      ...(token
+        ? {}
+        : {
+            address: data.address,
+            sat_timestamp: moment.unix(data.sat_timestamp),
+            location: data.location,
+            sat: data.sat,
+            output: data.output,
+            offset: data.offset,
+            output_value: data.output_value,
+          }),
       ...(token && { token }),
       ...(domain_name && { domain_name }),
       tags,
@@ -111,7 +116,7 @@ async function fetchInscriptionDetails(
 
 async function fetchInscriptionsWithoutSat() {
   await dbConnect();
-  return Inscription.find({ sat: { $exists: false } })
+  return Inscription.find({ sat: { $exists: false }, token: false })
     .sort({ inscription_number: -1 })
     .limit(300);
 }
