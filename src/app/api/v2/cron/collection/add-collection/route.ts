@@ -12,8 +12,16 @@ function validateUrl(v: string) {
     /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
   return v ? urlPattern.test(v) : true;
 }
-export const GET = async (req: NextRequest, res: NextResponse) => {
+
+function validateSlug(v: string) {
+  return v ? /^[a-zA-Z0-9-_.]+$/.test(v) : true;
+}
+export async function GET(req: NextRequest, res: NextResponse) {
   try {
+    console.log("***** ADD COLLECTION CRONJOB CALLED *****");
+    let successfulSlugs: any[] = [];
+    let unsuccessfulSlugs: any[] = [];
+
     await dbConnect();
     const existingSlugs = await Collection.find({}).distinct("slug");
 
@@ -47,9 +55,9 @@ export const GET = async (req: NextRequest, res: NextResponse) => {
       body: JSON.stringify({ query, variables }),
     });
 
-    console.log({ query, variables }, "PARAMS");
+    // console.log({ query, variables }, "PARAMS");
     const data = await response.json();
-    console.dir(data, "DATA");
+    // console.dir(data, "DATA");
     const collectionsEntries = data.data.repository.object.entries;
     console.log(collectionsEntries.length, "CE");
     const collectionsFolders = collectionsEntries
@@ -61,31 +69,24 @@ export const GET = async (req: NextRequest, res: NextResponse) => {
     try {
       const batchLimit = 100;
       const processItems = collectionsFolders.slice(0, batchLimit);
-
-      // Initialize counter for successful imports
-      let successCounter = 0;
-      const errorItems: any = [];
+      console.log(processItems.length, " Procesing items");
 
       await Promise.all(
         processItems.map(async (folder: any) => {
-          try {
-            await processCollection(folder);
-            successCounter++;
-          } catch (e) {
-            // Handle error, set error flag, and save
-            errorItems.push({
-              folder: folder.name,
-              error: true,
-              error_tag: "validation",
-            });
+          const result = await processCollection(folder);
+          console.log(result, "RESULT for ", folder);
+          if (result.success) {
+            successfulSlugs.push(result.slug);
+          } else {
+            unsuccessfulSlugs.push(result.slug);
           }
         })
       );
 
       return NextResponse.json({
         message: "Collections imported partially",
-        count: successCounter,
-        errors: errorItems,
+        successful: successfulSlugs,
+        unsuccessful: unsuccessfulSlugs,
       });
     } catch (error) {
       console.error("Error in processing collections while block :", error);
@@ -101,7 +102,7 @@ export const GET = async (req: NextRequest, res: NextResponse) => {
       { status: 500 }
     );
   }
-};
+}
 
 const processCollection = async (folder: any) => {
   try {
@@ -112,88 +113,78 @@ const processCollection = async (folder: any) => {
     if (!metaResponse.ok) {
       throw new Error("Failed to fetch meta data");
     }
+    console.log("fetching metadata...");
 
     const metaData = await metaResponse.json();
-    console.log("got metadata for ", folder.name, { metaData });
-    console.log({
-      metaData: metaData,
-      icon: metaData.inscription_icon || metaData.icon,
-    });
-    if (
-      (metaData.inscription_icon || metaData.icon) &&
-      !metaData.inscription_icon.includes("https://") &&
-      !metaData.inscription_icon.includes(".")
-    ) {
-      console.log("processing...");
-      if (metaData.twitter_link && !validateUrl(metaData.twitter_link)) {
-        console.log("invalid_twitter link");
-        metaData.twitter_link = "";
-        //  saveFailedCollection(folder.name);
-        // return;
-      }
-      if (metaData.discord_link && !validateUrl(metaData.discord_link)) {
-        console.log("invalid discord_link");
-        metaData.discord_link = "";
-        //  saveFailedCollection(folder.name);
-        // return;
-      }
+    // console.log("got metadata for ", folder.name, { metaData });
+    // console.log({
+    //   metaData: metaData,
+    //   icon: metaData.inscription_icon || metaData.icon,
+    // });
+    console.log("processing...");
+    if (metaData.twitter_link && !validateUrl(metaData.twitter_link)) {
+      console.log("invalid_twitter link");
+      metaData.twitter_link = "";
+      //  saveFailedCollection(folder.name);
+      // return;
+    }
+    if (metaData.discord_link && !validateUrl(metaData.discord_link)) {
+      console.log("invalid discord_link");
+      metaData.discord_link = "";
+      //  saveFailedCollection(folder.name);
+      // return;
+    }
 
-      if (metaData.website_link && !validateUrl(metaData.website_link)) {
-        console.log("invalid website link");
-        metaData.website_link = "";
-        //  saveFailedCollection(folder.name);
-        // return;
-      }
+    if (metaData.website_link && !validateUrl(metaData.website_link)) {
+      console.log("invalid website link");
+      metaData.website_link = "";
+      //  saveFailedCollection(folder.name);
+      // return;
+    }
+    if (!validateSlug(metaData.slug)) {
+      metaData.error = true;
+      metaData.error_tag = "Slug invalid";
+    }
 
-      metaData.live = true;
-      metaData.type = "official";
-      metaData.updatedBy = "cronjob";
-      metaData.supply = 0;
+    metaData.live = true;
+    metaData.type = "official";
+    metaData.updatedBy = "cronjob";
+    metaData.supply = 0;
 
-      if (!metaData.description) {
-        metaData.description = `${metaData.name} is a collection forever inscribed on the BTC Blockchain.`;
-      }
+    if (!metaData.description) {
+      metaData.description = `${metaData.name} is a collection forever inscribed on the BTC Blockchain.`;
+    }
 
-      const inscription = metaData.inscription_icon
-        ? await Inscription.findOne({
-            inscription_id: metaData.inscription_icon,
-          })
-        : null;
+    const inscription = metaData.inscription_icon
+      ? await Inscription.findOne({
+          inscription_id: metaData.inscription_icon,
+        })
+      : null;
 
-      if (metaData.inscription_icon) {
-        if (inscription) {
-          metaData.inscription_icon = inscription._id;
-        } else {
-          metaData.inscription_icon = null;
-          metaData.error = true;
-          metaData.error_tag = "inscription icon not in db";
-          console.log(
-            "adding to err file because inscription_icon wasn't found in db: ",
-            folder.name
-          );
-        }
+    if (metaData.inscription_icon) {
+      if (inscription) {
+        metaData.inscription_icon = inscription._id;
       } else {
         metaData.inscription_icon = null;
+        metaData.error = true;
+        metaData.error_tag = "inscription icon not in db";
+        console.log(
+          "adding to err file because inscription_icon wasn't found in db: ",
+          folder.name
+        );
       }
-
-      const existingCollection = await Collection.findOne({
-        slug: metaData.slug,
-      });
-      console.log(metaData, "FINAL DATA");
-
-      if (!existingCollection) {
-        console.log("saved ", folder.name);
-        const newCollection = new Collection(metaData);
-        await newCollection.save();
-      } else {
-        console.log("collection already in DB");
-        return;
-        //  saveFailedCollection(folder.name);
-      }
+    } else {
+      metaData.inscription_icon = null;
     }
+    console.log(metaData, "adding...");
+
+    const newCollection = new Collection(metaData);
+    await newCollection.save();
+    return { success: true, slug: folder.name };
   } catch (error) {
     console.error("Error processing collection:", error);
-    return;
-    //  saveFailedCollection(folder.name);
+    return { success: false, slug: folder.name };
   }
 };
+
+export const dynamic = "force-dynamic";

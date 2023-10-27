@@ -28,7 +28,7 @@ export const collectionSchema = new Schema(
       required: true,
       maxlength: 100,
     },
-    inscription_icon: { type: ObjectId, ref: "Inscription", required: true },
+    inscription_icon: { type: ObjectId, ref: "Inscription" },
     icon: { type: String },
     supply: {
       type: Number,
@@ -48,7 +48,9 @@ export const collectionSchema = new Schema(
       validate: {
         validator: function (v: any) {
           // The regex pattern allows lowercase letters, digits, and hyphens only
-          const pattern = /^[a-z0-9-_]+$/;
+          // const pattern = /^[a-z0-9-_]+$/;
+
+          const pattern = /^[a-zA-Z0-9-_.]+$/; //alow uppercase and period
           return pattern.test(v);
         },
         message: (props: any) =>

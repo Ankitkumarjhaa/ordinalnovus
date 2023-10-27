@@ -88,7 +88,7 @@ export const inscriptionSchema = new mongoose.Schema(
     percentile: { type: String },
     period: { type: Number },
     rarity: { type: String },
-    sat_number: { type: Number },
+    sat: { type: Number },
     sat_name: { type: String },
     sat_offset: { type: Number },
     lists: [{ type: Schema.Types.ObjectId, ref: "Collection" }],

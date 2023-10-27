@@ -71,13 +71,22 @@ function Search() {
   }
 
   return (
-    <div className="flex relative items-center justify-center w-full md:max-w-md max-w-lg mx-auto pb-6  lg:pb-0">
+    <div
+      onBlur={(e) => {
+        if (
+          e.relatedTarget === null ||
+          !e.currentTarget.contains(e.relatedTarget)
+        ) {
+          setId("");
+        }
+      }}
+      className="flex relative items-center justify-center w-full md:max-w-md max-w-lg mx-auto pb-6  lg:pb-0"
+    >
       <div
         id="main-searchbar"
         className="relative w-full flex justify-between items-center border xl:border-2 border-accent rounded-md"
       >
         <input
-          onBlur={() => setId("")}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               // handleSearch();
@@ -104,9 +113,9 @@ function Search() {
           {possibleTypes.map((item: string, idx: number) => {
             let url = "";
             if (item === "sat") {
-              url = `/search/sat?id=${id}`;
+              url = `/sat/${id}`;
             } else if (item.includes("inscription number")) {
-              url = `/search/inscription?id=${id}`;
+              url = `/inscription/${id}`;
             }
             return (
               <Link key={item} shallow href={url}>

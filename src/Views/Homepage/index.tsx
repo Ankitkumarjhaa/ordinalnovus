@@ -109,7 +109,8 @@ function Homepage({ data }: HomepageProps) {
       </div>
       <div className="bg-yellow-700 w-full my-2 text-center text-xs uppercase font-bold text-white flex justify-start">
         <span
-          className={`bg-green-300 w-[${data.percentParsed}%] py-1 text-green-900`}
+          style={{ width: `${data.percentParsed}%` }}
+          className={`bg-green-300 py-1 text-green-900`}
         >
           indexing... {data.percentParsed}%
         </span>

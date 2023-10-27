@@ -5,6 +5,7 @@ import dbConnect from "@/lib/dbConnect";
 import crypto from "crypto";
 import { fetchContentFromProviders } from "@/utils";
 import { IInscription } from "@/types/Ordinals";
+import moment from "moment";
 
 // Function to fetch details of a single inscription
 async function fetchInscriptionDetails(
@@ -33,13 +34,11 @@ async function fetchInscriptionDetails(
         };
       }
     }
-    const dateObject = new Date(data.timestamp);
-    const dateSatObject = new Date(data.sat_timestamp);
 
     return {
       ...data,
-      timestamp: dateObject,
-      sat_timestamp: dateSatObject,
+      timestamp: moment.unix(data.timestamp),
+      sat_timestamp: moment.unix(data.sat_timestamp),
     };
   } catch (error: any) {
     if (
@@ -79,7 +78,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const promises = inscriptionIdList.map(
       async (inscriptionId: string, index: number) => {
         if (!inscriptionId) return;
-        let tags = [];
+        let tags: string[] = [];
         let content = null;
         let sha;
         let token = false;
@@ -95,6 +94,12 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             content = contentResponse.data;
 
             try {
+              const domainPattern =
+                /^(?!\d+\.)[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.[a-zA-Z]+$/;
+              if (domainPattern.test(content) && !tags.includes("domain")) {
+                tags.push("domain");
+              }
+
               // Check if content is a bitmap pattern (number followed by .bitmap)
               const bitmapPattern = /^\d+\.bitmap$/;
               if (bitmapPattern.test(content)) {
@@ -220,8 +225,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   }
 }
 
-export const dynamic = "force-dynamic";
-
 const handlePreSaveLogic = async (bulkDocs: Array<Partial<any>>) => {
   console.time("Total Time Taken for handlePreSaveLogic");
 
@@ -337,3 +340,5 @@ const deleteInscriptionsAboveThreshold = async () => {
 
   console.timeEnd("Time Taken for Deleting Documents");
 };
+
+export const dynamic = "force-dynamic";

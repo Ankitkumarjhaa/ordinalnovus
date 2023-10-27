@@ -283,3 +283,5 @@ export async function POST(req: NextRequest, res: NextResponse) {
     );
   }
 }
+
+export const dynamic = "force-dynamic";
