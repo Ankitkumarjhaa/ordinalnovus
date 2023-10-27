@@ -117,7 +117,7 @@ async function fetchInscriptionDetails(
 async function fetchInscriptionsWithoutSat() {
   await dbConnect();
   return Inscription.find({ sat: { $exists: false }, token: false })
-    .sort({ inscription_number: -1 })
+    .sort({ inscription_number: 1 })
     .limit(300);
 }
 
