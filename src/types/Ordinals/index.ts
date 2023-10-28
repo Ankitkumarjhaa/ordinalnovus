@@ -68,6 +68,7 @@ export interface IInscription {
   domain_name?: string;
   created_at?: Date;
   updated_at?: Date;
+  from_ord?: boolean;
 }
 
 export interface ICollection {

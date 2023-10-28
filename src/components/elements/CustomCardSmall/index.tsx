@@ -27,7 +27,7 @@ const CustomCard: React.FC<CustomCardProps> = ({
 }) => {
   return (
     <div className={`card_div p-2 w-full`}>
-      <Link href={`/search/${inscriptionId}`}>
+      <Link shallow href={`/inscription/${inscriptionId}`}>
         <div
           className={
             "relative rounded-xl border xl:border-2 border-accent bg-secondary shadow-xl p-3 " +
@@ -53,11 +53,13 @@ const CustomCard: React.FC<CustomCardProps> = ({
                 {content_type && content_type.split(";")[0]}
               </p>
 
-              {showCollection && inscription && inscription?.name && (
-                <span className="bg-yellow-500 rounded-md text-xs py-1 px-3 font-bold text-yellow-900">
-                  {inscription.name}
-                </span>
-              )}
+              {showCollection &&
+                inscription &&
+                inscription?.collection_item_name && (
+                  <span className="bg-yellow-500 rounded-md text-xs py-1 px-3 font-bold text-yellow-900">
+                    {inscription.collection_item_name}
+                  </span>
+                )}
             </div>
           </div>
         </div>

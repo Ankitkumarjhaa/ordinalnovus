@@ -89,28 +89,9 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
     if (inscriptions.length) {
       return NextResponse.json({
         statusCode: 200,
-        message: "Fetched Latest Inscription data successfully",
+        message: "Fetched Inscription data successfully",
         data: {
           inscriptions,
-          pagination: {
-            page,
-            limit,
-            total: totalCount,
-          },
-        },
-      });
-    } else if (/^-?\d+$/.test(id)) {
-      const { data } = await axios.get(
-        `${process.env.NEXT_PUBLIC_PROVIDER}/api/inscriptions/${id}`
-      );
-      const inscription_id = data.inscriptions[0];
-      const iData = await fetchLatestInscriptionData(inscription_id);
-      iData.inscription_id = inscription_id;
-      return NextResponse.json({
-        statusCode: 200,
-        message: "Fetched Latest Inscription data successfully",
-        data: {
-          inscriptions: [iData],
           pagination: {
             page,
             limit,
@@ -124,6 +105,7 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
       );
       const iData = await fetchLatestInscriptionData(id);
       iData.inscription_id = id;
+      iData.from_ord = true;
       return NextResponse.json({
         statusCode: 200,
         message: "Fetched Latest Inscription data successfully",
