@@ -1425,10 +1425,10 @@ bip174@^2.1.0:
   resolved "https://registry.yarnpkg.com/bip174/-/bip174-2.1.0.tgz#cd3402581feaa5116f0f00a0eaee87a5843a2d30"
   integrity sha512-lkc0XyiX9E9KiVAS1ZiOqK1xfiwvf4FXDDdkDq5crcDzOq+xGytY+14qCsqz7kCiy8rpN1CRNfacRhf9G3JNSA==
 
-bitcoin-wallet-adapter@^1.0.6:
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/bitcoin-wallet-adapter/-/bitcoin-wallet-adapter-1.0.6.tgz#58be1dcb05622d8fc65f2a93ddcec812887d2ce6"
-  integrity sha512-7S9gxbNoEyPooUlzrO1o2w444PyMJCwGNYZZJ6EZALCdyqwMmCNQRXKv/+tWPff7u4bfGTCERIzfjEc89xVxIQ==
+bitcoin-wallet-adapter@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/bitcoin-wallet-adapter/-/bitcoin-wallet-adapter-1.1.0.tgz#ad7d17ac1f2003b6a18a7f3a5579160af7c7d367"
+  integrity sha512-eJxBKEsQj0URVHBunqJZioey+iQuI75Jk+kc4C1E5QxISUQO6VnVrZ6ewYmOJz7MYYnQAr4WVlrRzdNkRa8qyA==
   dependencies:
     "@emotion/react" "^11.11.1"
     "@emotion/styled" "^11.11.0"
@@ -1446,7 +1446,7 @@ bitcoin-wallet-adapter@^1.0.6:
     react-icons "^4.10.1"
     react-redux "^8.1.2"
     redux-thunk "^2.4.2"
-    sats-connect "^0.5.0"
+    sats-connect "^1.1.1"
     tailwindcss "^3.3.3"
     typescript "^5.1.6"
 
@@ -4617,10 +4617,10 @@ saslprep@^1.0.3:
   dependencies:
     sparse-bitfield "^3.0.3"
 
-sats-connect@^0.5.0:
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/sats-connect/-/sats-connect-0.5.0.tgz#1bf68dad604c2b3a6576d1230da8830cdd778dd8"
-  integrity sha512-GDhKmkpKyi7jgonC/CZbXWKOddb9XJ7oC87T0fogv5+fcyBa7eIFyEQwY518XkeMdNjLIxioU4EQORm8NTYhaQ==
+sats-connect@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/sats-connect/-/sats-connect-1.1.1.tgz#9a9ff6d86a2516141be5bdcc6892d8279d14b61e"
+  integrity sha512-cckwlFc0gnYNZsNUsH9xACcpIeD+XdbSvtYhkGZSRqNeqzbqgdVI50mD4mzxs1ILbUGLjdTCINohVP6WbbvhcA==
   dependencies:
     jsontokens "^4.0.1"
     process "^0.11.10"

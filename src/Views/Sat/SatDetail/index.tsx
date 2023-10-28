@@ -21,11 +21,6 @@ function SatDetail({ data }: SatProps) {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
 
-  //wallet
-  const walletDetails = useSelector(
-    (state: RootState) => state.wallet.walletDetails
-  );
-
   return (
     <div className="p-6 md:pt-0 pb-6 flex-1">
       <div className="pb-2 border-b xl:border-b-2 border-accent">

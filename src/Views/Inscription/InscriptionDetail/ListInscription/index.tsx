@@ -34,12 +34,6 @@ function ListInscription({ data }: InscriptionProps) {
   const [unsignedPsbtBase64, setUnsignedPsbtBase64] = useState("");
 
   const [content, setContent] = useState(<></>);
-
-  //redux wallet management
-  const walletDetails = useSelector(
-    (state: RootState) => state.wallet.walletDetails
-  );
-  const lastWallet = useSelector((state: RootState) => state.wallet.lastWallet);
   const btcPrice = useSelector(
     (state: RootState) => state.general.btc_price_in_dollar
   );

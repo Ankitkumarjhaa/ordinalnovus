@@ -24,11 +24,6 @@ function InscriptionDetail({ data }: InscriptionProps) {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
 
-  //wallet
-  const walletDetails = useSelector(
-    (state: RootState) => state.wallet.walletDetails
-  );
-
   return (
     <div className="p-6 md:pt-0 pb-6 flex-1">
       <div className="pb-2 border-b xl:border-b-2 border-accent">
@@ -83,22 +78,7 @@ function InscriptionDetail({ data }: InscriptionProps) {
         </div>
       </div>
       <div className="relative py-6 border-b-2 border-accent">
-        {/* {currentBids?.txid && currentBids?.feeRate && (
-          <a href={`https://mempool.space/tx/${currentBids?.txid}`} target="#">
-            <p className="text-center mb-6 py-2 bg-secondary">
-              Active Bid at {currentBids?.feeRate}sats/vB Fee rate in mempool
-            </p>
-          </a>
-        )} */}
-        {walletDetails?.ordinal !== data?.address && (
-          <div className="center w-full">
-            {/* <BuyInscription data={data} loading={loading} /> */}
-            {/* <div className="w-full md:w-6/12 pl-3">
-              <AddPadding />
-            </div> */}
-          </div>
-        )}
-        {/* <ListInscription data={data} /> */}
+        {/* TODO: Add BUY/ SELL/ ADD PADDING */}
       </div>
       <div className="pt-2">
         <DisplayProperties data={data} />
