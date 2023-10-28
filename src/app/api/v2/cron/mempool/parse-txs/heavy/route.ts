@@ -60,7 +60,7 @@ async function fetchInscriptionsFromOutput(
   }
 }
 
-const LIMIT = 200;
+const LIMIT = 100;
 async function parseTxData(sort: 1 | -1, skip: number) {
   try {
     const modifiedTxIds: string[] = [];
@@ -164,7 +164,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
       parseTxData(1, 3000),
       parseTxData(1, 3000 + LIMIT),
       parseTxData(-1, 3000),
-      parseTxData(-1, 3000 + LIMIT),
+      // parseTxData(-1, 3000 + LIMIT),
     ]);
 
     return NextResponse.json({
