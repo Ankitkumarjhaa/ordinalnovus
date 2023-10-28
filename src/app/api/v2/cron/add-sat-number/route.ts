@@ -118,7 +118,7 @@ async function fetchInscriptionsWithoutSat() {
   await dbConnect();
   return Inscription.find({ sat: { $exists: false }, token: false })
     .sort({ inscription_number: 1 })
-    .limit(300);
+    .limit(100);
 }
 
 async function updateInscriptions(inscriptions: any) {
@@ -157,10 +157,13 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({
-      status: 400,
-      body: { message: "Error fetching and saving inscriptions", bulkOps },
-    });
+    return NextResponse.json(
+      {
+        status: 400,
+        body: { message: "Error fetching and saving inscriptions", bulkOps },
+      },
+      { status: 400 }
+    );
   }
 }
 

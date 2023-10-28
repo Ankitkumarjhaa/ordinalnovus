@@ -29,7 +29,7 @@ async function fetchInscriptionsFromOutput(
 ): Promise<IInscriptionDetails[]> {
   try {
     const apiUrl = `${process.env.NEXT_PUBLIC_PROVIDER}/api/output/${output}`;
-    console.log(apiUrl, "apiUrl");
+    // console.log(apiUrl, "apiUrl");
     const { data } = await axios.get(apiUrl);
     if (!data.inscription_details?.length) {
       return [];
