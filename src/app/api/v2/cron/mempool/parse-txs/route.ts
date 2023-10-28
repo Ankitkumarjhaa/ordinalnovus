@@ -169,8 +169,9 @@ export async function GET(req: NextRequest, res: NextResponse) {
     const result = await Promise.allSettled([
       parseTxData(1, 0),
       parseTxData(1, LIMIT),
+      parseTxData(1, LIMIT * 2),
       parseTxData(-1, 0),
-      parseTxData(-1, LIMIT),
+      parseTxData(-1, LIMIT * 2),
     ]);
 
     return NextResponse.json({

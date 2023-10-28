@@ -1,11 +1,11 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import thunk from "redux-thunk";
 import notificationsReducer from "./reducers/notificationReducer";
-// import walletReducer from './reducers/walletReducer';
+import generalReducer from "./reducers/generalReducer";
 
 const rootReducer = combineReducers({
   notifications: notificationsReducer,
-  // wallet: walletReducer
+  general: generalReducer,
 });
 
 export const store = configureStore({

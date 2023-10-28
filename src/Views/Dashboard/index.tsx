@@ -5,8 +5,6 @@ import CustomCard from "@/components/elements/CustomCardSmall";
 import { useRouter } from "next/navigation";
 import CardContent from "@/components/elements/CustomCardSmall/CardContent";
 import { shortenString } from "@/utils";
-import { useSelector } from "react-redux";
-import { RootState } from "@/stores";
 import { CircularProgress } from "@mui/material";
 import { fetchInscriptions } from "@/apiHelper/fetchInscriptions";
 import { useWalletAddress } from "bitcoin-wallet-adapter";
