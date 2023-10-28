@@ -154,23 +154,17 @@ export async function GET(req: NextRequest, res: NextResponse) {
   try {
     console.log(`***** Parse Txs [CRONJOB] Called *****`);
     await dbConnect();
-    const oneDayAgo = moment().subtract(1, "days").toDate();
-
-    const query = {
-      parsed: true,
-      tag: { $exists: false },
-      createdAt: { $lt: oneDayAgo },
-    };
-
-    await Tx.deleteMany({ ...query });
 
     console.log("Starting parsing...");
+    const nonParsedTxs = await Tx.countDocuments({ parsed: false });
     // const result = await parseTxData(1);
+    if (nonParsedTxs < 3000)
+      return NextResponse.json({ message: "Not enough Txs" });
     const result = await Promise.allSettled([
-      parseTxData(1, 0),
-      parseTxData(1, LIMIT),
-      parseTxData(-1, 0),
-      parseTxData(-1, LIMIT),
+      parseTxData(1, 3000),
+      parseTxData(1, 3000 + LIMIT),
+      parseTxData(-1, 3000),
+      parseTxData(-1, 3000 + LIMIT),
     ]);
 
     return NextResponse.json({
