@@ -9,6 +9,14 @@ export interface IApikeyResponse {
   expirationDate: string;
   details: IApikey;
 }
+export interface IFeeInfo {
+  fastestFee: number;
+  halfHourFee: number;
+  hourFee: number;
+  economyFee: number;
+  minimumFee: number;
+  lastChecked: Date;
+}
 
 interface IApikey {
   apiKey: string;

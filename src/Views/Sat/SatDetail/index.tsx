@@ -1,7 +1,7 @@
 "use client";
 
 import copy from "copy-to-clipboard";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { addNotification } from "@/stores/reducers/notificationReducer";
 import { IInscription, ISat } from "@/types/Ordinals";
 import React, { useState } from "react";

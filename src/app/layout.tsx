@@ -25,7 +25,7 @@ export default function RootLayout({
             <link rel="icon" href="/favicon.ico" sizes="any" />
           </Head>
           <body className=" bg-primary text-light_gray relative small-scrollbar">
-            <main className="py-36 lg:py-12 px-6 lg:px-24 max-w-7xl mx-auto relative">
+            <main className=" py-52 lg:py-24 px-6 lg:px-24 max-w-7xl mx-auto relative">
               <Header />
               {children}
             </main>

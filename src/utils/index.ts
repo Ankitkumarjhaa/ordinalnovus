@@ -41,8 +41,11 @@ export const formattedJsonString = (item: any) => {
   );
 };
 
+import { AppDispatch } from "@/stores";
+import { setFees } from "@/stores/reducers/generalReducer";
 import mempoolJS from "@mempool/mempool.js";
 import axios from "axios";
+import moment from "moment";
 
 const { bitcoin } = mempoolJS({
   hostname: "mempool.space",
@@ -143,3 +146,16 @@ export function calculateBTCCostInDollars(btcAmount: number, btcPrice: number) {
   const btcCostInDollars = btcAmount * btcPrice;
   return btcCostInDollars.toFixed(2);
 }
+
+export const fetchFees = async (dispatch: AppDispatch) => {
+  try {
+    const response = await axios.get(
+      "https://mempool.space/api/v1/fees/recommended"
+    );
+    const data = response.data;
+    data.lastChecked = moment();
+    dispatch(setFees(response.data));
+  } catch (error) {
+    console.error("Error fetching fees:", error);
+  }
+};

@@ -1,20 +1,17 @@
 "use client";
 
 import copy from "copy-to-clipboard";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { addNotification } from "@/stores/reducers/notificationReducer";
-import { IInscription, Transaction, TransactionInput } from "@/types/Ordinals";
-import React, { useCallback, useEffect, useState } from "react";
+import { IInscription } from "@/types/Ordinals";
+import React, { useState } from "react";
 import { AiFillCheckCircle } from "react-icons/ai";
 import { BsFillShareFill } from "react-icons/bs";
 import { FaFlag } from "react-icons/fa";
 import { TfiReload } from "react-icons/tfi";
 import DisplayProperties from "./DisplayProperties";
 import { useRouter } from "next/navigation";
-import { RootState } from "@/stores";
 import Link from "next/link";
-// import ListInscription from "../ListInscription";
-// import BuyInscription from "../BuyInscription";
 import moment from "moment";
 type InscriptionProps = {
   data: IInscription;
