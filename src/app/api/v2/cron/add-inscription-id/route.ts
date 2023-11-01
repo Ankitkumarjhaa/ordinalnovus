@@ -162,6 +162,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         } else {
           inscriptionDetails.inscription_number = start + 1 + index;
         }
+        tags = tags.filter((tag) => tag).map((tag) => tag.toLowerCase());
         bulkOps.push({
           insertOne: {
             document: {
@@ -303,14 +304,16 @@ const handlePreSaveLogic = async (bulkDocs: Array<Partial<any>>) => {
       const contentTypeParts = doc.content_type.split("/");
       doc.tags = doc.tags
         ? [
-            ...doc.tags,
-            contentTypeParts[0].toLowerCase(),
-            contentTypeParts[1].toLowerCase(),
+            ...doc.tags
+              .filter((tag: string) => tag)
+              .map((tag: string) => tag.toLowerCase()),
+            ...contentTypeParts
+              .filter((part: string) => part)
+              .map((part: string) => part.toLowerCase()),
           ]
-        : [
-            contentTypeParts[0].toLowerCase(),
-            contentTypeParts[1].toLowerCase(),
-          ];
+        : contentTypeParts
+            .filter((part: string) => part)
+            .map((part: string) => part.toLowerCase());
     }
     // console.timeEnd("Modify the tags");
 
