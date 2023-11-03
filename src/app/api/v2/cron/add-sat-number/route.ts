@@ -119,7 +119,7 @@ async function fetchInscriptionsWithoutSat() {
   return (
     Inscription.find({ sat: { $exists: false }, token: false })
       // .sort({ inscription_number: -1 })
-      .limit(300)
+      .limit(100)
   );
 }
 

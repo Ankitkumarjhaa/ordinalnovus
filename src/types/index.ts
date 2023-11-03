@@ -18,6 +18,23 @@ export interface IFeeInfo {
   lastChecked: Date;
 }
 
+export interface IFile {
+  file_type: string;
+  file_name: string;
+  base64_data: string;
+  file_size: number;
+  txid: string;
+  inscription_fee: number;
+}
+
+export interface IInscribe {
+  funding_address: string;
+  receive_address: string;
+  fee: number;
+  files: Array<IFile>;
+  referrer?: string; // Optional field
+}
+
 interface IApikey {
   apiKey: string;
   count: number;

@@ -6,8 +6,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/stores";
 import { fetchFees } from "@/utils";
 import moment from "moment";
+import { useWalletAddress } from "bitcoin-wallet-adapter";
 
 const InscribePage = () => {
+  const walletDetails = useWalletAddress();
   const [files, setFiles] = useState<any>([]);
   const [lowPostage, setLowPostage] = useState(false);
   const [receiveAddress, setReceiveAddress] = useState("");
@@ -26,7 +28,9 @@ const InscribePage = () => {
     if (shouldFetch) {
       fetchFees(dispatch);
     }
-  }, [dispatch]);
+    if (walletDetails && walletDetails.ordinal_address)
+      setReceiveAddress(walletDetails.ordinal_address);
+  }, [dispatch, walletDetails]);
 
   const handleFileChange = (event: any) => {
     const selectedFiles = Array.from(event.target.files)
@@ -69,7 +73,7 @@ const InscribePage = () => {
       const response = await axios.post("/api/v2/inscribe/create-order", {
         files,
         lowPostage,
-        receiveAddress,
+        receiveAddress: receiveAddress || walletDetails.ordinal_address,
         fee,
       });
       setResponseData(response.data);

@@ -10,6 +10,11 @@ export function shortenString(str: string, length?: number): string {
   const end = str.slice(-4);
   return `${start}...${end}`;
 }
+export function wait(seconds = 10) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, seconds * 1000);
+  });
+}
 
 export const copyToClipboard = (text: string) => {
   navigator.clipboard.writeText(text);

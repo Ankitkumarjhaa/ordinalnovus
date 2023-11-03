@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
         leaf: leaf,
         tapkey: tapkey,
         cblock: cblock,
-        inscription_address: inscriptionAddress,
+        inscriptionAddress: inscriptionAddress,
         txsize: txsize,
         fee: fee,
         script: script,
