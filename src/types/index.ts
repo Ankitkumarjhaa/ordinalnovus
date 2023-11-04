@@ -1,4 +1,4 @@
-import { Schema } from "mongoose";
+import { Document, Schema } from "mongoose";
 
 export interface IApikeyResponse {
   success: boolean;
@@ -18,21 +18,43 @@ export interface IFeeInfo {
   lastChecked: Date;
 }
 
-export interface IFile {
+export interface IFileSchema {
   file_type: string;
   file_name: string;
   base64_data: string;
   file_size: number;
-  txid: string;
+  inscription_address: string;
+  txid?: string;
+  leaf: string;
+  tapkey: string;
+  cblock: string;
   inscription_fee: number;
+  inscription_id?: string;
 }
 
-export interface IInscribe {
+export interface IInscribeOrder extends Document {
+  order_id: string;
   funding_address: string;
+  privkey: string;
   receive_address: string;
-  fee: number;
-  files: Array<IFile>;
-  referrer?: string; // Optional field
+  chain_fee: number;
+  service_fee: number;
+  inscriptions: IFileSchema[];
+  cursed: boolean;
+  network: "testnet" | "mainnet";
+  status:
+    | "payment pending"
+    | "payment received"
+    | "insufficient balance"
+    | "inscribed"
+    | "refunded";
+  webhook_url?: string;
+  fee_rate: number;
+  txid?: string;
+  referrer?: string;
+  referral_fee?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 interface IApikey {
