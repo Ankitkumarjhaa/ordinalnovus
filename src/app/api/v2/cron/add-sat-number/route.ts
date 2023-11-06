@@ -116,11 +116,9 @@ async function fetchInscriptionDetails(
 
 async function fetchInscriptionsWithoutSat() {
   await dbConnect();
-  return (
-    Inscription.find({ sat: { $exists: false }, token: false })
-      // .sort({ inscription_number: -1 })
-      .limit(100)
-  );
+  return Inscription.find({ sat: { $exists: false }, token: false })
+    .sort({ inscription_number: -1 })
+    .limit(300);
 }
 
 async function updateInscriptions(inscriptions: any) {
@@ -145,6 +143,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     if (inscriptionsWithoutSat.length < 1)
       return NextResponse.json({ message: "All inscriptions have sat" });
 
+    console.log(inscriptionsWithoutSat.length, "iws");
     const promises = inscriptionsWithoutSat.map(async (inscription) => {
       const inscriptionDetails = await fetchInscriptionDetails(inscription);
       return { _id: inscription._id, ...inscriptionDetails };

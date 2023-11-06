@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
       receiveAddress,
       fee_rate,
       webhook_url,
-      referral,
+      referrer,
       referral_fee,
       referral_fee_percent,
     } = await req.json();
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
       throw new CustomError("Invalid input", 400);
     }
 
-    if (referral && !referral_fee && !referral_fee_percent) {
+    if (referrer && !referral_fee && !referral_fee_percent) {
       throw new CustomError(
         "Referral address has been used. Please provide referral_fee.",
         400
@@ -60,11 +60,13 @@ export async function POST(req: NextRequest) {
     );
 
     let total_fees = calculateTotalFees(inscriptions, fee_rate);
-    referral_fee = calculateReferralFee(
-      total_fees,
-      referral_fee,
-      referral_fee_percent
-    );
+    if (referrer)
+      referral_fee = calculateReferralFee(
+        total_fees,
+        referral_fee,
+        referral_fee_percent
+      );
+    else referral_fee = 0;
     let service_fee = calculateServiceFee(total_fees, referral_fee);
 
     const data = constructOrderData(
@@ -74,7 +76,7 @@ export async function POST(req: NextRequest) {
       receiveAddress,
       total_fees,
       service_fee,
-      referral,
+      referrer,
       referral_fee,
       fee_rate,
       inscriptions,
@@ -252,7 +254,7 @@ function constructOrderData(
   receive_address: string,
   chain_fee: number,
   service_fee: number,
-  referral: string | undefined,
+  referrer: string | undefined,
   referral_fee: number | undefined,
   fee_rate: number,
   inscriptions: any[],
@@ -260,6 +262,7 @@ function constructOrderData(
   cursed: boolean,
   webhook_url: string | undefined
 ): IInscribeOrder {
+  //@ts-ignore
   return {
     order_id: order_id,
     funding_address: funding_address,
@@ -267,7 +270,7 @@ function constructOrderData(
     receive_address: receive_address,
     chain_fee: chain_fee,
     service_fee: service_fee,
-    referrer: referral,
+    referrer,
     referral_fee: referral_fee,
     fee_rate: fee_rate,
     inscriptions: inscriptions,

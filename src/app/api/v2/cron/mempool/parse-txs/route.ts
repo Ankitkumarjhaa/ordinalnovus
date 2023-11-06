@@ -158,8 +158,8 @@ export async function GET(req: NextRequest, res: NextResponse) {
 
     const query = {
       parsed: true,
-      tag: { $exists: false },
       createdAt: { $lt: oneDayAgo },
+      $or: [{ tag: { $exists: false } }, { tag: { $eq: "inscribed" } }],
     };
 
     await Tx.deleteMany({ ...query });
