@@ -17,125 +17,24 @@ const getProjectionFields = (show: string) => {
   }
 };
 
-const buildPipeline = (query: any) => {
-  const pipeline: PipelineStage[] = [
-    { $match: query.find },
-    {
-      $addFields: {
-        titleNumber: {
-          $cond: {
-            if: {
-              $and: [
-                { $eq: [{ $size: { $split: ["$name", "#"] } }, 2] },
-                {
-                  $regexMatch: {
-                    input: {
-                      $arrayElemAt: [{ $split: ["$name", "#"] }, 1],
-                    },
-                    regex: /^[0-9]+$/,
-                  },
-                },
-              ],
-            },
-            then: {
-              $toInt: {
-                $arrayElemAt: [
-                  {
-                    $split: ["$name", "#"],
-                  },
-                  1,
-                ],
-              },
-            },
-            else: "$number",
-          },
-        },
+const fetchInscriptions = async (query: any, projectionFields: string) => {
+  
+  return await Inscription.find(query.find)
+    .select(projectionFields)
+    .where(query.where)
+    .populate({
+      path: "official_collection",
+      select:
+        "name inscription_id inscription_icon supply slug description _id verified featured",
+      populate: {
+        path: "inscription_icon",
+        select: "inscription_id content_type",
       },
-    },
-    { $sort: { titleNumber: 1 } },
-    {
-      $lookup: {
-        from: "collections",
-        localField: "official_collection",
-        foreignField: "_id",
-        as: "official_collection",
-      },
-    },
-    {
-      $unwind: {
-        path: "$official_collection",
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-    {
-      $lookup: {
-        from: "inscriptions",
-        localField: "official_collection.inscription_icon",
-        foreignField: "_id",
-        as: "official_collection.inscription_icon",
-      },
-    },
-    {
-      $unwind: {
-        path: "$official_collection.inscription_icon",
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-    { $skip: query.start },
-    { $limit: query.limit },
-    {
-      $project: {
-        titleNumber: 0,
-        created_at: 0,
-        updated_at: 0,
-        __v: 0,
-        "official_collection._id": 0,
-        "official_collection.__v": 0,
-        "official_collection.updated_at": 0,
-        "official_collection.created_at": 0,
-        "official_collection.errored": 0,
-        "official_collection.updated": 0,
-        "official_collection.erroredInscriptions": 0,
-        "official_collection.updatedBy": 0,
-        "official_collection.inscription_icon.created_at": 0,
-        "official_collection.inscription_icon.updated_at": 0,
-      },
-    },
-  ];
-
-  return pipeline;
-};
-
-const fetchInscriptions = async (
-  query: any,
-  projectionFields: string,
-  pipeline: PipelineStage[]
-) => {
-  if (
-    query.sort &&
-    (query.sort.name === 1 || query.sort.name === -1) &&
-    query.find.official_collection
-  ) {
-    console.log("\nusing aggregation pipeline becuase sort = name & slug used");
-    return await Inscription.aggregate(pipeline).exec();
-  } else {
-    return await Inscription.find(query.find)
-      .select(projectionFields)
-      .where(query.where)
-      .populate({
-        path: "official_collection",
-        select:
-          "name inscription_id inscription_icon supply slug description _id verified featured",
-        populate: {
-          path: "inscription_icon",
-          select: "inscription_id content_type",
-        },
-      })
-      .sort(query.sort)
-      .skip(query.start)
-      .limit(query.limit)
-      .exec();
-  }
+    })
+    .sort(query.sort)
+    .skip(query.start)
+    .limit(query.limit)
+    .exec();
 };
 
 const countInscriptions = async (query: any) => {
@@ -166,14 +65,9 @@ export async function GET(req: NextRequest, res: NextResponse) {
       query.find.official_collection = collection._id;
     }
     const projectionFields = getProjectionFields(query.show as string);
-    const pipeline = buildPipeline(query);
 
     await dbConnect();
-    const inscriptions = await fetchInscriptions(
-      query,
-      projectionFields,
-      pipeline
-    );
+    const inscriptions = await fetchInscriptions(query, projectionFields);
     const totalCount = await countInscriptions(query);
 
     return NextResponse.json({

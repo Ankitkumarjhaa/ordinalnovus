@@ -34,7 +34,7 @@ export async function fetchCollections(
   } = params;
   try {
     const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_API}/collection`,
+      `${process.env.NEXT_PUBLIC_URL}/api/v2/collection`,
       {
         params: {
           slug,
@@ -43,7 +43,7 @@ export async function fetchCollections(
           name: search,
           _limit: pageSize,
           _start: (page - 1) * pageSize,
-          apiKey: process.env.API_KEY,
+          apikey: process.env.API_KEY,
         },
       }
     );

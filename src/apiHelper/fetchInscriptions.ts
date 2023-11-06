@@ -25,15 +25,7 @@ export interface InscriptionResponse {
 export async function fetchInscriptions(
   params: FetchInscriptionsParams
 ): Promise<{ data: InscriptionResponse; error: string | null } | undefined> {
-  const {
-    collection_id,
-    slug,
-    sort = "name:1",
-    search,
-    page_size,
-    page,
-    wallet,
-  } = params;
+  const { collection_id, slug, sort, search, page_size, page, wallet } = params;
   try {
     const response = await axios.get(
       `${process.env.NEXT_PUBLIC_URL}/api/v2/inscription`,
@@ -42,7 +34,7 @@ export async function fetchInscriptions(
           official_collection: collection_id,
           address: wallet,
           slug,
-          _sort: sort || "timestamp:1",
+          _sort: sort || "inscription_number:1",
           name: search,
           _limit: page_size,
           _start: (page - 1) * page_size,
@@ -50,8 +42,6 @@ export async function fetchInscriptions(
         },
       }
     );
-
-    console.log(response.data, "RESPONSE");
 
     if (response.status === 200) {
       return { data: response.data || [], error: null };

@@ -58,18 +58,32 @@ export async function GET(req: NextRequest, res: NextResponse) {
     // console.log({ query, variables }, "PARAMS");
     const data = await response.json();
     // console.dir(data, "DATA");
+
+    const excludeSlugs = [
+      "blup",
+      "plastic-bag-rabbits",
+      "wise-monkeys",
+      "skapes ordinals",
+      "roboiz ordinals",
+    ];
     const collectionsEntries = data.data.repository.object.entries;
     console.log(collectionsEntries.length, "CE");
     const collectionsFolders = collectionsEntries
       .filter((item: { type: string }) => item.type === "tree")
-      .filter((item: { name: any }) => !existingSlugs.includes(item.name));
+      .filter(
+        (item: { name: any }) =>
+          !existingSlugs.includes(item.name) &&
+          !excludeSlugs.includes(item.name)
+      );
 
     console.log(collectionsFolders.length, "TOTAL COLLECTIONS TO PROCESS");
+    if (collectionsFolders.length === 0)
+      return NextResponse.json({ message: "All Collections added" });
 
     try {
       const batchLimit = 100;
       const processItems = collectionsFolders.slice(0, batchLimit);
-      console.log(processItems.length, " Procesing items");
+      console.log(processItems.length, " Processing items");
 
       await Promise.all(
         processItems.map(async (folder: any) => {
@@ -105,6 +119,9 @@ export async function GET(req: NextRequest, res: NextResponse) {
 }
 
 const processCollection = async (folder: any) => {
+  const startTime = performance.now(); // Starting the performance timer
+  console.log(`Starting process for folder: ${folder.name}`);
+
   try {
     const metaResponse = await fetch(
       `https://raw.githubusercontent.com/ordinals-wallet/ordinals-collections/main/collections/${folder.name}/meta.json`
@@ -113,34 +130,27 @@ const processCollection = async (folder: any) => {
     if (!metaResponse.ok) {
       throw new Error("Failed to fetch meta data");
     }
-    console.log("fetching metadata...");
 
     const metaData = await metaResponse.json();
-    // console.log("got metadata for ", folder.name, { metaData });
-    // console.log({
-    //   metaData: metaData,
-    //   icon: metaData.inscription_icon || metaData.icon,
-    // });
-    console.log("processing...");
-    if (metaData.twitter_link && !validateUrl(metaData.twitter_link)) {
-      console.log("invalid_twitter link");
-      metaData.twitter_link = "";
-      //  saveFailedCollection(folder.name);
-      // return;
-    }
-    if (metaData.discord_link && !validateUrl(metaData.discord_link)) {
-      console.log("invalid discord_link");
-      metaData.discord_link = "";
-      //  saveFailedCollection(folder.name);
-      // return;
-    }
+    console.log(`Metadata fetched for ${folder.name}`);
 
-    if (metaData.website_link && !validateUrl(metaData.website_link)) {
-      console.log("invalid website link");
-      metaData.website_link = "";
-      //  saveFailedCollection(folder.name);
-      // return;
+    // Process twitter link
+    if (metaData.twitter_link && !validateUrl(metaData.twitter_link)) {
+      console.log("Invalid Twitter link");
+      metaData.twitter_link = "";
     }
+    // Process discord link
+    if (metaData.discord_link && !validateUrl(metaData.discord_link)) {
+      console.log("Invalid Discord link");
+      metaData.discord_link = "";
+    }
+    // Process website link
+    if (metaData.website_link && !validateUrl(metaData.website_link)) {
+      console.log("Invalid website link");
+      metaData.website_link = "";
+    }
+    console.log("Links verified: ", folder.name);
+    // Validate slug
     if (!validateSlug(metaData.slug)) {
       metaData.error = true;
       metaData.error_tag = "Slug invalid";
@@ -151,10 +161,12 @@ const processCollection = async (folder: any) => {
     metaData.updatedBy = "cronjob";
     metaData.supply = 0;
 
+    // Default description
     if (!metaData.description) {
       metaData.description = `${metaData.name} is a collection forever inscribed on the BTC Blockchain.`;
     }
 
+    // Inscription handling
     const inscription = metaData.inscription_icon
       ? await Inscription.findOne({
           inscription_id: metaData.inscription_icon,
@@ -167,19 +179,28 @@ const processCollection = async (folder: any) => {
       } else {
         metaData.inscription_icon = null;
         metaData.error = true;
-        metaData.error_tag = "inscription icon not in db";
+        metaData.error_tag = "Inscription icon not in db";
         console.log(
-          "adding to err file because inscription_icon wasn't found in db: ",
+          "Adding to error file because inscription_icon wasn't found in db: ",
           folder.name
         );
       }
     } else {
       metaData.inscription_icon = null;
     }
-    console.log(metaData, "adding...");
+    console.log("Adding collection to the database...", folder.name);
 
     const newCollection = new Collection(metaData);
     await newCollection.save();
+    console.log(`Successfully processed collection for ${folder.name}`);
+
+    const endTime = performance.now(); // Ending the performance timer
+    console.log(
+      `Processing time for ${folder.name}: ${(endTime - startTime).toFixed(
+        2
+      )} milliseconds`
+    );
+
     return { success: true, slug: folder.name };
   } catch (error) {
     console.error("Error processing collection:", error);

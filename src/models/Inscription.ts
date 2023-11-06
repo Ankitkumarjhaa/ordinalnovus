@@ -203,3 +203,7 @@ inscriptionSchema.index({ sha: 1, version: 1 });
 inscriptionSchema.index({ address: 1 });
 inscriptionSchema.index({ tags: 1 });
 inscriptionSchema.index({ inscription_number: 1 });
+
+// temporary
+inscriptionSchema.index({ sat: 1 }),
+  { partialFilterExpression: { sat: { $exists: false } } };

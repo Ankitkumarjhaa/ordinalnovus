@@ -13,7 +13,7 @@ async function getCollections(query: any) {
       .where(query.where)
       .populate({
         path: "inscription_icon",
-        select: "inscriptionId content_type number",
+        select: "inscription_id content_type number",
       })
       .sort(query.sort)
       .skip(query.start)
@@ -67,8 +67,8 @@ async function getInscriptionsRange(collections: any) {
         .select("inscription_number"); // Select only the 'number' field
 
       // Update the collection with new min and max
-      collection.min = lowestInscription.number;
-      collection.max = highestInscription.number;
+      collection.min = lowestInscription.inscription_number;
+      collection.max = highestInscription.inscription_number;
       await Collection.findByIdAndUpdate(collection._id, {
         min: collection.min,
         max: collection.max,
@@ -99,6 +99,8 @@ export async function GET(req: NextRequest, res: NextResponse) {
     await dbConnect();
 
     const query = convertParams(Collection, req.nextUrl);
+
+    query.find.supply = { $gt: 0 };
 
     // Generate a unique key for this query
     const cacheKey = `collections:${JSON.stringify(query)}`;
@@ -147,6 +149,9 @@ export async function GET(req: NextRequest, res: NextResponse) {
         },
       };
 
+      // await resetCollections();
+      // await Collection.deleteOne({ slug: "btc-artifacts" });
+
       // Store the result in Redis for 1 hour
       await setCache(cacheKey, result, 60 * 60);
 
@@ -162,3 +167,23 @@ export async function GET(req: NextRequest, res: NextResponse) {
   }
 }
 export const dynamic = "force-dynamic";
+
+const resetCollections = async () => {
+  try {
+    const result = await Collection.updateMany(
+      {}, // This empty object means that the update will apply to all documents
+      {
+        $set: {
+          updated: 0,
+          supply: 0,
+          errored: 0,
+          errored_inscriptions: [],
+        },
+      }
+    );
+
+    console.log(`Successfully reset collections.`);
+  } catch (error) {
+    console.error("Error resetting collections:", error);
+  }
+};

@@ -79,7 +79,7 @@ export const collectionSchema = new Schema(
       required: false,
       validate: {
         validator: function (tags: any) {
-          const pattern = /^[a-z-]+$/;
+          const pattern = /^[^A-Z]+$/;
           return tags.every((tag: any) => pattern.test(tag));
         },
         message: () =>
@@ -104,6 +104,8 @@ collectionSchema.index({ featured: 1, verified: 1, priority: 1, live: 1 });
 collectionSchema.index({ tags: 1 });
 collectionSchema.index({ name: "text" });
 collectionSchema.index({ slug: 1 });
+collectionSchema.index({ updated: 1, errored: 1 });
+collectionSchema.index({ supply: 1 });
 
 collectionSchema.pre(
   "deleteOne",
