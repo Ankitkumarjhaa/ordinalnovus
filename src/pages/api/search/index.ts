@@ -33,7 +33,7 @@ async function fetchInscriptions(query: any, page: number, limit: number) {
   console.log("Fetching Inscriptions...");
 
   const skip = (page - 1) * limit;
-  const url = `${process.env.NEXT_PUBLIC_API}/inscription`;
+  const url = `${process.env.NEXT_PUBLIC_URL}/api/inscription`;
 
   try {
     const response = await axios.get(url, {
@@ -42,7 +42,7 @@ async function fetchInscriptions(query: any, page: number, limit: number) {
         apiKey: process.env.API_KEY,
         _start: skip,
         _limit: limit,
-        show:"all"
+        show: "all",
       },
       headers: { "Content-Type": "application/json" },
     });
@@ -90,14 +90,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
       console.log(query, "SEARCH QUERY");
 
       if (/^[0-9A-Fa-f]{64}i\d$/gm.test(id) || !isNaN(Number(id))) {
-        
-      const { inscriptions, totalCount } = await fetchInscriptions(
-        query,
-        page,
-        limit
-      );
+        const { inscriptions, totalCount } = await fetchInscriptions(
+          query,
+          page,
+          limit
+        );
 
-      console.log(inscriptions.length, " inscriptions found in db");
+        console.log(inscriptions.length, " inscriptions found in db");
 
         if (inscriptions.length) {
           console.log(
@@ -142,7 +141,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
             statusCode: 404,
           });
         }
-        console.log(satData, 'satdata')
+        console.log(satData, "satdata");
 
         return res.status(200).json({
           statusCode: 200,

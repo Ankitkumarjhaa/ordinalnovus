@@ -1,65 +1,74 @@
 import * as bitcoin from "bitcoinjs-lib";
-// Static Fields
+
+interface Attribute {
+  key: string;
+  value: string;
+}
+
 export interface IInscription {
-  _id: any;
-  inscriptionId?: string;
+  _id: string;
+  inscription_number: number;
+  inscription_id: string;
   content?: string;
   sha?: string;
-  officialCollection?: ICollection;
-  name?: string;
-  attributes?: any;
-  preview?: string;
+  location?: string;
+  output?: string;
+  timestamp?: Date;
+  children?: any[];
+  next?: string;
+  previous?: string;
+  parent?: string;
+  genesis_address?: string;
+  genesis_fee?: number;
+  genesis_height?: number;
+  genesis_transaction?: string;
   flagged?: boolean;
-  banned?: boolean;
+  banned: boolean;
   reason?: string;
   updated_by?: string;
   block?: number;
   content_length?: number;
   content_type?: string;
+  official_collection?: any;
+  collection_item_name?: string;
+  collection_item_number?: number;
+  attributes?: Attribute[];
+  sat_timestamp?: Date;
   cycle?: number;
   decimal?: string;
   degree?: string;
   epoch?: number;
-  genesis_address?: string;
-  genesis_fee?: number;
-  genesis_height?: number;
-  genesis_transaction?: string;
-  location?: string;
-  number: number; //required
   percentile?: string;
   period?: number;
   rarity?: string;
   sat?: number;
   sat_name?: string;
-  timestamp?: Date;
-
-  // Dynamic Fields
   sat_offset?: number;
-  lists?: ICollection[];
-  tags?: string[]; // Lowercase letters and hyphens only
+  lists?: any[];
+  tags?: string[];
   error?: boolean;
-
-  // New Fields
+  error_retry?: number;
+  error_tag?: string;
   offset?: number;
-  output?: string;
   output_value?: number;
   address?: string;
   listed?: boolean;
-  listedAt?: Date;
-  listedPrice?: number; //in sats
-  listedMakerFeeBp?: number;
-  listedSellerReceiveAddress?: string;
-  signedPsbt?: string;
-  unSignedPsbt?: string;
-  satBlockTime?: Date;
+  listed_at?: Date;
+  listed_price?: number;
+  listed_maker_fee_bp?: number;
+  tap_internal_key?: string;
+  listed_seller_receive_address?: string;
+  signed_psbt?: string;
+  unsigned_psbt?: string;
+  sat_block_time?: Date;
   sattributes?: string[];
-  lastChecked?: Date;
-  tapInternalKey?: string;
-
-  // Timestamp Fields
+  last_checked?: Date;
+  version?: number;
+  token?: boolean;
+  domain_name?: string;
   created_at?: Date;
   updated_at?: Date;
-  version: Number;
+  from_ord?: boolean;
 }
 
 export interface ICollection {
@@ -88,18 +97,20 @@ export interface ICollection {
 }
 
 export interface ISat {
-  _links: any;
-  block: number;
-  cycle: number;
+  number: number;
   decimal: string;
   degree: string;
-  epoch: number;
   name: string;
-  offset: number;
-  percentile: string;
+  block: number;
+  cycle: number;
+  epoch: number;
   period: number;
+  offset: number;
   rarity: string;
-  timestamp: string;
+  percentile: string;
+  satpoint: null | any; //TODO: Replace 'any' with the actual type if known
+  timestamp: Date;
+  inscriptions: IInscription[];
 }
 
 export interface RecentInscription {
@@ -156,8 +167,6 @@ export interface WitnessUtxo {
   value: number;
 }
 
-
-
 export interface IListingState {
   seller: {
     makerFeeBp: number;
@@ -180,7 +189,7 @@ export interface IListingState {
     unsignedBuyingPSBTInputSize?: number;
     signedBuyingPSBTBase64?: string;
     buyerDummyUTXOs?: UTXO[];
-    buyerPaymentUTXOs?: AddressTxsUtxo[] ; // after the selection
+    buyerPaymentUTXOs?: AddressTxsUtxo[]; // after the selection
     mergedSignedBuyingPSBTBase64?: string;
   };
 }

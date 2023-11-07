@@ -5,29 +5,47 @@ import dbConnect from "@/lib/dbConnect";
 import crypto from "crypto";
 import { fetchContentFromProviders } from "@/utils";
 import { IInscription } from "@/types/Ordinals";
-import { AnyBulkWriteOperation } from "mongodb";
+import moment from "moment";
 
 // Function to fetch details of a single inscription
 async function fetchInscriptionDetails(
   inscriptionId: string
-): Promise<Partial<IInscription> | { error: true }> {
+): Promise<
+  Partial<IInscription> | { error: true; error_tag: string; error_retry: 1 }
+> {
   try {
     const { data } = await axios.get(
       `${process.env.NEXT_PUBLIC_PROVIDER}/api/inscription/${inscriptionId}`
     );
-    if (!data.sat) throw Error("server down");
+    if (!data.sat) {
+      console.log(data, "DATA");
+      if (
+        !data.inscription_number &&
+        !data.genesis_transaction &&
+        !data.genesis_height
+      )
+        throw Error("server down");
+      else {
+        return {
+          ...data,
+          error: true,
+          error_tag: "unbound item",
+          error_retry: 1,
+        };
+      }
+    }
 
     return {
       ...data,
-      timestamp: new Date(data.timestamp),
-      preview: data._links.preview.href.split("/")[2],
+      timestamp: moment.unix(data.timestamp),
+      sat_timestamp: moment.unix(data.sat_timestamp),
     };
   } catch (error: any) {
     if (
       error.response &&
       (error.response.status === 500 || error.response.status === 502)
     ) {
-      return { error: true };
+      return { error: true, error_tag: "server error", error_retry: 1 };
     }
     throw error;
   }
@@ -35,38 +53,38 @@ async function fetchInscriptionDetails(
 
 // Main handler function
 export async function GET(req: NextRequest): Promise<NextResponse> {
-  await dbConnect();
+  const bulkOps: any[] = [];
 
   try {
-    console.log("ADDING NEW INSCRIPTIONS");
-    const highestInscription = await Inscription.findOne().sort({ number: -1 });
-    const start = highestInscription ? highestInscription.number + 1 : 0;
-    const { data } = await axios.get(
-      `${process.env.NEXT_PUBLIC_PROVIDER}/api/feed`
-    );
-    const total = data.total;
-    const bulkOps: AnyBulkWriteOperation<any>[] = [];
+    await dbConnect();
+    const highestInscription = await Inscription.findOne().sort({
+      inscription_number: -1,
+    });
+    const start = highestInscription
+      ? highestInscription.inscription_number
+      : -1;
+
     const savedInscriptionIds: string[] = [];
+    const BATCH = 300;
+
+    const url = `${process.env.NEXT_PUBLIC_PROVIDER}/api/inscriptions/${
+      start + BATCH
+    }/${BATCH}`;
+    console.log(url, "URL");
+    const inscriptionsRes = await axios.get(url);
+    const inscriptionIdList = inscriptionsRes.data.inscriptions.reverse();
 
     // Fetch inscriptions asynchronously
-    const promises = Array.from(
-      { length: Math.min(200, total - start) },
-      async (_, i) => {
-        const currentNumber = start + i;
-        const url = `${process.env.NEXT_PUBLIC_PROVIDER}/api/inscriptions/${currentNumber}`;
-        const { data } = await axios.get(url);
-        const inscriptionId = data.inscriptions[0];
-
+    const promises = inscriptionIdList.map(
+      async (inscriptionId: string, index: number) => {
         if (!inscriptionId) return;
-
-        // console.log(inscriptionId, "ID");
-
+        let tags: string[] = [];
         let content = null;
         let sha;
-        let brc20 = false;
         let token = false;
         let contentType = null;
         let contentResponse = null;
+        let domain_name = null;
 
         try {
           contentResponse = await fetchContentFromProviders(inscriptionId);
@@ -76,21 +94,47 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             content = contentResponse.data;
 
             try {
+              const domainPattern =
+                /^(?!\d+\.)[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.[a-zA-Z]+$/;
+              if (domainPattern.test(content) && !tags.includes("domain")) {
+                tags.push("domain");
+              }
+
+              // Check if content is a bitmap pattern (number followed by .bitmap)
+              const bitmapPattern = /^\d+\.bitmap$/;
+              if (bitmapPattern.test(content)) {
+                tags.push("bitmap");
+              }
               const parsedContent = JSON.parse(content.toString("utf-8"));
 
               if (parsedContent.p === "brc-20") {
-                brc20 = true;
+                tags.push("brc-20");
+                tags.push("token");
                 token = true;
-              }
-              if (
+              } else if (
                 parsedContent.p === "brc-21" ||
                 parsedContent.p.includes("orc")
               ) {
+                tags.push("token");
                 token = true;
+              } else if (
+                parsedContent.p &&
+                parsedContent.tick &&
+                parsedContent.amt
+              ) {
+                token = true;
+                tags.push("token");
+              } else if (
+                parsedContent.p === "sns" &&
+                parsedContent.op === "reg" &&
+                parsedContent.name
+              ) {
+                if (typeof parsedContent.name === "string") {
+                  tags.push("domain");
+                  domain_name = parsedContent.name;
+                }
               }
-            } catch (error) {
-              // console.log("Error parsing JSON:", error);
-            }
+            } catch (error) {}
 
             if (!token) {
               // if content is not a token
@@ -111,35 +155,64 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
           }
         } catch (e) {}
 
-        let inscriptionDetails = {};
+        let inscriptionDetails: any = {};
         if (!token) {
           // if content is not a token
           inscriptionDetails = await fetchInscriptionDetails(inscriptionId);
+        } else {
+          inscriptionDetails.inscription_number = start + 1 + index;
         }
-
+        tags = tags.filter((tag) => tag).map((tag) => tag.toLowerCase());
         bulkOps.push({
           insertOne: {
             document: {
-              inscriptionId,
-              number: currentNumber,
+              inscription_id: inscriptionId,
               content_type: contentType,
-              ...(token || !contentResponse
+              ...(token ||
+              !contentResponse ||
+              !sha ||
+              /image|audio|zip|video/.test(contentType)
                 ? {}
-                : { content: contentResponse.data.toString("utf-8") }), // Only store content if it's not a token
-              sha,
-              brc20,
-              token,
+                : { content: contentResponse.data.toString("utf-8") }),
+              ...(sha && { sha }),
+              ...(token && { token }),
+              ...(domain_name && { domain_name }),
+              tags,
               ...inscriptionDetails,
             },
           },
         });
+
         savedInscriptionIds.push(inscriptionId);
       }
     );
 
     await Promise.all(promises);
 
-    if (bulkOps.length > 0) await Inscription.bulkWrite(bulkOps);
+    // Sort the bulkOps array based on the 'number' field in ascending order
+    bulkOps.sort((a, b) => {
+      return (
+        a.insertOne.document.inscription_number -
+        b.insertOne.document.inscription_number
+      );
+    });
+
+    const transformedBulkDocs = await handlePreSaveLogic(bulkOps);
+
+    const bulkWriteOperations = transformedBulkDocs.map((transformedDoc) => {
+      return {
+        insertOne: {
+          document: transformedDoc,
+        },
+      };
+    });
+
+    // await deleteInscriptionsAboveThreshold();
+
+    // Perform the bulk insert after transformations are done
+    if (bulkWriteOperations.length > 0)
+      await Inscription.bulkWrite(bulkWriteOperations);
+
     return NextResponse.json({
       message: "Inscriptions fetched and saved successfully",
       savedInscriptionIds,
@@ -148,8 +221,127 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     console.error(error);
     return NextResponse.json({
       status: 400,
-      body: { message: "Error fetching and saving inscriptions" },
+      body: { message: "Error fetching and saving inscriptions", bulkOps },
     });
   }
 }
+
+const handlePreSaveLogic = async (bulkDocs: Array<Partial<any>>) => {
+  console.time("Total Time Taken for handlePreSaveLogic");
+
+  const transformedBulkOps: any[] = [];
+  const shaMap: { [sha: string]: number } = {};
+
+  // Pre-compute the maximum existing version for each unique SHA
+  const uniqueShas = [
+    ...new Set(bulkDocs.map((doc) => doc.insertOne.document.sha)),
+  ];
+  for (const sha of uniqueShas) {
+    if (sha) {
+      const latestDocumentWithSameSha = await Inscription.findOne({
+        sha: sha,
+      }).sort({ version: -1 });
+      shaMap[sha] = latestDocumentWithSameSha
+        ? latestDocumentWithSameSha.version
+        : 0;
+    }
+  }
+
+  for (let i = 0; i < bulkDocs.length; i++) {
+    // console.time(`Time Taken for Loop Iteration ${i}`);
+
+    let bulkDoc = { ...bulkDocs[i] };
+    const insertOne = bulkDoc.insertOne;
+    const doc = insertOne.document;
+
+    // console.time("Check for Previous Document");
+    if (i === 0 && doc.inscription_number > 0) {
+      const prevDocument = await Inscription.findOne({
+        inscription_number: doc.inscription_number - 1,
+      });
+
+      if (!prevDocument || !prevDocument.inscription_id) {
+        throw new Error(
+          `A document with number ${
+            doc.inscription_number - 1
+          } does not exist or inscriptionId is missing in it`
+        );
+      }
+    } else if (i > 0) {
+      let prevBulkDoc = { ...bulkDocs[i - 1] };
+      const prevInsertOne = prevBulkDoc.insertOne;
+      const prevDoc = prevInsertOne.document;
+      if (
+        !prevDoc ||
+        prevDoc.inscription_number !== doc.inscription_number - 1 ||
+        !prevDoc.inscription_id
+      ) {
+        throw new Error(
+          `A document with number ${
+            doc.inscription_number - 1
+          } does not exist or inscription_id is missing in it`
+        );
+      }
+    }
+    // console.timeEnd("Check for Previous Document");
+
+    // Updated SHA version logic
+    // console.time("Increment the version if the SHA exists");
+    if (doc.sha && !doc.token) {
+      // console.log(doc.sha, " Working on this SHA");
+
+      if (shaMap[doc.sha] != null) {
+        shaMap[doc.sha]++;
+      } else {
+        shaMap[doc.sha] = 1;
+      }
+      doc.version = shaMap[doc.sha];
+    }
+    // console.timeEnd("Increment the version if the SHA exists");
+
+    // console.time("Modify the tags");
+    if (doc.content_type && doc.content_type.includes("/")) {
+      const contentTypeParts = doc.content_type.split("/");
+      doc.tags = doc.tags
+        ? [
+            ...doc.tags
+              .filter((tag: string) => tag)
+              .map((tag: string) => tag.toLowerCase()),
+            ...contentTypeParts
+              .filter((part: string) => part)
+              .map((part: string) => part.toLowerCase()),
+          ]
+        : contentTypeParts
+            .filter((part: string) => part)
+            .map((part: string) => part.toLowerCase());
+    }
+    // console.timeEnd("Modify the tags");
+
+    transformedBulkOps.push(doc);
+
+    // console.timeEnd(`Time Taken for Loop Iteration ${i}`);
+  }
+
+  // console.log(uniqueShas, "UNIQUESHAS");
+  console.log(shaMap, "SHAMAP");
+  console.timeEnd("Total Time Taken for handlePreSaveLogic");
+  return transformedBulkOps;
+};
+
+const deleteInscriptionsAboveThreshold = async () => {
+  console.time("Time Taken for Deleting Documents");
+
+  try {
+    const result = await Inscription.deleteMany({
+      inscription_number: { $gt: 700000 },
+    });
+
+    console.log(`Successfully deleted ${result.deletedCount} documents.`);
+  } catch (err) {
+    console.error("An error occurred while deleting documents:", err);
+  }
+
+  console.timeEnd("Time Taken for Deleting Documents");
+};
+
 export const dynamic = "force-dynamic";

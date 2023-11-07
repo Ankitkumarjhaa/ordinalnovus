@@ -99,7 +99,7 @@ function processWhereParam(
   ) {
     finalQuery.find.$text = { $search: value };
   } else if (schemaKeys.includes(key)) {
-    if (key === "officialCollection" || key === "list") {
+    if (key === "official_collection" || key === "list") {
       finalQuery.find[key] = new Types.ObjectId(value);
     } else if (key === "name") {
       console.log("NAME...");

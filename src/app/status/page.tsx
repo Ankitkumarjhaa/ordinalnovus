@@ -1,5 +1,5 @@
 "use client";
-import StatusPage from "@/views/StatusPage";
+import StatusPage from "@/Views/StatusPage";
 
 export default async function Home() {
   return (

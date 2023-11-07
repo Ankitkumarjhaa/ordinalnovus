@@ -15,7 +15,7 @@ export async function FetchApikey(
   const { walletId } = params;
   try {
     const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_API}/apikey/${walletId}`
+      `${process.env.NEXT_PUBLIC_URL}/api/apikey/${walletId}`
     );
 
     if (response.status === 200) {

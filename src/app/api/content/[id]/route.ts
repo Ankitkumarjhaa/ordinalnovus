@@ -22,7 +22,7 @@ export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  console.log(params.id, "searchParams");
+  // console.log(params.id, "searchParams");
   const contentId = params.id;
 
   try {

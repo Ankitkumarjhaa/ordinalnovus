@@ -12,7 +12,7 @@ export async function CreateApikey(
   const { walletId } = params;
   try {
     const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_API}/apikey/create`,
+      `${process.env.NEXT_PUBLIC_URL}/api/apikey/create`,
       {
         wallet: walletId,
       }
