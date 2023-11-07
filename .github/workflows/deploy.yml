@@ -17,7 +17,7 @@ jobs:
       - name: Build Ordinalnovus image
         run: |
           TAG_NAME="latest"
-          MONGODB_STRING=$MONGODB_URI
+          MONGODB_STRING="mongodb://192.168.1.33:27017/ordinalnovus_dev"
           if [ "${{ github.ref }}" == "refs/heads/dev" ]; then
             TAG_NAME="dev"
             MONGODB_STRING="mongodb://192.168.1.33:27017/ordinalnovus_dev"
