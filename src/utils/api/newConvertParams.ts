@@ -11,6 +11,61 @@ interface FinalQuery {
 }
 
 /**
+ * Processes the 'tags' parameter and updates the find query object to match the tag logic.
+ * If the 'domain' tag is present, sets `domain_name` to the value of the `content` key.
+ * @param finalQuery The final query object being constructed.
+ * @param tagsValue The tags string that will be processed.
+ * @param contentValue The value of the content key, if available.
+ */
+function processTagsParam(
+  finalQuery: FinalQuery,
+  tagsValue: string,
+  contentValue?: string
+): void {
+  console.debug(`Processing tags parameter: ${tagsValue}`); // Log the input tagsValue for debugging
+
+  // Check if the tag is using the 'or' operator
+  if (tagsValue.includes("|")) {
+    const tags = tagsValue.split("|").filter(Boolean); // Split the tags by the '|' operator and remove any empty strings
+    finalQuery.find.$or = tags.map((tag) => ({ tags: tag }));
+
+    // If 'domain' is one of the tags and content value is provided, set domain_name to contentValue
+    if (tags.includes("domain") && contentValue) {
+      finalQuery.find.domain_name = contentValue;
+      finalQuery.find.version = 1;
+    }
+  }
+  // Check if the tag is using the 'and' operator
+  else if (tagsValue.includes("&")) {
+    const tags = tagsValue.split("&").filter(Boolean); // Split the tags by the '&' operator and remove any empty strings
+    finalQuery.find.$and = tags.map((tag) => ({ tags: tag }));
+
+    // If 'domain' is one of the tags and content value is provided, set domain_name to contentValue
+    if (tags.includes("domain") && contentValue) {
+      finalQuery.find.domain_name = contentValue;
+      finalQuery.find.version = 1;
+    }
+  }
+  // If no operator is found, treat it as a single tag
+  else {
+    finalQuery.find.tags = tagsValue;
+
+    // If the tag is 'domain' and content value is provided, set domain_name to contentValue
+    if (tagsValue === "domain" && contentValue) {
+      finalQuery.find.domain_name = contentValue;
+      finalQuery.find.version = 1;
+    }
+  }
+
+  console.debug(
+    `Updated finalQuery.find with tags: ${JSON.stringify(
+      finalQuery.find.$or || finalQuery.find.$and || finalQuery.find.tags
+    )}`
+  );
+  // Log the outcome of the tags parameter process
+}
+
+/**
  * This function processes the sorting parameters and updates the query object accordingly.
  * @param finalQuery The final query object that is being constructed.
  * @param sortParam The sorting parameter obtained from the URL.
@@ -45,6 +100,13 @@ function processWhereParam(
   const schemaKeys = Object.keys(schema.obj);
 
   if (key === "content") {
+    if (finalQuery.find["domain_name"] && finalQuery.find["version"] == 1) {
+      console.debug(
+        `Skipping 'content' as 'domain_name' and 'version=1' conditions are present`
+      );
+      return;
+    }
+
     console.debug(`Performing a text search for: ${value}`);
     // MongoDB expects the $text operator with the $search field for text searches.
     finalQuery.find.$text = { $search: `\"${value}\"` };
@@ -150,10 +212,10 @@ export default function convertParams(
   Object.keys(params).forEach((key) => {
     if (key.includes("_sort")) {
       processSortParam(finalQuery, params[key]);
-    } else if (key === "_start" || key === "_limit") {
-      // These have been already handled when initializing finalQuery
-    } else if (["show", "match"].includes(key)) {
-      // Special parameters that have been already handled
+    } else if (key === "tags") {
+      // Check if there's a content parameter to pair with the domain tag
+      const contentValue = params["content"] || undefined;
+      processTagsParam(finalQuery, params["tags"], contentValue);
     } else {
       processWhereParam(finalQuery, model, key, params[key]);
     }

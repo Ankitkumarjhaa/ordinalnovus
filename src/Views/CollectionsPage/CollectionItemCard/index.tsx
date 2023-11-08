@@ -14,12 +14,16 @@ const CollectionItemCard: React.FC<CollectionCardProps> = ({ item }) => {
       <Link href={`/collection/${item.slug}`} shallow>
         <Tooltip title={item.name} placement={"top"}>
           <div className="relative rounded-xl border xl:border-2 border-accent bg-secondary shadow-xl p-3 h-[220px] xl:h-[300px]">
-            {item.inscription_icon.inscription_id && (
+            {item?.inscription_icon?.inscription_id ? (
               <div className="content-div h-full overflow-hidden">
                 <CardContent
                   inscriptionId={item.inscription_icon.inscription_id}
                   content_type={item.inscription_icon.content_type}
                 />
+              </div>
+            ) : (
+              <div className="content-div h-full overflow-hidden">
+                <img src={item.icon} />
               </div>
             )}
 

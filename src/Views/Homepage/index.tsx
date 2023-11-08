@@ -6,6 +6,7 @@ import React from "react";
 import Hero from "./Hero";
 // import OrderbookSection from "./Orderbook";
 import Recent from "./RecentlyInscribed";
+import Collections from "./Collections";
 // import CustomCard from "@/components/elements/CustomCardSmall";
 type Data = {
   percentParsed: number;
@@ -104,17 +105,19 @@ function Homepage({ data }: HomepageProps) {
   // ];
   return (
     <div className="pt-16">
-      <div className="bg-yellow-700 w-full my-2 text-center py-1 text-xs uppercase font-bold text-white">
+      {/* <div className="bg-yellow-700 w-full my-2 text-center py-1 text-xs uppercase font-bold text-white">
         Under development{" "}
-      </div>
-      <div className="bg-yellow-700 w-full my-2 text-center text-xs uppercase font-bold text-white flex justify-start">
-        <span
-          style={{ width: `${data.percentParsed}%` }}
-          className={`bg-green-300 py-1 text-green-900`}
-        >
-          indexing... {data.percentParsed}%
-        </span>
-      </div>
+      </div> */}
+      {data.percentParsed < 95 && (
+        <div className="bg-yellow-700 w-full my-2 text-center text-xs uppercase font-bold text-white flex justify-start">
+          <span
+            style={{ width: `${data.percentParsed}%` }}
+            className={`bg-green-300 py-1 text-green-900`}
+          >
+            indexing... {data.percentParsed}%
+          </span>
+        </div>
+      )}
       <Hero data={data.featured} />
       {/* <div className="flex flex-wrap">
         {list?.map((i) => (
@@ -122,7 +125,7 @@ function Homepage({ data }: HomepageProps) {
         ))}
       </div> */}
       {/* <OrderbookSection data={data.orders} /> */}
-      {/* <Collections data={data.verified} /> */}
+      <Collections data={data.verified} />
       <Recent data={data.recentInscriptions} />
     </div>
   );

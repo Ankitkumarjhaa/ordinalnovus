@@ -284,15 +284,16 @@ const CardContent: React.FC<CardContentProps> = ({
         </span>
       )}
       {isLoading ? (
-        <div className="flex justify-center items-center h-full text-white py-16  w-full">
-          <CircularProgress color="inherit" />{" "}
+        <div className="flex justify-center items-center h-full text-white py-6  w-full">
+          <CircularProgress color="inherit" size={10} />{" "}
           {/* Display the loading component */}
         </div>
       ) : fetchedContent ? (
         renderContent()
       ) : (
-        <div className="flex justify-center items-center h-full">
-          <CircularProgress /> {/* Display the loading component */}
+        <div className="flex justify-center items-center h-full text-white py-6  w-full">
+          <CircularProgress color="inherit" size={10} />{" "}
+          {/* Display the loading component */}
         </div>
       )}
     </div>

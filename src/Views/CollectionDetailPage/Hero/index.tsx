@@ -12,12 +12,18 @@ function Hero({ data }: HeroProps) {
     <div className="relative h-auto lg:h-[60vh] 2xl:max-h-96 rounded-xl overflow-hidden border xl:border-2 border-accent bg-secondary">
       <div className="flex justify-between items-start flex-wrap h-full w-full p-6">
         <div className="w-full lg:w-4/12 h-full flex justify-center lg:justify-start items-center">
-          <div className="max-w-[300px] max-h-[300px] w-[250px] h-[250px] xl:w-[300px] xl:h-[300px]  relative rounded-2xl overflow-hidden">
-            <CardContent
-              inscriptionId={data.inscription_icon.inscription_id + ""}
-              content_type={data.inscription_icon.content_type}
-            />
-          </div>
+          {data?.inscription_icon?.inscription_id ? (
+            <div className="max-w-[300px] max-h-[300px] w-[250px] h-[250px] xl:w-[300px] xl:h-[300px]  relative rounded-2xl overflow-hidden">
+              <CardContent
+                inscriptionId={data.inscription_icon.inscription_id}
+                content_type={data.inscription_icon.content_type}
+              />
+            </div>
+          ) : (
+            <div className="max-w-[300px] max-h-[300px] w-[250px] h-[250px] xl:w-[300px] xl:h-[300px]  relative rounded-2xl overflow-hidden">
+              <img src={data.icon} />
+            </div>
+          )}
         </div>
         <div className=" w-full lg:w-8/12 p-6 flex flex-wrap justify-center relative h-full">
           <div className="detailPanel w-full md:w-8/12 md:pr-6">
@@ -69,7 +75,7 @@ function Hero({ data }: HeroProps) {
             </div>
           </div>
           <div className="sidePanel w-full md:w-4/12 md:border-l border-accent py-6 md:p-3">
-            {data.tags.length > 0 && (
+            {data?.tags && data.tags.length > 0 && (
               <div className="tags flex items-center justify-start text-xs">
                 {data?.tags?.map((item, idx) => {
                   if (idx < 2)
