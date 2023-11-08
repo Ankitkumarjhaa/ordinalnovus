@@ -36,12 +36,13 @@ function Footer() {
         </div>
         <div className="LinksSection w-full md:w-6/12 lg:w-4/12  pb-6 lg:pb-0">
           <p className="underline font-bold pb-6">Links</p>
-          {/* <Link href="/collection">
+          <Link shallow href="/collection">
             <p>Collection</p>
-          </Link> */}
-          {/* <Link href="/orderbook">
-            <p>Orderbook</p>
-          </Link> */}
+          </Link>
+
+          <Link shallow href="/developer">
+            <p>Developer</p>
+          </Link>
         </div>
         <div className="socials w-full md:w-6/12 lg:w-4/12  pb-6 lg:pb-0">
           <p className="underline font-bold pb-6">Follow Us</p>
