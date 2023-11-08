@@ -19,7 +19,7 @@ interface SupplyValidatorContext {
 
 function supplyValidator(this: SupplyValidatorContext, value: number): boolean {
   const total = this.updated + this.errored;
-  return value <= total;
+  return total <= value;
 }
 
 export const collectionSchema = new Schema(
@@ -39,7 +39,7 @@ export const collectionSchema = new Schema(
       validate: {
         validator: supplyValidator,
         message: () =>
-          `Supply cannot be greater than the sum of updated and errored.`,
+          `Updated and errored total cannot be greater than supply`,
       },
     },
     slug: {

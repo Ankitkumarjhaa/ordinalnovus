@@ -284,8 +284,9 @@ const CardContent: React.FC<CardContentProps> = ({
         </span>
       )}
       {isLoading ? (
-        <div className="flex justify-center items-center h-full">
-          <CircularProgress /> {/* Display the loading component */}
+        <div className="flex justify-center items-center h-full text-white py-16  w-full">
+          <CircularProgress color="inherit" />{" "}
+          {/* Display the loading component */}
         </div>
       ) : fetchedContent ? (
         renderContent()

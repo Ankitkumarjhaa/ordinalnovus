@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { Inscription, Collection } from "@/models";
 import dbConnect from "@/lib/dbConnect";
 import convertParams from "@/utils/api/newConvertParams";
-import { PipelineStage } from "mongoose";
 
 import apiKeyMiddleware from "@/newMiddlewares/apikeyMiddleware";
 import { CustomError } from "@/utils";
@@ -18,7 +17,6 @@ const getProjectionFields = (show: string) => {
 };
 
 const fetchInscriptions = async (query: any, projectionFields: string) => {
-  
   return await Inscription.find(query.find)
     .select(projectionFields)
     .where(query.where)
@@ -56,6 +54,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
     }
 
     const query = convertParams(Inscription, req.nextUrl);
+    console.log(query, "QUERY");
     if (req.nextUrl.searchParams.has("slug")) {
       const collection = await Collection.findOne({
         slug: req.nextUrl.searchParams.get("slug"),

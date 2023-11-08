@@ -33,6 +33,7 @@ export async function fetchInscriptions(
         params: {
           official_collection: collection_id,
           address: wallet,
+          show: "all",
           slug,
           _sort: sort || "inscription_number:1",
           name: search,

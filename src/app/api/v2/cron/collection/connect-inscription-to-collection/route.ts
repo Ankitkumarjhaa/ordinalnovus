@@ -3,6 +3,7 @@ import axios from "axios";
 import { Collection, Inscription } from "@/models";
 import { NextResponse } from "next/server";
 import { wait } from "@/utils";
+import dbConnect from "@/lib/dbConnect";
 
 const CHUNK_SIZE = 100; // Adjust the chunk size based on your requirements
 
@@ -90,6 +91,7 @@ async function processChunk(chunk: any, collection: any) {
 
 export async function GET() {
   try {
+    await dbConnect();
     console.log("Searching for collections to update");
     let collection = await Collection.findOne({
       supply: 0,

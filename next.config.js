@@ -10,6 +10,15 @@ module.exports = {
       },
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: "/api",
+        destination: "/developer",
+        permanent: false,
+      },
+    ];
+  },
   env: {
     NEXT_PUBLIC_ENV: "PRODUCTION",
   },
@@ -31,7 +40,7 @@ module.exports = {
   experimental: {
     appDir: true,
     typedRoutes: true,
-    serverActions: true
+    serverActions: true,
   },
   webpack: (config) => {
     config.resolve.alias["@components"] = path.join(
