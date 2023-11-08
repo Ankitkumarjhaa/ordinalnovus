@@ -72,6 +72,7 @@ export interface IInscription {
 }
 
 export interface ICollection {
+  _id: string | undefined;
   name: string;
   inscription_icon?: IInscription;
   icon?: string;

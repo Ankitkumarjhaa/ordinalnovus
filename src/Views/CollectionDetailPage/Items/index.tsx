@@ -26,7 +26,7 @@ function Items({ collection }: ItemProps) {
   const [page, setPage] = useState<number>(1);
   const [data, setData] = useState<IInscription[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
-  const [pageSize, setPageSize] = useState<number>(12);
+  const [pageSize, setPageSize] = useState<number>(40);
   const [sort, setSort] = useState<string>("collection_item_number:1");
   const [search, setSearch] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -40,6 +40,7 @@ function Items({ collection }: ItemProps) {
       search,
       page_size: pageSize,
       page,
+      collection_item_number: search,
     });
     if (result && result.error) {
       dispatch(
@@ -63,6 +64,7 @@ function Items({ collection }: ItemProps) {
 
   const handleSearchChange = (value: string) => {
     setSearch(value);
+    if (value.length > 0) setPage(1);
   };
 
   const handlePageChange = (
@@ -86,7 +88,7 @@ function Items({ collection }: ItemProps) {
           </div>
           <div className="w-full center pb-4 lg:pb-0 md:pl-4 lg:w-auto">
             <CustomSearch
-              placeholder="Search by item name..."
+              placeholder="Search by item number..."
               value={search}
               onChange={handleSearchChange}
             />

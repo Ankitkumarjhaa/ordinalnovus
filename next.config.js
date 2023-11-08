@@ -17,6 +17,12 @@ module.exports = {
         destination: "/developer",
         permanent: false,
       },
+
+      {
+        source: "/collection",
+        destination: "/collections",
+        permanent: false,
+      },
     ];
   },
   env: {

@@ -11,6 +11,8 @@ export interface FetchInscriptionsParams {
   sort?: string;
   search?: string;
   wallet?: string;
+  collection_item_number?: string;
+  tag?: string;
 }
 
 export interface InscriptionResponse {
@@ -25,7 +27,17 @@ export interface InscriptionResponse {
 export async function fetchInscriptions(
   params: FetchInscriptionsParams
 ): Promise<{ data: InscriptionResponse; error: string | null } | undefined> {
-  const { collection_id, slug, sort, search, page_size, page, wallet } = params;
+  const {
+    collection_id,
+    slug,
+    sort,
+    search,
+    page_size,
+    page,
+    wallet,
+    collection_item_number,
+    tag,
+  } = params;
   try {
     const response = await axios.get(
       `${process.env.NEXT_PUBLIC_URL}/api/v2/inscription`,
@@ -39,6 +51,8 @@ export async function fetchInscriptions(
           name: search,
           _limit: page_size,
           _start: (page - 1) * page_size,
+          tag,
+          ...(collection_item_number && { collection_item_number }),
           apikey: process.env.API_KEY,
         },
       }
