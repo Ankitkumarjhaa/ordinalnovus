@@ -72,28 +72,35 @@ export interface IInscription {
 }
 
 export interface ICollection {
-  _id: string;
   name: string;
-  inscription_icon: IInscription;
-  supply: number;
+  inscription_icon?: IInscription;
+  icon?: string;
+  supply?: number;
   slug: string;
   description: string;
-  discord_link?: string;
   twitter_link?: string;
+  discord_link?: string;
   website_link?: string;
-  live: boolean;
-  featured: boolean;
-  blockchain: string;
-  flagged: boolean;
-  banned: boolean;
-  verified: boolean;
-  type: string;
-  tags: Array<string>;
-  favourites: Array<string>;
-  updated: number;
-  priority: number;
+  live?: boolean;
+  featured?: boolean;
+  blockchain: "btc" | "ltc" | "doge";
+  flagged?: boolean;
+  banned?: boolean;
+  verified?: boolean;
+  updated_by?: string;
+  type: "official" | "list";
+  tags?: string[];
+  favorites: string[];
+  updated?: number;
+  errored?: number;
+  error?: boolean;
+  errored_inscriptions?: string[];
+  error_tag?: string;
   min?: number;
   max?: number;
+  priority?: number;
+  created_at?: Date;
+  updated_at?: Date;
 }
 
 export interface ISat {

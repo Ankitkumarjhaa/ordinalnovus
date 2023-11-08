@@ -18,6 +18,11 @@ async function getCollections(query: any) {
       .sort(query.sort)
       .skip(query.start)
       .limit(query.limit)
+
+      .select(
+        "-error -error_tag -__v -created_at -updated_at -errored -errored_inscriptions "
+      )
+
       .exec();
 
     return coll;
@@ -106,7 +111,8 @@ export async function GET(req: NextRequest, res: NextResponse) {
     const cacheKey = `collections:${JSON.stringify(query)}`;
 
     // Try to fetch the result from Redis first
-    let cachedResult = await getCache(cacheKey);
+    let cachedResult =
+      process.env.NODE_ENV === "production" ? await getCache(cacheKey) : null;
 
     if (cachedResult) {
       // If the result exists in the cache, return it

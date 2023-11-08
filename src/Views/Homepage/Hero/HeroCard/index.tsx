@@ -28,9 +28,7 @@ const HeroCard: React.FC<HeroCardProps> = ({ item }) => {
 
           <div className="pt-2">
             <CustomButton
-              // icon={FaWallet}
               text="View Collection"
-              // onClick={handleOpen}
               link={true}
               href={`/collection/${item.slug}`}
               hoverBgColor="hover:bg-accent_dark"
@@ -70,14 +68,18 @@ const HeroCard: React.FC<HeroCardProps> = ({ item }) => {
             )}
           </div>
         </div>
-        {item.inscription_icon.inscriptionId && (
+        {item?.inscription_icon?.inscription_id ? (
           <div className="w-full lg:w-5/12 h-full flex justify-center lg:justify-end items-center order-1 lg:order-2">
             <div className="max-w-[300px] max-h-[300px] w-[250px] xl:w-[300px] h-[250px] xl:h-[300px]  relative rounded-xl overflow-hidden">
               <CardContent
-                inscriptionId={item.inscription_icon.inscriptionId}
+                inscriptionId={item.inscription_icon.inscription_id}
                 content_type={item.inscription_icon.content_type}
               />
             </div>
+          </div>
+        ) : (
+          <div>
+            <img src={item.icon} />
           </div>
         )}
       </div>
