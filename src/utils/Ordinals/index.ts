@@ -8,8 +8,6 @@
 // bitcoin.initEccLib(secp256k1);
 // const varuint = require("bip174/src/lib/converter/varint");
 
-
-
 // export const baseMempoolUrl = true
 //   ? "https://mempool.space"
 //   : "https://mempool.space/signet";
@@ -72,7 +70,6 @@
 
 //   return null;
 // }
-
 
 // export async function getAddressMempoolTxIds(address: any) {
 //   return await fetch(`${baseMempoolApiUrl}/address/${address}/txs/mempool`)
@@ -264,7 +261,6 @@
 //   return psbt.data.globalMap.unsignedTx.toBuffer().length;
 // }
 
-
 // export function btcToSat(btc: any) {
 //   return Math.floor(Number(btc) * Math.pow(10, 8));
 // }
@@ -397,7 +393,6 @@
 //   ...args: Parameters<typeof fetch>
 // ): Promise<T> => fetch(...args).then((res) => res.json() as Promise<T>);
 
-
 // export const convert = (n: number) => {
 //   if (n < 1e3) return n;
 //   if (n >= 1e3 && n < 1e6) return +(n / 1e3).toFixed(1) + "K";
@@ -415,7 +410,6 @@
 
 // export const range = (n: any) => Array.from(Array(n).keys());
 
-
 // export function satsToFormattedDollarString(
 //   sats: number,
 //   _bitcoinPrice: number
@@ -425,7 +419,6 @@
 //     maximumFractionDigits: 2,
 //   });
 // }
-
 
 // // Replace notify with console.log
 // export function notify(notification: { type: string; message: string }) {

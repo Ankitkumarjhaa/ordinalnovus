@@ -1,15 +1,17 @@
 // app/api/order/create-listing-psbt/route.ts
-import * as btc from "micro-btc-signer";
+import * as btc from "@scure/btc-signer";
 import { hex, base64 } from "@scure/base";
 import { NextRequest, NextResponse } from "next/server";
 import { getSellerOrdOutputValue } from "@/utils/Marketplace";
 import { IInscription } from "@/types/Ordinals";
 import { Inscription } from "@/models";
-import { CustomError } from "@/utils";
+import { CustomError, ecdsaPublicKeyToSchnorr } from "@/utils";
+import dbConnect from "@/lib/dbConnect";
 
 interface OrderInput {
   inscription_id: string;
   price: number; // in sats
+  wallet: "Leather" | "Xverse" | "Unisat";
   receive_address: string;
   publickey: string;
   maker_fee_bp?: number; // in sats
@@ -20,6 +22,7 @@ function validateRequest(req: NextRequest, body: OrderInput): string[] {
   const requiredFields = [
     "inscription_id",
     "price",
+    "wallet",
     "receive_address",
     "publickey",
   ];
@@ -36,8 +39,10 @@ async function processOrdItem(
   address: string,
   price: number, //in sats
   key: string,
+  wallet: string,
   maker_fee_bp?: number
 ) {
+  await dbConnect();
   console.log("finding in db...");
   const ordItem: IInscription | null = await Inscription.findOne({
     inscription_id,
@@ -46,10 +51,16 @@ async function processOrdItem(
   if (!ordItem) throw new CustomError("Item hasn't been added to our DB", 404);
   const publickey = hex.decode(key);
 
-  const p2tr = btc.p2tr(publickey, undefined, btc.NETWORK);
+  let p2tr = null;
+
+  if (wallet === "Leather") {
+    p2tr = btc.p2tr(ecdsaPublicKeyToSchnorr(publickey), undefined, btc.NETWORK);
+  } else {
+    btc.p2tr(publickey, undefined, btc.NETWORK);
+  }
   const tx = new btc.Transaction({});
 
-  if (ordItem.address && ordItem.output && ordItem.output_value) {
+  if (ordItem.address && ordItem.output && ordItem.output_value && p2tr) {
     const [ordinalUtxoTxId, ordinalUtxoVout] = ordItem.output.split(":");
 
     // Define the input for the PSBT
@@ -61,8 +72,8 @@ async function processOrdItem(
         script: p2tr.script,
         amount: BigInt(ordItem.output_value),
       },
-      tapInternalKey: publickey,
-      sighashType: btc.SignatureHash.SINGLE | btc.SignatureHash.ANYONECANPAY,
+      tapInternalKey: p2tr.tapInternalKey,
+      sighashType: btc.SigHash.SINGLE | btc.SigHash.DEFAULT_ANYONECANPAY,
     });
 
     // Add input and output to the PSBT
@@ -109,11 +120,12 @@ export async function POST(
       body.receive_address,
       Math.floor(body.price),
       body.publickey,
+      body.wallet,
       body.maker_fee_bp
     );
     return NextResponse.json({
       ok: true,
-      tokenId: body.inscription_id,
+      inscription_id: body.inscription_id,
       price: Math.floor(body.price),
       receive_address: body.receive_address,
       unsigned_psbt_base64: unsignedPsbtBase64,

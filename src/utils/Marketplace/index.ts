@@ -98,16 +98,6 @@ async function getTxHexById(txId: TxId): Promise<string> {
 const toXOnly = (pubKey: string | any[]) =>
   pubKey.length === 32 ? pubKey : pubKey.slice(1, 33);
 
-// Function to convert price from satoshi to Bitcoin
-function convertSatToBtc(priceInSat: number): number {
-  return priceInSat / 1e8; // 1 BTC = 100,000,000 SAT
-}
-
-// Function to convert price from satoshi to Bitcoin
-function convertBtcToSat(priceInSat: number): number {
-  return priceInSat * 1e8; // 1 BTC = 100,000,000 SAT
-}
-
 async function getUtxosByAddress(address: string) {
   return await mempoolBitcoin.addresses.getAddressTxsUtxo({ address });
 }
@@ -215,8 +205,6 @@ export {
   getTxHexById,
   validatePsbt,
   toXOnly,
-  convertBtcToSat,
-  convertSatToBtc,
   getUtxosByAddress,
   recommendedFeeRate,
   doesUtxoContainInscription,

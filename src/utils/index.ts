@@ -164,3 +164,24 @@ export const fetchFees = async (dispatch: AppDispatch) => {
     console.error("Error fetching fees:", error);
   }
 };
+
+// Function to convert price from satoshi to Bitcoin
+export const convertSatToBtc = (priceInSat: number) => {
+  return priceInSat / 100000000; // 1 BTC = 100,000,000 SAT
+};
+
+export function convertBtcToSat(priceInSat = 0): number {
+  return priceInSat * 1e8; // 1 BTC = 100,000,000 SAT
+}
+
+export function ecdsaPublicKeyToSchnorr(pubKey: Uint8Array) {
+  if (pubKey.byteLength !== 33) throw new Error("Invalid public key length");
+  return pubKey.slice(1);
+}
+
+export function base64ToHex(str: string) {
+  return atob(str)
+    .split("")
+    .map((c) => c.charCodeAt(0).toString(16).padStart(2, "0"))
+    .join("");
+}
