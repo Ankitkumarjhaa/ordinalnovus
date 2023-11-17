@@ -185,3 +185,8 @@ export function base64ToHex(str: string) {
     .map((c) => c.charCodeAt(0).toString(16).padStart(2, "0"))
     .join("");
 }
+
+export function base64ToBytes(base64: string) {
+  const buffer = Buffer.from(base64, "base64");
+  return new Uint8Array(buffer);
+}

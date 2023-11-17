@@ -66,6 +66,9 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
       ((highestInDB.inscription_number / latestInscription) * 100).toFixed(2)
     );
 
+    const listings = await Inscription.find({ listed: true }).limit(50);
+    data.listings = listings;
+
     // Return data in the desired format
     return NextResponse.json({
       statusCode: 200,

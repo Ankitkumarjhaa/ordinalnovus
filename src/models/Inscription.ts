@@ -145,13 +145,13 @@ export const inscriptionSchema = new mongoose.Schema(
           return (
             !value ||
             (value &&
-              this.listedAt &&
-              this.listedPrice &&
-              this.listedMakerFeeBp &&
-              this.tapInternalKey &&
-              this.listedSellerReceiveAddress &&
-              this.signedPsbt &&
-              this.unSignedPsbt)
+              this.listed_at &&
+              this.listed_price &&
+              this.listed_maker_fee_bp &&
+              this.tap_internal_key &&
+              this.listed_seller_receive_address &&
+              this.signed_psbt &&
+              this.unsigned_psbt)
           );
         },
         message:

@@ -3,10 +3,14 @@
 import * as bitcoin from "bitcoinjs-lib";
 import * as ecc from "tiny-secp256k1";
 
+import * as btc from "@scure/btc-signer";
+
 // Initialize the bitcoinjs-lib library with secp256k1
 bitcoin.initEccLib(ecc);
 
 import { validatePsbt } from "..";
+import { base64ToBytes } from "@/utils";
+import { base64 } from "@scure/base";
 
 function verifySignature(signedListingPSBT: string): boolean {
   try {
@@ -58,6 +62,11 @@ function addFinalScriptWitness(signedListingPSBT: string): any {
       if (input.tapInternalKey) {
         const finalScriptWitness = input.finalScriptWitness;
         if (input.tapKeySig?.length && !finalScriptWitness?.length) {
+          console.log(input.tapKeySig, "TAPKEYSIG");
+          console.log(
+            input.tapKeySig.__proto__.constructor([1, 65, ...input.tapKeySig]),
+            "FINALSCRIPTWITNESS"
+          );
           psbt.updateInput(idx, {
             finalScriptWitness: input.tapKeySig.__proto__.constructor([
               1,
@@ -83,6 +92,40 @@ function addFinalScriptWitness(signedListingPSBT: string): any {
     }
   }
 }
+
+// function addFinalScriptWitness(signedListingPSBT: string): any {
+//   let newPSBT = null;
+//   try {
+//     const tx = btc.Transaction.fromPSBT(base64ToBytes(signedListingPSBT));
+//     // console.dir(tx, { depth: null });
+//     const input = tx.getInput(0);
+//     if (input.tapKeySig) {
+//       // Assuming tapKeySig is an array of bytes.
+//       // Prepend the values [1, 65] to the tapKeySig array.
+//       // The numbers 1 and 65 need to be byte values.
+//       const combinedArray = new Uint8Array([1, 65, ...input.tapKeySig]);
+
+//       console.log(combinedArray, "tapkeysig");
+//       input.finalScriptWitness = [combinedArray];
+//       console.log(input.finalScriptWitness, "FINALSCRIPTWITNESS");
+//     }
+
+//     console.dir(input, { depth: null });
+//     tx.updateInput(0, input);
+//     const newPSBT = base64.encode(tx.toPSBT(0));
+
+//     // Verifies that the actual owner address has signed the PSBT
+//     return newPSBT;
+//   } catch (e: any) {
+//     if (e.message == "Not finalized") {
+//       throw Error("Please sign and finalize the PSBT before submitting it");
+//     } else if (e.message != "Outputs are spending more than Inputs") {
+//       throw Error("Invalid PSBT: " + e.message || e);
+//     } else {
+//       return newPSBT;
+//     }
+//   }
+// }
 
 // Helper function to check if a string is in base64 format
 function isBase64(str: string): boolean {

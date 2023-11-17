@@ -43,7 +43,6 @@ async function processOrdItem(
   maker_fee_bp?: number
 ) {
   await dbConnect();
-  console.log("finding in db...");
   const ordItem: IInscription | null = await Inscription.findOne({
     inscription_id,
   });
@@ -83,7 +82,10 @@ async function processOrdItem(
     );
 
     const unsignedPsbtBase64 = base64.encode(tx.toPSBT(0));
-    return unsignedPsbtBase64;
+    return {
+      unsignedPsbtBase64,
+      tap_internal_key: p2tr.tapInternalKey.toString(),
+    };
   } else {
     throw new Error("Ord Provider Unavailable");
   }
@@ -115,7 +117,7 @@ export async function POST(
       );
     }
 
-    const unsignedPsbtBase64 = await processOrdItem(
+    const { unsignedPsbtBase64, tap_internal_key } = await processOrdItem(
       body.inscription_id,
       body.receive_address,
       Math.floor(body.price),
@@ -129,6 +131,7 @@ export async function POST(
       price: Math.floor(body.price),
       receive_address: body.receive_address,
       unsigned_psbt_base64: unsignedPsbtBase64,
+      tap_internal_key,
       message: "Success",
     });
   } catch (error: any) {

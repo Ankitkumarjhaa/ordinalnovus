@@ -21,6 +21,7 @@ import {
   useLeatherSign,
   useXverseSign,
 } from "bitcoin-wallet-adapter";
+import listInscription from "@/apiHelper/listInscription";
 
 type InscriptionProps = {
   data: IInscription;
@@ -127,11 +128,44 @@ function ListInscription({ data }: InscriptionProps) {
     }
   };
 
+  const listOrdinal = async (signedPsbt: string) => {
+   try {
+     const result = await listInscription({
+       seller_receive_address: walletDetails.cardinal_address || "",
+       price: convertBtcToSat(Number(price)),
+       inscription_id: data.inscription_id,
+       unsigned_listing_psbt_base64: unsignedPsbtBase64,
+       tap_internal_key: walletDetails.ordinal_pubkey || "",
+       signed_listing_psbt_base64: signedPsbt,
+     });
+     if (result.ok) {
+       // copy(result.unsigned_psbt_base64);
+       setUnsignedPsbtBase64("");
+     } else {
+       setUnsignedPsbtBase64("");
+       throw Error(result.message);
+     }
+   } catch (e: any) {
+     setLoading(false);
+     dispatch(
+       addNotification({
+         id: new Date().valueOf(),
+         message: e.message || "Some error occurred",
+         open: true,
+         severity: "error",
+       })
+     );
+   }
+  };
   useEffect(() => {
     // Handling Leather Wallet Sign Results/Errors
     if (leatherResult) {
       // Handle successful result from leather wallet sign
       console.log("Leather Sign Result:", leatherResult);
+
+      if (leatherResult) {
+        listOrdinal(leatherResult);
+      }
       dispatch(
         addNotification({
           id: new Date().valueOf(),

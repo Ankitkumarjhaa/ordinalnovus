@@ -7,12 +7,15 @@ import Hero from "./Hero";
 // import OrderbookSection from "./Orderbook";
 import Recent from "./RecentlyInscribed";
 import Collections from "./Collections";
+import { IInscription } from "@/types";
+import Listed from "./Listed";
 // import CustomCard from "@/components/elements/CustomCardSmall";
 type Data = {
   percentParsed: number;
   featured: ICollection[];
   verified: ICollection[];
   orders: Order[];
+  listings: IInscription[];
   recentInscriptions: RecentInscription[]; // Define the shape of the data object here
 };
 
@@ -126,6 +129,7 @@ function Homepage({ data }: HomepageProps) {
       </div> */}
       {/* <OrderbookSection data={data.orders} /> */}
       <Collections data={data.verified} />
+      <Listed data={data.listings} />
       <Recent data={data.recentInscriptions} />
     </div>
   );
