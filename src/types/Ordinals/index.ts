@@ -191,7 +191,7 @@ export interface IListingState {
     takerFeeBp: number;
     buyerAddress: string;
     buyerTokenReceiveAddress: string;
-    feeRateTier: string;
+    fee_rate: number;
     buyerPublicKey?: string;
     unsignedBuyingPSBTBase64?: string;
     unsignedBuyingPSBTInputSize?: number;

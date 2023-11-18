@@ -14,6 +14,7 @@ interface OrderInput {
   pay_address: string;
   receive_address: string;
   publickey: string;
+  fee_rate: number;
   wallet: string;
 }
 
@@ -25,6 +26,7 @@ function validateRequest(body: OrderInput): string[] {
     "pay_address",
     "receive_address",
     "wallet",
+    "fee_rate",
   ];
   const missingFields = requiredFields.filter((field) => {
     //@ts-ignore
@@ -46,7 +48,8 @@ async function processOrdItem(
   receive_address: string,
   pay_address: string,
   publickey: string,
-  wallet: string
+  wallet: string,
+  fee_rate: number
 ) {
   const ordItem: any = await fetchLatestInscriptionData(inscription_id);
   //   console.log("got ordItem", ordItem);
@@ -65,23 +68,32 @@ async function processOrdItem(
   if (ordItem.address !== dbItem.address || dbItem.output !== ordItem.output) {
     dbItem.listed = false;
     dbItem.listed_price = 0;
+    dbItem.address = ordItem.address;
+    dbItem.output = ordItem.output;
+    dbItem.location = ordItem.location;
+    dbItem.offset = ordItem.offset;
+    dbItem.output_value = ordItem.output_value;
+    dbItem.signed_psbt = "";
+    dbItem.unsigned_psbt = "";
+    dbItem.tap_internal_key = "";
     dbItem.save();
     throw Error("PSBT Expired");
   }
   if (
     ordItem.address &&
-    dbItem.signedListingPsbtBase64 &&
-    dbItem.price &&
+    dbItem.signed_psbt &&
+    dbItem.listed_price &&
     ordItem.output &&
-    ordItem.outputValue
+    ordItem.output_value
   ) {
     const result = await buyOrdinalPSBT(
       pay_address,
       receive_address,
       dbItem,
-      dbItem.price,
+      dbItem.listed_price,
       publickey,
-      wallet
+      wallet,
+      fee_rate
     );
     return result;
   } else {
@@ -93,11 +105,11 @@ export async function POST(
   req: NextRequest,
   res: NextResponse<{
     ok: Boolean;
-    tokenId?: string;
+    inscription_id?: string;
     price?: number;
     receive_address?: string;
     pay_address?: string;
-    unsignedPsbtBase64?: string;
+    unsigned_psbt_base64?: string;
     message: string;
     for?: string;
   }>
@@ -123,7 +135,8 @@ export async function POST(
       body.receive_address,
       body.pay_address,
       body.publickey,
-      body.wallet
+      body.wallet,
+      body.fee_rate
     );
 
     //buy psbt || dummy utxo psbt
@@ -133,9 +146,9 @@ export async function POST(
 
     return NextResponse.json({
       ok: true,
-      unsignedPsbtBase64: psbt,
+      unsigned_psbt_base64: psbt,
       // ...result,
-      tokenId: body.inscription_id,
+      inscription_id: body.inscription_id,
       receive_address: body.receive_address,
       pay_address: body.pay_address,
       for: result.data.for,

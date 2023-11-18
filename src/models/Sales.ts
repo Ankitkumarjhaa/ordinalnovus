@@ -74,6 +74,11 @@ export const salesSchema = new mongoose.Schema(
     price: { type: Number, required: true },
     price_in_usd: { type: Number, required: true },
     tx: { type: String, required: true },
+    status: {
+      type: String,
+      enum: ["confirmed", "rejected", "mempool"],
+      required: true,
+    },
   },
   {
     timestamps: { createdAt: "created_at", updatedAt: "updated_at" },

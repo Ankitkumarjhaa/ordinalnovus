@@ -16,6 +16,9 @@ import {
 } from "@/utils";
 import { useWalletAddress } from "bitcoin-wallet-adapter";
 import getUnsignedBuyPsbt from "@/apiHelper/getUnsignedBuyPsbt";
+import { Slider } from "@mui/material";
+import { IFeeInfo } from "@/types";
+import FeePicker from "@/components/elements/FeePicker";
 // import mergeSignedPsbt from "@/api/mergeSignedPsbt";
 // import broadcast from "@/api/broadcast";
 
@@ -33,6 +36,8 @@ function BuyInscription({ data }: InscriptionProps) {
   const [unsignedPsbtBase64, setUnsignedPsbtBase64] = useState<string>("");
   const [signedPsbtBase64, setSignedPsbtBase64] = useState<string>("");
   const [action, setAction] = useState<string>("");
+  const [feeRate, setFeeRate] = useState(0);
+  const [marks, setMarks] = useState<any>(null);
 
   const btcPrice = useSelector(
     (state: RootState) => state.general.btc_price_in_dollar
@@ -68,6 +73,7 @@ function BuyInscription({ data }: InscriptionProps) {
         receive_address: walletDetails.ordinal_address,
         publickey: walletDetails.cardinal_pubkey,
         wallet: walletDetails.wallet,
+        fee_rate: feeRate,
       });
 
       if (result.ok && result.unsigned_psbt_base64) {
@@ -417,29 +423,42 @@ function BuyInscription({ data }: InscriptionProps) {
 
   return (
     <>
-      <div className="center  w-full  py-6 border-b-2 border-accent">
+      <div className="w-full  py-6 border-b-2 border-accent">
         {/* {result?.data?.for === "dummy" && (
         <p className="p-3">This will generate DUMMY UTXO.</p>
       )} */}
+        <div>
+          <div className="center ">
+            <p className="py-1 px-4 font-medium rounded bg-bitcoin text-xs text-yellow-900">
+              Selected Fee <strong className="text-lg">{feeRate}</strong>{" "}
+              sats/vB
+            </p>
+          </div>
+          <FeePicker onChange={setFeeRate} />
+        </div>
         <CustomButton
           loading={loading}
           disabled={!data.signed_psbt}
-          text={`Buy Now ${
-            data?.listed_price
-              ? ` for ${convertSatToBtc(
-                  Number(data?.listed_price)
-                )} BTC USD ${calculateBTCCostInDollars(
-                  Number(convertSatToBtc(data?.listed_price)),
-                  btcPrice
-                )}`
-              : ""
+          text={`${
+            action === "dummy"
+              ? "Confirm Transaction for Dummy UTXO"
+              : `Buy Now ${
+                  data?.listed_price
+                    ? `for ${convertSatToBtc(
+                        Number(data.listed_price)
+                      )} BTC USD ${calculateBTCCostInDollars(
+                        Number(convertSatToBtc(data.listed_price)),
+                        btcPrice
+                      )}`
+                    : ""
+                }`
           }`}
           hoverBgColor="hover:bg-accent_dark"
           hoverTextColor="text-white"
           bgColor="bg-accent"
           textColor="text-white"
           className="transition-all w-full rounded-xl"
-          //   onClick={buy} // Add this line to make the button functional
+          onClick={buy} // Add this line to make the button functional
         />
       </div>
     </>

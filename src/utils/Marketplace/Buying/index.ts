@@ -13,9 +13,7 @@ import {
   getUtxosByAddress,
   getSellerOrdOutputValue,
   getTxHexById,
-  isP2SHAddress,
   mapUtxos,
-  recommendedFeeRate,
   toXOnly,
   calculateTxBytesFeeWithRate,
 } from "@/utils/Marketplace";
@@ -41,7 +39,8 @@ export async function buyOrdinalPSBT(
   inscription: any,
   price: number,
   publickey: string,
-  wallet: string
+  wallet: string,
+  fee_rate: number
 ): Promise<Result> {
   const numberOfDummyUtxosToCreate = 2;
   bitcoin.initEccLib(secp256k1);
@@ -79,7 +78,7 @@ export async function buyOrdinalPSBT(
       minimumValueRequired,
       vins,
       vouts,
-      ""
+      fee_rate
     );
 
     let psbt: any = null;
@@ -106,7 +105,7 @@ export async function buyOrdinalPSBT(
           takerFeeBp: 0,
           buyerAddress: payerAddress,
           buyerTokenReceiveAddress: receiverAddress,
-          feeRateTier: "",
+          fee_rate,
           buyerPublicKey: publickey,
           unsignedBuyingPSBTBase64: "",
           buyerDummyUTXOs: dummyUtxos,
@@ -133,8 +132,7 @@ export async function buyOrdinalPSBT(
           payerAddress,
           publickey,
           paymentUtxos,
-          "",
-          inscription,
+          fee_rate,
           wallet
         );
       console.log(psbt, "PSBT CREATED");
@@ -162,15 +160,14 @@ async function generateUnsignedCreateDummyUtxoPSBTBase64(
   address: string,
   buyerPublicKey: string | undefined,
   unqualifiedUtxos: AddressTxsUtxo[],
-  feeRateTier: string,
-  itemProvider: IInscription,
+  fee_rate: number,
   wallet: string
 ): Promise<string> {
   wallet = wallet?.toLowerCase();
   const psbt = new bitcoin.Psbt({ network: undefined });
   const [mappedUnqualifiedUtxos, recommendedFee] = await Promise.all([
     mapUtxos(unqualifiedUtxos),
-    recommendedFeeRate("halfHourFee"),
+    fee_rate,
   ]);
 
   // Loop the unqualified utxos until we have enough to create a dummy utxo
@@ -198,7 +195,7 @@ async function generateUnsignedCreateDummyUtxoPSBTBase64(
         redeem: { output: redeemScript },
       });
       input.witnessUtxo = utxo.tx.outs[utxo.vout];
-      if (wallet !== "unisat") {
+      if (wallet !== "unisat" && wallet !== "leather") {
         input.redeemScript = p2sh.redeem?.output;
       }
     } else {
@@ -229,7 +226,9 @@ async function generateUnsignedCreateDummyUtxoPSBTBase64(
     recommendedFee
   );
 
+  console.log({ totalValue, finalFees });
   const changeValue = totalValue - DUMMY_UTXO_VALUE * 2 - finalFees;
+  console.log({ changeValue });
 
   // We must have enough value to create a dummy utxo and pay for tx fees
   if (changeValue < 0) {
@@ -288,7 +287,7 @@ async function selectPaymentUTXOs(
   amount: number, // amount is expected total output (except tx fee)
   vinsLength: number,
   voutsLength: number,
-  feeRateTier: string
+  fee_rate: number
 ) {
   const selectedUtxos: any = [];
   let selectedAmount = 0;
@@ -312,7 +311,7 @@ async function selectPaymentUTXOs(
         (await calculateTxBytesFee(
           vinsLength + selectedUtxos.length,
           voutsLength,
-          feeRateTier
+          fee_rate
         ))
     ) {
       break;
@@ -494,7 +493,7 @@ async function generateUnsignedBuyingPSBTBase64(
   const fee = await calculateTxBytesFee(
     psbt.txInputs.length,
     psbt.txOutputs.length, // already taken care of the exchange output bytes calculation
-    listing.buyer.feeRateTier
+    listing.buyer.fee_rate
   );
 
   const totalOutput = psbt.txOutputs.reduce(

@@ -163,10 +163,10 @@ function calculateTxBytesFeeWithRate(
 async function calculateTxBytesFee(
   vinsLength: number,
   voutsLength: number,
-  feeRateTier: string,
+  feeRate: number,
   includeChangeOutput: 0 | 1 = 1
 ) {
-  const recommendedFR = await recommendedFeeRate(feeLevel);
+  const recommendedFR = feeRate;
   return calculateTxBytesFeeWithRate(
     vinsLength,
     voutsLength,
