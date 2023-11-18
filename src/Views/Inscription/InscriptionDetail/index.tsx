@@ -15,6 +15,7 @@ import Link from "next/link";
 import moment from "moment";
 import { useWalletAddress } from "bitcoin-wallet-adapter";
 import ListInscription from "./ListInscription";
+import BuyInscription from "./BuyInscription";
 type InscriptionProps = {
   data: IInscription;
 };
@@ -77,12 +78,15 @@ function InscriptionDetail({ data }: InscriptionProps) {
           </div>
         </div>
       </div>
-      <div className="relative py-6 border-b-2 border-accent">
+      <div className="relative">
         {/* TODO: Add BUY/ SELL/ ADD PADDING */}
         {WalletDetail.connected &&
           WalletDetail.ordinal_address === data.address && (
             <ListInscription data={data} />
           )}
+        {WalletDetail.connected &&
+          WalletDetail.ordinal_address !== data.address &&
+          data.listed && <BuyInscription data={data} />}
       </div>
       <div className="pt-2">
         <DisplayProperties data={data} />

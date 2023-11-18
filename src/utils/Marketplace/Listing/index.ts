@@ -3,14 +3,10 @@
 import * as bitcoin from "bitcoinjs-lib";
 import * as ecc from "tiny-secp256k1";
 
-import * as btc from "@scure/btc-signer";
-
 // Initialize the bitcoinjs-lib library with secp256k1
 bitcoin.initEccLib(ecc);
 
 import { validatePsbt } from "..";
-import { base64ToBytes } from "@/utils";
-import { base64 } from "@scure/base";
 
 function verifySignature(signedListingPSBT: string): boolean {
   try {

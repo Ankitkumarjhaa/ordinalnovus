@@ -263,7 +263,7 @@ function ListInscription({ data }: InscriptionProps) {
   return (
     <>
       {" "}
-      <div className="center">
+      <div className="center  py-6 border-b-2 border-accent">
         <div className="flex-1 mr-3 border border-white rounded-xl">
           <div className="flex items-center">
             <input
