@@ -5,7 +5,7 @@ interface CreateListingPsbtData {
   inscription_id: string;
   price: number;
   receive_address: string;
-  wallet?: string;
+  wallet: string;
   publickey?: string;
 }
 
@@ -36,11 +36,11 @@ async function getUnsignedListingPsbt(data: CreateListingPsbtData): Promise<{
     } else {
       throw new Error("Error generating unsigned PSBT");
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log(error, "ERROr");
     return {
       ok: false,
-      message: "Error generating unsigned PSBT",
+      message: error.response.data.message || "Error generating unsigned PSBT",
     };
   }
 }

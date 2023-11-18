@@ -5,8 +5,8 @@ import {
 } from "@/components/elements/Arrows";
 import React from "react";
 import Slider from "react-slick";
-import CustomCard from "@/components/elements/CustomCardSmall";
 import { IInscription } from "@/types";
+import ListingCard from "./ListingCard";
 type ListedInscriptionsProps = {
   data: IInscription[];
 };
@@ -55,9 +55,10 @@ function Listed({ data }: ListedInscriptionsProps) {
         <h2 className="font-bold text-2xl lg:text-4xl text-white">Listed</h2>
       </div>
       <Slider {...settings}>
-        {data?.map((item) => (
+        {data?.map((item: IInscription) => (
           <div key={item.inscription_id} className="w-full">
-            <CustomCard
+            <ListingCard
+              inscription={item}
               number={item.inscription_number}
               key={item.inscription_id}
               inscriptionId={item.inscription_id}

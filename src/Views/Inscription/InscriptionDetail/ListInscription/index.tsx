@@ -63,7 +63,8 @@ function ListInscription({ data }: InscriptionProps) {
       if (
         !walletDetails ||
         !walletDetails.cardinal_address ||
-        !walletDetails.ordinal_address
+        !walletDetails.ordinal_address ||
+        !walletDetails.wallet
       ) {
         dispatch(
           addNotification({
@@ -125,38 +126,56 @@ function ListInscription({ data }: InscriptionProps) {
       console.log(options, "OPTIONS");
 
       await leatherSign(options);
+    } else if (walletDetails.wallet === "Xverse") {
+      const options: any = {
+        psbt: unsignedPsbtBase64,
+        network: "Mainnet",
+        action: "sell",
+        inputs: [
+          {
+            address: walletDetails.ordinal_address,
+            publickey: walletDetails.ordinal_pubkey,
+            sighash: 131,
+            index: [0],
+          },
+        ],
+      };
+      console.log(options, "OPTIONS");
+
+      await xverseSign(options);
     }
   };
 
   const listOrdinal = async (signedPsbt: string) => {
-   try {
-     const result = await listInscription({
-       seller_receive_address: walletDetails.cardinal_address || "",
-       price: convertBtcToSat(Number(price)),
-       inscription_id: data.inscription_id,
-       unsigned_listing_psbt_base64: unsignedPsbtBase64,
-       tap_internal_key: walletDetails.ordinal_pubkey || "",
-       signed_listing_psbt_base64: signedPsbt,
-     });
-     if (result.ok) {
-       // copy(result.unsigned_psbt_base64);
-       setUnsignedPsbtBase64("");
-     } else {
-       setUnsignedPsbtBase64("");
-       throw Error(result.message);
-     }
-   } catch (e: any) {
-     setLoading(false);
-     dispatch(
-       addNotification({
-         id: new Date().valueOf(),
-         message: e.message || "Some error occurred",
-         open: true,
-         severity: "error",
-       })
-     );
-   }
+    try {
+      const result = await listInscription({
+        seller_receive_address: walletDetails.cardinal_address || "",
+        price: convertBtcToSat(Number(price)),
+        inscription_id: data.inscription_id,
+        unsigned_listing_psbt_base64: unsignedPsbtBase64,
+        tap_internal_key: walletDetails.ordinal_pubkey || "",
+        signed_listing_psbt_base64: signedPsbt,
+      });
+      if (result.ok) {
+        // copy(result.unsigned_psbt_base64);
+        setUnsignedPsbtBase64("");
+      } else {
+        setUnsignedPsbtBase64("");
+        throw Error(result.message);
+      }
+    } catch (e: any) {
+      setLoading(false);
+      dispatch(
+        addNotification({
+          id: new Date().valueOf(),
+          message: e.message || "Some error occurred",
+          open: true,
+          severity: "error",
+        })
+      );
+    }
   };
+
   useEffect(() => {
     // Handling Leather Wallet Sign Results/Errors
     if (leatherResult) {
@@ -195,6 +214,17 @@ function ListInscription({ data }: InscriptionProps) {
     if (xverseResult) {
       // Handle successful result from xverse wallet sign
       console.log("Xverse Sign Result:", xverseResult);
+      if (xverseResult.psbtBase64) {
+        listOrdinal(xverseResult.psbtBase64);
+      }
+      dispatch(
+        addNotification({
+          id: new Date().valueOf(),
+          message: "Leather wallet transaction successful",
+          open: true,
+          severity: "success",
+        })
+      );
       dispatch(
         addNotification({
           id: new Date().valueOf(),
@@ -230,207 +260,6 @@ function ListInscription({ data }: InscriptionProps) {
     }
   }, [unsignedPsbtBase64]);
 
-  // useEffect(() => {
-  //   const signTransaction = async () => {
-  //     try {
-  //       let signResult = null;
-  //       if (unsignedPsbtBase64 && walletDetails?.ordinalPubkey) {
-  //         if (lastWallet === "Xverse") {
-  //           // // Decode the base64 PSBT
-  //           const decodedPSBT = bitcoin.Psbt.fromBase64(unsignedPsbtBase64);
-  //           console.log("psbt decoded");
-
-  //           // Extract the inputs
-  //           const inputs = decodedPSBT.data.inputs
-  //             .map((input: any, index: number) => {
-  //               if (input.witnessUtxo) {
-  //                 console.log("input has witness");
-  //                 // Get the address from the output script
-  //                 const address = bitcoin.address.fromOutputScript(
-  //                   input.witnessUtxo.script,
-  //                   bitcoin.networks.bitcoin || undefined
-  //                 );
-  //                 console.log(address, "address");
-  //                 const publicKey =
-  //                   address === walletDetails?.cardinal
-  //                     ? walletDetails?.cardinalPubkey
-  //                     : walletDetails?.ordinalPubkey;
-  //                 if (publicKey) {
-  //                   return {
-  //                     address: address,
-  //                     signingIndexes: [index],
-  //                     sigHash: 131,
-  //                   };
-  //                 }
-  //               } else if (input.redeemScript) {
-  //                 const nonWitnessUtxoTx = bitcoin.Transaction.fromBuffer(
-  //                   input.nonWitnessUtxo
-  //                 );
-
-  //                 console.log(nonWitnessUtxoTx, "tx", input);
-  //                 const output = nonWitnessUtxoTx.outs[input.index];
-
-  //                 // Get the address from the output script
-  //                 const address = bitcoin.address.fromOutputScript(
-  //                   output.script,
-  //                   bitcoin.networks.bitcoin
-  //                 );
-
-  //                 const publicKey =
-  //                   address === walletDetails?.cardinal
-  //                     ? walletDetails?.cardinalPubkey
-  //                     : walletDetails?.ordinalPubkey;
-  //                 if (publicKey) {
-  //                   const publicKeyBuffer = Buffer.from(publicKey, "hex");
-  //                   const p2wpkh = bitcoin.payments.p2wpkh({
-  //                     pubkey: publicKeyBuffer,
-  //                     network: bitcoin.networks.bitcoin || undefined,
-  //                   });
-  //                   const p2sh = bitcoin.payments.p2sh({
-  //                     redeem: p2wpkh,
-  //                     network: bitcoin.networks.bitcoin || undefined,
-  //                   });
-  //                   console.log({
-  //                     address: address,
-  //                     signingIndexes: [index],
-  //                     redeemScript: p2sh,
-  //                   });
-  //                   return {
-  //                     address: address,
-  //                     signingIndexes: [index],
-  //                     redeemScript: p2sh,
-  //                   };
-  //                 }
-  //               }
-  //             })
-  //             .filter((input: any) => input !== null && input !== undefined);
-
-  //           console.log(inputs, "Inputs");
-  //           const signPsbtOptions = {
-  //             payload: {
-  //               network: {
-  //                 type: "Mainnet",
-  //               },
-  //               message: "Sign Transaction",
-  //               psbtBase64: unsignedPsbtBase64,
-  //               broadcast: false,
-  //               inputsToSign: inputs,
-  //             },
-  //             onFinish: (response: { psbtBase64: any }) => {
-  //               console.log(unsignedPsbtBase64, "unsigned");
-  //               console.log(response.psbtBase64, "signed");
-  //               signResult = response.psbtBase64;
-  //               setUnsignedPsbtBase64("");
-  //               //  alert(response.psbtBase64);
-  //               // setLoading(false);
-  //               // setUnsignedPsbtBase64("");
-
-  //               // return base64ToHex(response.psbtBase64);
-  //             },
-  //             onCancel: () => {
-  //               setLoading(false);
-  //               setUnsignedPsbtBase64("");
-  //               alert("Canceled");
-  //             },
-  //           };
-
-  //           console.log(signPsbtOptions, "XVERSE_OPTIONS");
-
-  //           //@ts-ignore
-  //           const signedResult = await signXversePSBT(signPsbtOptions);
-  //           console.log(signedResult, "SIGNED");
-  //         } else
-  //           signResult = await signTx({
-  //             publicKey: walletDetails?.ordinalPubkey,
-  //             hex: base64ToHex(unsignedPsbtBase64),
-  //             signAtIndex: range(
-  //               bitcoin.Psbt.fromBase64(unsignedPsbtBase64).inputCount
-  //             ),
-  //           });
-
-  //         if (
-  //           signResult &&
-  //           walletDetails &&
-  //           data.inscriptionId &&
-  //           walletDetails.ordinalPubkey
-  //         ) {
-  //           const listData: listOrdinalData = {
-  //             sellerReceiveAddress: walletDetails?.cardinal,
-  //             tokenId: data.inscriptionId,
-  //             price: convertBtcToSat(Number(price)),
-  //             unsignedListingPSBTBase64: unsignedPsbtBase64,
-  //             toSignInputs: [0],
-  //             toSignSigHash: 131,
-  //             tapInternalKey: walletDetails?.ordinalPubkey,
-  //             listing: {
-  //               seller: {
-  //                 sellerOrdAddress: walletDetails?.ordinal,
-  //                 sellerReceiveAddress: walletDetails?.cardinal,
-  //               },
-  //             },
-  //             signedListingPSBTBase64:
-  //               bitcoin.Psbt.fromHex(signResult).toBase64(),
-  //           };
-
-  //           try {
-  //             console.log(bitcoin.Psbt.fromHex(signResult).toBase64());
-  //             const result = await listOrdinal(listData);
-
-  //             // Check if the request was successful
-  //             if (result.success) {
-  //               setLoading(false);
-  //               setUnsignedPsbtBase64("");
-  //               dispatch(
-  //                 addNotification({
-  //                   id: new Date().valueOf(),
-  //                   message: "Successfully Listed Ordinal for sale.",
-  //                   open: true,
-  //                   severity: "success",
-  //                 })
-  //               );
-  //               // Additional code to handle success if needed
-  //             } else {
-  //               setUnsignedPsbtBase64("");
-  //               setLoading(false);
-  //               dispatch(
-  //                 addNotification({
-  //                   id: new Date().valueOf(),
-  //                   message: "Some error occurred",
-  //                   open: true,
-  //                   severity: "error",
-  //                 })
-  //               );
-  //               // Additional code to handle failure if needed
-  //             }
-  //           } catch (error: any) {
-  //             setLoading(false);
-  //             dispatch(
-  //               addNotification({
-  //                 id: new Date().valueOf(),
-  //                 message: error.message || "Some error occurred",
-  //                 open: true,
-  //                 severity: "error",
-  //               })
-  //             );
-  //           }
-  //         }
-  //       }
-  //     } catch (e) {
-  //       console.log(e, "Error in txSign");
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   signTransaction();
-  // }, [
-  //   data.inscriptionId,
-  //   dispatch,
-  //   price,
-  //   signTx,
-  //   unsignedPsbtBase64,
-  //   walletDetails,
-  // ]);
-
   return (
     <>
       {" "}
@@ -458,7 +287,7 @@ function ListInscription({ data }: InscriptionProps) {
         </div>
         <div className="flex-1">
           <CustomButton
-            loading={loading}
+            loading={loading || leatherLoading || xverseLoading}
             text={data.listed_price ? "Update Price" : `List Now`}
             hoverBgColor="hover:bg-accent_dark"
             hoverTextColor="text-white"

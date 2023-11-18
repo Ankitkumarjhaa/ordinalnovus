@@ -55,7 +55,7 @@ async function processOrdItem(
   if (wallet === "Leather") {
     p2tr = btc.p2tr(ecdsaPublicKeyToSchnorr(publickey), undefined, btc.NETWORK);
   } else {
-    btc.p2tr(publickey, undefined, btc.NETWORK);
+    p2tr = btc.p2tr(publickey, undefined, btc.NETWORK);
   }
   const tx = new btc.Transaction({});
 
@@ -87,6 +87,12 @@ async function processOrdItem(
       tap_internal_key: p2tr.tapInternalKey.toString(),
     };
   } else {
+    console.debug({
+      address: ordItem.address,
+      output: ordItem.output,
+      output_value: ordItem.output_value,
+      p2tr,
+    });
     throw new Error("Ord Provider Unavailable");
   }
 }

@@ -13,6 +13,7 @@ const customColors = {
   accent_dark: "#3d0263",
   light_gray: "#84848a",
   black: "#0c0d0c",
+  bitcoin: "#eab308",
 };
 
 module.exports = {
