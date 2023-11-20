@@ -78,7 +78,7 @@ function InscriptionDetail({ data }: InscriptionProps) {
           </div>
         </div>
       </div>
-      <div className="relative">
+      <div className="relative hidden">
         {/* TODO: Add BUY/ SELL/ ADD PADDING */}
         {WalletDetail.connected &&
           WalletDetail.ordinal_address === data.address && (

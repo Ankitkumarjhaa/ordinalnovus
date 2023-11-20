@@ -1,18 +1,14 @@
 "use client";
 import CustomButton from "@/components/elements/CustomButton";
-// import { useSignTx } from "@/hooks/useHiroSignTx";
 import { addNotification } from "@/stores/reducers/notificationReducer";
 import { IInscription, WalletDetail } from "@/types/Ordinals";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-// import * as bitcoin from "bitcoinjs-lib";
-// import secp256k1 from "@bitcoinerlab/secp256k1";
 import { RootState } from "@/stores";
 import {
   base64ToHex,
   calculateBTCCostInDollars,
   convertSatToBtc,
-  //   range,
 } from "@/utils";
 import {
   useLeatherSign,
@@ -20,13 +16,8 @@ import {
   useXverseSign,
 } from "bitcoin-wallet-adapter";
 import getUnsignedBuyPsbt from "@/apiHelper/getUnsignedBuyPsbt";
-import { Slider } from "@mui/material";
-import { IFeeInfo } from "@/types";
 import FeePicker from "@/components/elements/FeePicker";
-// import mergeSignedPsbt from "@/api/mergeSignedPsbt";
-// import broadcast from "@/api/broadcast";
-
-// bitcoin.initEccLib(secp256k1);
+import axios from "axios";
 type InscriptionProps = {
   data: IInscription;
 };
@@ -131,8 +122,42 @@ function BuyInscription({ data }: InscriptionProps) {
     }
   }, [walletDetails, data]);
 
-  const broadcast = (signedPsbt: string) => {
-    console.log({ signedPsbt });
+  const broadcast = async (signedPsbt: string) => {
+    try {
+      console.log({ signedPsbt });
+      const { data } = await axios.post("/api/v2/order/broadcast", {
+        signed_psbt: signedPsbt,
+      });
+      setLoading(false);
+      console.log(data);
+      dispatch(
+        addNotification({
+          id: new Date().valueOf(),
+          message: `Broadcasted ${action} Tx Successfully`,
+          open: true,
+          severity: "success",
+        })
+      );
+      dispatch(
+        addNotification({
+          id: new Date().valueOf(),
+          message: `Txid: ${data.data.txid}`,
+          open: true,
+          severity: "success",
+        })
+      );
+      window.open(`https://mempool.space/tx/${data.data.txid}`, "_blank");
+    } catch (err: any) {
+      setLoading(false);
+      dispatch(
+        addNotification({
+          id: new Date().valueOf(),
+          message: err.response.data.message || "Error broadcasting tx",
+          open: true,
+          severity: "error",
+        })
+      );
+    }
   };
 
   const signTx = async () => {

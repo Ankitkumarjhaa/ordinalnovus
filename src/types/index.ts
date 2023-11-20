@@ -123,6 +123,8 @@ export interface IInscription {
   listed_seller_receive_address?: string;
   signed_psbt?: string;
   unsigned_psbt?: string;
+  in_mempool: boolean;
+  txid: string;
   sat_block_time?: Date;
   sattributes?: string[];
   last_checked?: Date;
