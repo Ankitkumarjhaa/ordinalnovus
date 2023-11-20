@@ -13,6 +13,9 @@ import DisplayProperties from "./DisplayProperties";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import moment from "moment";
+import { useWalletAddress } from "bitcoin-wallet-adapter";
+import ListInscription from "./ListInscription";
+import BuyInscription from "./BuyInscription";
 type InscriptionProps = {
   data: IInscription;
 };
@@ -20,6 +23,7 @@ function InscriptionDetail({ data }: InscriptionProps) {
   const router = useRouter();
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
+  const WalletDetail = useWalletAddress();
 
   return (
     <div className="p-6 md:pt-0 pb-6 flex-1">
@@ -46,7 +50,7 @@ function InscriptionDetail({ data }: InscriptionProps) {
         )}
         <div className="flex justify-between items-center">
           <p className="text-gray-300 text-xs">
-            {moment(data.timestamp).format()}
+            {moment(data.timestamp).format("MMMM Do YYYY, h:mm:ss a")}
           </p>
           <div className="flex items-center justify-between">
             <div
@@ -74,8 +78,15 @@ function InscriptionDetail({ data }: InscriptionProps) {
           </div>
         </div>
       </div>
-      <div className="relative py-6 border-b-2 border-accent">
+      <div className="relative hidden">
         {/* TODO: Add BUY/ SELL/ ADD PADDING */}
+        {WalletDetail.connected &&
+          WalletDetail.ordinal_address === data.address && (
+            <ListInscription data={data} />
+          )}
+        {WalletDetail.connected &&
+          WalletDetail.ordinal_address !== data.address &&
+          data.listed && <BuyInscription data={data} />}
       </div>
       <div className="pt-2">
         <DisplayProperties data={data} />

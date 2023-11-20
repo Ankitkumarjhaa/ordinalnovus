@@ -145,13 +145,13 @@ export const inscriptionSchema = new mongoose.Schema(
           return (
             !value ||
             (value &&
-              this.listedAt &&
-              this.listedPrice &&
-              this.listedMakerFeeBp &&
-              this.tapInternalKey &&
-              this.listedSellerReceiveAddress &&
-              this.signedPsbt &&
-              this.unSignedPsbt)
+              this.listed_at &&
+              this.listed_price &&
+              this.listed_maker_fee_bp &&
+              this.tap_internal_key &&
+              this.listed_seller_receive_address &&
+              this.signed_psbt &&
+              this.unsigned_psbt)
           );
         },
         message:
@@ -165,6 +165,8 @@ export const inscriptionSchema = new mongoose.Schema(
     listed_seller_receive_address: { type: String },
     signed_psbt: { type: String },
     unsigned_psbt: { type: String },
+    in_mempool: { type: Boolean, default: false },
+    txid: { type: String },
     sat_block_time: { type: Date },
     sattributes: [{ type: String }],
     last_checked: { type: Date },
@@ -191,7 +193,8 @@ inscriptionSchema.index({ collection_item_name: 1, collection_item_number: 1 });
 inscriptionSchema.index({ sat: 1, sat_name: 1, rarity: 1 });
 inscriptionSchema.index({ lists: 1 });
 inscriptionSchema.index({ domain_name: 1 });
-inscriptionSchema.index({ listed: 1 });
+inscriptionSchema.index({ listed: 1, in_mempool: 1, address: 1 });
+inscriptionSchema.index({ txid: 1 });
 inscriptionSchema.index({ official_collection: 1, listed: 1 }); // for docs that are listed from a certain collection
 
 // Sorting by price
@@ -203,7 +206,3 @@ inscriptionSchema.index({ sha: 1, version: 1 });
 inscriptionSchema.index({ address: 1 });
 inscriptionSchema.index({ tags: 1 });
 inscriptionSchema.index({ inscription_number: 1 });
-
-// temporary
-inscriptionSchema.index({ sat: 1 }),
-  { partialFilterExpression: { sat: { $exists: false } } };

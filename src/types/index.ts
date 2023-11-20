@@ -123,9 +123,39 @@ export interface IInscription {
   listed_seller_receive_address?: string;
   signed_psbt?: string;
   unsigned_psbt?: string;
+  in_mempool: boolean;
+  txid: string;
   sat_block_time?: Date;
   sattributes?: string[];
   last_checked?: Date;
   version?: number;
   token?: boolean;
+}
+
+export interface ISale extends Document {
+  inscription: Schema.Types.ObjectId;
+  inscription_id: string;
+  official_collection?: Schema.Types.ObjectId;
+  collection_item_name?: string;
+  collection_item_number?: number;
+  offset?: number;
+  output_value?: number;
+  output: string;
+  location: string;
+  address?: string;
+  sold_at?: Date;
+  fee?: number;
+  seller_tap_internal_key?: string;
+  listed_seller_receive_address?: string;
+  signed_seller_psbt: string;
+  signed_buyer_psbt: string;
+  buyer_payment_address: string;
+  buyer_ordinal_address: string;
+  buyer_tap_internal_key: string;
+  price: number;
+  price_in_usd: number;
+  tx: string;
+  status: "confirmed" | "rejected" | "mempool";
+  created_at?: Date;
+  updated_at?: Date;
 }

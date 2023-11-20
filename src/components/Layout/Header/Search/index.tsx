@@ -116,6 +116,8 @@ function Search() {
               url = `/sat/${id}`;
             } else if (item.includes("inscription number")) {
               url = `/inscription/${id}`;
+            } else if (item.includes("inscription id")) {
+              url = `/inscription/${id}`;
             }
 
             return (

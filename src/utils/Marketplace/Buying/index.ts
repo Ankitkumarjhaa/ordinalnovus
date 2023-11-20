@@ -9,28 +9,25 @@ import {
 } from "@/types/Ordinals";
 import {
   calculateTxBytesFee,
-  convertSatToBtc,
   doesUtxoContainInscription,
   getUtxosByAddress,
   getSellerOrdOutputValue,
   getTxHexById,
-  isP2SHAddress,
   mapUtxos,
-  recommendedFeeRate,
   toXOnly,
   calculateTxBytesFeeWithRate,
 } from "@/utils/Marketplace";
+import { convertSatToBtc } from "@/utils";
 
 const DUMMY_UTXO_MAX_VALUE = Number(1000);
 const DUMMY_UTXO_MIN_VALUE = Number(580);
 const DUMMY_UTXO_VALUE = 1000;
-const ORDINALS_POSTAGE_VALUE = Number(10000);
+const ORDINALS_POSTAGE_VALUE = Number(1000);
 const PLATFORM_FEE_ADDRESS =
   process.env.PLATFORM_FEE_ADDRESS ||
-  "bc1pfappe7h7l6hpzvj2mdgqehaalygxr449tf0asv8s7wxrfdr0gc6quf9pnd";
+  "bc1qhg8828sk4yq6ac08rxd0rh7dzfjvgdch3vfsm4";
 const BUYING_PSBT_SELLER_SIGNATURE_INDEX = 2;
 
-bitcoin.initEccLib(secp256k1);
 interface Result {
   status: string;
   message: string;
@@ -39,12 +36,14 @@ interface Result {
 export async function buyOrdinalPSBT(
   payerAddress: string,
   receiverAddress: string,
-  inscription: IInscription,
+  inscription: any,
   price: number,
   publickey: string,
-  numberOfDummyUtxosToCreate: number = 2,
-  DUMMY_UTXO_VALUE: number = 1000
+  wallet: string,
+  fee_rate: number
 ): Promise<Result> {
+  const numberOfDummyUtxosToCreate = 2;
+  bitcoin.initEccLib(secp256k1);
   let payerUtxos: AddressTxsUtxo[];
   let dummyUtxos: UTXO[] | null;
   let paymentUtxos: AddressTxsUtxo[] | undefined;
@@ -79,35 +78,34 @@ export async function buyOrdinalPSBT(
       minimumValueRequired,
       vins,
       vouts,
-      ""
+      fee_rate
     );
 
-    let psbt = null;
+    let psbt: any = null;
 
     if (
       dummyUtxos &&
       dummyUtxos.length >= 2 &&
       inscription.address &&
-      inscription.listedPrice &&
-      inscription.listedSellerReceiveAddress &&
-      inscription.output_value
+      inscription.price &&
+      inscription.receiveAddress &&
+      inscription.outputValue
     ) {
       const listing = {
         seller: {
-          makerFeeBp: inscription.listedMakerFeeBp || 0,
+          makerFeeBp: 100,
           sellerOrdAddress: inscription.address,
-          price: inscription.listedPrice,
+          price: inscription.price,
           ordItem: inscription,
-          sellerReceiveAddress: inscription.listedSellerReceiveAddress,
-          unsignedListingPSBTBase64: inscription.unSignedPsbt,
-          signedListingPSBTBase64: inscription.signedPsbt,
+          sellerReceiveAddress: inscription.receiveAddress,
+          signedListingPSBTBase64: inscription.signedListingPsbtBase64,
           tapInternalKey: inscription.tapInternalKey,
         },
         buyer: {
           takerFeeBp: 0,
           buyerAddress: payerAddress,
           buyerTokenReceiveAddress: receiverAddress,
-          feeRateTier: "",
+          fee_rate,
           buyerPublicKey: publickey,
           unsignedBuyingPSBTBase64: "",
           buyerDummyUTXOs: dummyUtxos,
@@ -115,8 +113,9 @@ export async function buyOrdinalPSBT(
         },
       };
       console.log("Generating payment PSBT");
+      console.log({ listing });
 
-      psbt = await generateUnsignedBuyingPSBTBase64(listing);
+      psbt = await generateUnsignedBuyingPSBTBase64(listing, wallet);
       return {
         status: "success",
         message: "has valid utxo",
@@ -128,13 +127,14 @@ export async function buyOrdinalPSBT(
         },
       };
     } else {
-      psbt = await generateUnsignedCreateDummyUtxoPSBTBase64(
-        payerAddress,
-        publickey,
-        paymentUtxos,
-        "",
-        inscription
-      );
+      if (paymentUtxos)
+        psbt = await generateUnsignedCreateDummyUtxoPSBTBase64(
+          payerAddress,
+          publickey,
+          paymentUtxos,
+          fee_rate,
+          wallet
+        );
       console.log(psbt, "PSBT CREATED");
       return {
         status: "success",
@@ -160,13 +160,14 @@ async function generateUnsignedCreateDummyUtxoPSBTBase64(
   address: string,
   buyerPublicKey: string | undefined,
   unqualifiedUtxos: AddressTxsUtxo[],
-  feeRateTier: string,
-  itemProvider: IInscription
+  fee_rate: number,
+  wallet: string
 ): Promise<string> {
+  wallet = wallet?.toLowerCase();
   const psbt = new bitcoin.Psbt({ network: undefined });
   const [mappedUnqualifiedUtxos, recommendedFee] = await Promise.all([
     mapUtxos(unqualifiedUtxos),
-    recommendedFeeRate("halfHourFee"),
+    fee_rate,
   ]);
 
   // Loop the unqualified utxos until we have enough to create a dummy utxo
@@ -176,14 +177,17 @@ async function generateUnsignedCreateDummyUtxoPSBTBase64(
     if (await doesUtxoContainInscription(utxo)) {
       continue;
     }
+    const taprootAddress = address.startsWith("bc1p");
 
     const input: any = {
       hash: utxo.txid,
       index: utxo.vout,
-      nonWitnessUtxo: utxo.tx.toBuffer(),
+      ...(taprootAddress && {
+        nonWitnessUtxo: utxo.tx.toBuffer(),
+      }),
     };
 
-    if (isP2SHAddress(address, bitcoin.networks.bitcoin)) {
+    if (!taprootAddress) {
       const redeemScript = bitcoin.payments.p2wpkh({
         pubkey: Buffer.from(buyerPublicKey!, "hex"),
       }).output;
@@ -191,7 +195,15 @@ async function generateUnsignedCreateDummyUtxoPSBTBase64(
         redeem: { output: redeemScript },
       });
       input.witnessUtxo = utxo.tx.outs[utxo.vout];
-      input.redeemScript = p2sh.redeem?.output;
+      if (wallet !== "unisat" && wallet !== "leather") {
+        input.redeemScript = p2sh.redeem?.output;
+      }
+    } else {
+      // unisat
+      input.witnessUtxo = utxo.tx.outs[utxo.vout];
+      input.tapInternalKey = toXOnly(
+        utxo.tx.toBuffer().constructor(buyerPublicKey, "hex")
+      );
     }
 
     psbt.addInput(input);
@@ -214,7 +226,9 @@ async function generateUnsignedCreateDummyUtxoPSBTBase64(
     recommendedFee
   );
 
-  const changeValue = totalValue - DUMMY_UTXO_VALUE * 2 - finalFees;
+  console.log({ totalValue, finalFees });
+  const changeValue = totalValue - DUMMY_UTXO_VALUE * 2 - finalFees / 2;
+  console.log({ changeValue });
 
   // We must have enough value to create a dummy utxo and pay for tx fees
   if (changeValue < 0) {
@@ -238,65 +252,10 @@ async function generateUnsignedCreateDummyUtxoPSBTBase64(
     });
   }
 
+  console.log("psbt made");
+
   return psbt.toBase64();
 }
-// export function calculateFee(
-//   vins: number,
-//   vouts: number,
-//   recommendedFeeRate: number,
-//   address?: string,
-//   includeChangeOutput = true
-// ): number {
-//   const txSize = estimateTxSize(
-//     vins,
-//     vouts + (includeChangeOutput ? 1 : 0),
-//     address
-//   );
-
-//   console.log(
-//     txSize,
-//     "Estimated txSize inside CalculateFee",
-//     recommendedFeeRate,
-//     "recommended fee rate"
-//   );
-
-//   const fee = txSize * recommendedFeeRate;
-
-//   return fee;
-// }
-
-// function estimateTxSize(vins: number, vouts: number, address?: string): number {
-//   const baseTxSize = 10;
-//   let inSize;
-
-//   if (address) {
-//     if (address.startsWith("bc1")) {
-//       // SegWit transaction
-//       if (address.startsWith("bc1p")) {
-//         // P2WPKH (Pay-to-Witness-Public-Key-Hash)
-//         inSize = 68;
-//       } else {
-//         // P2WSH (Pay-to-Witness-Script-Hash)
-//         inSize = 108;
-//       }
-//     } else if (address.startsWith("3")) {
-//       // P2SH (Pay-to-Script-Hash) transaction
-//       inSize = 295;
-//     } else {
-//       // Default to P2PKH (Pay-to-Public-Key-Hash) transaction
-//       inSize = 148;
-//     }
-//   } else {
-//     // Default to P2WPKH (Pay-to-Witness-Public-Key-Hash) transaction
-//     inSize = 68;
-//   }
-
-//   const outSize = 34;
-//   console.log({ baseTxSize, vins, inSize, vouts, outSize });
-//   const txSize = baseTxSize + vins * inSize + vouts * outSize;
-
-//   return txSize;
-// }
 
 async function selectDummyUTXOs(
   utxos: AddressTxsUtxo[]
@@ -328,9 +287,9 @@ async function selectPaymentUTXOs(
   amount: number, // amount is expected total output (except tx fee)
   vinsLength: number,
   voutsLength: number,
-  feeRateTier: string
+  fee_rate: number
 ) {
-  const selectedUtxos = [];
+  const selectedUtxos: any = [];
   let selectedAmount = 0;
 
   // Sort descending by value, and filter out dummy utxos
@@ -352,7 +311,7 @@ async function selectPaymentUTXOs(
         (await calculateTxBytesFee(
           vinsLength + selectedUtxos.length,
           voutsLength,
-          feeRateTier
+          fee_rate
         ))
     ) {
       break;
@@ -367,8 +326,15 @@ Needed:       ${convertSatToBtc(amount)} BTC`);
 
   return selectedUtxos;
 }
-async function generateUnsignedBuyingPSBTBase64(listing: IListingState) {
+async function generateUnsignedBuyingPSBTBase64(
+  listing: IListingState,
+  wallet: string
+) {
+  wallet = wallet.toLowerCase();
   const psbt = new bitcoin.Psbt({ network: undefined });
+
+  const taprootAddress = listing?.buyer?.buyerAddress.startsWith("bc1p");
+  const buyerPublicKey = listing?.buyer?.buyerPublicKey;
   if (
     !listing.buyer ||
     !listing.buyer.buyerAddress ||
@@ -376,9 +342,9 @@ async function generateUnsignedBuyingPSBTBase64(listing: IListingState) {
   ) {
     throw new Error("Buyer address is not set");
   }
-   if (!listing.seller.ordItem.output_value) {
-     throw Error("Inscription has no output value");
-   }
+  if (!listing.seller.ordItem.output_value) {
+    throw Error("Inscription has no output value");
+  }
 
   if (
     listing.buyer.buyerDummyUTXOs?.length !== 2 ||
@@ -391,34 +357,47 @@ async function generateUnsignedBuyingPSBTBase64(listing: IListingState) {
 
   // Add two dummyUtxos
   for (const dummyUtxo of listing.buyer.buyerDummyUTXOs) {
+    const tx = bitcoin.Transaction.fromHex(await getTxHexById(dummyUtxo.txid));
+    for (const output in tx.outs) {
+      try {
+        tx.setWitness(parseInt(output), []);
+      } catch {}
+    }
     const input: any = {
       hash: dummyUtxo.txid,
       index: dummyUtxo.vout,
-      nonWitnessUtxo: dummyUtxo.tx.toBuffer(),
+      ...(taprootAddress && {
+        nonWitnessUtxo: tx.toBuffer(),
+      }),
     };
 
-    const p2shInputRedeemScript: any = {};
-    const p2shInputWitnessUTXO: any = {};
-
-    if (isP2SHAddress(listing.buyer.buyerAddress, bitcoin.networks.bitcoin)) {
+    if (!taprootAddress) {
       const redeemScript = bitcoin.payments.p2wpkh({
-        pubkey: Buffer.from(listing.buyer.buyerPublicKey!, "hex"),
+        pubkey: Buffer.from(buyerPublicKey!, "hex"),
       }).output;
       const p2sh = bitcoin.payments.p2sh({
         redeem: { output: redeemScript },
       });
-      p2shInputWitnessUTXO.witnessUtxo = {
-        script: p2sh.output,
-        value: dummyUtxo.value,
-      } as WitnessUtxo;
-      p2shInputRedeemScript.redeemScript = p2sh.redeem?.output;
+
+      if (wallet !== "unisat") {
+        input.witnessUtxo = {
+          script: p2sh.output,
+          value: dummyUtxo.value,
+        } as WitnessUtxo;
+        input.redeemScript = p2sh.redeem?.output;
+      } else {
+        // unisat wallet should not have redeemscript for buy tx
+        input.witnessUtxo = tx.outs[dummyUtxo.vout];
+      }
+    } else {
+      // unisat
+      input.witnessUtxo = tx.outs[dummyUtxo.vout];
+      input.tapInternalKey = toXOnly(
+        tx.toBuffer().constructor(buyerPublicKey, "hex")
+      );
     }
 
-    psbt.addInput({
-      ...input,
-      ...p2shInputWitnessUTXO,
-      ...p2shInputRedeemScript,
-    });
+    psbt.addInput(input);
     totalInput += dummyUtxo.value;
   }
 
@@ -445,34 +424,45 @@ async function generateUnsignedBuyingPSBTBase64(listing: IListingState) {
   // Add payment utxo inputs
   for (const utxo of listing.buyer.buyerPaymentUTXOs) {
     const tx = bitcoin.Transaction.fromHex(await getTxHexById(utxo.txid));
+    for (const output in tx.outs) {
+      try {
+        tx.setWitness(parseInt(output), []);
+      } catch {}
+    }
+
     const input: any = {
       hash: utxo.txid,
       index: utxo.vout,
-      nonWitnessUtxo: tx.toBuffer(),
+      ...(taprootAddress && { nonWitnessUtxo: tx.toBuffer() }),
     };
 
-    const p2shInputWitnessUTXOUn: any = {};
-    const p2shInputRedeemScriptUn: any = {};
-
-    if (isP2SHAddress(listing.buyer.buyerAddress, bitcoin.networks.bitcoin)) {
+    if (!taprootAddress) {
       const redeemScript = bitcoin.payments.p2wpkh({
         pubkey: Buffer.from(listing.buyer.buyerPublicKey!, "hex"),
       }).output;
       const p2sh = bitcoin.payments.p2sh({
         redeem: { output: redeemScript },
       });
-      p2shInputWitnessUTXOUn.witnessUtxo = {
-        script: p2sh.output,
-        value: utxo.value,
-      } as WitnessUtxo;
-      p2shInputRedeemScriptUn.redeemScript = p2sh.redeem?.output;
+
+      if (wallet !== "unisat") {
+        input.witnessUtxo = {
+          script: p2sh.output,
+          value: utxo.value,
+        } as WitnessUtxo;
+
+        input.redeemScript = p2sh.redeem?.output;
+      } else {
+        // unisat wallet should not have redeemscript for buy tx
+        input.witnessUtxo = tx.outs[utxo.vout];
+      }
+    } else {
+      input.witnessUtxo = tx.outs[utxo.vout];
+      input.tapInternalKey = toXOnly(
+        tx.toBuffer().constructor(listing.buyer.buyerPublicKey, "hex")
+      );
     }
 
-    psbt.addInput({
-      ...input,
-      ...p2shInputWitnessUTXOUn,
-      ...p2shInputRedeemScriptUn,
-    });
+    psbt.addInput(input);
 
     totalInput += utxo.value;
   }
@@ -503,7 +493,7 @@ async function generateUnsignedBuyingPSBTBase64(listing: IListingState) {
   const fee = await calculateTxBytesFee(
     psbt.txInputs.length,
     psbt.txOutputs.length, // already taken care of the exchange output bytes calculation
-    listing.buyer.feeRateTier
+    listing.buyer.fee_rate
   );
 
   const totalOutput = psbt.txOutputs.reduce(
@@ -511,8 +501,7 @@ async function generateUnsignedBuyingPSBTBase64(listing: IListingState) {
     0
   );
 
-  const changeValue =
-    totalInput - (totalOutput) - fee;
+  const changeValue = totalInput - totalOutput - fee;
 
   if (changeValue < 0) {
     throw `Your wallet address doesn't have enough funds to buy this inscription.
@@ -525,23 +514,22 @@ Missing:    ${convertSatToBtc(-changeValue)} BTC`;
   if (changeValue > DUMMY_UTXO_MIN_VALUE) {
     psbt.addOutput({
       address: listing.buyer.buyerAddress,
-      value: changeValue+listing.seller.ordItem.output_value,
+      value: changeValue + listing.seller.ordItem.output_value,
     });
   }
 
-  
-  console.log({ totalInput, totalOutput, fee, changeValue });
-
-  // merge seller signature to unsigned buyer psbt
   if (listing.seller.signedListingPSBTBase64) {
-    const sellerSignedPsbt = bitcoin.Psbt.fromBase64(listing.seller.signedListingPSBTBase64);
+    const sellerSignedPsbt = bitcoin.Psbt.fromBase64(
+      listing.seller.signedListingPSBTBase64
+    );
     (psbt.data.globalMap.unsignedTx as any).tx.ins[
       BUYING_PSBT_SELLER_SIGNATURE_INDEX
     ] = (sellerSignedPsbt.data.globalMap.unsignedTx as any).tx.ins[0];
     psbt.data.inputs[BUYING_PSBT_SELLER_SIGNATURE_INDEX] =
       sellerSignedPsbt.data.inputs[0];
   }
-  
+
+  console.log({ totalInput, totalOutput, fee, changeValue });
 
   listing.buyer.unsignedBuyingPSBTBase64 = psbt.toBase64();
   listing.buyer.unsignedBuyingPSBTInputSize = psbt.data.inputs.length;
@@ -550,10 +538,10 @@ Missing:    ${convertSatToBtc(-changeValue)} BTC`;
 
 async function getSellerInputAndOutput(listing: IListingState) {
   if (!listing.seller.ordItem.output) {
-    throw Error("Inscription has no output")
+    throw Error("Inscription has no output");
   }
-    const [ordinalUtxoTxId, ordinalUtxoVout] =
-      listing.seller.ordItem.output.split(":");
+  const [ordinalUtxoTxId, ordinalUtxoVout] =
+    listing.seller.ordItem.output.split(":");
   const tx = bitcoin.Transaction.fromHex(await getTxHexById(ordinalUtxoTxId));
   // No need to add this witness if the seller is using taproot
   if (!listing.seller.tapInternalKey) {
@@ -577,9 +565,9 @@ async function getSellerInputAndOutput(listing: IListingState) {
       tx.toBuffer().constructor(listing.seller.tapInternalKey, "hex")
     );
   }
-   if (!listing.seller.ordItem.output_value) {
-     throw Error("Inscription has no output value");
-   }
+  if (!listing.seller.ordItem.output_value) {
+    throw Error("Inscription has no output value");
+  }
 
   const ret = {
     sellerInput,
@@ -600,14 +588,28 @@ export function mergeSignedBuyingPSBTBase64(
   signedListingPSBTBase64: string,
   signedBuyingPSBTBase64: string
 ): string {
+  console.log("[INFO] Initiating merging of signed PSBTs.");
+
+  // Deserialize PSBTs from Base64
+  console.log("[INFO] Deserializing seller PSBTs from Base64.");
   const sellerSignedPsbt = bitcoin.Psbt.fromBase64(signedListingPSBTBase64);
+
+  console.log("[INFO] Deserializing buyer PSBTs from Base64.");
   const buyerSignedPsbt = bitcoin.Psbt.fromBase64(signedBuyingPSBTBase64);
+
+  // Merge operations
+  console.log("[INFO] Merging seller's signature into buyer's PSBT.");
 
   (buyerSignedPsbt.data.globalMap.unsignedTx as any).tx.ins[
     BUYING_PSBT_SELLER_SIGNATURE_INDEX
   ] = (sellerSignedPsbt.data.globalMap.unsignedTx as any).tx.ins[0];
+
   buyerSignedPsbt.data.inputs[BUYING_PSBT_SELLER_SIGNATURE_INDEX] =
     sellerSignedPsbt.data.inputs[0];
 
+  console.log("[SUCCESS] Merging completed successfully.");
+
+  // Return serialized PSBT
+  console.log("[INFO] Serializing merged PSBT to Base64.");
   return buyerSignedPsbt.toBase64();
 }

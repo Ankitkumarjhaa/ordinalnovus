@@ -50,6 +50,8 @@ async function fetchInscriptionsFromOutput(
         listed_seller_receive_address: "",
         signed_psbt: "",
         unsigned_psbt: "",
+        in_mempool: false,
+        txid: i.location.split(":")[0],
       },
     }));
 

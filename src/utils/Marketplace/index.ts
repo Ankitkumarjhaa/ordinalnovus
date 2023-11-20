@@ -98,16 +98,6 @@ async function getTxHexById(txId: TxId): Promise<string> {
 const toXOnly = (pubKey: string | any[]) =>
   pubKey.length === 32 ? pubKey : pubKey.slice(1, 33);
 
-// Function to convert price from satoshi to Bitcoin
-function convertSatToBtc(priceInSat: number): number {
-  return priceInSat / 1e8; // 1 BTC = 100,000,000 SAT
-}
-
-// Function to convert price from satoshi to Bitcoin
-function convertBtcToSat(priceInSat: number): number {
-  return priceInSat * 1e8; // 1 BTC = 100,000,000 SAT
-}
-
 async function getUtxosByAddress(address: string) {
   return await mempoolBitcoin.addresses.getAddressTxsUtxo({ address });
 }
@@ -173,10 +163,10 @@ function calculateTxBytesFeeWithRate(
 async function calculateTxBytesFee(
   vinsLength: number,
   voutsLength: number,
-  feeRateTier: string,
+  feeRate: number,
   includeChangeOutput: 0 | 1 = 1
 ) {
-  const recommendedFR = await recommendedFeeRate(feeLevel);
+  const recommendedFR = feeRate;
   return calculateTxBytesFeeWithRate(
     vinsLength,
     voutsLength,
@@ -210,13 +200,20 @@ function getSellerOrdOutputValue(
   return outputValue;
 }
 
+export const fromXOnly = (buffer: Buffer): string => {
+  // Check if buffer has a length of 32, which means it was not sliced
+  if (buffer.length === 32) {
+    return buffer.toString("hex");
+  } else {
+    throw Error("Wrong pubkey");
+  }
+};
+
 export {
   fetchLatestInscriptionData,
   getTxHexById,
   validatePsbt,
   toXOnly,
-  convertBtcToSat,
-  convertSatToBtc,
   getUtxosByAddress,
   recommendedFeeRate,
   doesUtxoContainInscription,
