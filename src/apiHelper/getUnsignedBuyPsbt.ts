@@ -33,7 +33,7 @@ async function getUnsignedPsbt(data: CreateBuyingPsbtData): Promise<{
         ok: response.data.ok,
         message: response.data.message,
         unsigned_psbt_base64: response.data.unsigned_psbt_base64,
-        for: response.data.data.for,
+        for: response.data.for,
       };
     } else {
       throw new Error("Error generating unsigned PSBT");

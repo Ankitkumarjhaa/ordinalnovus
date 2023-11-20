@@ -14,7 +14,11 @@ import {
   convertSatToBtc,
   //   range,
 } from "@/utils";
-import { useWalletAddress } from "bitcoin-wallet-adapter";
+import {
+  useLeatherSign,
+  useWalletAddress,
+  useXverseSign,
+} from "bitcoin-wallet-adapter";
 import getUnsignedBuyPsbt from "@/apiHelper/getUnsignedBuyPsbt";
 import { Slider } from "@mui/material";
 import { IFeeInfo } from "@/types";
@@ -29,12 +33,23 @@ type InscriptionProps = {
 
 function BuyInscription({ data }: InscriptionProps) {
   const dispatch = useDispatch();
-  //   const signTx = useSignTx();
-  //   const signXversePSBT = useXverseSignTx();
+  const {
+    loading: leatherLoading,
+    result: leatherResult,
+    error: leatherError,
+    sign: leatherSign,
+  } = useLeatherSign();
+
+  const {
+    loading: xverseLoading,
+    result: xverseResult,
+    error: xverseError,
+    sign: xverseSign,
+  } = useXverseSign();
+
   const [loading, setLoading] = useState<boolean>(false);
 
   const [unsignedPsbtBase64, setUnsignedPsbtBase64] = useState<string>("");
-  const [signedPsbtBase64, setSignedPsbtBase64] = useState<string>("");
   const [action, setAction] = useState<string>("");
   const [feeRate, setFeeRate] = useState(0);
   const [marks, setMarks] = useState<any>(null);
@@ -115,6 +130,134 @@ function BuyInscription({ data }: InscriptionProps) {
       );
     }
   }, [walletDetails, data]);
+
+  const broadcast = (signedPsbt: string) => {
+    console.log({ signedPsbt });
+  };
+
+  const signTx = async () => {
+    if (walletDetails.wallet === "Leather") {
+      const options: any = {
+        psbt: base64ToHex(unsignedPsbtBase64),
+        network: "Mainnet",
+        action: "dummy",
+        inputs: [
+          {
+            address: walletDetails.cardinal_address,
+            publickey: walletDetails.cardinal_pubkey,
+            sighash: 1,
+            index: [0],
+          },
+        ],
+      };
+      console.log(options, "OPTIONS");
+
+      await leatherSign(options);
+    } else if (walletDetails.wallet === "Xverse") {
+      const options: any = {
+        psbt: unsignedPsbtBase64,
+        network: "Mainnet",
+        action: "dummy",
+        inputs: [
+          {
+            address: walletDetails.cardinal_address,
+            publickey: walletDetails.cardinal_pubkey,
+            sighash: 1,
+            index: [0],
+          },
+        ],
+      };
+      console.log(options, "OPTIONS");
+
+      await xverseSign(options);
+    }
+  };
+
+  useEffect(() => {
+    // Handling Leather Wallet Sign Results/Errors
+    if (leatherResult) {
+      // Handle successful result from leather wallet sign
+      console.log("Leather Sign Result:", leatherResult);
+
+      if (leatherResult) {
+        broadcast(leatherResult);
+        // listOrdinal(leatherResult);
+      }
+      dispatch(
+        addNotification({
+          id: new Date().valueOf(),
+          message: "Leather wallet transaction successful",
+          open: true,
+          severity: "success",
+        })
+      );
+      // Additional logic here
+    }
+
+    if (leatherError) {
+      // Handle error from leather wallet sign
+      console.error("Leather Sign Error:", leatherError);
+      dispatch(
+        addNotification({
+          id: new Date().valueOf(),
+          message: leatherError.message || "Leather wallet error occurred",
+          open: true,
+          severity: "error",
+        })
+      );
+      // Additional logic here
+    }
+
+    // Handling Xverse Wallet Sign Results/Errors
+    if (xverseResult) {
+      // Handle successful result from xverse wallet sign
+      console.log("Xverse Sign Result:", xverseResult);
+      if (xverseResult.psbtBase64) {
+        broadcast(xverseResult.psbtBase64);
+        // listOrdinal(xverseResult.psbtBase64);
+      }
+      dispatch(
+        addNotification({
+          id: new Date().valueOf(),
+          message: "Leather wallet transaction successful",
+          open: true,
+          severity: "success",
+        })
+      );
+      dispatch(
+        addNotification({
+          id: new Date().valueOf(),
+          message: "Xverse wallet transaction successful",
+          open: true,
+          severity: "success",
+        })
+      );
+      // Additional logic here
+    }
+
+    if (xverseError) {
+      // Handle error from xverse wallet sign
+      console.error("Xverse Sign Error:", xverseError);
+      dispatch(
+        addNotification({
+          id: new Date().valueOf(),
+          message: xverseError.message || "Xverse wallet error occurred",
+          open: true,
+          severity: "error",
+        })
+      );
+      // Additional logic here
+    }
+
+    // Turn off loading after handling results or errors
+    setLoading(false);
+  }, [leatherResult, leatherError, xverseResult, xverseError]);
+
+  useEffect(() => {
+    if (unsignedPsbtBase64) {
+      signTx();
+    }
+  }, [unsignedPsbtBase64]);
 
   //   const buy = useCallback(async () => {
   //     if (

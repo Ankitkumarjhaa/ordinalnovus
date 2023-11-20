@@ -227,7 +227,7 @@ async function generateUnsignedCreateDummyUtxoPSBTBase64(
   );
 
   console.log({ totalValue, finalFees });
-  const changeValue = totalValue - DUMMY_UTXO_VALUE * 2 - finalFees;
+  const changeValue = totalValue - DUMMY_UTXO_VALUE * 2 - finalFees / 2;
   console.log({ changeValue });
 
   // We must have enough value to create a dummy utxo and pay for tx fees
