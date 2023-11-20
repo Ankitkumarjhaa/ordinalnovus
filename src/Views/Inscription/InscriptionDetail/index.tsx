@@ -78,15 +78,15 @@ function InscriptionDetail({ data }: InscriptionProps) {
           </div>
         </div>
       </div>
-      <div className="relative hidden">
+      <div className="relative">
         {/* TODO: Add BUY/ SELL/ ADD PADDING */}
         {WalletDetail.connected &&
           WalletDetail.ordinal_address === data.address && (
             <ListInscription data={data} />
           )}
-        {WalletDetail.connected &&
+        {/* {WalletDetail.connected &&
           WalletDetail.ordinal_address !== data.address &&
-          data.listed && <BuyInscription data={data} />}
+          data.listed && <BuyInscription data={data} />} */}
       </div>
       <div className="pt-2">
         <DisplayProperties data={data} />
