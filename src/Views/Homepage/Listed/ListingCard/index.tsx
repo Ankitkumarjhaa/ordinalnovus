@@ -68,13 +68,19 @@ const ListingCard: React.FC<ListingCardProps> = ({
                     </div>
                     <p>{convertSatToBtc(inscription?.listed_price)}</p>
                   </div>
-                  <p className="text-xs bg-bitcoin text-yellow-900 font-bold p-1 rounded">
-                    USD{" "}
-                    {calculateBTCCostInDollars(
-                      convertSatToBtc(inscription?.listed_price),
-                      btcPrice
-                    )}
-                  </p>
+                  {inscription.in_mempool ? (
+                    <p className="text-xs bg-bitcoin text-yellow-900 font-bold p-1 rounded">
+                      In Mempool
+                    </p>
+                  ) : (
+                    <p className="text-xs bg-bitcoin text-yellow-900 font-bold p-1 rounded">
+                      USD{" "}
+                      {calculateBTCCostInDollars(
+                        convertSatToBtc(inscription?.listed_price),
+                        btcPrice
+                      )}
+                    </p>
+                  )}
                 </div>
               )}
               {showCollection &&

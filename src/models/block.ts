@@ -20,8 +20,15 @@ export const BlocksSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    processed: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
   },
   {
     timestamps: true,
   }
 );
+
+BlocksSchema.index({ processed: 1, height: 1 });
