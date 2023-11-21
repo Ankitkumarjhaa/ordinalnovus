@@ -61,7 +61,7 @@ async function processOrdItem(
 
   console.log("got db listing", dbItem);
 
-  if (!dbItem.address) {
+  if (!dbItem || !dbItem.address) {
     throw Error("Item not listed in db");
   }
 

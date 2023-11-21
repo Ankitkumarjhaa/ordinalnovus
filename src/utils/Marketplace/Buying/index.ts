@@ -36,7 +36,7 @@ interface Result {
 export async function buyOrdinalPSBT(
   payerAddress: string,
   receiverAddress: string,
-  inscription: any,
+  inscription: IInscription,
   price: number,
   publickey: string,
   wallet: string,
@@ -87,19 +87,19 @@ export async function buyOrdinalPSBT(
       dummyUtxos &&
       dummyUtxos.length >= 2 &&
       inscription.address &&
-      inscription.price &&
-      inscription.receiveAddress &&
-      inscription.outputValue
+      inscription.listed_price &&
+      inscription.listed_seller_receive_address &&
+      inscription.output_value
     ) {
       const listing = {
         seller: {
           makerFeeBp: 100,
           sellerOrdAddress: inscription.address,
-          price: inscription.price,
+          price: inscription.listed_price,
           ordItem: inscription,
-          sellerReceiveAddress: inscription.receiveAddress,
-          signedListingPSBTBase64: inscription.signedListingPsbtBase64,
-          tapInternalKey: inscription.tapInternalKey,
+          sellerReceiveAddress: inscription.listed_seller_receive_address,
+          signedListingPSBTBase64: inscription.signed_psbt,
+          tapInternalKey: inscription.tap_internal_key,
         },
         buyer: {
           takerFeeBp: 0,
@@ -384,7 +384,8 @@ async function generateUnsignedBuyingPSBTBase64(
           script: p2sh.output,
           value: dummyUtxo.value,
         } as WitnessUtxo;
-        input.redeemScript = p2sh.redeem?.output;
+         if (wallet !== "unisat" && wallet !== "leather")
+           input.redeemScript = p2sh.redeem?.output;
       } else {
         // unisat wallet should not have redeemscript for buy tx
         input.witnessUtxo = tx.outs[dummyUtxo.vout];
@@ -564,6 +565,7 @@ async function getSellerInputAndOutput(listing: IListingState) {
     sellerInput.tapInternalKey = toXOnly(
       tx.toBuffer().constructor(listing.seller.tapInternalKey, "hex")
     );
+    console.log(sellerInput.tapInternalKey.toString("hex"), "tik");
   }
   if (!listing.seller.ordItem.output_value) {
     throw Error("Inscription has no output value");
