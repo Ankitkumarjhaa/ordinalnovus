@@ -56,7 +56,7 @@ const CustomButton = ({
   if (link && href) {
     return (
       //@ts-ignore
-      <Link href={href} passHref prefetch={false}>
+      <Link href={href} passHref prefetch={false} target="_blank">
         <button
           className={`${buttonClasses} ${
             !disabled && hoverClasses

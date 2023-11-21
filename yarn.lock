@@ -48,9 +48,9 @@
     regenerator-runtime "^0.13.11"
 
 "@babel/runtime@^7.23.2":
-  version "7.23.2"
-  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.23.2.tgz#062b0ac103261d68a966c4c7baf2ae3e62ec3885"
-  integrity sha512-mM8eg4yl5D6i3lu2QKPuPH4FArvJ8KhTofbE7jwMUv9KX5mBvwPAqnV3MlyBNqdp9RyRKP6Yck8TrfYrPvX3bg==
+  version "7.23.4"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.23.4.tgz#36fa1d2b36db873d25ec631dcc4923fdc1cf2e2e"
+  integrity sha512-2Yv65nlWnWlSpe3fXEyX5i7fx5kIKo4Qbcj+hMO0odwaneFjfXw5fdum+4yL20O0QiaHpia0cYQ9xpNMqrBwHg==
   dependencies:
     regenerator-runtime "^0.14.0"
 
@@ -965,9 +965,9 @@
     "@types/ms" "*"
 
 "@types/elliptic@^6.4.12":
-  version "6.4.17"
-  resolved "https://registry.yarnpkg.com/@types/elliptic/-/elliptic-6.4.17.tgz#6c9ff6ba137670c8bc3c65da2e23995b22ec3607"
-  integrity sha512-+NOzUIq9aenYuaIFS+8Gmv72r72zb12jttZsAsu4zEJ3QmQfGo958Kh0jQ+GJp5+uflE14KI4BcZqcsGCxTNFA==
+  version "6.4.18"
+  resolved "https://registry.yarnpkg.com/@types/elliptic/-/elliptic-6.4.18.tgz#bc96e26e1ccccbabe8b6f0e409c85898635482e1"
+  integrity sha512-UseG6H5vjRiNpQvrhy4VF/JXdA3V/Fp5amvveaL+fs28BZ6xIKJBPnUPRlEaZpysD9MbpfaLi8lbl7PGUAkpWw==
   dependencies:
     "@types/bn.js" "*"
 
@@ -1026,9 +1026,9 @@
   integrity sha512-9avDaQJczATcXgfmMAW3MIWArOO7A+m90vuCFLr8AotWf8igO/mRoYukrk2cqZVtv38tHs33retzHEilM7FpeQ==
 
 "@types/node@^18.0.4":
-  version "18.18.10"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.18.10.tgz#4971bffdf3a43977c4c8166aa714b2c0b05b3256"
-  integrity sha512-luANqZxPmjTll8bduz4ACs/lNTCLuWssCyjqTY9yLdsv1xnViQp3ISKwsEWOIecO13JWUqjVdig/Vjjc09o8uA==
+  version "18.18.11"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.18.11.tgz#d43f6b92671eacfdd1fedb7a897388fb8880323f"
+  integrity sha512-c1vku6qnTeujJneYH94/4aq73XrVcsJe35UPyAsSok1ijiKrkRzK+AxQPSpNMUnC03roWBBwJx/9I8V7lQoxmA==
   dependencies:
     undici-types "~5.26.4"
 
@@ -1043,9 +1043,9 @@
   integrity sha512-JCB8C6SnDoQf0cNycqd/35A7MjcnK+ZTqE7judS6o7utxUCg6imJg3QK2qzHKszlTjcj2cn+NwMB2i96ubpj7w==
 
 "@types/prop-types@^15.7.10":
-  version "15.7.10"
-  resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.7.10.tgz#892afc9332c4d62a5ea7e897fe48ed2085bbb08a"
-  integrity sha512-mxSnDQxPqsZxmeShFH+uwQ4kO4gcJcGahjjMFeLbKE95IAZiiZyiEepGZjtXJ7hN/yfu0bu9xN2ajcU0JcxX6A==
+  version "15.7.11"
+  resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.7.11.tgz#2596fb352ee96a1379c657734d4b913a613ad563"
+  integrity sha512-ga8y9v9uyeiLdpKddhxYQkxNDrfvuPrlFb0N1qnZZByvcElJaXthF1UhvCh9TLWJBEHeNtdnbysW7Y6Uq8CVng==
 
 "@types/randombytes@^2.0.0":
   version "2.0.3"
@@ -2044,9 +2044,9 @@ electron-to-chromium@^1.4.284:
   integrity sha512-mNuDxb+HpLhPGUKrg0hSxbTjHWw8EziwkwlJNkFUj3W60ypigLDRVz04vU+VRsJPi8Gub+FDhYUpuTm9xiEwRQ==
 
 electron-to-chromium@^1.4.535:
-  version "1.4.588"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.588.tgz#d553f3c008e73488fb181fdf2601fdb0b1ffbb78"
-  integrity sha512-soytjxwbgcCu7nh5Pf4S2/4wa6UIu+A3p03U2yVr53qGxi1/VTR3ENI+p50v+UxqqZAfl48j3z55ud7VHIOr9w==
+  version "1.4.589"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.589.tgz#3fc83c284ed8f1f58e0cb3c664c8ebcb4d0b42fb"
+  integrity sha512-zF6y5v/YfoFIgwf2dDfAqVlPPsyQeWNpEWXbAlDUS8Ax4Z2VoiiZpAPC0Jm9hXEkJm2vIZpwB6rc4KnLTQffbQ==
 
 elliptic@^6.5.2:
   version "6.5.4"
@@ -5213,9 +5213,9 @@ typescript@5.0.2:
   integrity sha512-wVORMBGO/FAs/++blGNeAVdbNKtIh1rbBL2EyQ1+J9lClJ93KiiKe8PmFIVdXhHcyv44SL9oglmfeSsndo0jRw==
 
 typescript@^5.1.6:
-  version "5.2.2"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.2.2.tgz#5ebb5e5a5b75f085f22bc3f8460fba308310fa78"
-  integrity sha512-mI4WrpHsbCIcwT9cF4FZvr80QUeKvsUsUvKDoR+X/7XHQH98xYD8YHZg7ANtz2GtZt/CBq2QJ0thkGJMHfqc1w==
+  version "5.3.2"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.3.2.tgz#00d1c7c1c46928c5845c1ee8d0cc2791031d4c43"
+  integrity sha512-6l+RyNy7oAHDfxC4FzSJcz9vnjTKxrLpDG5M2Vu4SHRVNg6xzqZp6LYSR9zjqQTu8DU/f5xwxUdADOkbrIX2gQ==
 
 uint8array-tools@0.0.7:
   version "0.0.7"

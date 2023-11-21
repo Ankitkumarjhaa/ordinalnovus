@@ -1,13 +1,9 @@
 // pages/api/v1/order/createBuyPsbt.ts
-// import { fetchLatestInscriptionData } from "@/utils/marketplace";
-import * as bitcoin from "bitcoinjs-lib";
-import secp256k1 from "@bitcoinerlab/secp256k1";
 import { Inscription } from "@/models";
 import dbConnect from "@/lib/dbConnect";
 import { NextRequest, NextResponse } from "next/server";
 import { fetchLatestInscriptionData } from "@/utils/Marketplace";
 import { buyOrdinalPSBT } from "@/utils/Marketplace/Buying";
-bitcoin.initEccLib(secp256k1);
 
 interface OrderInput {
   inscription_id: string;
@@ -59,7 +55,7 @@ async function processOrdItem(
     listed: true,
   });
 
-  console.log("got db listing", dbItem);
+  console.log("got db listing");
 
   if (!dbItem || !dbItem.address) {
     throw Error("Item not listed in db");

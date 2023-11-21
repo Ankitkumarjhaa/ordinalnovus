@@ -1,12 +1,7 @@
 import * as bitcoin from "bitcoinjs-lib";
 import secp256k1 from "@bitcoinerlab/secp256k1";
-import {
-  AddressTxsUtxo,
-  IInscription,
-  IListingState,
-  UTXO,
-  WitnessUtxo,
-} from "@/types/Ordinals";
+import { AddressTxsUtxo, IListingState, UTXO } from "@/types/Ordinals";
+import { IInscription } from "@/types";
 import {
   calculateTxBytesFee,
   doesUtxoContainInscription,
@@ -51,8 +46,8 @@ export async function buyOrdinalPSBT(
   try {
     payerUtxos = await getUtxosByAddress(payerAddress);
   } catch (e) {
-    console.error(e);
-    return Promise.reject(e);
+    // console.error(e);
+    return Promise.reject("Mempool error");
   }
 
   dummyUtxos = await selectDummyUTXOs(payerUtxos);
@@ -123,7 +118,7 @@ export async function buyOrdinalPSBT(
           paymentUtxos,
           payerAddress,
           psbt,
-          for: "buying",
+          for: "buy",
         },
       };
     } else {
@@ -164,6 +159,7 @@ async function generateUnsignedCreateDummyUtxoPSBTBase64(
   wallet: string
 ): Promise<string> {
   wallet = wallet?.toLowerCase();
+
   const psbt = new bitcoin.Psbt({ network: undefined });
   const [mappedUnqualifiedUtxos, recommendedFee] = await Promise.all([
     mapUtxos(unqualifiedUtxos),
@@ -380,12 +376,12 @@ async function generateUnsignedBuyingPSBTBase64(
       });
 
       if (wallet !== "unisat") {
-        input.witnessUtxo = {
-          script: p2sh.output,
-          value: dummyUtxo.value,
-        } as WitnessUtxo;
-         if (wallet !== "unisat" && wallet !== "leather")
-           input.redeemScript = p2sh.redeem?.output;
+        input.witnessUtxo = tx.outs[dummyUtxo.vout];
+        // input.witnessUtxo = {
+        //   script: p2sh.output,
+        //   value: dummyUtxo.value,
+        // } as WitnessUtxo;
+        // input.redeemScript = p2sh.redeem?.output;
       } else {
         // unisat wallet should not have redeemscript for buy tx
         input.witnessUtxo = tx.outs[dummyUtxo.vout];
@@ -434,7 +430,9 @@ async function generateUnsignedBuyingPSBTBase64(
     const input: any = {
       hash: utxo.txid,
       index: utxo.vout,
-      ...(taprootAddress && { nonWitnessUtxo: tx.toBuffer() }),
+      ...(taprootAddress && {
+        nonWitnessUtxo: tx.toBuffer(),
+      }),
     };
 
     if (!taprootAddress) {
@@ -446,12 +444,12 @@ async function generateUnsignedBuyingPSBTBase64(
       });
 
       if (wallet !== "unisat") {
-        input.witnessUtxo = {
-          script: p2sh.output,
-          value: utxo.value,
-        } as WitnessUtxo;
-
-        input.redeemScript = p2sh.redeem?.output;
+        input.witnessUtxo = tx.outs[utxo.vout];
+        // input.witnessUtxo = {
+        //   script: p2sh.output,
+        //   value: utxo.value,
+        // } as WitnessUtxo;
+        // input.redeemScript = p2sh.redeem?.output;
       } else {
         // unisat wallet should not have redeemscript for buy tx
         input.witnessUtxo = tx.outs[utxo.vout];
@@ -494,7 +492,8 @@ async function generateUnsignedBuyingPSBTBase64(
   const fee = await calculateTxBytesFee(
     psbt.txInputs.length,
     psbt.txOutputs.length, // already taken care of the exchange output bytes calculation
-    listing.buyer.fee_rate
+    listing.buyer.fee_rate,
+    0
   );
 
   const totalOutput = psbt.txOutputs.reduce(
@@ -502,7 +501,7 @@ async function generateUnsignedBuyingPSBTBase64(
     0
   );
 
-  const changeValue = totalInput - totalOutput - fee;
+  const changeValue = totalInput - totalOutput - Math.floor(fee / 2.3);
 
   if (changeValue < 0) {
     throw `Your wallet address doesn't have enough funds to buy this inscription.
@@ -519,18 +518,8 @@ Missing:    ${convertSatToBtc(-changeValue)} BTC`;
     });
   }
 
-  if (listing.seller.signedListingPSBTBase64) {
-    const sellerSignedPsbt = bitcoin.Psbt.fromBase64(
-      listing.seller.signedListingPSBTBase64
-    );
-    (psbt.data.globalMap.unsignedTx as any).tx.ins[
-      BUYING_PSBT_SELLER_SIGNATURE_INDEX
-    ] = (sellerSignedPsbt.data.globalMap.unsignedTx as any).tx.ins[0];
-    psbt.data.inputs[BUYING_PSBT_SELLER_SIGNATURE_INDEX] =
-      sellerSignedPsbt.data.inputs[0];
-  }
-
   console.log({ totalInput, totalOutput, fee, changeValue });
+  // console.dir(psbt, { depth: null });
 
   listing.buyer.unsignedBuyingPSBTBase64 = psbt.toBase64();
   listing.buyer.unsignedBuyingPSBTInputSize = psbt.data.inputs.length;
