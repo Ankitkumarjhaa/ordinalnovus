@@ -3,7 +3,7 @@
 import copy from "copy-to-clipboard";
 import { useDispatch } from "react-redux";
 import { addNotification } from "@/stores/reducers/notificationReducer";
-import { IInscription } from "@/types/Ordinals";
+import { IInscription } from "@/types";
 import React, { useState } from "react";
 import { AiFillCheckCircle } from "react-icons/ai";
 import { BsFillShareFill } from "react-icons/bs";
@@ -42,6 +42,8 @@ function InscriptionDetail({ data }: InscriptionProps) {
           <Link shallow href={`/collection/${data?.official_collection?.slug}`}>
             <p className="capitalize pb-1 flex items-baseline hover:underline">
               {data?.collection_item_name}
+              {"  #"}
+              {data?.collection_item_number}
               {data?.official_collection?.verified && (
                 <AiFillCheckCircle className="ml-2 text-yellow-500" />
               )}
