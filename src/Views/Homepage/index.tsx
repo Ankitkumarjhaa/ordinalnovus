@@ -129,7 +129,7 @@ function Homepage({ data }: HomepageProps) {
       </div> */}
       {/* <OrderbookSection data={data.orders} /> */}
       <Collections data={data.verified} />
-      {/* <Listed data={data.listings} /> */}
+      <Listed data={data.listings} />
       <Recent data={data.recentInscriptions} />
     </div>
   );
