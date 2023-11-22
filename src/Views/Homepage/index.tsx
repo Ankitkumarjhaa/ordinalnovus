@@ -1,5 +1,5 @@
 "use client";
-import { ICollection, RecentInscription } from "@/types/Ordinals";
+import { RecentInscription } from "@/types/Ordinals";
 import { Order } from "@/types/Ordinals/Orders";
 import React from "react";
 // import Collections from "./Collections";
@@ -7,7 +7,7 @@ import Hero from "./Hero";
 // import OrderbookSection from "./Orderbook";
 import Recent from "./RecentlyInscribed";
 import Collections from "./Collections";
-import { IInscription } from "@/types";
+import { ICollection, IInscription } from "@/types";
 import Listed from "./Listed";
 // import CustomCard from "@/components/elements/CustomCardSmall";
 type Data = {
