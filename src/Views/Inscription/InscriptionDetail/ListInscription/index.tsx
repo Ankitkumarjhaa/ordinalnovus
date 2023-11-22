@@ -188,7 +188,7 @@ function ListInscription({ data }: InscriptionProps) {
       dispatch(
         addNotification({
           id: new Date().valueOf(),
-          message: "Leather wallet transaction successful",
+          message: "Listed successfully",
           open: true,
           severity: "success",
         })
@@ -220,15 +220,7 @@ function ListInscription({ data }: InscriptionProps) {
       dispatch(
         addNotification({
           id: new Date().valueOf(),
-          message: "Leather wallet transaction successful",
-          open: true,
-          severity: "success",
-        })
-      );
-      dispatch(
-        addNotification({
-          id: new Date().valueOf(),
-          message: "Xverse wallet transaction successful",
+          message: "Listed successfully",
           open: true,
           severity: "success",
         })

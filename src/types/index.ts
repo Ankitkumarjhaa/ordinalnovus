@@ -1,4 +1,4 @@
-import { Document, Schema } from "mongoose";
+import mongoose, { Document, Schema } from "mongoose";
 
 export interface IApikeyResponse {
   success: boolean;
@@ -92,7 +92,7 @@ export interface IInscription {
   block?: number;
   content_length?: number;
   content_type?: string;
-  official_collection?: Schema.Types.ObjectId;
+  official_collection?: ICollection;
   collection_item_name?: string;
   collection_item_number?: number;
   attributes?: Attribute[];
@@ -130,6 +130,39 @@ export interface IInscription {
   last_checked?: Date;
   version?: number;
   token?: boolean;
+}
+
+export interface ICollection {
+  _id?: string;
+  name: string;
+  inscription_icon?: IInscription;
+  icon?: string;
+  supply?: number;
+  slug: string;
+  description: string;
+  twitter_link?: string;
+  discord_link?: string;
+  website_link?: string;
+  live?: boolean;
+  featured?: boolean;
+  blockchain: "btc" | "ltc" | "doge";
+  flagged?: boolean;
+  banned?: boolean;
+  verified?: boolean;
+  updated_by?: string;
+  type: "official" | "list";
+  tags?: string[];
+  favorites: string[];
+  updated?: number;
+  errored?: number;
+  error?: boolean;
+  errored_inscriptions: string[];
+  error_tag?: string;
+  min?: number;
+  max?: number;
+  priority?: number;
+  created_at?: Date;
+  updated_at?: Date;
 }
 
 export interface ISale extends Document {

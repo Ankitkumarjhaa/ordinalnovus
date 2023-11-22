@@ -3,7 +3,6 @@ import axios from "axios";
 import dbConnect from "@/lib/dbConnect";
 import apiKeyMiddleware from "@/newMiddlewares/apikeyMiddleware";
 import { CustomError } from "@/utils";
-import { IInscription } from "@/types/Ordinals";
 import { Inscription } from "@/models";
 
 type Data = {
@@ -28,6 +27,10 @@ async function fetchInscriptions(query: any, page: number, limit: number) {
   try {
     const response = await Inscription.find({ ...query })
       .limit(limit || 20)
+      .populate({
+        path: "official_collection",
+        select: "name slug supply updated verified featured",
+      })
       .select("-created_at -updated_at -error_tag -error-retry -error ");
 
     const inscriptions = response || [];
@@ -121,7 +124,7 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
     } else {
       return NextResponse.json(
         {
-          message: "ID is inavlid",
+          message: "ID is invalid",
         },
         {
           status: 500,

@@ -285,14 +285,20 @@ const CardContent: React.FC<CardContentProps> = ({
       )}
       {isLoading ? (
         <div className="flex justify-center items-center h-full text-white py-6  w-full">
-          <CircularProgress color="inherit" size={10} />{" "}
+          {/* <CircularProgress color="inherit" size={10} />{" "} */}
+          <div className="min-h-[100px] lg:w-full relative rounded-xl overflow-hidden">
+            <div className="relative bg-gray-500 animate-pulse rounded-xl overflow-hidden w-full h-full aspect-square"></div>
+          </div>
           {/* Display the loading component */}
         </div>
       ) : fetchedContent ? (
         renderContent()
       ) : (
         <div className="flex justify-center items-center h-full text-white py-6  w-full">
-          <CircularProgress color="inherit" size={10} />{" "}
+          {/* <CircularProgress color="inherit" size={10} />{" "} */}
+          <div className="min-h-[100px] lg:w-full relative rounded-xl overflow-hidden">
+            <div className="relative bg-gray-500 animate-pulse rounded-xl overflow-hidden w-full h-full aspect-square"></div>
+          </div>
           {/* Display the loading component */}
         </div>
       )}

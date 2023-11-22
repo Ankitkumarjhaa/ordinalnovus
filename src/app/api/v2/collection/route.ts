@@ -7,6 +7,8 @@ import { getCache, setCache } from "@/lib/cache";
 import apiKeyMiddleware from "@/newMiddlewares/apikeyMiddleware";
 import { CustomError } from "@/utils";
 
+//TODO: return collection listings and FP
+
 async function getCollections(query: any) {
   try {
     const coll = await Collection.find(query.find)
