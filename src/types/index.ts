@@ -133,7 +133,7 @@ export interface IInscription {
 }
 
 export interface ICollection {
-  _id?: mongoose.Types.ObjectId;
+  _id?: string;
   name: string;
   inscription_icon?: IInscription;
   icon?: string;

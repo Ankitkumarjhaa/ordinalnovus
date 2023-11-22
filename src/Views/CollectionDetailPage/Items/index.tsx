@@ -4,7 +4,7 @@ import CustomPaginationComponent from "@/components/elements/CustomPagination";
 import CustomSearch from "@/components/elements/CustomSearch";
 import CustomSelector from "@/components/elements/CustomSelector";
 import { addNotification } from "@/stores/reducers/notificationReducer";
-import { ICollection, IInscription } from "@/types/Ordinals";
+import { ICollection, IInscription } from "@/types";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import CollectionItemCard from "./CollectionItemCard";
@@ -16,9 +16,9 @@ type ItemProps = {
 };
 
 const options = [
-  { value: "collection_item_number:1", label: "Default" },
+  { value: "listed_price:-1", label: "Default" },
+  { value: "collection_item_number:1", label: "Item Name" },
   { value: "inscription_number:1", label: "Number" },
-  // { value: "price:1", label: "Price" },
 ];
 
 function Items({ collection }: ItemProps) {
@@ -27,7 +27,7 @@ function Items({ collection }: ItemProps) {
   const [data, setData] = useState<IInscription[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(40);
-  const [sort, setSort] = useState<string>("collection_item_number:1");
+  const [sort, setSort] = useState<string>("listed_price:-1");
   const [search, setSearch] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
