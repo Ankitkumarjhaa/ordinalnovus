@@ -3,7 +3,7 @@ export default async function searchInscription({ id }: { id: string }) {
   const link = `${process.env.NEXT_PUBLIC_URL}/api/v2/search/inscription?apikey=${process.env.API_KEY}&&id=${id}`;
 
   const res = await fetch(link, {
-    next: { revalidate: 60 },
+    cache: "no-store",
   });
 
   // console.log(res, "res");

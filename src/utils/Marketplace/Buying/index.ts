@@ -492,8 +492,8 @@ async function generateUnsignedBuyingPSBTBase64(
   const fee = await calculateTxBytesFee(
     psbt.txInputs.length,
     psbt.txOutputs.length, // already taken care of the exchange output bytes calculation
-    listing.buyer.fee_rate,
-    0
+    listing.buyer.fee_rate
+    // 0
   );
 
   const totalOutput = psbt.txOutputs.reduce(
@@ -501,7 +501,7 @@ async function generateUnsignedBuyingPSBTBase64(
     0
   );
 
-  const changeValue = totalInput - totalOutput - Math.floor(fee / 2.3);
+  const changeValue = totalInput - totalOutput - Math.floor(fee / 2);
 
   if (changeValue < 0) {
     throw `Your wallet address doesn't have enough funds to buy this inscription.
