@@ -15,6 +15,7 @@ async function getUnsignedPsbt(data: CreateBuyingPsbtData): Promise<{
   message: string;
   for?: string;
   unsigned_psbt_base64?: string;
+  input_length?: number;
 }> {
   try {
     const response = await axios.post(
@@ -33,13 +34,14 @@ async function getUnsignedPsbt(data: CreateBuyingPsbtData): Promise<{
         ok: response.data.ok,
         message: response.data.message,
         unsigned_psbt_base64: response.data.unsigned_psbt_base64,
+        input_length: response.data.input_length,
         for: response.data.for,
       };
     } else {
       throw new Error("Error generating unsigned PSBT");
     }
   } catch (error: any) {
-    console.log(error, "error");
+    console.log(error.response.data.message, "error");
     return {
       ok: false,
       message: error.response.data.message || "Error generating unsigned PSBT",

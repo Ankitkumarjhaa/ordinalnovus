@@ -106,6 +106,7 @@ export async function POST(
     receive_address?: string;
     pay_address?: string;
     unsigned_psbt_base64?: string;
+    input_length: number;
     message: string;
     for?: string;
   }>
@@ -143,6 +144,7 @@ export async function POST(
     return NextResponse.json({
       ok: true,
       unsigned_psbt_base64: psbt,
+      input_length: result.data.psbt.buyer.unsignedBuyingPSBTInputSize,
       // ...result,
       inscription_id: body.inscription_id,
       receive_address: body.receive_address,
