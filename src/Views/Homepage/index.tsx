@@ -111,7 +111,7 @@ function Homepage({ data }: HomepageProps) {
       {/* <div className="bg-yellow-700 w-full my-2 text-center py-1 text-xs uppercase font-bold text-white">
         Under development{" "}
       </div> */}
-      {data.percentParsed < 95 && (
+      {data.percentParsed < 98 && (
         <div className="bg-yellow-700 w-full my-2 text-center text-xs uppercase font-bold text-white flex justify-start">
           <span
             style={{ width: `${data.percentParsed}%` }}
