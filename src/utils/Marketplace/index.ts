@@ -5,15 +5,11 @@ import * as ecc from "tiny-secp256k1";
 import { mempoolBitcoin } from "..";
 
 //types
-import {
-  AddressTxsUtxo,
-  FeeRateTier,
-  IInscription,
-  UTXO,
-} from "@/types/Ordinals";
+import { AddressTxsUtxo, FeeRateTier, UTXO } from "@/types/Ordinals";
 
 //others
 import axios from "axios";
+import { IInscription } from "@/types";
 
 export const baseMempoolApiUrl = `https://mempool.space/api`;
 const feeLevel: FeeRateTier = "halfHourFee";
@@ -197,7 +193,7 @@ function getSellerOrdOutputValue(
   const outputValue = price - makerFee + prevUtxoValue;
   console.log("Output Value: ", outputValue);
 
-  return outputValue;
+  return Math.floor(outputValue);
 }
 
 export const fromXOnly = (buffer: Buffer): string => {

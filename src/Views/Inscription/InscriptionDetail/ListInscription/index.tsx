@@ -2,7 +2,7 @@
 import CustomButton from "@/components/elements/CustomButton";
 // import { useSignTx } from "@/hooks/useHiroSignTx";
 import { addNotification } from "@/stores/reducers/notificationReducer";
-import { IInscription } from "@/types/Ordinals";
+import { IInscription } from "@/types";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import copy from "copy-to-clipboard";
@@ -22,13 +22,14 @@ import {
   useXverseSign,
 } from "bitcoin-wallet-adapter";
 import listInscription from "@/apiHelper/listInscription";
-
+import { useRouter } from "next/navigation";
 type InscriptionProps = {
   data: IInscription;
 };
 
 function ListInscription({ data }: InscriptionProps) {
   const dispatch = useDispatch();
+  const router = useRouter();
   const walletDetails = useWalletAddress();
   const {
     loading: leatherLoading,
@@ -159,6 +160,15 @@ function ListInscription({ data }: InscriptionProps) {
       if (result.ok) {
         // copy(result.unsigned_psbt_base64);
         setUnsignedPsbtBase64("");
+        dispatch(
+          addNotification({
+            id: new Date().valueOf(),
+            message: "Listed successfully",
+            open: true,
+            severity: "success",
+          })
+        );
+        router.refresh();
       } else {
         setUnsignedPsbtBase64("");
         throw Error(result.message);
@@ -185,14 +195,7 @@ function ListInscription({ data }: InscriptionProps) {
       if (leatherResult) {
         listOrdinal(leatherResult);
       }
-      dispatch(
-        addNotification({
-          id: new Date().valueOf(),
-          message: "Listed successfully",
-          open: true,
-          severity: "success",
-        })
-      );
+
       // Additional logic here
     }
 
@@ -217,14 +220,7 @@ function ListInscription({ data }: InscriptionProps) {
       if (xverseResult.psbtBase64) {
         listOrdinal(xverseResult.psbtBase64);
       }
-      dispatch(
-        addNotification({
-          id: new Date().valueOf(),
-          message: "Listed successfully",
-          open: true,
-          severity: "success",
-        })
-      );
+
       // Additional logic here
     }
 

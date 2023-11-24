@@ -4,7 +4,7 @@ import axios from "axios";
 import dbConnect from "@/lib/dbConnect";
 import crypto from "crypto";
 import { fetchContentFromProviders } from "@/utils";
-import { IInscription } from "@/types/Ordinals";
+import { IInscription } from "@/types";
 import moment from "moment";
 
 // Function to fetch details of a single inscription
@@ -207,7 +207,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       };
     });
 
-    // await deleteInscriptionsAboveThreshold();
+    // await deleteInscriptionsAboveThreshold(43038000);
 
     // Perform the bulk insert after transformations are done
     if (bulkWriteOperations.length > 0)
@@ -328,12 +328,12 @@ const handlePreSaveLogic = async (bulkDocs: Array<Partial<any>>) => {
   return transformedBulkOps;
 };
 
-const deleteInscriptionsAboveThreshold = async () => {
+const deleteInscriptionsAboveThreshold = async (number: number) => {
   console.time("Time Taken for Deleting Documents");
 
   try {
     const result = await Inscription.deleteMany({
-      inscription_number: { $gt: 700000 },
+      inscription_number: { $gt: number },
     });
 
     console.log(`Successfully deleted ${result.deletedCount} documents.`);

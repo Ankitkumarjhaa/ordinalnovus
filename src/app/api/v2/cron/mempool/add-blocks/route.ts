@@ -90,6 +90,8 @@ const fetchTransactions = async (index: number, blockhash: string) => {
   } catch (error: any) {
     if (error.response && error.response.status === 404) {
       return []; // Return empty array for 404 errors
+    } else if (error.response && error.response.status === 400) {
+      // throw Error("wrong number of tx in DB");
     } else {
       throw error; // Re-throw other errors
     }
@@ -121,6 +123,10 @@ async function addBlockTxToDB(blockhash: string) {
   }
 
   let startIndex = existingTxIds.length;
+  if (startIndex % 25 !== 0) {
+    await Tx.deleteMany({ blockhash: new ObjectId(dbBlockDetail._id) });
+    throw Error("wrong number of tx in DB");
+  }
   let allBlockTxsData: any = [];
   const maxTransactions = 100;
   const batchSize = 25; // Each call handles 25 transactions
@@ -257,12 +263,9 @@ export async function GET(req: NextRequest, res: NextResponse) {
           "No new blocks to process. Latest block height is already saved."
         );
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error("Failed to get block information:", e);
-      return NextResponse.json(
-        { message: "Failed to get initial block height" },
-        { status: 500 }
-      );
+      return NextResponse.json({ message: e.message || e }, { status: 500 });
     }
   } catch (error) {
     console.error(error);

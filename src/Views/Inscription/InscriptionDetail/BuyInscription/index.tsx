@@ -17,12 +17,14 @@ import {
 } from "bitcoin-wallet-adapter";
 import getUnsignedBuyPsbt from "@/apiHelper/getUnsignedBuyPsbt";
 import FeePicker from "@/components/elements/FeePicker";
+import { useRouter } from "next/navigation";
 import axios from "axios";
 type InscriptionProps = {
   data: IInscription;
 };
 
 function BuyInscription({ data }: InscriptionProps) {
+  const router = useRouter();
   const dispatch = useDispatch();
   const {
     loading: leatherLoading,
@@ -41,6 +43,7 @@ function BuyInscription({ data }: InscriptionProps) {
   const [loading, setLoading] = useState<boolean>(false);
 
   const [unsignedPsbtBase64, setUnsignedPsbtBase64] = useState<string>("");
+  const [inputLength, setInputLength] = useState(0);
   const [action, setAction] = useState<string>("");
   const [feeRate, setFeeRate] = useState(0);
 
@@ -98,6 +101,7 @@ function BuyInscription({ data }: InscriptionProps) {
           console.log(result, "UNSIGNED DUMMY");
         } else {
           setAction("buy");
+          setInputLength(result?.input_length || 0);
 
           setUnsignedPsbtBase64(result.unsigned_psbt_base64);
 
@@ -129,6 +133,7 @@ function BuyInscription({ data }: InscriptionProps) {
       });
       setLoading(false);
       console.log(data);
+      router.refresh();
       dispatch(
         addNotification({
           id: new Date().valueOf(),
@@ -169,35 +174,14 @@ function BuyInscription({ data }: InscriptionProps) {
         index: [0],
       });
     } else if (action === "buy") {
-      inputs.push({
-        address: walletDetails.cardinal_address,
-        publickey: walletDetails.cardinal_pubkey,
-        sighash: 1,
-        index: [0],
-      });
-      inputs.push({
-        address: walletDetails.cardinal_address,
-        publickey: walletDetails.cardinal_pubkey,
-        sighash: 1,
-        index: [1],
-      });
-      inputs.push({
-        address: walletDetails.cardinal_address,
-        publickey: walletDetails.cardinal_pubkey,
-        sighash: 1,
-        index: [3],
-      });
-      inputs.push({
-        address: walletDetails.cardinal_address,
-        publickey: walletDetails.cardinal_pubkey,
-        sighash: 1,
-        index: [4],
-      });
-      inputs.push({
-        address: walletDetails.cardinal_address,
-        publickey: walletDetails.cardinal_pubkey,
-        sighash: 1,
-        index: [5],
+      new Array(inputLength).fill(1).map((item: number, idx: number) => {
+        if (idx !== 2)
+          inputs.push({
+            address: walletDetails.cardinal_address,
+            publickey: walletDetails.cardinal_pubkey,
+            sighash: 1,
+            index: [idx],
+          });
       });
     }
     if (walletDetails.wallet === "Leather") {
@@ -228,19 +212,20 @@ function BuyInscription({ data }: InscriptionProps) {
     if (leatherResult) {
       // Handle successful result from leather wallet sign
       console.log("Leather Sign Result:", leatherResult);
+      dispatch(
+        addNotification({
+          id: new Date().valueOf(),
+          message: "Tx signed successfully",
+          open: true,
+          severity: "success",
+        })
+      );
 
       if (leatherResult) {
         broadcast(leatherResult);
         // listOrdinal(leatherResult);
       }
-      dispatch(
-        addNotification({
-          id: new Date().valueOf(),
-          message: "Leather wallet transaction successful",
-          open: true,
-          severity: "success",
-        })
-      );
+
       // Additional logic here
     }
 
@@ -262,26 +247,19 @@ function BuyInscription({ data }: InscriptionProps) {
     if (xverseResult) {
       // Handle successful result from xverse wallet sign
       console.log("Xverse Sign Result:", xverseResult);
+      dispatch(
+        addNotification({
+          id: new Date().valueOf(),
+          message: "Tx signed successfully",
+          open: true,
+          severity: "success",
+        })
+      );
       if (xverseResult.psbtBase64) {
         broadcast(xverseResult.psbtBase64);
         // listOrdinal(xverseResult.psbtBase64);
       }
-      dispatch(
-        addNotification({
-          id: new Date().valueOf(),
-          message: "Leather wallet transaction successful",
-          open: true,
-          severity: "success",
-        })
-      );
-      dispatch(
-        addNotification({
-          id: new Date().valueOf(),
-          message: "Xverse wallet transaction successful",
-          open: true,
-          severity: "success",
-        })
-      );
+
       // Additional logic here
     }
 

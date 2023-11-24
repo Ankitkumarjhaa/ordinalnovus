@@ -381,7 +381,7 @@ async function generateUnsignedBuyingPSBTBase64(
         //   script: p2sh.output,
         //   value: dummyUtxo.value,
         // } as WitnessUtxo;
-        // input.redeemScript = p2sh.redeem?.output;
+        if (wallet === "xverse") input.redeemScript = p2sh.redeem?.output;
       } else {
         // unisat wallet should not have redeemscript for buy tx
         input.witnessUtxo = tx.outs[dummyUtxo.vout];
@@ -449,7 +449,7 @@ async function generateUnsignedBuyingPSBTBase64(
         //   script: p2sh.output,
         //   value: utxo.value,
         // } as WitnessUtxo;
-        // input.redeemScript = p2sh.redeem?.output;
+        if (wallet === "xverse") input.redeemScript = p2sh.redeem?.output;
       } else {
         // unisat wallet should not have redeemscript for buy tx
         input.witnessUtxo = tx.outs[utxo.vout];
@@ -469,7 +469,7 @@ async function generateUnsignedBuyingPSBTBase64(
   // Create a platform fee output
   let platformFeeValue = Math.floor((listing.seller.price * (0 + 100)) / 10000);
   platformFeeValue =
-    platformFeeValue > DUMMY_UTXO_MIN_VALUE ? platformFeeValue : 0;
+    platformFeeValue > DUMMY_UTXO_MIN_VALUE ? platformFeeValue : 580;
 
   console.log(platformFeeValue, "PLATFORM_FEE");
   if (platformFeeValue > 0) {
@@ -492,8 +492,8 @@ async function generateUnsignedBuyingPSBTBase64(
   const fee = await calculateTxBytesFee(
     psbt.txInputs.length,
     psbt.txOutputs.length, // already taken care of the exchange output bytes calculation
-    listing.buyer.fee_rate,
-    0
+    listing.buyer.fee_rate
+    // 0
   );
 
   const totalOutput = psbt.txOutputs.reduce(
@@ -501,7 +501,7 @@ async function generateUnsignedBuyingPSBTBase64(
     0
   );
 
-  const changeValue = totalInput - totalOutput - Math.floor(fee / 2.3);
+  const changeValue = totalInput - totalOutput - Math.floor(fee / 2);
 
   if (changeValue < 0) {
     throw `Your wallet address doesn't have enough funds to buy this inscription.
