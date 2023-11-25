@@ -13,6 +13,7 @@ import {
   calculateTxBytesFeeWithRate,
 } from "@/utils/Marketplace";
 import { convertSatToBtc } from "@/utils";
+import { satsToDollars } from "@/utils/Inscribe";
 
 const DUMMY_UTXO_MAX_VALUE = Number(1000);
 const DUMMY_UTXO_MIN_VALUE = Number(580);
@@ -315,9 +316,12 @@ async function selectPaymentUTXOs(
   }
 
   if (selectedAmount < amount) {
-    throw new Error(`Not enough cardinal spendable funds.
-Address has:  ${convertSatToBtc(selectedAmount)} BTC
-Needed:       ${convertSatToBtc(amount)} BTC`);
+    throw `Your wallet needs ${Number(
+      await satsToDollars(amount - selectedAmount)
+    ).toFixed(2)} USD more`;
+    throw new Error(`Not enough cardinal spendable funds. \n
+Address has:  ${await satsToDollars(selectedAmount)} USD \n
+Needed:       ${await satsToDollars(amount)} USD`);
   }
 
   return selectedUtxos;
@@ -504,6 +508,9 @@ async function generateUnsignedBuyingPSBTBase64(
   const changeValue = totalInput - totalOutput - Math.floor(fee / 2);
 
   if (changeValue < 0) {
+    throw `Your wallet needs ${Number(
+      await satsToDollars(-changeValue)
+    ).toFixed(2)} USD more`;
     throw `Your wallet address doesn't have enough funds to buy this inscription.
 Price:      ${convertSatToBtc(listing.seller.price)} BTC
 Required:   ${convertSatToBtc(totalOutput + fee)} BTC

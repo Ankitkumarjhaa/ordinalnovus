@@ -47,6 +47,10 @@ function AccountPage() {
         fetchData();
       }
     }
+    if (!walletDetails.connected) {
+      console.log({ walletDetails });
+      return router.push("/");
+    }
   }, [walletDetails, inscriptions]);
 
   return (

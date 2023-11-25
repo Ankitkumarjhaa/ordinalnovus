@@ -56,7 +56,7 @@ function CollectionsSection({ data }: CollectionsProps) {
           />
         </div>
       </div>
-      <div className="flex flex-wrap items-center justify-center">
+      <div className="flex flex-wrap items-center justify-start">
         {/* {staticCollections.map((item) => (
           <StaticCard key={item.name} item={item} />
         ))} */}
