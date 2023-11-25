@@ -71,6 +71,7 @@ interface Attribute {
 }
 
 export interface IInscription {
+  _id: string;
   inscription_number: number;
   inscription_id: string;
   content?: string;

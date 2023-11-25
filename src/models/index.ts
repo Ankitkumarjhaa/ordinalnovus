@@ -5,7 +5,7 @@ import { APIKeySchema } from "./APIKey";
 import { TXCacheSchema } from "./tx";
 import { BlocksSchema } from "./block";
 import { InscribeSchema } from "./Inscribe";
-import { salesSchema } from "./Sales";
+import { salesSchema } from "./Sale";
 
 const Inscription =
   models.Inscription || model("Inscription", inscriptionSchema);

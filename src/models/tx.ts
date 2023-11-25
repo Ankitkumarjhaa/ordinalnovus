@@ -52,6 +52,8 @@ export const TXCacheSchema = new mongoose.Schema(
     weight: { type: Number },
     fee: { type: Number },
     status: { confirmed: { type: Boolean } },
+    marketplace: { type: String },
+    timestamp: { type: Date, required: true },
   },
   {
     timestamps: true,
@@ -61,7 +63,7 @@ export const TXCacheSchema = new mongoose.Schema(
 TXCacheSchema.index({ txid: 1, height: 1 });
 TXCacheSchema.index({ tag: 1 });
 TXCacheSchema.index({ parsed: 1 });
-TXCacheSchema.index({ from: 1 });
+TXCacheSchema.index({ from: 1, to: 1, price: 1, marketplace: 1 });
 TXCacheSchema.index({ inscription: 1 });
-TXCacheSchema.index({ to: 1 });
 TXCacheSchema.index({ blockhash: 1 });
+TXCacheSchema.index({ timestamp: 1 });

@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
 import dbConnect from "@/lib/dbConnect";
 import moment from "moment";
-import { Inscription, Tx } from "@/models";
-import { IVOUT } from "@/types/Tx";
+import { Tx, Sale, Inscription } from "@/models";
+import { IVIN, IVOUT } from "@/types/Tx";
+import { ITXDATA, constructTxData } from "@/utils/api/constructTxData";
+import { IInscription } from "@/types";
 
 interface IInscriptionDetails {
   inscription_id: string;
@@ -25,7 +27,9 @@ interface IInscriptionDetails {
 }
 
 async function fetchInscriptionsFromOutput(
-  output: string
+  output: string,
+  vin: IVIN[],
+  vout: IVOUT[]
 ): Promise<IInscriptionDetails[]> {
   try {
     const apiUrl = `${process.env.NEXT_PUBLIC_PROVIDER}/api/output/${output}`;
@@ -36,6 +40,7 @@ async function fetchInscriptionsFromOutput(
     }
     const details = data.inscription_details.map((i: any) => ({
       inscription_id: i.inscription_id,
+      txData: constructTxData(i.inscription_id, vin, vout),
       body: {
         location: i.location,
         offset: Number(i.offset),
@@ -74,6 +79,7 @@ async function parseTxData(sort: 1 | -1, skip: number) {
 
     const txBulkOps = [];
     const inscriptionBulkOps: any = [];
+    const salesBulkOps: any = [];
 
     if (!nonParsedTxs.length) {
       return {
@@ -95,7 +101,11 @@ async function parseTxData(sort: 1 | -1, skip: number) {
         if (v?.scriptpubkey_address?.startsWith("bc1p") && index < 10) {
           // const isInscribeTx = parseInscription({ vin });
           // if (!isInscribeTx?.base64Data)
-          return fetchInscriptionsFromOutput(`${txid}:${index}`);
+          return fetchInscriptionsFromOutput(
+            `${txid}:${index}`,
+            tx.vin,
+            tx.vout
+          );
         }
         return [];
       });
@@ -103,12 +113,15 @@ async function parseTxData(sort: 1 | -1, skip: number) {
       const inscriptions = (await Promise.all(outputPromises)).flat();
       isInscribed = inscriptions.some((i) => i.inscription_id.startsWith(txid));
 
+      let txData: ITXDATA | null;
       inscriptionIds = inscriptions.map((i) => {
         modifiedInscriptionIds.push(i.inscription_id);
+
         return i.inscription_id;
       });
 
       inscriptions.forEach((i) => {
+        txData = i.txData || null;
         inscriptionBulkOps.push({
           updateOne: {
             filter: { inscription_id: i.inscription_id },
@@ -124,17 +137,64 @@ async function parseTxData(sort: 1 | -1, skip: number) {
             $set: {
               ...(inscriptionIds.length && { inscriptions: inscriptionIds }),
               ...(inscriptionIds.length > 0
-                ? { tag: isInscribed ? "inscribed" : "others" }
+                ? {
+                    tag: isInscribed
+                      ? "inscribed"
+                      : txData && (txData as ITXDATA) && txData.tag
+                      ? txData.tag
+                      : "others",
+                  }
                 : {}),
               parsed: true,
+              ...(txData && { from: txData.from }),
+              ...(txData && { to: txData.to }),
+              ...(txData && { price: txData.price }),
+              ...(txData && { marketplace: txData.marketplace }),
             },
           },
         },
       });
+
+      if (
+        txData &&
+        txData.tag === "sale" &&
+        txData.marketplace === "ordinalnovus"
+      ) {
+        const inscription_id = inscriptionIds[0];
+        const inscription: IInscription | null = await Inscription.findOne({
+          inscription_id,
+        }).populate("official_collection");
+        if (inscription) {
+          salesBulkOps.push({
+            insertOne: {
+              document: {
+                inscription: inscription._id,
+                inscription_id,
+                output_value: inscription.output_value,
+                location: inscription.location,
+
+                sale_date: tx.timestamp,
+                fee: tx.fee,
+                price: txData.price,
+                from: txData.from, // seller_ordinal_address
+                seller_receive_address:
+                  inscription.listed_seller_receive_address, // seller_payment_addres
+                to: txData.to, // buyer_ordinal_address,
+                txid: tx.txid,
+                marketplace_fee: txData.fee,
+              },
+            },
+          });
+        }
+      }
     }
 
     if (txBulkOps.length > 0) {
       await Tx.bulkWrite(txBulkOps);
+    }
+
+    if (salesBulkOps.length > 0) {
+      await Sale.bulkWrite(salesBulkOps);
     }
 
     if (inscriptionBulkOps.length > 0) {
@@ -142,10 +202,11 @@ async function parseTxData(sort: 1 | -1, skip: number) {
     }
 
     return {
-      modifiedTxIds,
-      modifiedInscriptionIds,
-      inscriptionBulkOps,
-      txBulkOps,
+      modifiedTxIds: modifiedTxIds.length,
+      modifiedInscriptionIds: modifiedInscriptionIds.length,
+      salesBulkOps: salesBulkOps.length,
+      inscriptionBulkOps: inscriptionBulkOps.length,
+      txBulkOps: txBulkOps.length,
     };
   } catch (error) {
     console.error("Error in parsing transactions:", error);
@@ -167,7 +228,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
     await Tx.deleteMany({ ...query });
 
     console.log("Starting parsing...");
-    // const result = await parseTxData(1);
+    // const result = await parseTxData(1, 0);
     const result = await Promise.allSettled([
       parseTxData(1, 0),
       parseTxData(1, LIMIT),
@@ -197,6 +258,7 @@ async function resetParsedAndRemoveFields() {
         inscriptions: "",
         from: "",
         to: "",
+        marketplace: "",
         price: "",
         tag: "",
       },

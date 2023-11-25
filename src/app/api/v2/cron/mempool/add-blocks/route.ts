@@ -186,6 +186,7 @@ async function addBlockTxToDB(blockhash: string) {
           vin: inputs,
           vout: outputs,
           height: dbBlockDetail.height,
+          timestamp: new Date(item.status.block_time * 1000),
         },
       },
     });
@@ -325,8 +326,8 @@ export async function POST(req: NextRequest, res: NextResponse) {
       message: `Sync completed for block height ${blockHeight}`,
       operationMessage,
     });
-  } catch (error) {
-    console.error(error);
+  } catch (error: any) {
+    console.error(error.response.data.message || error.message || error);
     return NextResponse.json(
       { message: "Error fetching and saving txids for the block height" },
       { status: 500 }

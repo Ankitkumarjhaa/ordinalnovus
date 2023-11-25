@@ -472,8 +472,8 @@ async function generateUnsignedBuyingPSBTBase64(
 
   // Create a platform fee output
   let platformFeeValue = Math.floor((listing.seller.price * (0 + 100)) / 10000);
-  platformFeeValue =
-    platformFeeValue > DUMMY_UTXO_MIN_VALUE ? platformFeeValue : 580;
+  platformFeeValue = 580; // TODO: Discount Till We get some traction
+  // platformFeeValue > DUMMY_UTXO_MIN_VALUE ? platformFeeValue : 580;
 
   console.log(platformFeeValue, "PLATFORM_FEE");
   if (platformFeeValue > 0) {
