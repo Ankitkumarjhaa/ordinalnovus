@@ -135,15 +135,15 @@ function checkFor4InputSale(
     outputArray[0].value != null &&
     inputArray[0].value + inputArray[1].value === outputArray[0].value;
 
-  const isInputValid =
-    inputArray[2].address?.startsWith(BC1P_PREFIX) &&
-    inputArray[2].type === V1_P2TR_TYPE;
+  // const isInputValid =
+  //   inputArray[2].address?.startsWith(BC1P_PREFIX) &&
+  //   inputArray[2].type === V1_P2TR_TYPE;
 
-  const isOutputValid =
-    outputArray[1].address?.startsWith(BC1P_PREFIX) &&
-    outputArray[1].type === V1_P2TR_TYPE;
+  // const isOutputValid =
+  //   outputArray[1].address?.startsWith(BC1P_PREFIX) &&
+  //   outputArray[1].type === V1_P2TR_TYPE;
 
-  if (isValueMatch && isInputValid && isOutputValid) {
+  if (isValueMatch) {
     const result: ITXDATAWITHOUTTXID = {
       from: inputArray[2].address || "",
       to: outputArray[1].address || "",
