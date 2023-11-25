@@ -81,7 +81,7 @@ function AccountPage() {
                 inscription.content_type.includes("image")
             ) && (
               <div className="pb-16">
-                <h2 className="text-2xl font-bold ">Image Inscriptions</h2>
+                <h2 className="text-2xl font-bold pb-4">Image Inscriptions</h2>
                 <div className="center flex-wrap">
                   {inscriptions
                     .filter(
@@ -94,6 +94,9 @@ function AccountPage() {
                         key={item.inscription_id}
                         className="w-3/12 relative"
                       >
+                        <p className="absolute bg-bitcoin rounded-full font-bold text-yellow-900 text-sm p-1 z-10">
+                          V{item.version}
+                        </p>
                         <CustomCard
                           number={item.inscription_number}
                           key={item.inscription_id}
@@ -114,7 +117,7 @@ function AccountPage() {
                 inscription.content_type.includes("video")
             ) && (
               <div className="pb-16">
-                <h2 className="text-2xl font-bold ">Video Inscriptions</h2>
+                <h2 className="text-2xl font-bold pb-4">Video Inscriptions</h2>
                 <div className="center flex-wrap">
                   {inscriptions
                     .filter(
@@ -147,7 +150,7 @@ function AccountPage() {
                 inscription.content_type.includes("text")
             ) && (
               <div className="pb-16">
-                <h2 className="text-2xl font-bold ">Text Inscriptions</h2>
+                <h2 className="text-2xl font-bold pb-4">Text Inscriptions</h2>
                 <div className="center flex-wrap">
                   {inscriptions
                     .filter(
@@ -160,6 +163,16 @@ function AccountPage() {
                         key={item.inscription_id}
                         className="w-3/12 relative"
                       >
+                        {item.version && (
+                          <p className="absolute bg-bitcoin rounded-full font-bold text-yellow-900 text-sm p-1 z-10">
+                            V{item.version}
+                          </p>
+                        )}
+                        {item.token && (
+                          <p className="absolute bg-bitcoin rounded-full font-bold text-yellow-900 text-sm p-1 z-10 right-0">
+                            {"token"}
+                          </p>
+                        )}
                         <CustomCard
                           number={item.inscription_number}
                           key={item.inscription_id}
@@ -183,7 +196,7 @@ function AccountPage() {
                 )
             ) && (
               <div className="pb-16">
-                <h2 className="text-2xl font-bold ">Other Inscriptions</h2>
+                <h2 className="text-2xl font-bold pb-4">Other Inscriptions</h2>
                 <div className="center flex-wrap">
                   {inscriptions
                     .filter(
