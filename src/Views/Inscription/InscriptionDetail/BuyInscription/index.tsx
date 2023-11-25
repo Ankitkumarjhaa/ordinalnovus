@@ -14,6 +14,7 @@ import {
   useLeatherSign,
   useWalletAddress,
   useXverseSign,
+  useUnisatSign,
 } from "bitcoin-wallet-adapter";
 import getUnsignedBuyPsbt from "@/apiHelper/getUnsignedBuyPsbt";
 import FeePicker from "@/components/elements/FeePicker";
@@ -39,6 +40,13 @@ function BuyInscription({ data }: InscriptionProps) {
     error: xverseError,
     sign: xverseSign,
   } = useXverseSign();
+
+  const {
+    loading: unisatLoading,
+    result: unisatResult,
+    error: unisatError,
+    sign: unisatSign,
+  } = useUnisatSign();
 
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -204,6 +212,16 @@ function BuyInscription({ data }: InscriptionProps) {
       console.log(options, "OPTIONS");
 
       await xverseSign(options);
+    } else if (walletDetails.wallet === "Unisat") {
+      const options: any = {
+        psbt: base64ToHex(unsignedPsbtBase64),
+        network: "Mainnet",
+        action,
+        inputs,
+      };
+      console.log(options, "OPTIONS");
+
+      await unisatSign(options);
     }
   }, [action, unsignedPsbtBase64]);
 
@@ -277,9 +295,50 @@ function BuyInscription({ data }: InscriptionProps) {
       // Additional logic here
     }
 
+    // Handling unisat Wallet Sign Results/Errors
+    if (unisatResult) {
+      // Handle successful result from unisat wallet sign
+      console.log("Unisat Sign Result:", unisatResult);
+      dispatch(
+        addNotification({
+          id: new Date().valueOf(),
+          message: "Tx signed successfully",
+          open: true,
+          severity: "success",
+        })
+      );
+      if (unisatResult) {
+        broadcast(unisatResult);
+        // listOrdinal(unisatResult.psbtBase64);
+      }
+
+      // Additional logic here
+    }
+
+    if (unisatError) {
+      // Handle error from unisat wallet sign
+      console.error("Unisat Sign Error:", unisatError);
+      dispatch(
+        addNotification({
+          id: new Date().valueOf(),
+          message: unisatError.message || "Unisat wallet error occurred",
+          open: true,
+          severity: "error",
+        })
+      );
+      // Additional logic here
+    }
+
     // Turn off loading after handling results or errors
     setLoading(false);
-  }, [leatherResult, leatherError, xverseResult, xverseError]);
+  }, [
+    leatherResult,
+    leatherError,
+    xverseResult,
+    xverseError,
+    unisatResult,
+    unisatError,
+  ]);
 
   useEffect(() => {
     if (unsignedPsbtBase64) {

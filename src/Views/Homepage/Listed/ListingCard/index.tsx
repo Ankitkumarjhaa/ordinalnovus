@@ -41,6 +41,9 @@ const ListingCard: React.FC<ListingCardProps> = ({
           }
         >
           <div className="content-div h-full overflow-hidden">
+            <p className="absolute bg-bitcoin rounded-full font-bold text-yellow-900 text-xl p-1 z-10">
+              V{inscription.version}
+            </p>
             <CardContent
               inscriptionId={inscriptionId}
               content_type={content_type}

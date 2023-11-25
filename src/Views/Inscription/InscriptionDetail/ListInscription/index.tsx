@@ -1,11 +1,9 @@
 "use client";
 import CustomButton from "@/components/elements/CustomButton";
-// import { useSignTx } from "@/hooks/useHiroSignTx";
 import { addNotification } from "@/stores/reducers/notificationReducer";
 import { IInscription } from "@/types";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import copy from "copy-to-clipboard";
 import { RootState } from "@/stores";
 import getUnsignedListingPsbt from "@/apiHelper/getUnsignedListingPsbt";
 
@@ -15,11 +13,11 @@ import {
   convertBtcToSat,
   convertSatToBtc,
 } from "@/utils";
-// import listOrdinal, { listOrdinalData } from "@/apiHelper/listOrdinal";
 import {
   useWalletAddress,
   useLeatherSign,
   useXverseSign,
+  useUnisatSign,
 } from "bitcoin-wallet-adapter";
 import listInscription from "@/apiHelper/listInscription";
 import { useRouter } from "next/navigation";
@@ -45,8 +43,12 @@ function ListInscription({ data }: InscriptionProps) {
     sign: xverseSign,
   } = useXverseSign();
 
-  // const signTx = useSignTx();
-  // const signXversePSBT = useXverseSignTx();
+  const {
+    loading: unisatLoading,
+    result: unisatResult,
+    error: unisatError,
+    sign: unisatSign,
+  } = useUnisatSign();
 
   const [loading, setLoading] = useState(false);
   const [unsignedPsbtBase64, setUnsignedPsbtBase64] = useState("");
@@ -57,7 +59,6 @@ function ListInscription({ data }: InscriptionProps) {
   const [price, setPrice] = useState(
     data?.listed_price ? convertSatToBtc(data?.listed_price) : "0"
   );
-  // const [price, setPrice] = useState("0");
 
   const list = useCallback(async () => {
     if (data?.inscription_id && data?.inscription_number) {
@@ -89,7 +90,6 @@ function ListInscription({ data }: InscriptionProps) {
 
         console.log(result, "RESULT");
         if (result.ok && result.unsigned_psbt_base64) {
-          // copy(result.unsigned_psbt_base64);
           setUnsignedPsbtBase64(result.unsigned_psbt_base64);
         } else {
           setUnsignedPsbtBase64("");
@@ -144,6 +144,22 @@ function ListInscription({ data }: InscriptionProps) {
       console.log(options, "OPTIONS");
 
       await xverseSign(options);
+    } else if (walletDetails.wallet === "Unisat") {
+      const options: any = {
+        psbt: base64ToHex(unsignedPsbtBase64),
+        network: "Mainnet",
+        action: "sell",
+        inputs: [
+          {
+            address: walletDetails.ordinal_address,
+            publickey: walletDetails.ordinal_pubkey,
+            sighash: 131,
+            index: [0],
+          },
+        ],
+      };
+
+      await unisatSign(options);
     }
   };
 
@@ -238,9 +254,42 @@ function ListInscription({ data }: InscriptionProps) {
       // Additional logic here
     }
 
+    // Handling Unisat Wallet Sign Results/Errors
+    if (unisatResult) {
+      // Handle successful result from unisat wallet sign
+      console.log("Unisat Sign Result:", unisatResult);
+
+      if (unisatResult) {
+        listOrdinal(unisatResult);
+      }
+
+      // Additional logic here
+    }
+
+    if (unisatError) {
+      // Handle error from unisat wallet sign
+      console.error("Unisat Sign Error:", unisatError);
+      dispatch(
+        addNotification({
+          id: new Date().valueOf(),
+          message: unisatError.message || "unisat wallet error occurred",
+          open: true,
+          severity: "error",
+        })
+      );
+      // Additional logic here
+    }
+
     // Turn off loading after handling results or errors
     setLoading(false);
-  }, [leatherResult, leatherError, xverseResult, xverseError]);
+  }, [
+    leatherResult,
+    leatherError,
+    xverseResult,
+    xverseError,
+    unisatResult,
+    unisatError,
+  ]);
 
   useEffect(() => {
     if (unsignedPsbtBase64) {
