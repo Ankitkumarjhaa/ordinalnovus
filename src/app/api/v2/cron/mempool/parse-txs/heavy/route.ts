@@ -128,7 +128,9 @@ async function parseTxData(sort: 1 | -1, skip: number) {
         });
       });
 
-      let txData: ITXDATA | null = inscriptions[0].txData;
+      let txData: ITXDATA | null =
+        inscriptions && inscriptions.length ? inscriptions[0].txData : null;
+
       txBulkOps.push({
         updateOne: {
           filter: { _id },
@@ -179,13 +181,13 @@ async function parseTxData(sort: 1 | -1, skip: number) {
 
                 sale_date: tx.timestamp,
                 fee: tx.fee,
-                price: txData.price,
-                from: txData.from, // seller_ordinal_address
+                price: txData.price || 0,
+                from: txData.from || "", // seller_ordinal_address
                 seller_receive_address:
                   inscription.listed_seller_receive_address, // seller_payment_addres
-                to: txData.to, // buyer_ordinal_address,
+                to: txData.to || "", // buyer_ordinal_address,
                 txid: tx.txid,
-                marketplace_fee: txData.fee,
+                marketplace_fee: txData.fee || 0,
               },
             },
           });
