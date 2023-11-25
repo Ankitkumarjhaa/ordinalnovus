@@ -227,7 +227,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 }
 
 const handlePreSaveLogic = async (bulkDocs: Array<Partial<any>>) => {
-  console.time("Total Time Taken for handlePreSaveLogic");
 
   const transformedBulkOps: any[] = [];
   const shaMap: { [sha: string]: number } = {};
@@ -248,13 +247,11 @@ const handlePreSaveLogic = async (bulkDocs: Array<Partial<any>>) => {
   }
 
   for (let i = 0; i < bulkDocs.length; i++) {
-    // console.time(`Time Taken for Loop Iteration ${i}`);
 
     let bulkDoc = { ...bulkDocs[i] };
     const insertOne = bulkDoc.insertOne;
     const doc = insertOne.document;
 
-    // console.time("Check for Previous Document");
     if (i === 0 && doc.inscription_number > 0) {
       const prevDocument = await Inscription.findOne({
         inscription_number: doc.inscription_number - 1,
@@ -283,10 +280,8 @@ const handlePreSaveLogic = async (bulkDocs: Array<Partial<any>>) => {
         );
       }
     }
-    // console.timeEnd("Check for Previous Document");
 
     // Updated SHA version logic
-    // console.time("Increment the version if the SHA exists");
     if (doc.sha && !doc.token) {
       // console.log(doc.sha, " Working on this SHA");
 
@@ -297,9 +292,7 @@ const handlePreSaveLogic = async (bulkDocs: Array<Partial<any>>) => {
       }
       doc.version = shaMap[doc.sha];
     }
-    // console.timeEnd("Increment the version if the SHA exists");
 
-    // console.time("Modify the tags");
     if (doc.content_type && doc.content_type.includes("/")) {
       const contentTypeParts = doc.content_type.split("/");
       doc.tags = doc.tags
@@ -315,21 +308,16 @@ const handlePreSaveLogic = async (bulkDocs: Array<Partial<any>>) => {
             .filter((part: string) => part)
             .map((part: string) => part.toLowerCase());
     }
-    // console.timeEnd("Modify the tags");
-
     transformedBulkOps.push(doc);
 
-    // console.timeEnd(`Time Taken for Loop Iteration ${i}`);
   }
 
   // console.log(uniqueShas, "UNIQUESHAS");
   console.log(shaMap, "SHAMAP");
-  console.timeEnd("Total Time Taken for handlePreSaveLogic");
   return transformedBulkOps;
 };
 
 const deleteInscriptionsAboveThreshold = async (number: number) => {
-  console.time("Time Taken for Deleting Documents");
 
   try {
     const result = await Inscription.deleteMany({
@@ -341,7 +329,6 @@ const deleteInscriptionsAboveThreshold = async (number: number) => {
     console.error("An error occurred while deleting documents:", err);
   }
 
-  console.timeEnd("Time Taken for Deleting Documents");
 };
 
 export const dynamic = "force-dynamic";

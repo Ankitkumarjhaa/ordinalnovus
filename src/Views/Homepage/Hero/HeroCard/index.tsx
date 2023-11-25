@@ -1,7 +1,7 @@
 import React from "react";
 import CustomButton from "@components/elements/CustomButton";
 import { FaTwitter, FaDiscord, FaGlobe } from "react-icons/fa";
-import { ICollection } from "@/types/Ordinals";
+import { ICollection } from "@/types";
 import { AiFillCheckCircle } from "react-icons/ai";
 import CardContent from "@/components/elements/CustomCardSmall/CardContent";
 

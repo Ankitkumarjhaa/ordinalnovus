@@ -1,5 +1,5 @@
 "use client";
-import { ICollection } from "@/types/Ordinals";
+import { ICollection } from "@/types";
 import React from "react";
 import { AiFillCheckCircle } from "react-icons/ai";
 import { FaDiscord, FaFlag, FaGlobe, FaTwitter } from "react-icons/fa";

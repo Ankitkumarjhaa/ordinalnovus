@@ -3,14 +3,26 @@ import { IVIN, IVOUT } from "@/types/Tx";
 
 type InputType = { address?: string; value?: number; type?: string };
 type OutputType = { address?: string; value?: number; type?: string };
+type ITXDATAWITHOUTTXID = {
+  from: string;
+  to: string;
+  price: number;
+  tag: string;
+  marketplace: string;
+  fee?: number;
+};
+
+export type ITXDATA = ITXDATAWITHOUTTXID & {
+  txid: string;
+  inscription_id: string; // Consider defining a more specific type instead of 'any[]' if possible
+};
 
 export function constructTxData(
-  inscriptions: any[],
+  inscription_id: string,
   inputs: IVIN[],
-  outputs: IVOUT[],
-  outputIndex?: number[]
-): any {
-  if (inscriptions.length === 0) {
+  outputs: IVOUT[]
+): ITXDATA | null {
+  if (!inscription_id) {
     console.debug("Inscriptions not present");
     return null;
   }
@@ -35,46 +47,32 @@ export function constructTxData(
   let from: string | null = null;
   let price: number | null = null;
 
-  const { tag: inscribedTag, to: inscribedTo } = checkForInscribed(
-    inputs,
-    outputArray,
-    inscriptions
-  );
-
-  if (inscribedTag) {
-    console.debug(`Transaction tagged as 'inscribed'`);
-    return {
-      tag: inscribedTag,
-      to: inscribedTo,
-      inscriptions,
-    };
-  }
-
   if (inputs.length >= 4 && !tag) {
     const saleInfo = checkFor4InputSale(inputArray, outputArray);
 
     if (saleInfo) {
       console.debug("Valid sale detected.");
+      console.log({ saleInfo });
       return {
         tag: saleInfo.tag,
-        to: saleInfo.toAddress,
-        from: saleInfo.fromAddress,
+        to: saleInfo.to,
+        from: saleInfo.from,
         price: saleInfo.price,
-        inscriptions,
+        inscription_id,
+        txid: inscription_id.split("i")[0],
+        marketplace: saleInfo.marketplace,
+        fee: saleInfo.fee,
       };
     }
   }
 
   if (!tag) {
-    const { isTransfer, toAddress, fromAddress } = checkForTransfer(
-      inputArray,
-      outputArray
-    );
+    const transferCheck = checkForTransfer(inputArray, outputArray);
 
-    if (isTransfer && toAddress && fromAddress) {
-      tag = "transfer";
-      to = toAddress;
-      from = fromAddress;
+    if (transferCheck) {
+      tag = transferCheck.tag;
+      to = transferCheck.to;
+      from = transferCheck.from;
     }
   }
 
@@ -83,91 +81,100 @@ export function constructTxData(
       from,
       to,
       price,
-      tag: tag && inscriptions.length ? tag : "other",
-      inscriptions,
+      tag: tag && inscription_id ? tag : "other",
+      inscription_id,
     },
     "RETURNING THIS"
   );
   console.debug("Transaction data construction completed.");
-  throw Error("stop parsing");
   return {
-    from,
-    to,
-    price,
-    tag: tag && inscriptions.length ? tag : "other",
-    inscriptions,
+    from: from || "",
+    to: to || "",
+    price: price || 0,
+    tag: tag && inscription_id ? tag : "other",
+    inscription_id,
+    txid: inscription_id.split("i")[0],
+    marketplace: "",
   };
 }
+
+const V1_P2TR_TYPE = "v1_p2tr";
+const BC1P_PREFIX = "bc1p";
 
 function checkFor4InputSale(
   inputArray: InputType[],
   outputArray: OutputType[]
-) {
-  // Initialize return object
-  let result: {
-    fromAddress: string | null;
-    toAddress: string | null;
-    price: number | null;
-    tag: string | null;
-  } = {
-    fromAddress: null,
-    toAddress: null,
-    price: null,
-    tag: null,
-  };
-
-  // Validate the arrays contain at least the required number of elements
+): ITXDATAWITHOUTTXID | null {
   if (inputArray.length < 3 || outputArray.length < 3) {
-    return null; // Not enough elements to validate
+    return null;
   }
 
-  // Check 1: first input value + second input value = first output value
-  if (
-    inputArray[0].value != null &&
-    inputArray[1].value != null &&
-    outputArray[0].value != null &&
-    inputArray[0].value + inputArray[1].value === outputArray[0].value
-  ) {
-    // Check 2: third input address is of type v1_p2tr and starts with bc1p
-    if (
-      inputArray[2].address?.startsWith("bc1p") &&
-      inputArray[2].type === "v1_p2tr"
-    ) {
-      // Check 3: 2nd output address is of type v1_p2tr and starts with bc1p
-      if (
-        outputArray[1].address?.startsWith("bc1p") &&
-        outputArray[1].type === "v1_p2tr"
-      ) {
-        // Assign values to the result object
-        result.fromAddress = inputArray[2].address;
-        result.toAddress = outputArray[1].address;
-        result.price = outputArray[2]?.value || null;
-        result.tag = "sale";
+  // Marketplace addresses and their corresponding names
+  const marketplaces = {
+    bc1qcq2uv5nk6hec6kvag3wyevp6574qmsm9scjxc2: "magiceden",
+    bc1qhg8828sk4yq6ac08rxd0rh7dzfjvgdch3vfsm4: "ordinalnovus",
+    bc1p6yd49679azsaxqgtr52ff6jjvj2wv5dlaqwhaxarkamevgle2jaqs8vlnr:
+      "ordinalswallet",
+  };
 
-        return result;
-      }
+  let marketplace = "";
+  let fee = 0;
+
+  // Iterate over the marketplaces to find a match
+  for (const [address, name] of Object.entries(marketplaces)) {
+    if (outputArray.some((a) => a.address === address)) {
+      marketplace = name;
+      fee = outputArray.find((a) => a.address === address)?.value || 0;
+      break; // Stop searching once a marketplace is found
     }
   }
 
-  return null; // If any check fails, return null
+  const isValueMatch =
+    inputArray[0].value != null &&
+    inputArray[1].value != null &&
+    outputArray[0].value != null &&
+    inputArray[0].value + inputArray[1].value === outputArray[0].value;
+
+  const isInputValid =
+    inputArray[2].address?.startsWith(BC1P_PREFIX) &&
+    inputArray[2].type === V1_P2TR_TYPE;
+
+  const isOutputValid =
+    outputArray[1].address?.startsWith(BC1P_PREFIX) &&
+    outputArray[1].type === V1_P2TR_TYPE;
+
+  if (isValueMatch && isInputValid && isOutputValid) {
+    const result: ITXDATAWITHOUTTXID = {
+      from: inputArray[2].address || "",
+      to: outputArray[1].address || "",
+      price: outputArray[2]?.value || 0, // Assuming price is a number and should default to 0 if not set
+      tag: "sale",
+      marketplace,
+      fee,
+    };
+
+    return result;
+  }
+
+  return null;
 }
 
 const checkForTransfer = (
   inputArray: InputType[],
   outputArray: OutputType[]
-): { isTransfer: boolean; toAddress?: string; fromAddress?: string } => {
+): ITXDATAWITHOUTTXID | null => {
   let isTransfer = false;
-  let toAddress: string | undefined;
-  let fromAddress: string | undefined;
+  let to: string | undefined;
+  let from: string | undefined;
 
   if (outputArray.length === 1) {
     // single taproot output transfer
     for (const input of inputArray) {
       const output = outputArray[0];
-      if (input.type === "v1_p2tr" && output.type === "v1_p2tr") {
+      if (input.type === V1_P2TR_TYPE && output.type === V1_P2TR_TYPE) {
         isTransfer = true;
-        toAddress = output.address;
-        fromAddress = inputArray.find((a) => a.type === "v1_p2tr")?.address;
+        to = output.address;
+        from = inputArray.find((a) => a.type === V1_P2TR_TYPE)?.address;
         break;
       }
     }
@@ -177,12 +184,14 @@ const checkForTransfer = (
       for (const output of outputArray) {
         if (
           input.value === output.value &&
-          (input.type === "v1_p2tr" || input?.address?.startsWith("bc1p")) &&
-          (output.type === "v1_p2tr" || output?.address?.startsWith("bc1p"))
+          (input.type === V1_P2TR_TYPE ||
+            input?.address?.startsWith(BC1P_PREFIX)) &&
+          (output.type === V1_P2TR_TYPE ||
+            output?.address?.startsWith(BC1P_PREFIX))
         ) {
           isTransfer = true;
-          fromAddress = input.address;
-          toAddress = output.address;
+          from = input.address;
+          to = output.address;
           break;
         }
       }
@@ -192,7 +201,9 @@ const checkForTransfer = (
     }
   }
 
-  return { isTransfer, toAddress, fromAddress };
+  if (isTransfer && to && from)
+    return { tag: "transfer", to, from, price: 0, marketplace: "" };
+  else return null;
 };
 
 interface InscribedCheckResult {

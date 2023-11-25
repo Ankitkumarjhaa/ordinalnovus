@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import CardContent from "./CardContent";
 import { shortenString } from "@/utils";
 import Link from "next/link";
-import { IInscription } from "@/types/Ordinals";
+import { IInscription } from "@/types";
 type CustomCardProps = {
   inscriptionId: string;
   content_type?: string;

@@ -3,7 +3,7 @@ import {
   CustomLeftArrow,
   CustomRightArrow,
 } from "@/components/elements/Arrows";
-import { RecentInscription } from "@/types/Ordinals";
+import { RecentInscription } from "@/types";
 import React from "react";
 import Slider from "react-slick";
 import CustomCard from "@/components/elements/CustomCardSmall";

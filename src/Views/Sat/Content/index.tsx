@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { ISat } from "@/types/Ordinals";
+import { ISat } from "@/types";
 import CardContent from "@components/elements/CustomCardSmall/CardContent";
 import { ImEnlarge } from "react-icons/im";
 import { BsDownload } from "react-icons/bs";

@@ -1,4 +1,4 @@
-import { ISat, IInscription } from "@/types/Ordinals";
+import { IInscription } from "@/types";
 import React from "react";
 import Content from "./Content";
 import InscriptionDetail from "./InscriptionDetail";

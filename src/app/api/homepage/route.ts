@@ -2,7 +2,7 @@ import dbConnect from "@/lib/dbConnect";
 import axios from "axios";
 import { Collection, Inscription } from "@/models";
 import { NextRequest, NextResponse } from "next/server";
-import { RecentInscription } from "@/types/Ordinals";
+import { RecentInscription } from "@/types";
 import { getCache, setCache } from "@/lib/cache";
 
 type Data = {

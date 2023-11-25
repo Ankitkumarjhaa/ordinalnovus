@@ -1,4 +1,4 @@
-import { ISat, IInscription } from "@/types/Ordinals";
+import { ISat, IInscription } from "@/types";
 import React from "react";
 import Content from "./Content";
 import SatDetail from "./SatDetail";

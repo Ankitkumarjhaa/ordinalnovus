@@ -3,7 +3,7 @@ import * as btc from "@scure/btc-signer";
 import { hex, base64 } from "@scure/base";
 import { NextRequest, NextResponse } from "next/server";
 import { getSellerOrdOutputValue } from "@/utils/Marketplace";
-import { IInscription } from "@/types/Ordinals";
+import { IInscription } from "@/types";
 import { Inscription } from "@/models";
 import { CustomError, ecdsaPublicKeyToSchnorr } from "@/utils";
 import dbConnect from "@/lib/dbConnect";
@@ -52,7 +52,7 @@ async function processOrdItem(
 
   let p2tr = null;
 
-  if (wallet === "Leather") {
+  if (wallet === "Leather" || wallet === "Unisat") {
     p2tr = btc.p2tr(ecdsaPublicKeyToSchnorr(publickey), undefined, btc.NETWORK);
   } else {
     p2tr = btc.p2tr(publickey, undefined, btc.NETWORK);

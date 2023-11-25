@@ -5,7 +5,7 @@ import * as ecc from "tiny-secp256k1";
 import { mempoolBitcoin } from "..";
 
 //types
-import { AddressTxsUtxo, FeeRateTier, UTXO } from "@/types/Ordinals";
+import { AddressTxsUtxo, FeeRateTier, UTXO } from "@/types";
 
 //others
 import axios from "axios";

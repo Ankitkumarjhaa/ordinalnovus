@@ -36,6 +36,9 @@ function InscriptionDetail({ data }: InscriptionProps) {
           </div> */}
           <h3 className="text-3xl font-extrabold text-white">
             Inscription {data?.inscription_number}
+            <span className="text-sm bg-bitcoin rounded-full ml-2 p-1 text-yellow-900">
+              V{data.version}
+            </span>
           </h3>
         </div>
         {data?.official_collection && (
@@ -86,9 +89,9 @@ function InscriptionDetail({ data }: InscriptionProps) {
           WalletDetail.ordinal_address === data.address && (
             <ListInscription data={data} />
           )}
-        {WalletDetail.connected &&
-          WalletDetail.ordinal_address !== data.address &&
-          data.listed && <BuyInscription data={data} />}
+        {WalletDetail.ordinal_address !== data.address && data.listed && (
+          <BuyInscription data={data} />
+        )}
       </div>
       <div className="pt-2">
         <DisplayProperties data={data} />

@@ -1,6 +1,6 @@
 "use server";
 // api/inscription.ts
-import { ICollection } from "@/types/Ordinals";
+import { ICollection } from "@/types";
 import axios from "axios";
 
 export interface FetchCollectionParams {

@@ -5,7 +5,7 @@ import dbConnect from "../../../lib/dbConnect";
 import apiKeyMiddleware from "../../../middlewares/apiKeyMiddleware";
 import { getCache, setCache } from "@/lib/cache";
 import { fetchLatestInscriptionData } from "@/utils/Marketplace";
-import { IInscription } from "@/types/Ordinals";
+import { IInscription } from "@/types";
 
 async function validateAndUpdateInscriptions(
   inscriptions: IInscription[],
@@ -14,7 +14,7 @@ async function validateAndUpdateInscriptions(
   for (let i = 0; i < inscriptions.length; i++) {
     if (inscriptions[i].address !== reqAddress) {
       const ordItem = await fetchLatestInscriptionData(
-        inscriptions[i].inscriptionId+""
+        inscriptions[i].inscriptionId + ""
       );
 
       const updatedInscription = (await Inscription.findOneAndUpdate(

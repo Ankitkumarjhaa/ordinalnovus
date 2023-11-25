@@ -1,11 +1,9 @@
 "use client";
 import CustomButton from "@/components/elements/CustomButton";
-// import { useSignTx } from "@/hooks/useHiroSignTx";
 import { addNotification } from "@/stores/reducers/notificationReducer";
 import { IInscription } from "@/types";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import copy from "copy-to-clipboard";
 import { RootState } from "@/stores";
 import getUnsignedListingPsbt from "@/apiHelper/getUnsignedListingPsbt";
 
@@ -15,12 +13,7 @@ import {
   convertBtcToSat,
   convertSatToBtc,
 } from "@/utils";
-// import listOrdinal, { listOrdinalData } from "@/apiHelper/listOrdinal";
-import {
-  useWalletAddress,
-  useLeatherSign,
-  useXverseSign,
-} from "bitcoin-wallet-adapter";
+import { useWalletAddress, useSignTx } from "bitcoin-wallet-adapter";
 import listInscription from "@/apiHelper/listInscription";
 import { useRouter } from "next/navigation";
 type InscriptionProps = {
@@ -31,22 +24,7 @@ function ListInscription({ data }: InscriptionProps) {
   const dispatch = useDispatch();
   const router = useRouter();
   const walletDetails = useWalletAddress();
-  const {
-    loading: leatherLoading,
-    result: leatherResult,
-    error: leatherError,
-    sign: leatherSign,
-  } = useLeatherSign();
-
-  const {
-    loading: xverseLoading,
-    result: xverseResult,
-    error: xverseError,
-    sign: xverseSign,
-  } = useXverseSign();
-
-  // const signTx = useSignTx();
-  // const signXversePSBT = useXverseSignTx();
+  const { loading: signLoading, result, error, signTx: sign } = useSignTx();
 
   const [loading, setLoading] = useState(false);
   const [unsignedPsbtBase64, setUnsignedPsbtBase64] = useState("");
@@ -57,7 +35,6 @@ function ListInscription({ data }: InscriptionProps) {
   const [price, setPrice] = useState(
     data?.listed_price ? convertSatToBtc(data?.listed_price) : "0"
   );
-  // const [price, setPrice] = useState("0");
 
   const list = useCallback(async () => {
     if (data?.inscription_id && data?.inscription_number) {
@@ -89,7 +66,6 @@ function ListInscription({ data }: InscriptionProps) {
 
         console.log(result, "RESULT");
         if (result.ok && result.unsigned_psbt_base64) {
-          // copy(result.unsigned_psbt_base64);
           setUnsignedPsbtBase64(result.unsigned_psbt_base64);
         } else {
           setUnsignedPsbtBase64("");
@@ -110,41 +86,21 @@ function ListInscription({ data }: InscriptionProps) {
   }, [data, dispatch, price, walletDetails]);
 
   const signTx = async () => {
-    if (walletDetails.wallet === "Leather") {
-      const options: any = {
-        psbt: base64ToHex(unsignedPsbtBase64),
-        network: "Mainnet",
-        action: "sell",
-        inputs: [
-          {
-            address: walletDetails.ordinal_address,
-            publickey: walletDetails.ordinal_pubkey,
-            sighash: 131,
-            index: [0],
-          },
-        ],
-      };
-      console.log(options, "OPTIONS");
+    const options: any = {
+      psbt: unsignedPsbtBase64,
+      network: "Mainnet",
+      action: "sell",
+      inputs: [
+        {
+          address: walletDetails.ordinal_address,
+          publickey: walletDetails.ordinal_pubkey,
+          sighash: 131,
+          index: [0],
+        },
+      ],
+    };
 
-      await leatherSign(options);
-    } else if (walletDetails.wallet === "Xverse") {
-      const options: any = {
-        psbt: unsignedPsbtBase64,
-        network: "Mainnet",
-        action: "sell",
-        inputs: [
-          {
-            address: walletDetails.ordinal_address,
-            publickey: walletDetails.ordinal_pubkey,
-            sighash: 131,
-            index: [0],
-          },
-        ],
-      };
-      console.log(options, "OPTIONS");
-
-      await xverseSign(options);
-    }
+    await sign(options);
   };
 
   const listOrdinal = async (signedPsbt: string) => {
@@ -169,6 +125,7 @@ function ListInscription({ data }: InscriptionProps) {
           })
         );
         router.refresh();
+        setLoading(false);
       } else {
         setUnsignedPsbtBase64("");
         throw Error(result.message);
@@ -188,59 +145,34 @@ function ListInscription({ data }: InscriptionProps) {
 
   useEffect(() => {
     // Handling Leather Wallet Sign Results/Errors
-    if (leatherResult) {
+    if (result) {
       // Handle successful result from leather wallet sign
-      console.log("Leather Sign Result:", leatherResult);
+      console.log("Sign Result:", result);
 
-      if (leatherResult) {
-        listOrdinal(leatherResult);
+      if (result) {
+        listOrdinal(result);
       }
 
       // Additional logic here
     }
 
-    if (leatherError) {
+    if (error) {
       // Handle error from leather wallet sign
-      console.error("Leather Sign Error:", leatherError);
+      console.error(" Sign Error:", error);
+
+      // Turn off loading after handling results or errors
+      setLoading(false);
       dispatch(
         addNotification({
           id: new Date().valueOf(),
-          message: leatherError.message || "Leather wallet error occurred",
+          message: error.message || "wallet error occurred",
           open: true,
           severity: "error",
         })
       );
       // Additional logic here
     }
-
-    // Handling Xverse Wallet Sign Results/Errors
-    if (xverseResult) {
-      // Handle successful result from xverse wallet sign
-      console.log("Xverse Sign Result:", xverseResult);
-      if (xverseResult.psbtBase64) {
-        listOrdinal(xverseResult.psbtBase64);
-      }
-
-      // Additional logic here
-    }
-
-    if (xverseError) {
-      // Handle error from xverse wallet sign
-      console.error("Xverse Sign Error:", xverseError);
-      dispatch(
-        addNotification({
-          id: new Date().valueOf(),
-          message: xverseError.message || "Xverse wallet error occurred",
-          open: true,
-          severity: "error",
-        })
-      );
-      // Additional logic here
-    }
-
-    // Turn off loading after handling results or errors
-    setLoading(false);
-  }, [leatherResult, leatherError, xverseResult, xverseError]);
+  }, [result, error]);
 
   useEffect(() => {
     if (unsignedPsbtBase64) {
@@ -275,7 +207,7 @@ function ListInscription({ data }: InscriptionProps) {
         </div>
         <div className="flex-1">
           <CustomButton
-            loading={loading || leatherLoading || xverseLoading}
+            loading={loading || signLoading}
             text={data.listed_price ? "Update Price" : `List Now`}
             hoverBgColor="hover:bg-accent_dark"
             hoverTextColor="text-white"

@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchLatestInscriptionData } from "@/utils/Marketplace";
 import apiKeyMiddleware from "@/newMiddlewares/apikeyMiddleware";
-import { IInscription } from "@/types/Ordinals";
+import { IInscription } from "@/types";
 import {
   addFinalScriptWitness,
   verifyAddress,

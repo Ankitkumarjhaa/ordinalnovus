@@ -1,5 +1,5 @@
 "use client";
-import { RecentInscription } from "@/types/Ordinals";
+import { RecentInscription } from "@/types";
 import { Order } from "@/types/Ordinals/Orders";
 import React from "react";
 // import Collections from "./Collections";
@@ -108,9 +108,6 @@ function Homepage({ data }: HomepageProps) {
   // ];
   return (
     <div className="pt-16">
-      {/* <div className="bg-yellow-700 w-full my-2 text-center py-1 text-xs uppercase font-bold text-white">
-        Under development{" "}
-      </div> */}
       {data.percentParsed < 98 && (
         <div className="bg-yellow-700 w-full my-2 text-center text-xs uppercase font-bold text-white flex justify-start">
           <span
@@ -122,14 +119,8 @@ function Homepage({ data }: HomepageProps) {
         </div>
       )}
       <Hero data={data.featured} />
-      {/* <div className="flex flex-wrap">
-        {list?.map((i) => (
-          <CustomCard key={i.id} inscriptionId={i.id} content_type={i.type} />
-        ))}
-      </div> */}
-      {/* <OrderbookSection data={data.orders} /> */}
       <Collections data={data.verified} />
-      <Listed data={data.listings} />
+      {data.listings.length ? <Listed data={data.listings} /> : <></>}
       <Recent data={data.recentInscriptions} />
     </div>
   );

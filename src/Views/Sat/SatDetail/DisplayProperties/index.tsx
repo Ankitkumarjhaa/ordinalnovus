@@ -1,5 +1,5 @@
 "use client";
-import { ISat } from "@/types/Ordinals";
+import { ISat } from "@/types";
 import copy from "copy-to-clipboard";
 import React from "react";
 import { useDispatch } from "react-redux";

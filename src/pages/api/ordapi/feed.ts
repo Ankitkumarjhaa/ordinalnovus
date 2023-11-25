@@ -16,12 +16,11 @@ export default async function handler(
   await apiKeyMiddleware(["ordapi"], "read")(req, res, async () => {
     try {
       console.log("***** ORDAPI FEED CALL *****");
-      console.time("API call");
+
       // Try to get data from cache first
       const cachedData = await getCache("ordapi-feed");
 
       if (cachedData) {
-        console.timeEnd("API call");
         console.log("Returning cached ordapi feed");
         // Send cached data as response
         res.status(200).json(cachedData);
@@ -64,10 +63,8 @@ export default async function handler(
           }
         );
 
-        console.time("API calls");
         // Wait for all promises to resolve
         const formattedInscriptions = await Promise.all(inscriptionPromises);
-        console.timeEnd("API calls");
 
         // Cache the response data in Redis for 10 minutes
         await setCache("ordapi-feed", formattedInscriptions, 600);

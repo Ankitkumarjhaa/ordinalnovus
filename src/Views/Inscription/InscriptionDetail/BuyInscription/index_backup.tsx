@@ -10,11 +10,16 @@ import {
   calculateBTCCostInDollars,
   convertSatToBtc,
 } from "@/utils";
+import {
+  useLeatherSign,
+  useWalletAddress,
+  useXverseSign,
+  useUnisatSign,
+} from "bitcoin-wallet-adapter";
 import getUnsignedBuyPsbt from "@/apiHelper/getUnsignedBuyPsbt";
 import FeePicker from "@/components/elements/FeePicker";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { useWalletAddress, useSignTx } from "bitcoin-wallet-adapter";
 type InscriptionProps = {
   data: IInscription;
 };
@@ -22,7 +27,26 @@ type InscriptionProps = {
 function BuyInscription({ data }: InscriptionProps) {
   const router = useRouter();
   const dispatch = useDispatch();
-  const { loading: signLoading, result, error, signTx: sign } = useSignTx();
+  const {
+    loading: leatherLoading,
+    result: leatherResult,
+    error: leatherError,
+    sign: leatherSign,
+  } = useLeatherSign();
+
+  const {
+    loading: xverseLoading,
+    result: xverseResult,
+    error: xverseError,
+    sign: xverseSign,
+  } = useXverseSign();
+
+  const {
+    loading: unisatLoading,
+    result: unisatResult,
+    error: unisatError,
+    sign: unisatSign,
+  } = useUnisatSign();
 
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -168,22 +192,44 @@ function BuyInscription({ data }: InscriptionProps) {
           });
       });
     }
-    const options: any = {
-      psbt: unsignedPsbtBase64,
-      network: "Mainnet",
-      action,
-      inputs,
-    };
-    console.log(options, "OPTIONS");
+    if (walletDetails.wallet === "Leather") {
+      const options: any = {
+        psbt: base64ToHex(unsignedPsbtBase64),
+        network: "Mainnet",
+        action,
+        inputs,
+      };
+      console.log(options, "OPTIONS");
 
-    await sign(options);
+      await leatherSign(options);
+    } else if (walletDetails.wallet === "Xverse") {
+      const options: any = {
+        psbt: unsignedPsbtBase64,
+        network: "Mainnet",
+        action,
+        inputs,
+      };
+      console.log(options, "OPTIONS");
+
+      await xverseSign(options);
+    } else if (walletDetails.wallet === "Unisat") {
+      const options: any = {
+        psbt: base64ToHex(unsignedPsbtBase64),
+        network: "Mainnet",
+        action,
+        inputs,
+      };
+      console.log(options, "OPTIONS");
+
+      await unisatSign(options);
+    }
   }, [action, unsignedPsbtBase64]);
 
   useEffect(() => {
-    // Handling Wallet Sign Results/Errors
-    if (result) {
-      // Handle successful result from wallet sign
-      console.log("Sign Result:", result);
+    // Handling Leather Wallet Sign Results/Errors
+    if (leatherResult) {
+      // Handle successful result from leather wallet sign
+      console.log("Leather Sign Result:", leatherResult);
       dispatch(
         addNotification({
           id: new Date().valueOf(),
@@ -193,19 +239,89 @@ function BuyInscription({ data }: InscriptionProps) {
         })
       );
 
-      if (result) {
-        broadcast(result);
+      if (leatherResult) {
+        broadcast(leatherResult);
+        // listOrdinal(leatherResult);
       }
 
       // Additional logic here
     }
 
-    if (error) {
-      console.error("Sign Error:", error);
+    if (leatherError) {
+      // Handle error from leather wallet sign
+      console.error("Leather Sign Error:", leatherError);
       dispatch(
         addNotification({
           id: new Date().valueOf(),
-          message: error.message || "Wallet error occurred",
+          message: leatherError.message || "Leather wallet error occurred",
+          open: true,
+          severity: "error",
+        })
+      );
+      // Additional logic here
+    }
+
+    // Handling Xverse Wallet Sign Results/Errors
+    if (xverseResult) {
+      // Handle successful result from xverse wallet sign
+      console.log("Xverse Sign Result:", xverseResult);
+      dispatch(
+        addNotification({
+          id: new Date().valueOf(),
+          message: "Tx signed successfully",
+          open: true,
+          severity: "success",
+        })
+      );
+      if (xverseResult.psbtBase64) {
+        broadcast(xverseResult.psbtBase64);
+        // listOrdinal(xverseResult.psbtBase64);
+      }
+
+      // Additional logic here
+    }
+
+    if (xverseError) {
+      // Handle error from xverse wallet sign
+      console.error("Xverse Sign Error:", xverseError);
+      dispatch(
+        addNotification({
+          id: new Date().valueOf(),
+          message: xverseError.message || "Xverse wallet error occurred",
+          open: true,
+          severity: "error",
+        })
+      );
+      // Additional logic here
+    }
+
+    // Handling unisat Wallet Sign Results/Errors
+    if (unisatResult) {
+      // Handle successful result from unisat wallet sign
+      console.log("Unisat Sign Result:", unisatResult);
+      dispatch(
+        addNotification({
+          id: new Date().valueOf(),
+          message: "Tx signed successfully",
+          open: true,
+          severity: "success",
+        })
+      );
+      if (unisatResult) {
+        broadcast(unisatResult);
+        // listOrdinal(unisatResult.psbtBase64);
+      }
+
+      // Additional logic here
+    }
+
+    if (unisatError) {
+      // Handle error from unisat wallet sign
+      console.error("Unisat Sign Error:", unisatError);
+      dispatch(
+        addNotification({
+          id: new Date().valueOf(),
+          message: unisatError.message || "Unisat wallet error occurred",
           open: true,
           severity: "error",
         })
@@ -215,7 +331,14 @@ function BuyInscription({ data }: InscriptionProps) {
 
     // Turn off loading after handling results or errors
     setLoading(false);
-  }, [result, error]);
+  }, [
+    leatherResult,
+    leatherError,
+    xverseResult,
+    xverseError,
+    unisatResult,
+    unisatError,
+  ]);
 
   useEffect(() => {
     if (unsignedPsbtBase64) {

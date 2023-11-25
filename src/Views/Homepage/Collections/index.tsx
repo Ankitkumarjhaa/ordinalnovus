@@ -1,6 +1,6 @@
 "use client";
 import CustomButton from "@/components/elements/CustomButton";
-import { ICollection } from "@/types/Ordinals";
+import { ICollection } from "@/types";
 import React from "react";
 import CollectionCard from "./CollectionCard";
 import StaticCard from "./StaticCard";
@@ -56,7 +56,7 @@ function CollectionsSection({ data }: CollectionsProps) {
           />
         </div>
       </div>
-      <div className="flex flex-wrap items-center justify-center">
+      <div className="flex flex-wrap items-center justify-start">
         {/* {staticCollections.map((item) => (
           <StaticCard key={item.name} item={item} />
         ))} */}
