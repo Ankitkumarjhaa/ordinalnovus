@@ -113,7 +113,6 @@ async function parseTxData(sort: 1 | -1, skip: number) {
       const inscriptions = (await Promise.all(outputPromises)).flat();
       isInscribed = inscriptions.some((i) => i.inscription_id.startsWith(txid));
 
-      let txData: ITXDATA | null;
       inscriptionIds = inscriptions.map((i) => {
         modifiedInscriptionIds.push(i.inscription_id);
 
@@ -121,7 +120,6 @@ async function parseTxData(sort: 1 | -1, skip: number) {
       });
 
       inscriptions.forEach((i) => {
-        txData = i.txData || null;
         inscriptionBulkOps.push({
           updateOne: {
             filter: { inscription_id: i.inscription_id },
@@ -130,6 +128,7 @@ async function parseTxData(sort: 1 | -1, skip: number) {
         });
       });
 
+      let txData: ITXDATA | null = inscriptions[0].txData;
       txBulkOps.push({
         updateOne: {
           filter: { _id },
@@ -161,9 +160,14 @@ async function parseTxData(sort: 1 | -1, skip: number) {
         txData.marketplace === "ordinalnovus"
       ) {
         const inscription_id = inscriptionIds[0];
-        const inscription: IInscription | null = await Inscription.findOne({
+        const result = await Inscription.findOne({
           inscription_id,
         }).populate("official_collection");
+
+        const inscription: IInscription | null = Array.isArray(result)
+          ? result[0]
+          : result;
+
         if (inscription) {
           salesBulkOps.push({
             insertOne: {
