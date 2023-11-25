@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { Tooltip } from "@mui/material";
-import { ICollection } from "@/types/Ordinals";
+import { ICollection } from "@/types";
 import CardContent from "@/components/elements/CustomCardSmall/CardContent";
 import { shortenString } from "@/utils";
 interface CollectionCardProps {

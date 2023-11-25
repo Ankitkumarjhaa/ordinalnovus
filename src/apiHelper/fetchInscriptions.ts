@@ -1,6 +1,6 @@
 "use server";
 // api/inscription.ts
-import { IInscription } from "@/types/Ordinals";
+import { IInscription } from "@/types";
 import axios from "axios";
 
 export interface FetchInscriptionsParams {

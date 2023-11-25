@@ -2,7 +2,7 @@
 import CustomPaginationComponent from "@/components/elements/CustomPagination";
 import CustomSelector from "@/components/elements/CustomSelector";
 import { addNotification } from "@/stores/reducers/notificationReducer";
-import { ICollection } from "@/types/Ordinals";
+import { ICollection } from "@/types";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import CollectionItemCard from "./CollectionItemCard";

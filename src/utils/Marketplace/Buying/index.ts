@@ -1,6 +1,6 @@
 import * as bitcoin from "bitcoinjs-lib";
 import secp256k1 from "@bitcoinerlab/secp256k1";
-import { AddressTxsUtxo, IListingState, UTXO } from "@/types/Ordinals";
+import { AddressTxsUtxo, IListingState, UTXO } from "@/types";
 import { IInscription } from "@/types";
 import {
   calculateTxBytesFee,

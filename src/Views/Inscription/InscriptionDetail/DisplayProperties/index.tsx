@@ -1,5 +1,5 @@
 "use client";
-import { IInscription } from "@/types/Ordinals";
+import { IInscription } from "@/types";
 import { shortenString } from "@/utils";
 import copy from "copy-to-clipboard";
 import React from "react";

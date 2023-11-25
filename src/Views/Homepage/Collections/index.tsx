@@ -1,6 +1,6 @@
 "use client";
 import CustomButton from "@/components/elements/CustomButton";
-import { ICollection } from "@/types/Ordinals";
+import { ICollection } from "@/types";
 import React from "react";
 import CollectionCard from "./CollectionCard";
 import StaticCard from "./StaticCard";

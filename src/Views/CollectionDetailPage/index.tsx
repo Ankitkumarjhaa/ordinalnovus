@@ -1,4 +1,4 @@
-import { ICollection } from "@/types/Ordinals";
+import { ICollection } from "@/types";
 import React from "react";
 import Hero from "./Hero";
 import Items from "./Items";

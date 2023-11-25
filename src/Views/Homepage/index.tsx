@@ -1,5 +1,5 @@
 "use client";
-import { RecentInscription } from "@/types/Ordinals";
+import { RecentInscription } from "@/types";
 import { Order } from "@/types/Ordinals/Orders";
 import React from "react";
 // import Collections from "./Collections";

@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { IInscription } from "@/types/Ordinals";
+import { IInscription } from "@/types";
 import CardContent from "@components/elements/CustomCardSmall/CardContent";
 import { ImEnlarge } from "react-icons/im";
 import { BsDownload, BsChevronLeft, BsChevronRight } from "react-icons/bs";

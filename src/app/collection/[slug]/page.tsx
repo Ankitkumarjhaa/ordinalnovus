@@ -1,6 +1,6 @@
 import { fetchCollections } from "@/apiHelper/fetchCollection";
 import CollectionDetailPage from "@/Views/CollectionDetailPage";
-import { ICollection } from "@/types/Ordinals";
+import { ICollection } from "@/types";
 import { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 type Props = {

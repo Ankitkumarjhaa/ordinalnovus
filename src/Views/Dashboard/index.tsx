@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { IInscription } from "@/types/Ordinals";
+import { IInscription } from "@/types";
 import CustomCard from "@/components/elements/CustomCardSmall";
 import { useRouter } from "next/navigation";
 import CardContent from "@/components/elements/CustomCardSmall/CardContent";

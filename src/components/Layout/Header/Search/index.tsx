@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ICollection } from "@/types/Ordinals";
+import { ICollection } from "@/types";
 import { fetchCollections } from "@/apiHelper/fetchCollection";
 import SearchCard from "./SearchCard";
 import CustomButton from "@/components/elements/CustomButton";

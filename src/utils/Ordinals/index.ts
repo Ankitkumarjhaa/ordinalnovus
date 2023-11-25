@@ -2,7 +2,7 @@
 // import * as bitcoin from "bitcoinjs-lib";
 // import secp256k1 from "@bitcoinerlab/secp256k1";
 // import axios from 'axios'
-// import { Transaction, UTXO } from "@/types/Ordinals";
+// import { Transaction, UTXO } from "@/types";
 // const dummyUtxoValue = 1000; // Replace with the actual value
 // let sellerSignedPsbt;
 // bitcoin.initEccLib(secp256k1);

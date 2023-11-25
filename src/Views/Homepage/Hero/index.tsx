@@ -1,5 +1,5 @@
 "use client";
-import { ICollection } from "@/types/Ordinals";
+import { ICollection } from "@/types";
 import React from "react";
 import Slider from "react-slick";
 import HeroCard from "./HeroCard";

@@ -3,7 +3,7 @@
 import copy from "copy-to-clipboard";
 import { useDispatch } from "react-redux";
 import { addNotification } from "@/stores/reducers/notificationReducer";
-import { IInscription, ISat } from "@/types/Ordinals";
+import { IInscription, ISat } from "@/types";
 import React, { useState } from "react";
 import { BsFillShareFill } from "react-icons/bs";
 import { TfiReload } from "react-icons/tfi";

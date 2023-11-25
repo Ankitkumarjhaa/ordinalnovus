@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Inscription } from "@/models";
 import axios from "axios";
 import dbConnect from "@/lib/dbConnect";
-import { IInscription } from "@/types/Ordinals";
+import { IInscription } from "@/types";
 import moment from "moment";
 
 // Function to fetch details of a single inscription
