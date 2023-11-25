@@ -130,7 +130,6 @@ async function parseTxData(sort: 1 | -1, skip: number) {
 
       let txData: ITXDATA | null =
         inscriptions && inscriptions.length ? inscriptions[0].txData : null;
-     
 
       txBulkOps.push({
         updateOne: {
@@ -228,7 +227,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
 
     const query = {
       parsed: true,
-      // createdAt: { $lt: oneDayAgo },
+      createdAt: { $lt: oneDayAgo },
       $or: [
         { tag: { $exists: false } },
         { tag: { $eq: "inscribed" } },
