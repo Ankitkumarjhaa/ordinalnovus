@@ -40,7 +40,7 @@ function CollectionsSection({ data }: CollectionsProps) {
   return (
     <section className="pt-16">
       <div className="flex justify-between items-center">
-        <h2 className="font-bold text-2xl lg:text-4xl text-white">
+        <h2 className="font-bold text-2xl lg:text-4xl text-white  pb-6">
           Collections
         </h2>
         <div>

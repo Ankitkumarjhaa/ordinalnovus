@@ -9,6 +9,7 @@ import STL from "../../STLViewer";
 import GLTF from "../../GLTFViewer";
 
 import JSZip from "jszip";
+import AudioPlayer from "../../AudioPlayer";
 
 type CardContentProps = {
   inscriptionId: string;
@@ -83,7 +84,7 @@ const CardContent: React.FC<CardContentProps> = ({
         return (
           <div
             className={`${
-              className ? className : "w-full h-full center p-2 no-scrollbar"
+              className ? className : "w-full h-full center no-scrollbar"
             }`}
           >
             <img
@@ -102,13 +103,14 @@ const CardContent: React.FC<CardContentProps> = ({
       case "audio/midi":
       case "audio/mod":
         return (
-          <div className="w-full h-full center">
-            <audio
-              className="w-11/12 "
-              src={`/content/${inscriptionId}`}
-              controls
-            />
-          </div>
+          // <div className="w-full h-full center">
+          //   <audio
+          //     className="w-11/12 "
+          //     src={`/content/${inscriptionId}`}
+          //     controls
+          //   />
+          // </div>
+          <AudioPlayer inscriptionId={inscriptionId} />
         );
       case "video/mp4":
       case "video/avi":
@@ -286,7 +288,12 @@ const CardContent: React.FC<CardContentProps> = ({
       {isLoading ? (
         <div className="flex justify-center items-center h-full text-white py-6  w-full">
           {/* <CircularProgress color="inherit" size={10} />{" "} */}
-          <div className="min-h-[100px] lg:w-full relative rounded-xl overflow-hidden">
+          <div
+            className={`${
+              className ? className : "w-full h-full center no-scrollbar"
+            }`}
+            // className="min-h-[100px] lg:w-full relative rounded-xl overflow-hidden"
+          >
             <div className="relative bg-gray-500 animate-pulse rounded-xl overflow-hidden w-full h-full aspect-square"></div>
           </div>
           {/* Display the loading component */}
@@ -296,7 +303,12 @@ const CardContent: React.FC<CardContentProps> = ({
       ) : (
         <div className="flex justify-center items-center h-full text-white py-6  w-full">
           {/* <CircularProgress color="inherit" size={10} />{" "} */}
-          <div className="min-h-[100px] lg:w-full relative rounded-xl overflow-hidden">
+          <div
+            className={`${
+              className ? className : "w-full h-full center no-scrollbar"
+            }`}
+            // className="min-h-[100px] lg:w-full relative rounded-xl overflow-hidden"
+          >
             <div className="relative bg-gray-500 animate-pulse rounded-xl overflow-hidden w-full h-full aspect-square"></div>
           </div>
           {/* Display the loading component */}
