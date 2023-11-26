@@ -30,6 +30,7 @@ const HeroCard: React.FC<HeroCardProps> = ({ item }) => {
             <CustomButton
               text="View Collection"
               link={true}
+              newTab={false}
               href={`/collection/${item.slug}`}
               hoverBgColor="hover:bg-accent_dark"
               hoverTextColor="text-white"

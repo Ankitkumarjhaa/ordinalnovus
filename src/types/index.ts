@@ -106,7 +106,8 @@ export interface IInscription {
   percentile?: string;
   period?: number;
   rarity?: string;
-  sat_number?: number;
+
+  sat?: number;
   sat_name?: string;
   sat_offset?: number;
   lists?: Schema.Types.ObjectId[];

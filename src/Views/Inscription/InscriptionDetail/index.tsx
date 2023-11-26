@@ -16,6 +16,7 @@ import moment from "moment";
 import { useWalletAddress } from "bitcoin-wallet-adapter";
 import ListInscription from "./ListInscription";
 import BuyInscription from "./BuyInscription";
+import DisplayAttributes from "./DisplayAttributes";
 type InscriptionProps = {
   data: IInscription;
 };
@@ -98,6 +99,11 @@ function InscriptionDetail({ data }: InscriptionProps) {
       <div className="pt-2">
         <DisplayProperties data={data} />
       </div>
+      {data?.attributes?.length && (
+        <div className="pt-2">
+          <DisplayAttributes data={data} />
+        </div>
+      )}
     </div>
   );
 }

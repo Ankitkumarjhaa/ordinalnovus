@@ -20,6 +20,7 @@ interface CustomButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   link?: boolean;
   href?: string;
   loading?: boolean;
+  newTab?: boolean;
 }
 
 const CustomButton = ({
@@ -41,6 +42,7 @@ const CustomButton = ({
   icon: Icon = null,
   link = false,
   loading = false,
+  newTab = true,
   href,
   ...props
 }: CustomButtonProps) => {
@@ -55,8 +57,13 @@ const CustomButton = ({
 
   if (link && href) {
     return (
-      //@ts-ignore
-      <Link href={href} passHref prefetch={false} target="_blank">
+      <Link
+        //@ts-ignore
+        href={href}
+        passHref
+        prefetch={false}
+        target={newTab ? "_blank" : ""}
+      >
         <button
           className={`${buttonClasses} ${
             !disabled && hoverClasses
