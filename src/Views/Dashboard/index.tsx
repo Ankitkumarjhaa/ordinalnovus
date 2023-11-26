@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { IInscription } from "@/types";
 import CustomCard from "@/components/elements/CustomCardSmall";
 import { useRouter } from "next/navigation";
@@ -10,48 +10,55 @@ import { fetchInscriptions } from "@/apiHelper/fetchInscriptions";
 import { useWalletAddress } from "bitcoin-wallet-adapter";
 
 function AccountPage() {
-  const [inscriptions, setInscriptions] = useState<IInscription[]>([]);
+  const [inscriptions, setInscriptions] = useState<IInscription[] | null>(null);
   const [total, setTotal] = useState<number>(0);
   const [profile, setProfile] = useState<IInscription | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   const walletDetails = useWalletAddress();
 
-  useEffect(() => {
-    if (walletDetails && !inscriptions.length) {
-      if (walletDetails.connected && walletDetails.ordinal_address) {
-        setLoading(true);
-        const fetchData = async () => {
-          const params = {
-            wallet: walletDetails.ordinal_address,
-            page_size: 100,
-            page: 1,
-          };
+  const fetchData = useCallback(async () => {
+    try {
+      const params = {
+        wallet: walletDetails.ordinal_address,
+        page_size: 100,
+        page: 1,
+      };
 
-          const result = await fetchInscriptions(params);
-          if (result && result.data) {
-            // Do something with the fetched data
-            setProfile(
-              result.data.inscriptions.filter(
-                (a) => a?.content_type && a?.content_type.includes("image")
-              )[0]
-            );
-            setInscriptions(result.data.inscriptions);
-            setTotal(result.data.pagination.total);
-          }
-
-          setLoading(false);
-        };
-
-        fetchData();
+      const result = await fetchInscriptions(params);
+      if (result && result.data) {
+        // Do something with the fetched data
+        setProfile(
+          result.data.inscriptions.filter(
+            (a) => a?.content_type && a?.content_type.includes("image")
+          )[0]
+        );
+        setInscriptions(result.data.inscriptions);
+        setTotal(result.data.pagination.total);
       }
+      setLoading(false);
+    } catch (e: any) {
+      setLoading(false);
     }
-    if (!walletDetails.connected) {
-      console.log({ walletDetails });
+  }, [walletDetails]);
+
+  useEffect(() => {
+    if (
+      walletDetails?.connected &&
+      walletDetails.ordinal_address &&
+      !inscriptions &&
+      loading
+    ) {
+      fetchData();
+    }
+  }, [walletDetails, inscriptions, loading]);
+
+  useEffect(() => {
+    if (!walletDetails?.connected && !loading) {
       return router.push("/");
     }
-  }, [walletDetails, inscriptions]);
+  }, [walletDetails, loading]);
 
   return (
     <div className="pt-16 text-white">
@@ -70,9 +77,9 @@ function AccountPage() {
           )}
         </div>
         <div className="pl-4">
-          <p className="text-white text-sm">{walletDetails.ordinal_address}</p>
+          <p className="text-white text-sm">{walletDetails?.ordinal_address}</p>
           <p className="text-gray-400 text-xs">
-            {shortenString(walletDetails.ordinal_address || "")}
+            {shortenString(walletDetails?.ordinal_address || "")}
           </p>
         </div>
       </div>
@@ -96,7 +103,7 @@ function AccountPage() {
                     .map((item) => (
                       <div
                         key={item.inscription_id}
-                        className="w-3/12 relative"
+                        className="card_div p-2 w-full md:w-6/12 lg:w-3/12 relative"
                       >
                         <p className="absolute bg-bitcoin rounded-full font-bold text-yellow-900 text-sm p-1 z-10">
                           V{item.version}
@@ -132,7 +139,7 @@ function AccountPage() {
                     .map((item) => (
                       <div
                         key={item.inscription_id}
-                        className="w-3/12 relative"
+                        className="card_div p-2 w-full md:w-6/12 lg:w-3/12 relative"
                       >
                         <CustomCard
                           number={item.inscription_number}
@@ -165,7 +172,7 @@ function AccountPage() {
                     .map((item) => (
                       <div
                         key={item.inscription_id}
-                        className="w-3/12 relative"
+                        className="card_div p-2 w-full md:w-6/12 lg:w-3/12 relative"
                       >
                         {item.version && (
                           <p className="absolute bg-bitcoin rounded-full font-bold text-yellow-900 text-sm p-1 z-10">
@@ -214,7 +221,7 @@ function AccountPage() {
                     .map((item) => (
                       <div
                         key={item.inscription_id}
-                        className="w-3/12 relative"
+                        className="card_div p-2 w-full md:w-6/12 lg:w-3/12 relative"
                       >
                         <CustomCard
                           number={item.inscription_number}

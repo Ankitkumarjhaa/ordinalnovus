@@ -37,7 +37,7 @@ export async function GET(
       };
 
       // Cache the content data in Redis for 1 hour
-      await setCache(cacheKey, content, 1 * 60 * 60);
+      await setCache(cacheKey, content, 5 * 60 * 60);
     }
 
     const stream = bufferToStream(content.data);
