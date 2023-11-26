@@ -99,7 +99,7 @@ function processWhereParam(
   const schema = model.schema;
   const schemaKeys = Object.keys(schema.obj);
 
-  if (key === "content") {
+  if (key === "content" || key === "search") {
     if (finalQuery.find["domain_name"] && finalQuery.find["version"] == 1) {
       console.debug(
         `Skipping 'content' as 'domain_name' and 'version=1' conditions are present`

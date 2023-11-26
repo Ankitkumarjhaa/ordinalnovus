@@ -52,7 +52,9 @@ function Listed({ data }: ListedInscriptionsProps) {
   return (
     <section className="pt-16 w-full">
       <div>
-        <h2 className="font-bold text-2xl lg:text-4xl text-white">Listed</h2>
+        <h2 className="font-bold text-2xl lg:text-4xl text-white pb-6">
+          Listed
+        </h2>
       </div>
       <Slider {...settings}>
         {data?.map((item: IInscription) => (

@@ -7,24 +7,36 @@ import CardContent from "@components/elements/CustomCardSmall/CardContent";
 interface SearchCardProps {
   collection: ICollection;
   setCollections: React.Dispatch<React.SetStateAction<ICollection[] | null>>;
+  setId: React.Dispatch<React.SetStateAction<string>>;
 }
 const SearchCard: React.FC<SearchCardProps> = ({
   collection,
   setCollections,
+  setId,
 }) => {
   return (
-    <div className="w-full hover:bg-primary-dark p-3">
+    <div className="w-full hover:bg-primary-dark px-3 py-1">
       <Link href={`/collection/${collection.slug}`}>
         <div
-          className=" flex items-center h-full"
-          onClick={() => setCollections(null)}
+          className="flex items-center h-full"
+          onClick={() => {
+            setCollections(null);
+            setId("");
+          }}
         >
-          <div className="w-[50px] h-[50px] relative center">
-            <CardContent
-              inscriptionId={collection.inscription_icon.inscriptionId}
-              content_type={collection.inscription_icon.content_type}
-            />
-          </div>
+          {collection?.inscription_icon?.inscription_id ? (
+            <div className="w-[20px] h-[20px] relative center">
+              <CardContent
+                inscriptionId={collection.inscription_icon.inscription_id}
+                content_type={collection.inscription_icon.content_type}
+              />
+            </div>
+          ) : (
+            <div className="w-[20px] h-[20px] relative center">
+              <img src={collection.icon} />
+            </div>
+          )}
+
           <div className="flex-1 pl-2 flex items-center justify-between">
             <div className="center ">
               <h3 className="text-white text-xs font-extrabold capitalize flex collections-start">

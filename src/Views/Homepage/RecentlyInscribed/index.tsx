@@ -52,7 +52,7 @@ function Recent({ data }: RecentlyInscribedProps) {
   return (
     <section className="pt-16 w-full">
       <div>
-        <h2 className="font-bold text-2xl lg:text-4xl text-white">
+        <h2 className="font-bold text-2xl lg:text-4xl text-white  pb-6">
           Recently Inscribed
         </h2>
       </div>

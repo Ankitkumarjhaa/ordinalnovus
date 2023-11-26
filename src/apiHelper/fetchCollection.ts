@@ -40,7 +40,7 @@ export async function fetchCollections(
           slug,
           collectionId,
           _sort: sort,
-          name: search,
+          search,
           _limit: pageSize,
           _start: (page - 1) * pageSize,
           apikey: process.env.API_KEY,

@@ -1,13 +1,12 @@
 "use client";
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ICollection } from "@/types";
 import { fetchCollections } from "@/apiHelper/fetchCollection";
 import SearchCard from "./SearchCard";
-import CustomButton from "@/components/elements/CustomButton";
 import debounce from "lodash.debounce";
 import { determineTypesFromId } from "@/utils";
-import { FaBtc } from "react-icons/fa";
+import { FaBtc, FaSearch } from "react-icons/fa";
 import { SiHiveBlockchain } from "react-icons/si";
 import {
   Bs123,
@@ -32,136 +31,142 @@ function Search() {
   };
 
   const debouncedFetch = useRef(
-    debounce(
-      (id) => handleSearch(id),
-      //fetchCollectionsBySearch(id)
-      500
-    )
+    debounce((id) => handleSearch(id), 500)
   ).current;
 
   async function handleSearch(id: string) {
-    const possible = determineTypesFromId(id);
-    setPossibleTypes(possible);
+    try {
+      setLoading(true);
+      const possible = determineTypesFromId(id);
+      setPossibleTypes(possible);
+      if (possible.includes("collection") && id) {
+        console.log({ possible, id });
+        await fetchCollectionsBySearch(id);
+      }
+    } catch (e) {
+      setError(e);
+    } finally {
+      setLoading(false);
+    }
   }
 
-  // const fetchCollectionsBySearch = async (id: string) => {
-  //   if (id.trim() !== "") {
-  //     setLoading(true);
-  //     const result = await fetchCollections({ search: id });
-  //     setLoading(false);
-  //     if (error) {
-  //       setError(error);
-  //       return;
-  //     }
-  //     if (result && result.data) setCollections(result?.data.collections);
-  //   }
-  // };
+  const fetchCollectionsBySearch = async (id: string) => {
+    if (id.trim()) {
+      console.log("fetching coll data: ", id);
+      const result = await fetchCollections({ search: id });
+      if (result?.data) {
+        setCollections(result.data.collections);
+      }
+    }
+  };
 
   useEffect(() => {
     debouncedFetch(id);
   }, [id]);
 
-  // const handleSearch = () => {
-  //   setCollections(null); // clear collections state
-  //   router.push(`/search/${id}`);
-  // };
-
   if (error) {
     return <div>Error: {error.message}</div>;
   }
 
+  const determineUrl = (item: string, id: string) => {
+    switch (true) {
+      case item.includes("sat name"):
+        return `/sat/${id}`;
+      case item.includes("inscription number"):
+      case item.includes("inscription id"):
+      case item.includes("sha"):
+      case item.includes("sat"):
+        return `/inscription/${id}`;
+      case item.includes("token"):
+      case item.includes("bitmap"):
+      case item.includes("domain"):
+      case item.includes("content"):
+        return `/search/${id}`;
+      default:
+        return "";
+    }
+  };
+
+  const renderItem = (item: string, idx: number) => {
+    const url = determineUrl(item, id);
+
+    const renderIcon = (item: any) => {
+      // Icon rendering logic
+      const icons = {
+        sat: <FaBtc className="mr-2" />,
+        number: <Bs123 className="mr-2" />,
+        "inscription id": <HiDocument className="mr-2" />,
+        collection: <BsFillCollectionFill className="mr-2" />,
+        content: <BsTextParagraph className="mr-2" />,
+        "sat name": <RiCharacterRecognitionFill className="mr-2" />,
+        domain: <BsBrowserChrome className="mr-2" />,
+        bitmap: <SiHiveBlockchain className="mr-2" />,
+      };
+      return Object.keys(icons).find((key) => item.includes(key))
+        ? //@ts-ignore
+          icons[item]
+        : null;
+    };
+
+    return (
+      <Link tabIndex={idx} key={item} shallow href={url}>
+        <div className="cursor-pointer">
+          <div className="bg-primary text-xs items-center flex justify-start font-bold p-2 capitalize text-white">
+            {renderIcon(item)}
+            {item}
+          </div>
+          {collections && item.includes("collection") && id ? (
+            <div className="w-full max-h-[50vh] overflow-y-scroll no-scrollbar">
+              {collections.length ? (
+                collections.map((collection) => (
+                  <SearchCard
+                    collection={collection}
+                    setCollections={setCollections}
+                    setId={setId}
+                    key={collection.slug}
+                  />
+                ))
+              ) : (
+                <p className="p-2 hover:bg-gray-800 text-gray-200 ">
+                  Not Found
+                </p>
+              )}
+            </div>
+          ) : (
+            <p className="p-2 hover:bg-gray-800 text-gray-200 ">{id}</p>
+          )}
+        </div>
+      </Link>
+    );
+  };
+
   return (
     <div
       onBlur={(e) => {
-        if (
-          e.relatedTarget === null ||
-          !e.currentTarget.contains(e.relatedTarget)
-        ) {
+        if (!e.currentTarget.contains(e.relatedTarget)) {
           setId("");
         }
       }}
-      className="flex relative items-center justify-center w-full md:max-w-md max-w-lg mx-auto pb-6  lg:pb-0"
+      className="flex relative items-center justify-center w-full md:max-w-md max-w-lg mx-auto pb-6 lg:pb-0"
     >
       <div
         id="main-searchbar"
         className="relative w-full flex justify-between items-center border xl:border-2 border-accent rounded-md"
       >
         <input
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              // handleSearch();
-            }
-          }}
-          className="w-full px-4 py-2 bg-transparent text-white placeholder-brand_text_primary focus:outline-none focus:shadow-outline"
+          className="w-full px-2 py-2 bg-transparent text-white placeholder-brand_text_primary focus:outline-none focus:shadow-outline"
           type="text"
           placeholder="Enter ID / Sats / Number / Collection / bitmap / domain"
           value={id}
           onChange={handleIDChange}
         />
-        <CustomButton
-          text="Search"
-          // onClick={() => handleSearch()}
-          hoverBgColor="hover:bg-accent_dark"
-          hoverTextColor="text-white"
-          bgColor="bg-accent"
-          textColor="text-white"
-          className="flex transition-all"
-        />
+        <div className="text-bitcoin px-2">
+          <FaSearch />
+        </div>
       </div>
       {id && possibleTypes.length > 0 && (
         <div className="absolute top-[100%] bg-secondary w-full max-h-[50vh] overflow-y-auto overflow-x-hidden small-scrollbar p-1">
-          {possibleTypes.map((item: string, idx: number) => {
-            let url = "";
-            if (item.includes("sat name")) {
-              url = `/sat/${id}`;
-            } else if (item.includes("inscription number")) {
-              url = `/inscription/${id}`;
-            } else if (item.includes("inscription id")) {
-              url = `/inscription/${id}`;
-            }
-
-            return (
-              <Link tabIndex={idx} key={item} shallow href={url}>
-                <div className="cursor-pointer">
-                  <div className="bg-primary text-xs items-center flex justify-start font-bold p-2 capitalize text-white">
-                    {item === "sat" && <FaBtc className="mr-2" />}
-                    {item.includes("number") && <Bs123 className="mr-2" />}
-                    {item.includes("inscription id") && (
-                      <HiDocument className="mr-2" />
-                    )}
-                    {item.includes("collection") && (
-                      <BsFillCollectionFill className="mr-2" />
-                    )}
-                    {item.includes("content") && (
-                      <BsTextParagraph className="mr-2" />
-                    )}
-                    {item.includes("sat name") && (
-                      <RiCharacterRecognitionFill className="mr-2" />
-                    )}
-                    {item.includes("domain") && (
-                      <BsBrowserChrome className="mr-2" />
-                    )}
-                    {item.includes("bitmap") && (
-                      <SiHiveBlockchain className="mr-2" />
-                    )}
-                    {item}
-                  </div>
-                  <p className="p-2 hover:bg-gray-800 text-gray-200 ">{id}</p>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      )}
-      {collections && id && (
-        <div className="absolute top-[100%] bg-secondary w-full max-h-[50vh] overflow-y-scroll small-scrollbar">
-          {collections.map((collection) => (
-            <SearchCard
-              collection={collection}
-              setCollections={setCollections}
-              key={collection.slug}
-            />
-          ))}
+          {possibleTypes.map(renderItem)}
         </div>
       )}
     </div>
