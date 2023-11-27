@@ -120,6 +120,50 @@ async function getInscriptionsRange(collections: any) {
   }
 }
 
+// async function getCollectionsWithInscriptionVerification(query: any) {
+//   try {
+//     // Step 1: Fetch collections with supply > 0
+//     const collections = await Collection.find({
+//       ...query.find,
+//       supply: { $gt: 0 },
+//     });
+//     // ... [other existing query parameters]
+
+//     // Step 2: Verify each collection with its inscriptions
+//     for (let collection of collections) {
+//       const inscriptionsCount = await Inscription.countDocuments({
+//         official_collection: collection._id,
+//       });
+
+//       // Check for mismatch and update if necessary
+//       if (inscriptionsCount !== collection.supply) {
+//         await Collection.updateOne(
+//           { _id: collection._id },
+//           {
+//             live: true,
+//             updated: 0,
+//             error: false,
+//             error_tag: "",
+//             supply: 0,
+//             errored: 0,
+//             errored_inscriptions: [],
+//             min: null,
+//             max: null,
+//           }
+//         );
+
+//         console.log(`Updated collection ${collection.slug} due to mismatch.`);
+//       }
+//     }
+
+//     return collections;
+//   } catch (error) {
+//     // Your existing error handling
+//   }
+// }
+
+
+
 export async function GET(req: NextRequest, res: NextResponse) {
   try {
     console.log("***** COLLECTION API CALLED *****");
