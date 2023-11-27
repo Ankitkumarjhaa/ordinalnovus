@@ -120,48 +120,6 @@ async function getInscriptionsRange(collections: any) {
   }
 }
 
-// async function getCollectionsWithInscriptionVerification(query: any) {
-//   try {
-//     // Step 1: Fetch collections with supply > 0
-//     const collections = await Collection.find({
-//       ...query.find,
-//       supply: { $gt: 0 },
-//     });
-//     // ... [other existing query parameters]
-
-//     // Step 2: Verify each collection with its inscriptions
-//     for (let collection of collections) {
-//       const inscriptionsCount = await Inscription.countDocuments({
-//         official_collection: collection._id,
-//       });
-
-//       // Check for mismatch and update if necessary
-//       if (inscriptionsCount !== collection.supply) {
-//         await Collection.updateOne(
-//           { _id: collection._id },
-//           {
-//             live: true,
-//             updated: 0,
-//             error: false,
-//             error_tag: "",
-//             supply: 0,
-//             errored: 0,
-//             errored_inscriptions: [],
-//             min: null,
-//             max: null,
-//           }
-//         );
-
-//         console.log(`Updated collection ${collection.slug} due to mismatch.`);
-//       }
-//     }
-
-//     return collections;
-//   } catch (error) {
-//     // Your existing error handling
-//   }
-// }
-
 export async function GET(req: NextRequest, res: NextResponse) {
   try {
     console.log("***** COLLECTION API CALLED *****");
@@ -179,8 +137,6 @@ export async function GET(req: NextRequest, res: NextResponse) {
 
     const query = convertParams(Collection, req.nextUrl);
 
-    query.find.supply = { $gt: 0 };
-
     // Generate a unique key for this query
     const cacheKey = `collections:${JSON.stringify(query)}`;
 
@@ -190,8 +146,18 @@ export async function GET(req: NextRequest, res: NextResponse) {
 
     if (cachedResult) {
       // If the result exists in the cache, return it
+      cachedResult.collections = await getListingData(cachedResult.collections);
       return NextResponse.json(cachedResult);
     } else {
+      query.find.$expr = {
+        $and: [
+          { $gt: ["$supply", 1] },
+          { $gt: ["$updated", 1] },
+          { $eq: ["$supply", "$updated"] },
+        ],
+      };
+      query.find.live = true;
+
       if (req.nextUrl.searchParams.has("min")) {
         query.find["min"] = {
           $gte: parseInt(req.nextUrl.searchParams.get("min") as string, 10),
@@ -235,8 +201,8 @@ export async function GET(req: NextRequest, res: NextResponse) {
       // await resetCollections();
       // await Collection.deleteOne({ slug: "btc-artifacts" });
 
-      // Store the result in Redis for 30 minutes
-      await setCache(cacheKey, result, 60 * 30);
+      // Store the result in Redis for 2 hours
+      await setCache(cacheKey, result, 60 * 120);
 
       // Return the result
       return NextResponse.json(result);
@@ -250,23 +216,60 @@ export async function GET(req: NextRequest, res: NextResponse) {
   }
 }
 export const dynamic = "force-dynamic";
-
 const resetCollections = async () => {
   try {
+    // Update collections where supply is less than 1
     const result = await Collection.updateMany(
-      {}, // This empty object means that the update will apply to all documents
-      {
-        $set: {
-          updated: 0,
-          supply: 0,
-          errored: 0,
-          errored_inscriptions: [],
-        },
-      }
+      { supply: { $lt: 2 } }, // Query filter
+      { $set: { live: false } } // Update operation
     );
 
-    console.log(`Successfully reset collections.`);
+    console.log(
+      `Successfully reset collections. Updated count: ${result.modifiedCount}`
+    );
   } catch (error) {
     console.error("Error resetting collections:", error);
   }
 };
+
+// async function getCollectionsWithInscriptionVerification(query: any) {
+//   try {
+//     // Step 1: Fetch collections with supply > 0
+//     const collections = await Collection.find({
+//       ...query.find,
+//       supply: { $gt: 0 },
+//     });
+//     // ... [other existing query parameters]
+
+//     // Step 2: Verify each collection with its inscriptions
+//     for (let collection of collections) {
+//       const inscriptionsCount = await Inscription.countDocuments({
+//         official_collection: collection._id,
+//       });
+
+//       // Check for mismatch and update if necessary
+//       if (inscriptionsCount !== collection.supply) {
+//         await Collection.updateOne(
+//           { _id: collection._id },
+//           {
+//             live: true,
+//             updated: 0,
+//             error: false,
+//             error_tag: "",
+//             supply: 0,
+//             errored: 0,
+//             errored_inscriptions: [],
+//             min: null,
+//             max: null,
+//           }
+//         );
+
+//         console.log(`Updated collection ${collection.slug} due to mismatch.`);
+//       }
+//     }
+
+//     return collections;
+//   } catch (error) {
+//     // Your existing error handling
+//   }
+// }
