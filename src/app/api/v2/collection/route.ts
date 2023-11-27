@@ -12,11 +12,10 @@ import { ICollection } from "@/types";
 async function getListingData(collections: ICollection[]) {
   const updatedCollections = await Promise.all(
     collections.map(async (collection: any) => {
-      console.log({ collection });
-      console.log(collection._doc._id);
+      console.log(collection._id, "id");
       // Fetch inscriptions for each collection
       const inscriptions = await Inscription.find({
-        official_collection: collection._doc._id,
+        official_collection: collection._id,
         listed: true,
       }).sort({ listed_price: 1 });
 
@@ -27,7 +26,7 @@ async function getListingData(collections: ICollection[]) {
       let fp = inscriptions[0]?.listed_price || 0;
       // Return the updated collection object
       return {
-        ...collection._doc,
+        ...collection,
         listed,
         fp,
       };
@@ -185,7 +184,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
         collection.min = inscriptionsData.lowestInscription?.inscription_number;
         collection.max =
           inscriptionsData.highestInscription?.inscription_number;
-        collections[0] = { _doc: collection };
+        collections[0] = collection;
       }
 
       const updatedCollections = await getListingData(collections);
