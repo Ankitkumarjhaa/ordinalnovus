@@ -135,8 +135,13 @@ export interface IInscription {
   token?: boolean;
 }
 
-export interface ICollection {
-  _id?: string;
+export interface Holder {
+  address: string;
+  count: number;
+}
+
+export interface ICollection extends Document {
+  _id: string;
   name: string;
   inscription_icon?: IInscription;
   icon?: string;
@@ -166,6 +171,9 @@ export interface ICollection {
   priority?: number;
   created_at?: Date;
   updated_at?: Date;
+  holders_check?: Date;
+  holders: Holder[];
+  holders_count: number;
   listed?: number;
   fp?: number;
 }

@@ -78,7 +78,7 @@ function Hero({ data }: HeroProps) {
             {data?.tags && data.tags.length > 0 && (
               <div className="tags flex items-center justify-start text-xs">
                 {data?.tags?.map((item, idx) => {
-                  if (idx < 2)
+                  if (idx < 2 && !item.includes(";"))
                     return (
                       <span key={item} className="pr-3 py-3">
                         <span className="bg-accent border text-xs font-bold border-white px-4 py-2 rounded leading-1 text-white uppercase ">
@@ -103,6 +103,12 @@ function Hero({ data }: HeroProps) {
               <div className="supply bg-primary-dark px-3 py-1 rounded-lg my-3 md:m-3 text-sm md:ml-0 w-full flex justify-between items-center">
                 <span>Min</span>
                 <span className="text-white">{data.min}</span>
+              </div>
+            )}
+            {data?.holders && (
+              <div className="supply bg-primary-dark px-3 py-1 rounded-lg my-3 md:m-3 text-sm md:ml-0 w-full flex justify-between items-center">
+                <span>Holders</span>
+                <span className="text-white">{data.holders_count}</span>
               </div>
             )}
             {(data?.listed || -10) > 0 && (

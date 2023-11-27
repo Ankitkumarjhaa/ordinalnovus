@@ -163,14 +163,18 @@ const CardContent: React.FC<CardContentProps> = ({
           }
           return (
             <pre className="whitespace-pre-wrap p-2 text-white">
-              {jsonContent}
+              {jsonContent && jsonContent?.length > 100
+                ? jsonContent?.slice(0, 100)
+                : jsonContent}
             </pre>
           );
         } else {
           // If the content is not JSON, display it as plain text
           return (
             <pre className="whitespace-pre-wrap p-2 text-sm text-white">
-              {fetchedContent}
+              {fetchedContent && fetchedContent?.length > 100
+                ? fetchedContent?.slice(0, 100) + "..."
+                : fetchedContent}
             </pre>
           );
         }
