@@ -25,11 +25,9 @@ async function getListingData(collections: ICollection[]) {
       // Find the inscription with the lowest listed_price
       let fp = inscriptions[0]?.listed_price || 0;
       // Return the updated collection object
-      return {
-        ...collection,
-        listed,
-        fp,
-      };
+      collection.listed = listed;
+      collection.fp = fp;
+      return collection;
     })
   );
 
