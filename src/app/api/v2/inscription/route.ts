@@ -18,6 +18,7 @@ const getProjectionFields = (show: string) => {
 };
 
 const fetchInscriptions = async (query: any, projectionFields: string) => {
+  if (query.sort["listed_price"]) query.find["listed"] = true;
   return await Inscription.find(query.find)
     .select(projectionFields)
     .where(query.where)
@@ -33,6 +34,7 @@ const fetchInscriptions = async (query: any, projectionFields: string) => {
     .sort(query.sort)
     .skip(query.start)
     .limit(query.limit)
+    .lean()
     .exec();
 };
 

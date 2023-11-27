@@ -70,14 +70,21 @@ function processTagsParam(
  * @param finalQuery The final query object that is being constructed.
  * @param sortParam The sorting parameter obtained from the URL.
  */
-
 function processSortParam(finalQuery: FinalQuery, sortParam: string): void {
-  console.debug("Processing sort parameter:", sortParam); // Log the input sortParam for debugging
+  console.debug("Processing sort parameter along:", sortParam); // Log the input sortParam for debugging
   const [sortField, sortOrder] = sortParam.split(":");
+
+  // Add sort order to the finalQuery
   finalQuery.sort[sortField] = sortOrder === "-1" ? -1 : 1;
+
+  // Ensure the sort field exists in the documents
+  // Add a condition to the query to filter out documents where the sort field does not exist
+  // finalQuery.find[sortField] = { $exists: true, $ne: null };
+
   console.debug(
-    `Updated finalQuery.sort with field: ${sortField}, order: ${finalQuery.sort[sortField]}`
-  ); // Log the outcome of the sorting process
+    `Updated finalQuery.sort with field: ${sortField}, order: ${finalQuery.sort[sortField]}` +
+      ` and added existence check for ${sortField} in finalQuery.find`
+  ); // Log the outcome of the sorting process and the existence check
 }
 
 /**

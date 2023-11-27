@@ -1,5 +1,6 @@
 import CustomSearch from "@/components/elements/CustomSearch";
 import { ICollection } from "@/types";
+import moment from "moment";
 import React, { useEffect, useState } from "react";
 
 type ItemProps = {
@@ -40,12 +41,15 @@ function Holders({ collection }: ItemProps) {
   }, [originalHolders]);
   return (
     <div className="py-16">
-      <div className="w-full pb-4 lg:pb-0 md:pl-4 lg:w-auto">
+      <div className="w-full pb-4 lg:pb-0 md:pl-4 lg:w-auto flex justify-between items-center">
         <CustomSearch
           placeholder="Address..."
           value={search}
           onChange={handleSearchChange}
         />
+        <p className="text-xs">
+          updated {moment(collection.holders_check).fromNow()}
+        </p>
       </div>
       {holders && holders.length > 0 ? (
         <div className="py-6">

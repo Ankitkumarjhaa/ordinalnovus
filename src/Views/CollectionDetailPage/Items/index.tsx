@@ -17,7 +17,7 @@ type ItemProps = {
 };
 
 const options = [
-  { value: "listed_price:-1", label: "Default" },
+  { value: "listed_price:1", label: "Listed" },
   { value: "collection_item_number:1", label: "Item Name" },
   { value: "inscription_number:1", label: "Number" },
 ];
@@ -29,7 +29,7 @@ function Items({ collection }: ItemProps) {
   const [totalCount, setTotalCount] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(40);
   const [sort, setSort] = useState<string>(
-    collection.listed ? "listed_price:-1" : "collection_item_number:1"
+    collection.listed ? "listed_price:1" : "collection_item_number:1"
   );
   const [search, setSearch] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -66,6 +66,7 @@ function Items({ collection }: ItemProps) {
         })
       );
     } else if (result) {
+      console.log({ result });
       setData(result.data.inscriptions);
       setTotalCount(result.data.pagination.total);
       setLoading(false);
