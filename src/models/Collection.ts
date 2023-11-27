@@ -69,6 +69,22 @@ export const collectionSchema = new Schema(
     banned: { type: Boolean, default: false },
     verified: { type: Boolean, default: false },
     updated_by: { type: String, required: false },
+
+    holders: [
+      {
+        address: { type: String, required: true },
+        count: { type: Number, required: true, default: 0 },
+      },
+    ],
+    holders_count: {
+      type: Number,
+      default: 0,
+    },
+    holders_check: {
+      type: Date,
+      default: Date.now,
+    },
+
     type: {
       type: String,
       enum: ["official", "list"],
@@ -116,7 +132,13 @@ collectionSchema.pre(
     // Assuming Inscription is already imported
     await Inscription.updateMany(
       { official_collection: collectionId },
-      { $set: { official_collection: null } }
+      {
+        $set: {
+          official_collection: null,
+          collection_item_name: null,
+          collection_item_number: null,
+        },
+      }
     );
 
     next();

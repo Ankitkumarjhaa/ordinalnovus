@@ -78,8 +78,8 @@ async function getInscriptionsRange(collections: any) {
     // Check if the collection already has min and max
     if (collection.min && collection.max) {
       return {
-        lowestInscription: { number: collection.min },
-        highestInscription: { number: collection.max },
+        lowestInscription: { inscription_number: collection.min },
+        highestInscription: { inscription_number: collection.max },
       };
     }
 
@@ -161,8 +161,6 @@ async function getInscriptionsRange(collections: any) {
 //     // Your existing error handling
 //   }
 // }
-
-
 
 export async function GET(req: NextRequest, res: NextResponse) {
   try {
