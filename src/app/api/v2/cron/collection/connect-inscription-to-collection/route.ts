@@ -14,7 +14,7 @@ async function fetchInscriptions(slug: string) {
 }
 
 async function processChunk(chunk: any, collection: any) {
-  const err = collection.erroredInscriptions || [];
+  const err = collection.errored_inscriptions || [];
   const bulkOps = [];
 
   console.log(`Processing chunk for collection: ${collection.name}`);
