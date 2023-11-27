@@ -120,10 +120,18 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
               } else if (
                 parsedContent.p &&
                 parsedContent.tick &&
-                (parsedContent.amt || parsedContent.dep)
+                parsedContent.amt
               ) {
                 token = true;
                 tags.push("token");
+              } else if (
+                parsedContent.p &&
+                parsedContent.op &&
+                parsedContent.dep
+              ) {
+                token = true;
+                tags.push("token");
+                tags.push("dmt");
               } else if (
                 parsedContent.p === "sns" &&
                 parsedContent.op === "reg" &&
