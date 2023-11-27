@@ -75,7 +75,7 @@ async function getCollections(query: any) {
     console.log(query, { depth: null });
     const coll = await Collection.findOne(query.find)
       // .where(query.where)
-      .sort("supply:1")
+      .sort("supply:-1")
       .skip(query.start)
       .exec();
 
@@ -150,11 +150,12 @@ export async function GET(req: NextRequest, res: NextResponse) {
     await dbConnect();
 
     const query = convertParams(Collection, req.nextUrl);
-    const oneDayAgo = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
+    // check once in 2 days
+    const oneDayAgo = new Date(new Date().getTime() - 48 * 60 * 60 * 1000);
 
     query.find.$and = [
-      { supply: { $gt: 0 } },
-      { updated: { $gt: 0 } },
+      { supply: { $gt: 1 } },
+      { updated: { $gt: 1 } },
       { $expr: { $eq: ["$supply", "$updated"] } },
       {
         $or: [
