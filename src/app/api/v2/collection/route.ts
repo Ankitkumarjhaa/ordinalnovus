@@ -6,8 +6,34 @@ import convertParams from "@/utils/api/newConvertParams";
 import { getCache, setCache } from "@/lib/cache";
 import apiKeyMiddleware from "@/newMiddlewares/apikeyMiddleware";
 import { CustomError } from "@/utils";
+import { ICollection } from "@/types";
 
-//TODO: return collection listings and FP
+//TODO: return collection volume data
+async function getListingData(collections: ICollection[]) {
+  const updatedCollections = await Promise.all(
+    collections.map(async (collection) => {
+      // Fetch inscriptions for each collection
+      const inscriptions = await Inscription.find({
+        official_collection: collection._id,
+        listed: true,
+      }).sort({ listed_price: 1 });
+
+      // Count the number of listed
+      const listed = inscriptions.length || 0;
+
+      // Find the inscription with the lowest listed_price
+      let fp = inscriptions[0]?.listed_price || 0;
+      // Return the updated collection object
+      return {
+        ...collection,
+        listed,
+        fp,
+      };
+    })
+  );
+
+  return updatedCollections;
+}
 
 async function getCollections(query: any) {
   try {
@@ -133,7 +159,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
       }
 
       // If the result doesn't exist in the cache, query the database
-      const collections = await getCollections(query);
+      const collections: any = await getCollections(query);
       const totalCount = await getTotalCount(query);
 
       if (collections.length === 1) {
@@ -147,9 +173,11 @@ export async function GET(req: NextRequest, res: NextResponse) {
         collections[0] = collection;
       }
 
+      const updatedCollections = await getListingData(collections);
+
       // Construct the result
       const result = {
-        collections,
+        collections: updatedCollections,
         pagination: {
           page: query.start / query.limit + 1,
           limit: query.limit,
@@ -160,8 +188,8 @@ export async function GET(req: NextRequest, res: NextResponse) {
       // await resetCollections();
       // await Collection.deleteOne({ slug: "btc-artifacts" });
 
-      // Store the result in Redis for 1 hour
-      await setCache(cacheKey, result, 60 * 60);
+      // Store the result in Redis for 30 minutes
+      await setCache(cacheKey, result, 60 * 30);
 
       // Return the result
       return NextResponse.json(result);

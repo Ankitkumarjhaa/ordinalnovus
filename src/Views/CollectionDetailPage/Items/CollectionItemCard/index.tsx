@@ -10,11 +10,13 @@ import { calculateBTCCostInDollars, convertSatToBtc } from "@/utils";
 interface CollectionCardProps {
   item: IInscription;
   collection: ICollection;
+  search?: string;
 }
 
 const CollectionItemCard: React.FC<CollectionCardProps> = ({
   item,
   collection,
+  search,
 }) => {
   const btcPrice = useSelector(
     (state: RootState) => state.general.btc_price_in_dollar
@@ -55,6 +57,23 @@ const CollectionItemCard: React.FC<CollectionCardProps> = ({
             ) : (
               <></>
             )}
+            {search &&
+              item?.attributes &&
+              (() => {
+                const matchingAttribute = item.attributes.find((a) =>
+                  a.value.toLowerCase().includes(search.toLowerCase())
+                );
+
+                if (matchingAttribute) {
+                  return (
+                    <div className="absolute bottom-0 bg-black bg-opacity-80 py-1 px-2 left-0 right-0 text-xs text-gray-100 flex justify-between">
+                      <span>{matchingAttribute.trait_type}</span>
+                      <span>{matchingAttribute.value}</span>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
           </div>
           <div className="p-3 ">
             <p className="uppercase font-bold text-white text-sm">

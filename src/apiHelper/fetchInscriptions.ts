@@ -13,6 +13,7 @@ export interface FetchInscriptionsParams {
   wallet?: string;
   collection_item_number?: string;
   tag?: string;
+  attributes?: string;
 }
 
 export interface InscriptionResponse {
@@ -37,6 +38,7 @@ export async function fetchInscriptions(
     wallet,
     collection_item_number,
     tag,
+    attributes,
   } = params;
   try {
     const response = await axios.get(
@@ -48,7 +50,8 @@ export async function fetchInscriptions(
           show: "all",
           slug,
           _sort: sort || "inscription_number:1",
-          name: search,
+          // name: search,
+          ...(attributes && { attributes }),
           _limit: page_size,
           _start: (page - 1) * page_size,
           tag,

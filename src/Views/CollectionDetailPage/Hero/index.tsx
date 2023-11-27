@@ -105,6 +105,18 @@ function Hero({ data }: HeroProps) {
                 <span className="text-white">{data.min}</span>
               </div>
             )}
+            {(data?.listed || -10) > 0 && (
+              <div className="supply bg-primary-dark px-3 py-1 rounded-lg my-3 md:m-3 text-sm md:ml-0 w-full flex justify-between items-center">
+                <span>Listed</span>
+                <span className="text-white">{data.listed}</span>
+              </div>
+            )}
+            {data.fp !== undefined && !isNaN(data.fp) && data.fp > 0 && (
+              <div className="supply bg-primary-dark px-3 py-1 rounded-lg my-3 md:m-3 text-sm md:ml-0 w-full flex justify-between items-center">
+                <span>FP</span>
+                <span className="text-white">{data.fp / 100_000_000} BTC</span>
+              </div>
+            )}
           </div>
         </div>
       </div>

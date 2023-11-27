@@ -66,7 +66,7 @@ interface IApikey {
 }
 
 interface Attribute {
-  key: string;
+  trait_type: string;
   value: string;
 }
 
@@ -166,6 +166,8 @@ export interface ICollection {
   priority?: number;
   created_at?: Date;
   updated_at?: Date;
+  listed?: number;
+  fp?: number;
 }
 
 export interface ISale extends Document {
