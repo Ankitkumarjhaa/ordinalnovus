@@ -12,6 +12,8 @@ import { ICollection } from "@/types";
 async function getListingData(collections: ICollection[]) {
   const updatedCollections = await Promise.all(
     collections.map(async (collection: any) => {
+      console.log({ collection });
+      console.log(collection._doc._id);
       // Fetch inscriptions for each collection
       const inscriptions = await Inscription.find({
         official_collection: collection._doc._id,
