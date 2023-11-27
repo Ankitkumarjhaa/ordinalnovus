@@ -120,7 +120,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
               } else if (
                 parsedContent.p &&
                 parsedContent.tick &&
-                parsedContent.amt
+                (parsedContent.amt || parsedContent.dep)
               ) {
                 token = true;
                 tags.push("token");
@@ -227,7 +227,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 }
 
 const handlePreSaveLogic = async (bulkDocs: Array<Partial<any>>) => {
-
   const transformedBulkOps: any[] = [];
   const shaMap: { [sha: string]: number } = {};
 
@@ -247,7 +246,6 @@ const handlePreSaveLogic = async (bulkDocs: Array<Partial<any>>) => {
   }
 
   for (let i = 0; i < bulkDocs.length; i++) {
-
     let bulkDoc = { ...bulkDocs[i] };
     const insertOne = bulkDoc.insertOne;
     const doc = insertOne.document;
@@ -309,7 +307,6 @@ const handlePreSaveLogic = async (bulkDocs: Array<Partial<any>>) => {
             .map((part: string) => part.toLowerCase());
     }
     transformedBulkOps.push(doc);
-
   }
 
   // console.log(uniqueShas, "UNIQUESHAS");
@@ -318,7 +315,6 @@ const handlePreSaveLogic = async (bulkDocs: Array<Partial<any>>) => {
 };
 
 const deleteInscriptionsAboveThreshold = async (number: number) => {
-
   try {
     const result = await Inscription.deleteMany({
       inscription_number: { $gt: number },
@@ -328,7 +324,6 @@ const deleteInscriptionsAboveThreshold = async (number: number) => {
   } catch (err) {
     console.error("An error occurred while deleting documents:", err);
   }
-
 };
 
 export const dynamic = "force-dynamic";
