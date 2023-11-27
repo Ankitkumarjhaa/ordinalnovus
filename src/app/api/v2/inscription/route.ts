@@ -5,6 +5,7 @@ import convertParams from "@/utils/api/newConvertParams";
 
 import apiKeyMiddleware from "@/newMiddlewares/apikeyMiddleware";
 import { CustomError } from "@/utils";
+import moment from "moment";
 
 const getProjectionFields = (show: string) => {
   if (show === "prune") {
@@ -41,6 +42,7 @@ const countInscriptions = async (query: any) => {
 
 export async function GET(req: NextRequest, res: NextResponse) {
   console.log("***** INSCRIPTION API CALLED *****");
+  const startTime = Date.now(); // Record the start time
 
   try {
     const middlewareResponse = await apiKeyMiddleware(
@@ -68,6 +70,12 @@ export async function GET(req: NextRequest, res: NextResponse) {
     await dbConnect();
     const inscriptions = await fetchInscriptions(query, projectionFields);
     const totalCount = await countInscriptions(query);
+    const endTime = Date.now(); // Record the end time
+    const timeTaken = endTime - startTime; // Calculate the elapsed time
+    console.log(
+      "Time Taken to process this: ",
+      moment.duration(timeTaken).humanize()
+    );
 
     return NextResponse.json({
       inscriptions,
@@ -76,6 +84,8 @@ export async function GET(req: NextRequest, res: NextResponse) {
         limit: query.limit,
         total: totalCount,
       },
+      time_taken_to_process: moment.duration(timeTaken).humanize(),
+      processing_time: timeTaken,
     });
   } catch (error: any) {
     if (!error?.status) console.error("Catch Error: ", error);

@@ -66,7 +66,7 @@ interface IApikey {
 }
 
 interface Attribute {
-  key: string;
+  trait_type: string;
   value: string;
 }
 
@@ -106,7 +106,8 @@ export interface IInscription {
   percentile?: string;
   period?: number;
   rarity?: string;
-  sat_number?: number;
+
+  sat?: number;
   sat_name?: string;
   sat_offset?: number;
   lists?: Schema.Types.ObjectId[];
@@ -165,6 +166,8 @@ export interface ICollection {
   priority?: number;
   created_at?: Date;
   updated_at?: Date;
+  listed?: number;
+  fp?: number;
 }
 
 export interface ISale extends Document {

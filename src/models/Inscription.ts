@@ -2,12 +2,12 @@ import mongoose, { Schema, Document } from "mongoose";
 import { model, models } from "mongoose";
 // Define the schema for the "attribute" subdocument
 interface Attribute {
-  key: string;
+  trait_type: string;
   value: string;
 }
 
 const attributeSchema = new Schema({
-  key: { type: String, required: true },
+  trait_type: { type: String, required: true },
   value: { type: String, required: true },
 });
 
@@ -206,3 +206,4 @@ inscriptionSchema.index({ sha: 1, version: 1 });
 inscriptionSchema.index({ address: 1 });
 inscriptionSchema.index({ tags: 1 });
 inscriptionSchema.index({ inscription_number: 1 });
+inscriptionSchema.index({ "attributes.value": 1, "attributes.trait_type": 1 });

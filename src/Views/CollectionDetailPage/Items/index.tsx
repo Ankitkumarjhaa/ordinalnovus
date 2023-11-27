@@ -5,10 +5,11 @@ import CustomSearch from "@/components/elements/CustomSearch";
 import CustomSelector from "@/components/elements/CustomSelector";
 import { addNotification } from "@/stores/reducers/notificationReducer";
 import { ICollection, IInscription } from "@/types";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import CollectionItemCard from "./CollectionItemCard";
 import SkeletonCollectionItemCard from "./SkeletonCollectionItemCard";
+import debounce from "lodash.debounce";
 
 type ItemProps = {
   total: number;
@@ -27,21 +28,34 @@ function Items({ collection }: ItemProps) {
   const [data, setData] = useState<IInscription[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(40);
-  const [sort, setSort] = useState<string>("listed_price:-1");
+  const [sort, setSort] = useState<string>(
+    collection.listed ? "listed_price:-1" : "collection_item_number:1"
+  );
   const [search, setSearch] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
   const fetchData = async () => {
     setLoading(true);
-    const result = await fetchInscriptions({
+
+    // Define the parameters for fetchInscriptions
+    const params: any = {
       slug: collection.slug,
       collection_id: collection._id,
       sort,
-      search,
       page_size: pageSize,
       page,
-      collection_item_number: search,
-    });
+    };
+
+    // Check if search is a valid number greater than 0
+    if (!isNaN(Number(search)) && Number(search) > 0) {
+      params.collection_item_number = Number(search);
+    } else {
+      // Use search for search key
+      params.attributes = search;
+    }
+
+    const result = await fetchInscriptions(params);
+
     if (result && result.error) {
       dispatch(
         addNotification({
@@ -58,14 +72,34 @@ function Items({ collection }: ItemProps) {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, [collection._id, sort, search, page, dispatch, pageSize]);
+  // State to store the previous search value
+  const [prevSearch, setPrevSearch] = useState<string>("");
+
+  // Create a debounced function
+  const debouncedSearch = useCallback(
+    debounce((newSearchValue: string) => {
+      // Set the search value
+      setSearch(newSearchValue);
+
+      // Check if the search value has changed
+      if (newSearchValue !== prevSearch) {
+        // Reset the page only if the search value has changed
+        setPage(1);
+      }
+
+      // Update the previous search value
+      setPrevSearch(newSearchValue);
+    }, 500), // 500ms delay
+    [prevSearch] // Include prevSearch in the dependency array
+  );
 
   const handleSearchChange = (value: string) => {
-    setSearch(value);
-    if (value.length > 0) setPage(1);
+    debouncedSearch(value);
   };
+
+  useEffect(() => {
+    fetchData();
+  }, [collection._id, sort, search, page, pageSize]);
 
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
@@ -74,6 +108,12 @@ function Items({ collection }: ItemProps) {
     setPage(value);
   };
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [debouncedSearch]);
   return (
     <section>
       <div className="SortSearchPages py-6 flex flex-wrap justify-between">
@@ -88,7 +128,7 @@ function Items({ collection }: ItemProps) {
           </div>
           <div className="w-full center pb-4 lg:pb-0 md:pl-4 lg:w-auto">
             <CustomSearch
-              placeholder="Search by item number..."
+              placeholder="Item number or attribute value..."
               value={search}
               onChange={handleSearchChange}
             />
@@ -115,6 +155,7 @@ function Items({ collection }: ItemProps) {
               key={item.inscription_id}
               collection={collection}
               item={item}
+              search={search}
             />
           ))
         ) : (

@@ -116,7 +116,7 @@ export default async function Page({
     <main>
       <CollectionDetailPage
         collections={data.data.collections}
-        inscriptionCount={data.data.collections[0].updated}
+        inscriptionCount={data.data.collections[0].updated || 0}
       />
     </main>
   );

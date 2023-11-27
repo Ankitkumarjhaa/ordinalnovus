@@ -6,8 +6,34 @@ import convertParams from "@/utils/api/newConvertParams";
 import { getCache, setCache } from "@/lib/cache";
 import apiKeyMiddleware from "@/newMiddlewares/apikeyMiddleware";
 import { CustomError } from "@/utils";
+import { ICollection } from "@/types";
 
-//TODO: return collection listings and FP
+//TODO: return collection volume data
+async function getListingData(collections: ICollection[]) {
+  const updatedCollections = await Promise.all(
+    collections.map(async (collection: any) => {
+      // Fetch inscriptions for each collection
+      const inscriptions = await Inscription.find({
+        official_collection: collection._doc._id,
+        listed: true,
+      }).sort({ listed_price: 1 });
+
+      // Count the number of listed
+      const listed = inscriptions.length || 0;
+
+      // Find the inscription with the lowest listed_price
+      let fp = inscriptions[0]?.listed_price || 0;
+      // Return the updated collection object
+      return {
+        ...collection._doc,
+        listed,
+        fp,
+      };
+    })
+  );
+
+  return updatedCollections;
+}
 
 async function getCollections(query: any) {
   try {
@@ -73,22 +99,70 @@ async function getInscriptionsRange(collections: any) {
         .sort("-inscription_number") // Sorting in descending order
         .select("inscription_number"); // Select only the 'number' field
 
+      console.log({ lowestInscription, highestInscription });
       // Update the collection with new min and max
-      collection.min = lowestInscription.inscription_number;
-      collection.max = highestInscription.inscription_number;
-      await Collection.findByIdAndUpdate(collection._id, {
-        min: collection.min,
-        max: collection.max,
-      });
+      if (lowestInscription && highestInscription) {
+        collection.min = lowestInscription.inscription_number;
+        collection.max = highestInscription.inscription_number;
+        await Collection.findByIdAndUpdate(collection._id, {
+          min: collection.min,
+          max: collection.max,
+        });
+      }
 
       return { lowestInscription, highestInscription };
     }
 
     throw new CustomError("All inscriptions not connected to collection");
   } catch (error) {
+    console.log(error);
     throw new CustomError("Error fetching inscriptions");
   }
 }
+
+// async function getCollectionsWithInscriptionVerification(query: any) {
+//   try {
+//     // Step 1: Fetch collections with supply > 0
+//     const collections = await Collection.find({
+//       ...query.find,
+//       supply: { $gt: 0 },
+//     });
+//     // ... [other existing query parameters]
+
+//     // Step 2: Verify each collection with its inscriptions
+//     for (let collection of collections) {
+//       const inscriptionsCount = await Inscription.countDocuments({
+//         official_collection: collection._id,
+//       });
+
+//       // Check for mismatch and update if necessary
+//       if (inscriptionsCount !== collection.supply) {
+//         await Collection.updateOne(
+//           { _id: collection._id },
+//           {
+//             live: true,
+//             updated: 0,
+//             error: false,
+//             error_tag: "",
+//             supply: 0,
+//             errored: 0,
+//             errored_inscriptions: [],
+//             min: null,
+//             max: null,
+//           }
+//         );
+
+//         console.log(`Updated collection ${collection.slug} due to mismatch.`);
+//       }
+//     }
+
+//     return collections;
+//   } catch (error) {
+//     // Your existing error handling
+//   }
+// }
+
+
 
 export async function GET(req: NextRequest, res: NextResponse) {
   try {
@@ -133,7 +207,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
       }
 
       // If the result doesn't exist in the cache, query the database
-      const collections = await getCollections(query);
+      const collections: any = await getCollections(query);
       const totalCount = await getTotalCount(query);
 
       if (collections.length === 1) {
@@ -142,14 +216,17 @@ export async function GET(req: NextRequest, res: NextResponse) {
         // Convert the collection document to a plain JavaScript object
         let collection = collections[0].toObject();
 
-        collection.min = inscriptionsData.lowestInscription.number;
-        collection.max = inscriptionsData.highestInscription.number;
-        collections[0] = collection;
+        collection.min = inscriptionsData.lowestInscription?.inscription_number;
+        collection.max =
+          inscriptionsData.highestInscription?.inscription_number;
+        collections[0] = { _doc: collection };
       }
+
+      const updatedCollections = await getListingData(collections);
 
       // Construct the result
       const result = {
-        collections,
+        collections: updatedCollections,
         pagination: {
           page: query.start / query.limit + 1,
           limit: query.limit,
@@ -160,8 +237,8 @@ export async function GET(req: NextRequest, res: NextResponse) {
       // await resetCollections();
       // await Collection.deleteOne({ slug: "btc-artifacts" });
 
-      // Store the result in Redis for 1 hour
-      await setCache(cacheKey, result, 60 * 60);
+      // Store the result in Redis for 30 minutes
+      await setCache(cacheKey, result, 60 * 30);
 
       // Return the result
       return NextResponse.json(result);

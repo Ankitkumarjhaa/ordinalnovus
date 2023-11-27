@@ -115,6 +115,10 @@ function processWhereParam(
     if (isObjectId) {
       // Cast to ObjectId if the schema type is ObjectId
       finalQuery.find[key] = new Types.ObjectId(value);
+    } else if (key === "attributes") {
+      console.log("setting attributes");
+      // Handle attribute search based on value
+      finalQuery.find["attributes.value"] = new RegExp(value, "i"); // 'i' for case-insensitive
     } else {
       // Use regular expression for string matching if needed
       finalQuery.find[key] = key === "name" ? new RegExp(value, "i") : value;
