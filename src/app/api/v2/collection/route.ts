@@ -11,10 +11,10 @@ import { ICollection } from "@/types";
 //TODO: return collection volume data
 async function getListingData(collections: ICollection[]) {
   const updatedCollections = await Promise.all(
-    collections.map(async (collection) => {
+    collections.map(async (collection: any) => {
       // Fetch inscriptions for each collection
       const inscriptions = await Inscription.find({
-        official_collection: collection._id,
+        official_collection: collection._doc._id,
         listed: true,
       }).sort({ listed_price: 1 });
 
@@ -25,7 +25,7 @@ async function getListingData(collections: ICollection[]) {
       let fp = inscriptions[0]?.listed_price || 0;
       // Return the updated collection object
       return {
-        ...collection,
+        ...collection._doc,
         listed,
         fp,
       };
@@ -99,19 +99,23 @@ async function getInscriptionsRange(collections: any) {
         .sort("-inscription_number") // Sorting in descending order
         .select("inscription_number"); // Select only the 'number' field
 
+      console.log({ lowestInscription, highestInscription });
       // Update the collection with new min and max
-      collection.min = lowestInscription.inscription_number;
-      collection.max = highestInscription.inscription_number;
-      await Collection.findByIdAndUpdate(collection._id, {
-        min: collection.min,
-        max: collection.max,
-      });
+      if (lowestInscription && highestInscription) {
+        collection.min = lowestInscription.inscription_number;
+        collection.max = highestInscription.inscription_number;
+        await Collection.findByIdAndUpdate(collection._id, {
+          min: collection.min,
+          max: collection.max,
+        });
+      }
 
       return { lowestInscription, highestInscription };
     }
 
     throw new CustomError("All inscriptions not connected to collection");
   } catch (error) {
+    console.log(error);
     throw new CustomError("Error fetching inscriptions");
   }
 }
@@ -168,9 +172,10 @@ export async function GET(req: NextRequest, res: NextResponse) {
         // Convert the collection document to a plain JavaScript object
         let collection = collections[0].toObject();
 
-        collection.min = inscriptionsData.lowestInscription.number;
-        collection.max = inscriptionsData.highestInscription.number;
-        collections[0] = collection;
+        collection.min = inscriptionsData.lowestInscription?.inscription_number;
+        collection.max =
+          inscriptionsData.highestInscription?.inscription_number;
+        collections[0] = { _doc: collection };
       }
 
       const updatedCollections = await getListingData(collections);

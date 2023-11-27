@@ -127,6 +127,11 @@ function Homepage({ data }: HomepageProps) {
           </span>
         </div>
       )}
+      {
+        <div className="w-full my-2 text-center text-xs uppercase font-bold text-white flex justify-start">
+          <span className={`bg-green-300 py-1 text-green-900`}>No Fee</span>
+        </div>
+      }
       {/* <div className="center p-2 flex-wrap">
         {list.map((item) => (
           <div

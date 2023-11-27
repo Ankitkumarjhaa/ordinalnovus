@@ -42,7 +42,7 @@ const CustomButton = ({
   icon: Icon = null,
   link = false,
   loading = false,
-  newTab = true,
+  newTab = false,
   href,
   ...props
 }: CustomButtonProps) => {

@@ -99,7 +99,7 @@ function InscriptionDetail({ data }: InscriptionProps) {
       <div className="pt-2">
         <DisplayProperties data={data} />
       </div>
-      {data?.attributes?.length && (
+      {data?.attributes?.length && data?.attributes?.length > 0 && (
         <div className="pt-2">
           <DisplayAttributes data={data} />
         </div>
