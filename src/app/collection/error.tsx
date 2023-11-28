@@ -11,7 +11,7 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log the error to an error reporting service
+    // Log the error to an error reporting serv            ice
     console.error(error);
   }, [error]);
 
@@ -32,12 +32,12 @@ export default function Error({
 
         <div className=" flex items-baseline">
           <h2 className="text-center mr-4 uppercase text-4xl pt-6 extrabold">
-            Server Down!
+            Collection Not Found
           </h2>
 
           <div className="w-6 h-6 bg-red-600 rounded-full animate-glow"></div>
         </div>
-        <p className="mb-2 text-center">Let us know ASAP </p>
+        <p className="mb-2 text-center">Contact us to add it </p>
 
         <div className="center flex-col">
           <div className="flex items-center space-x-2 mb-2">

@@ -2,11 +2,13 @@ import CustomSearch from "@/components/elements/CustomSearch";
 import { ICollection } from "@/types";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
+import { useWalletAddress } from "bitcoin-wallet-adapter";
 
 type ItemProps = {
   collection: ICollection;
 };
 function Holders({ collection }: ItemProps) {
+  const walletAddress = useWalletAddress();
   const [originalHolders] = useState(collection.holders);
   // Assuming `holders` is an array of your holder objects
   const maxCount =
@@ -41,7 +43,7 @@ function Holders({ collection }: ItemProps) {
   }, [originalHolders]);
   return (
     <div className="py-16">
-      <div className="w-full pb-4 lg:pb-0 md:pl-4 lg:w-auto flex justify-between items-center">
+      <div className="w-full lg:pb-0 md:pl-4 lg:w-auto flex justify-between items-center">
         <CustomSearch
           placeholder="Address..."
           value={search}
@@ -52,7 +54,7 @@ function Holders({ collection }: ItemProps) {
         </p>
       </div>
       {holders && holders.length > 0 ? (
-        <div className="py-6">
+        <div className=" my-10 max-h-[50vh] overflow-x-hidden overflow-y-auto small-scrollbar">
           {holders.map((item: { address: string; count: number }) => (
             <div
               key={item.address}
@@ -60,7 +62,12 @@ function Holders({ collection }: ItemProps) {
             >
               {maxCount && (
                 <div
-                  className="bg-gray-500 bg-opacity-10 absolute top-0 bottom-0"
+                  className={`${
+                    item.address === walletAddress?.cardinal_address ||
+                    item.address === walletAddress?.ordinal_address
+                      ? "bg-yellow-500 bg-opacity-50"
+                      : "bg-gray-500 bg-opacity-10"
+                  }  absolute top-0 bottom-0`}
                   style={{
                     width: `${(item.count / maxCount) * 100}%`,
                   }}
