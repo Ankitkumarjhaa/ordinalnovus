@@ -70,14 +70,16 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
       query = { inscription_id: id };
     } else if (!isNaN(Number(id))) {
       query = { inscription_number: Number(id) };
-    } else if (/^[0-9a-f]{64}$/i.test(id)) {
-      query = { sha: id };
-    } else if (isNaN(Number(id))) {
-      query = {
-        sat_name: id,
-        content: id,
-      };
     }
+    // else if (/^[0-9a-f]{64}$/i.test(id)) {
+    //   query = { sha: id };
+    // }
+    // else if (isNaN(Number(id))) {
+    //   query = {
+    //     sat_name: id,
+    //     content: id,
+    //   };
+    // }
 
     await dbConnect();
 
