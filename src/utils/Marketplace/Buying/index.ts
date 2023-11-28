@@ -170,11 +170,13 @@ async function generateUnsignedCreateDummyUtxoPSBTBase64(
   // Loop the unqualified utxos until we have enough to create a dummy utxo
   let totalValue = 0;
   let paymentUtxoCount = 0;
+
+  const taprootAddress = address.startsWith("bc1p");
   for (const utxo of mappedUnqualifiedUtxos) {
     if (await doesUtxoContainInscription(utxo)) {
       continue;
     }
-    const taprootAddress = address.startsWith("bc1p");
+    const tx = bitcoin.Transaction.fromHex(await getTxHexById(utxo.txid));
 
     const input: any = {
       hash: utxo.txid,
@@ -191,9 +193,17 @@ async function generateUnsignedCreateDummyUtxoPSBTBase64(
       const p2sh = bitcoin.payments.p2sh({
         redeem: { output: redeemScript },
       });
-      input.witnessUtxo = utxo.tx.outs[utxo.vout];
-      if (wallet !== "unisat" && wallet !== "leather") {
-        input.redeemScript = p2sh.redeem?.output;
+     
+      if (wallet !== "unisat") {
+        input.witnessUtxo = tx.outs[utxo.vout];
+        // input.witnessUtxo = {
+        //   script: p2sh.output,
+        //   value: dummyUtxo.value,
+        // } as WitnessUtxo;
+        if (wallet === "xverse") input.redeemScript = p2sh.redeem?.output;
+      } else {
+        // unisat wallet should not have redeemscript for buy tx
+        input.witnessUtxo = tx.outs[utxo.vout];
       }
     } else {
       // unisat
