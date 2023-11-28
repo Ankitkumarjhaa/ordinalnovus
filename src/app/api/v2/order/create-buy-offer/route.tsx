@@ -12,6 +12,9 @@ interface OrderInput {
   publickey: string;
   fee_rate: number;
   wallet: string;
+  signed_psbt: string;
+  price: number;
+  seller_receive_address: string;
 }
 
 // Validate the POST method and necessary fields in the request
@@ -23,6 +26,9 @@ function validateRequest(body: OrderInput): string[] {
     "receive_address",
     "wallet",
     "fee_rate",
+    "signed_psbt",
+    "price",
+    "seller_receive_address",
   ];
   const missingFields = requiredFields.filter((field) => {
     //@ts-ignore
@@ -45,48 +51,27 @@ async function processOrdItem(
   pay_address: string,
   publickey: string,
   wallet: string,
-  fee_rate: number
+  fee_rate: number,
+  signed_psbt: string,
+  price: number,
+  seller_receive_address: string
 ) {
   const ordItem: any = await fetchLatestInscriptionData(inscription_id);
-  //   console.log("got ordItem", ordItem);
-  await dbConnect();
-  const dbItem: any | null = await Inscription.findOne({
-    inscription_id,
-    listed: true,
-  });
-
-  console.log("got db listing");
-
-  if (!dbItem || !dbItem.address) {
-    throw Error("Item not listed in db");
-  }
-
-  if (ordItem.address !== dbItem.address || dbItem.output !== ordItem.output) {
-    dbItem.listed = false;
-    dbItem.listed_price = 0;
-    dbItem.address = ordItem.address;
-    dbItem.output = ordItem.output;
-    dbItem.location = ordItem.location;
-    dbItem.offset = ordItem.offset;
-    dbItem.output_value = ordItem.output_value;
-    dbItem.signed_psbt = "";
-    dbItem.unsigned_psbt = "";
-    dbItem.tap_internal_key = "";
-    dbItem.save();
-    throw Error("PSBT Expired");
-  }
+  ordItem.signed_psbt = signed_psbt;
+  ordItem.listed_price = price;
+  ordItem.listed_seller_receive_address = seller_receive_address;
   if (
     ordItem.address &&
-    dbItem.signed_psbt &&
-    dbItem.listed_price &&
+    ordItem.signed_psbt &&
+    ordItem.listed_price &&
     ordItem.output &&
     ordItem.output_value
   ) {
     const result = await buyOrdinalPSBT(
       pay_address,
       receive_address,
-      dbItem,
-      dbItem.listed_price,
+      ordItem,
+      ordItem.listed_price,
       publickey,
       wallet,
       fee_rate
@@ -133,7 +118,10 @@ export async function POST(
       body.pay_address,
       body.publickey,
       body.wallet,
-      body.fee_rate
+      body.fee_rate,
+      body.signed_psbt,
+      body.price,
+      body.seller_receive_address
     );
 
     //buy psbt || dummy utxo psbt
