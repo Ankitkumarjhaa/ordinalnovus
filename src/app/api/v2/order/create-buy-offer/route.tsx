@@ -131,7 +131,7 @@ export async function POST(
 
     return NextResponse.json({
       ok: true,
-      unsigned_psbt_base64: psbt,
+      psbt,
       input_length:
         result.data.for === "dummy"
           ? 1
