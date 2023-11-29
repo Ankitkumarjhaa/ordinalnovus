@@ -3,7 +3,7 @@ import { Inscription } from "@/models";
 import axios from "axios";
 import dbConnect from "@/lib/dbConnect";
 import crypto from "crypto";
-import { fetchContentFromProviders } from "@/utils";
+import fetchContentFromProviders from "@/utils/api/fetchContentFromProviders";
 import { IInscription } from "@/types";
 import moment from "moment";
 

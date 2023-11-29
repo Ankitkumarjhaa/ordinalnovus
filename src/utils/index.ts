@@ -1,7 +1,3 @@
-export const PROVIDERS = [
-  process.env.NEXT_PUBLIC_PROVIDER,
-  "https://ordinals.com",
-];
 export function shortenString(str: string, length?: number): string {
   if (str.length <= (length || 8)) {
     return str;
@@ -58,22 +54,6 @@ const { bitcoin } = mempoolJS({
 });
 
 export const mempoolBitcoin = bitcoin;
-
-export async function fetchContentFromProviders(contentId: string) {
-  for (const url of PROVIDERS) {
-    try {
-      const response = await axios.get(`${url}/content/${contentId}`, {
-        responseType: "arraybuffer",
-      });
-      // console.log(" GOT Response from: ", url)
-      return response;
-    } catch (error) {
-      // console.log(error, "error");
-      console.warn(`Provider ${url} failed. Trying next.`);
-    }
-  }
-  throw new Error("All providers failed");
-}
 
 export const determineTypesFromId = (id: string): string[] => {
   // Check if ID is a positive number
