@@ -69,7 +69,8 @@ export default async function handler(
         // Cache the response data in Redis for 10 minutes
         await setCache("ordapi-feed", formattedInscriptions, 600);
 
-        res.status(200).json(formattedInscriptions);
+        if (formattedInscriptions) res.status(200).json(formattedInscriptions);
+        else res.status(200).json({ formattedInscriptions: [] });
       }
     } catch (error: any) {
       console.error("Error:", error.message);

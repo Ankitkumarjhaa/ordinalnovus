@@ -15,7 +15,7 @@ function HomePage() {
   const [apikey, setApikey] = useState<IApikeyResponse | null>(null);
 
   const checkApikey = useCallback(async () => {
-    if (!walletDetails.ordinal_address) return;
+    if (!walletDetails || !walletDetails.connected) return;
     setChecking(true);
 
     const apikeyResult = await FetchApikey({
@@ -26,7 +26,7 @@ function HomePage() {
       setApikey(apikeyResult.data);
     }
     setChecking(false);
-  }, [walletDetails.ordinal_address]);
+  }, [walletDetails]);
 
   const createButton = useCallback(async () => {
     if (walletDetails && walletDetails.ordinal_address) {
@@ -57,16 +57,20 @@ function HomePage() {
   }, [walletDetails]);
 
   useEffect(() => {
-    if (walletDetails.connected && walletDetails.ordinal_address) {
+    if (
+      walletDetails &&
+      walletDetails.connected &&
+      walletDetails.ordinal_address
+    ) {
       checkApikey();
     }
-  }, [walletDetails.ordinal_address]);
+  }, [walletDetails]);
 
   if (walletDetails?.connected && !checking)
     return (
       <>
         {!apikey ? (
-          <div className="px-6">
+          <div className="px-6 min-h-[40vh]">
             <button
               onClick={() => createButton()}
               className="px-4 cursor-pointer py-2 bg-green-800 text-white rounded"
@@ -75,7 +79,7 @@ function HomePage() {
             </button>
           </div>
         ) : (
-          <div className="px-6 w-full">
+          <div className="px-6 w-full  min-h-[40vh]">
             <p className="">
               Your apikey is :{" "}
               <span
@@ -135,7 +139,7 @@ function HomePage() {
     );
   else
     return (
-      <p className="text-center py-2 bg-gray-700 cursor-not-allowed text-white my-2">
+      <p className="text-center py-2 bg-gray-700 cursor-not-allowed text-white my-2  min-h-[40vh]">
         {checking ? "Checking..." : "Connect wallet to create your APIKEY"}
       </p>
     );

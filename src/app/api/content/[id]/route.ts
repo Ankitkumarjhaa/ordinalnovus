@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCache, setCache } from "@/lib/cache";
-import { fetchContentFromProviders } from "@/utils";
+import fetchContentFromProviders  from "@/utils/api/fetchContentFromProviders";
 
 function bufferToStream(base64String: string) {
   const buffer = Buffer.from(base64String, "base64");
