@@ -3,7 +3,7 @@ export default async function getHomepage() {
   const link = `${process.env.NEXT_PUBLIC_URL}/api/homepage`;
   console.log(link, "LINK");
   const res = await fetch(link, {
-    next: { revalidate: 600 },
+    cache: "no-store",
   });
 
   // console.log(res, "res");
