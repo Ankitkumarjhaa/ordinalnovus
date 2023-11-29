@@ -145,7 +145,11 @@ function Homepage({ data }: HomepageProps) {
       <Hero data={data.featured} />
       <Collections data={data.verified} />
       {data.listings.length ? <Listed data={data.listings} /> : <></>}
-      <Recent data={data.recentInscriptions} />
+      {data.recentInscriptions && data?.recentInscriptions.length ? (
+        <Recent data={data.recentInscriptions} />
+      ) : (
+        <></>
+      )}
     </div>
   );
 }
