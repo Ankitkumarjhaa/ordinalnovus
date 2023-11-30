@@ -30,7 +30,7 @@ function SatDetail({ data }: SatProps) {
         </div>
         <div className="flex justify-between items-center">
           <p className="text-gray-300 text-xs">
-            {moment(data.timestamp).format()}
+            {moment(data.timestamp * 1000).format()}
           </p>
           <div className="flex items-center justify-between">
             <div

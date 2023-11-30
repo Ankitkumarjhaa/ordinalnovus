@@ -34,7 +34,7 @@ function Header() {
       <Notification />
       <Logo />
       {pathname !== "/search" && <Search />}
-      <div className="flex justify-end">
+      <div className="w-full lg:w-auto flex justify-center lg:justify-end">
         <ConnectMultiButton
           additionalMenuItems={additionalItems}
           buttonClassname="bg-accent text-white px-4 py-2 rounded center "
