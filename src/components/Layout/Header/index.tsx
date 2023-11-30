@@ -6,15 +6,18 @@ import Search from "./Search";
 import { ConnectMultiButton, Notification } from "bitcoin-wallet-adapter";
 import Link from "next/link";
 
+import { usePathname } from "next/navigation";
 import { fetchFees, getBTCPriceInDollars } from "@/utils";
 import { setBTCPrice } from "@/stores/reducers/generalReducer";
 import { useDispatch } from "react-redux";
+import path from "path";
 const additionalItems = [
   <Link key={"dashboard"} href="/dashboard" shallow>
     <p className="bwa-text-xs">Dashboard</p>
   </Link>,
 ];
 function Header() {
+  const pathname = usePathname();
   const dispatch = useDispatch();
   const getBTCPrice = useCallback(async () => {
     const price = await getBTCPriceInDollars();
@@ -30,7 +33,7 @@ function Header() {
       <CustomNotification />
       <Notification />
       <Logo />
-      <Search />
+      {pathname !== "/search" && <Search />}
       <div className="flex justify-end">
         <ConnectMultiButton
           additionalMenuItems={additionalItems}

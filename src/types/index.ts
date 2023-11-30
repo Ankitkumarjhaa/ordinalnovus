@@ -1,6 +1,23 @@
 import mongoose, { Document, Schema } from "mongoose";
 import * as bitcoin from "bitcoinjs-lib";
 
+export interface ISat {
+  number: number;
+  decimal: string;
+  degree: string;
+  name: string;
+  block: number;
+  cycle: number;
+  epoch: number;
+  period: number;
+  offset: number;
+  rarity: string;
+  percentile: string;
+  satpoint: null;
+  timestamp: number;
+  inscriptions: IInscription[];
+}
+
 export interface IApikeyResponse {
   success: boolean;
   usage: number;

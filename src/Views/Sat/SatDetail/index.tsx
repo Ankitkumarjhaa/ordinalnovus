@@ -9,7 +9,6 @@ import { BsFillShareFill } from "react-icons/bs";
 import { TfiReload } from "react-icons/tfi";
 import DisplayProperties from "./DisplayProperties";
 import { useRouter } from "next/navigation";
-import { RootState } from "@/stores";
 import moment from "moment";
 import CardContent from "@/components/elements/CustomCardSmall/CardContent";
 import Link from "next/link";

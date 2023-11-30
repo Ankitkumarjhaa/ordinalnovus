@@ -17,6 +17,7 @@ type CardContentProps = {
   content?: string;
   className?: string;
   showTag?: boolean;
+  showFull?: boolean;
 };
 
 const CardContent: React.FC<CardContentProps> = ({
@@ -25,6 +26,7 @@ const CardContent: React.FC<CardContentProps> = ({
   content,
   className,
   showTag = false,
+  showFull = false,
 }) => {
   const [fileNames, setFileNames] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -69,7 +71,7 @@ const CardContent: React.FC<CardContentProps> = ({
       });
   }, [inscriptionId]);
 
-  const renderContent = () => {
+  const renderContent = (showFull: boolean) => {
     const contentType = fetchedContentType
       ? fetchedContentType
       : "No content type provided";
@@ -102,16 +104,7 @@ const CardContent: React.FC<CardContentProps> = ({
       case "audio/mpeg":
       case "audio/midi":
       case "audio/mod":
-        return (
-          // <div className="w-full h-full center">
-          //   <audio
-          //     className="w-11/12 "
-          //     src={`/content/${inscriptionId}`}
-          //     controls
-          //   />
-          // </div>
-          <AudioPlayer inscriptionId={inscriptionId} />
-        );
+        return <AudioPlayer inscriptionId={inscriptionId} />;
       case "video/mp4":
       case "video/avi":
       case "video/webm":
@@ -162,9 +155,9 @@ const CardContent: React.FC<CardContentProps> = ({
             jsonContent = fetchedContent;
           }
           return (
-            <pre className="whitespace-pre-wrap p-2 text-white">
-              {jsonContent && jsonContent?.length > 100
-                ? jsonContent?.slice(0, 100)
+            <pre className="whitespace-pre-wrap p-2 text-white overflow-y-auto max-h-full">
+              {!showFull && jsonContent && jsonContent?.length > 60
+                ? jsonContent?.slice(0, 60)
                 : jsonContent}
             </pre>
           );
@@ -172,19 +165,24 @@ const CardContent: React.FC<CardContentProps> = ({
           // If the content is not JSON, display it as plain text
           return (
             <pre className="whitespace-pre-wrap p-2 text-sm text-white">
-              {fetchedContent && fetchedContent?.length > 100
-                ? fetchedContent?.slice(0, 100) + "..."
+              {!showFull && fetchedContent && fetchedContent?.length > 50
+                ? fetchedContent?.slice(0, 50) + "..."
                 : fetchedContent}
             </pre>
           );
         }
 
       case "text/markdown":
+      case "text/markdown;charset=utf-8":
+        const truncatedMarkdown =
+          fetchedContent && fetchedContent.length > 150
+            ? fetchedContent.slice(0, 150) + "..."
+            : fetchedContent;
         return (
           <div className="p-2">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
-              className="markdown-content overflow-scroll" // Add a CSS class to the ReactMarkdown component
+              className="markdown-content overflow-y-auto" // Add a CSS class to the ReactMarkdown component
               components={{
                 p: ({ children }) => (
                   <p className="text-gray-500 text-xs py-2">{children}</p>
@@ -224,7 +222,7 @@ const CardContent: React.FC<CardContentProps> = ({
                 // Add styling for other Markdown elements as needed
               }}
             >
-              {fetchedContent + ""}
+              {!showFull ? truncatedMarkdown : fetchedContent + ""}
             </ReactMarkdown>
           </div>
         );
@@ -240,7 +238,7 @@ const CardContent: React.FC<CardContentProps> = ({
         return (
           <iframe
             sandbox="allow-scripts"
-            className="no-scrollbar"
+            className="no-scrollbar small-scrollbar"
             src={`/content/${inscriptionId}`}
             style={{ minWidth: "100%", minHeight: "100%" }}
           />
@@ -303,7 +301,7 @@ const CardContent: React.FC<CardContentProps> = ({
           {/* Display the loading component */}
         </div>
       ) : fetchedContent ? (
-        renderContent()
+        renderContent(showFull)
       ) : (
         <div className="flex justify-center items-center h-full text-white py-6  w-full">
           {/* <CircularProgress color="inherit" size={10} />{" "} */}

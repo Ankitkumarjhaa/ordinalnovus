@@ -7,7 +7,7 @@ type SearchDetailProps = {
 };
 function SearchDetailPage({ data }: SearchDetailProps) {
   return (
-    <div className="min-h-[60vh] py-16 flex justify-center flex-wrap">
+    <div className="min-h-[40vh] py-16 flex justify-center flex-wrap">
       <Content data={data} />
       <InscriptionDetail data={data} />
     </div>
