@@ -5,11 +5,11 @@ import CustomSearch from "@/components/elements/CustomSearch";
 import CustomSelector from "@/components/elements/CustomSelector";
 import { addNotification } from "@/stores/reducers/notificationReducer";
 import { ICollection, IInscription } from "@/types";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import CollectionItemCard from "./CollectionItemCard";
 import SkeletonCollectionItemCard from "./SkeletonCollectionItemCard";
-import debounce from "lodash.debounce";
+import { FaSearch } from "react-icons/fa";
 
 type ItemProps = {
   total: number;
@@ -73,34 +73,13 @@ function Items({ collection }: ItemProps) {
     }
   };
 
-  // State to store the previous search value
-  const [prevSearch, setPrevSearch] = useState<string>("");
-
-  // Create a debounced function
-  const debouncedSearch = useCallback(
-    debounce((newSearchValue: string) => {
-      // Set the search value
-      setSearch(newSearchValue);
-
-      // Check if the search value has changed
-      if (newSearchValue !== prevSearch) {
-        // Reset the page only if the search value has changed
-        setPage(1);
-      }
-
-      // Update the previous search value
-      setPrevSearch(newSearchValue);
-    }, 500), // 500ms delay
-    [prevSearch] // Include prevSearch in the dependency array
-  );
-
   const handleSearchChange = (value: string) => {
-    debouncedSearch(value);
+    setSearch(value);
   };
 
   useEffect(() => {
     fetchData();
-  }, [collection._id, sort, search, page, pageSize]);
+  }, [collection._id, sort, page, pageSize]);
 
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
@@ -109,12 +88,6 @@ function Items({ collection }: ItemProps) {
     setPage(value);
   };
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      debouncedSearch.cancel();
-    };
-  }, [debouncedSearch]);
   return (
     <section>
       <div className="SortSearchPages py-6 flex flex-wrap justify-between">
@@ -132,6 +105,9 @@ function Items({ collection }: ItemProps) {
               placeholder="Item number or attribute value..."
               value={search}
               onChange={handleSearchChange}
+              icon={FaSearch}
+              end={true}
+              onIconClick={fetchData}
             />
           </div>
         </div>

@@ -7,7 +7,7 @@ export default async function fetchContentFromProviders(contentId: string) {
   const PROVIDERS = [process.env.NEXT_PUBLIC_PROVIDER, "https://ordinals.com"];
   let activeProvider = await getCache("activeProvider");
 
-  console.log(await getCacheExpiry("activeProvider"), " Cache expiry");
+  // console.log(await getCacheExpiry("activeProvider"), " Cache expiry");
 
   if (!activeProvider) {
     activeProvider = PROVIDERS[0]; // Default to first provider if cache is empty
@@ -22,7 +22,7 @@ export default async function fetchContentFromProviders(contentId: string) {
         responseType: "arraybuffer",
       });
 
-      console.log("GOT Response from: ", PROVIDERS[i]);
+      // console.log("GOT Response from: ", PROVIDERS[i]);
 
       // Cache the active provider if it's not the primary one and it's different from the cached one
       if (i !== 0 && PROVIDERS[i] !== activeProvider) {
