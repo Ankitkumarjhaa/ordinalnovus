@@ -4,7 +4,7 @@ import Image from "next/image";
 function index() {
   return (
     <Link href="/" shallow>
-      <div className="flex items-center justify-start  pb-6 lg:pb-0">
+      <div className="w-full lg:w-auto  flex items-center justify-start  pb-6 lg:pb-0">
         <div className="">
           <Image
             src="/logo_default.png"
