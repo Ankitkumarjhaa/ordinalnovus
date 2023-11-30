@@ -73,7 +73,7 @@ const InscribePage = () => {
       const response = await axios.post("/api/v2/inscribe/create-order", {
         files,
         lowPostage,
-        receiveAddress: receiveAddress || walletDetails.ordinal_address,
+        receiveAddress: receiveAddress || walletDetails?.ordinal_address,
         fee,
       });
       setResponseData(response.data);
@@ -87,7 +87,7 @@ const InscribePage = () => {
   };
 
   return (
-    <div className="p-4 min-h-[50vh]">
+    <div className="p-4 min-h-[40vh]">
       <div className="relative py-6">
         <input
           type="file"

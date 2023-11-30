@@ -34,48 +34,46 @@ function convertParams(
     match: "exact",
   };
 
-    queryKeys.forEach((key) => {
-      if (key.includes("_sort")) {
-        processSortParam(finalQuery, params[key]);
-      } else if (key.includes("_start")) {
-        finalQuery.start = parseInt(params[key]);
-      } else if (key.includes("_limit")) {
-        finalQuery.limit = parseInt(params[key]);
-      } else if (key.includes("show")) {
-        finalQuery.show = params[key].split(",").join(" ");
-      } else if (key.includes("match")) {
-        if (params.match === "regex") {
-          if (params.content && params.content_type) {
-            finalQuery.find.$text = { $search: `\"${params.content}\"` };
-            finalQuery.find.content_type = params.content_type;
-          } else if (params.content) {
-            finalQuery.find.$text = { $search: `\"${params.content}\"` };
-          } else if (params.name) {
-            finalQuery.find.$text = { $search: `\"${params.name}\"` };
-            finalQuery.find.name = { $exists: true };
-          }
-          // If other fields like content_type, sha, or sat_name are required, handle them here as well
+  queryKeys.forEach((key) => {
+    if (key.includes("_sort")) {
+      processSortParam(finalQuery, params[key]);
+    } else if (key.includes("_start")) {
+      finalQuery.start = parseInt(params[key]);
+    } else if (key.includes("_limit")) {
+      finalQuery.limit = parseInt(params[key]);
+    } else if (key.includes("show")) {
+      finalQuery.show = params[key].split(",").join(" ");
+    } else if (key.includes("match")) {
+      if (params.match === "regex") {
+        if (params.content && params.content_type) {
+          finalQuery.find.$text = { $search: `\"${params.content}\"` };
+          finalQuery.find.content_type = params.content_type;
+        } else if (params.content) {
+          finalQuery.find.$text = { $search: `\"${params.content}\"` };
+        } else if (params.name) {
+          finalQuery.find.$text = { $search: `\"${params.name}\"` };
+          finalQuery.find.name = { $exists: true };
         }
-       } else if (key !== "match" && !params.match) {
-         // Exclude 'match' from processing in else condition
-         processWhereParam(
-           finalQuery,
-           model,
-           schemaKeys,
-           key,
-           params[key],
-           params
-         );
-       }
-    });
-  
+        // If other fields like content_type, sha, or sat_name are required, handle them here as well
+      }
+    } else if (key !== "match" && !params.match) {
+      // Exclude 'match' from processing in else condition
+      processWhereParam(
+        finalQuery,
+        model,
+        schemaKeys,
+        key,
+        params[key],
+        params
+      );
+    }
+  });
 
   processNumberRangeParam(finalQuery, params);
 
   console.log(finalQuery, "Final query");
   return finalQuery;
 }
-
 
 function processSortParam(finalQuery: FinalQuery, sortParam: string): void {
   const [sortField, sortOrder] = sortParam.split(":");
@@ -90,14 +88,18 @@ function processWhereParam(
   value: any,
   params: any
 ): void {
-  if (params.match === "text" &&
-     (key === "content" || key === "content_type" || key === "sha" || key === "sat_name")) {
+  if (
+    params.match === "text" &&
+    (key === "content" ||
+      key === "content_type" ||
+      key === "sha" ||
+      key === "sat_name")
+  ) {
     finalQuery.find.$text = { $search: value };
   } else if (schemaKeys.includes(key)) {
     if (key === "officialCollection" || key === "list") {
       finalQuery.find[key] = new Types.ObjectId(value);
     } else if (key === "name") {
-      console.log("NAME...");
       finalQuery.find[key] = new RegExp(value, "i"); // 'i' flag for case-insensitive matching
     } else {
       const isObjectId = model.schema.obj[key]?.valueType === "ObjectId";
@@ -107,8 +109,6 @@ function processWhereParam(
     processWhereParamWithOptions(finalQuery, key, value);
   }
 }
-
-
 
 function processNumberRangeParam(
   finalQuery: FinalQuery,

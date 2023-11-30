@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { TextField, styled } from "@mui/material";
+import { InputAdornment, TextField, styled } from "@mui/material";
 import debounce from "lodash.debounce";
+import { IconType } from "react-icons";
 
 // Update border radius value to make the search bar thinner
 const CustomTextField = styled(TextField)(({ theme }) => ({
@@ -36,42 +37,72 @@ interface CustomSearchProps {
   placeholder: string;
   value?: string;
   onChange: (value: string) => void;
+  fullWidth?: boolean;
+  icon?: IconType;
+  end?: boolean;
+  onIconClick?: () => void;
 }
 
 const CustomSearch: React.FC<CustomSearchProps> = ({
   placeholder,
   value,
   onChange,
+  fullWidth,
+  icon: Icon,
+  end,
+  onIconClick,
 }) => {
-  const [inputValue, setInputValue] = useState(value);
+  // const [inputValue, setInputValue] = useState(value);
 
-  // Create a memoized debounced version of the onChange function
-  const debouncedOnChange = useCallback(
-    debounce((value) => {
-      onChange(value);
-    }, 300),
-    [onChange]
-  );
+  // // Create a memoized debounced version of the onChange function
+  // const debouncedOnChange = useCallback(
+  //   debounce((value) => {
+  //     onChange(value);
+  //   }, 300),
+  //   [onChange]
+  // );
 
-  useEffect(() => {
-    // Call the debounced function when inputValue changes
-    debouncedOnChange(inputValue);
-  }, [inputValue, debouncedOnChange]);
+  // useEffect(() => {
+  //   // Call the debounced function when inputValue changes
+  //   debouncedOnChange(inputValue);
+  // }, [inputValue, debouncedOnChange]);
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(event.target.value);
+  // const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   setInputValue(event.target.value);
+  // };
+  const handleKeyPress = (event: React.KeyboardEvent) => {
+    if (event.key === "Enter" && onIconClick) {
+      onIconClick();
+    }
   };
+
+  const adornment = Icon ? (
+    <InputAdornment position={end ? "end" : "start"}>
+      <button
+        onClick={onIconClick}
+        style={{ background: "none", border: "none", cursor: "pointer" }}
+      >
+        <Icon style={{ color: "white" }} />
+      </button>
+    </InputAdornment>
+  ) : null;
 
   return (
     <CustomTextField
-      value={inputValue}
-      onChange={handleChange}
+      InputProps={{
+        ...(end ? { endAdornment: adornment } : { startAdornment: adornment }),
+        onKeyPress: handleKeyPress,
+      }}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
       variant="outlined"
       placeholder={placeholder}
       InputLabelProps={{
         shrink: true,
       }}
-      className="w-full sm:w-auto"
+      name="search"
+      autoComplete="off"
+      className={fullWidth ? "w-full" : "w-full sm:w-auto"}
     />
   );
 };

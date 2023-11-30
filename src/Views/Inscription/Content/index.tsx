@@ -52,6 +52,7 @@ function Content({ data }: ContentProps) {
                   <div className="relative rounded-xl border xl:border-2 border-accent overflow-hidden bg-secondary shadow-xl p-3 h-[50vh]">
                     <div className="content-div h-full overflow-hidden">
                       <CardContent
+                        showFull={true}
                         inscriptionId={data?.inscription_id}
                         content_type={data?.content_type}
                       />

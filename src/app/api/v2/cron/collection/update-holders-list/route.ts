@@ -72,11 +72,12 @@ function needToUpdateHolders(collection: ICollection) {
 
 async function getCollections(query: any) {
   try {
-    console.log(query, { depth: null });
-    const coll = await Collection.findOne(query.find)
+    console.dir(query, { depth: null });
+    const coll = await Collection.find(query.find)
       // .where(query.where)
-      .sort("supply:-1")
+      .sort({ supply: -1 })
       .skip(query.start)
+      .limit(2)
       .exec();
 
     return coll;
@@ -166,18 +167,20 @@ export async function GET(req: NextRequest, res: NextResponse) {
     ];
 
     // If the result doesn't exist in the cache, query the database
-    const collection: any = await getCollections(query);
-    if (!collection)
+    const collections: any = await getCollections(query);
+    if (!collections || collections.length == 0)
       return NextResponse.json({
         message: "All collection holders up to date",
       });
 
-    const inscriptionsData = await getInscriptionsRange(collection);
+    for (const collection of collections) {
+      const inscriptionsData = await getInscriptionsRange(collection);
 
-    collection.min = inscriptionsData.lowestInscription?.inscription_number;
-    collection.max = inscriptionsData.highestInscription?.inscription_number;
+      collection.min = inscriptionsData.lowestInscription?.inscription_number;
+      collection.max = inscriptionsData.highestInscription?.inscription_number;
 
-    updateHoldersData(collection);
+      updateHoldersData(collection);
+    }
 
     const endTime = Date.now(); // Record the end time
     const timeTaken = endTime - startTime; // Calculate the elapsed time
@@ -187,7 +190,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
     );
     // Construct the result
     const result = {
-      collection,
+      collections,
       pagination: {
         page: query.start / query.limit + 1,
         limit: query.limit,

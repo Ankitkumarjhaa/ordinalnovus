@@ -1,11 +1,13 @@
 "use server";
 
-import { getCache, setCache } from "@/lib/cache";
+import { getCache, getCacheExpiry, setCache } from "@/lib/cache";
 import axios from "axios";
 
 export default async function fetchContentFromProviders(contentId: string) {
   const PROVIDERS = [process.env.NEXT_PUBLIC_PROVIDER, "https://ordinals.com"];
   let activeProvider = await getCache("activeProvider");
+
+  console.log(await getCacheExpiry("activeProvider"), " Cache expiry");
 
   if (!activeProvider) {
     activeProvider = PROVIDERS[0]; // Default to first provider if cache is empty
@@ -19,17 +21,22 @@ export default async function fetchContentFromProviders(contentId: string) {
       const response = await axios.get(`${PROVIDERS[i]}/content/${contentId}`, {
         responseType: "arraybuffer",
       });
+
       console.log("GOT Response from: ", PROVIDERS[i]);
-      if (i !== 0) {
-        // Cache the active provider for 10 minutes if it's not the primary one
+
+      // Cache the active provider if it's not the primary one and it's different from the cached one
+      if (i !== 0 && PROVIDERS[i] !== activeProvider) {
+        console.log("Setting cache activeProvider: ", PROVIDERS[i]);
         await setCache("activeProvider", PROVIDERS[i], 600); // 600 seconds = 10 minutes
       }
+
       return response;
     } catch (error) {
       console.warn(`Provider ${PROVIDERS[i]} failed. Trying next.`);
-      if (i === PROVIDERS.length - 1) {
-        // Rotate back to the first provider if at the end of the list
-        await setCache("activeProvider", PROVIDERS[0], 600);
+
+      // If the current provider is the last in the list, check if the primary provider is also failing
+      if (i === PROVIDERS.length - 1 && activeProvider !== PROVIDERS[0]) {
+        i = -1; // This will make the loop start from the primary provider in the next iteration
       }
     }
   }

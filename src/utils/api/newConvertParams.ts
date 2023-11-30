@@ -100,7 +100,8 @@ function processWhereParam(
   finalQuery: FinalQuery,
   model: Model<any>,
   key: string,
-  value: any
+  value: any,
+  params: any
 ): void {
   console.debug(`Processing where parameter: key=${key}, value=${value}`); // Log the key-value being processed
   const schema = model.schema;
@@ -117,11 +118,50 @@ function processWhereParam(
     console.debug(`Performing a text search for: ${value}`);
     // MongoDB expects the $text operator with the $search field for text searches.
     finalQuery.find.$text = { $search: `\"${value}\"` };
+  } else if (key === "type") {
+    switch (value) {
+      case "address":
+        finalQuery.find.address = params.q;
+        break;
+      case "rarity":
+        finalQuery.find.rarity = params.q;
+        break;
+      case "sha":
+        finalQuery.find.sha = params.q;
+        break;
+      case "content":
+        finalQuery.find.$text = { $search: `\"${params.q}\"` };
+        break;
+      case "content-type":
+        const tags = params.q.split("|").map((tag: string) => tag.trim()); // Split the string and trim each tag
+        finalQuery.find.$or = tags.map((tag: string) => ({ tags: tag }));
+        break;
+
+      case "bitmap":
+        // finalQuery.find.tags = "bitmap";
+        finalQuery.find.tags = { $in: "bitmap" };
+        finalQuery.find.$text = { $search: `\"${params.q}\"` };
+        finalQuery.find.content_type = "text/plain;charset=utf-8";
+        break;
+      case "domain":
+        finalQuery.find.domain_name = params.q;
+        finalQuery.find.tags = { $in: "domain" };
+        break;
+      case "txid":
+        finalQuery.find.$or = [
+          { txid: params.q },
+          { genesis_transaction: params.q },
+        ];
+        break;
+    }
   } else if (schemaKeys.includes(key)) {
     const isObjectId = schema.path(key) instanceof Types.ObjectId;
     if (isObjectId) {
       // Cast to ObjectId if the schema type is ObjectId
       finalQuery.find[key] = new Types.ObjectId(value);
+    } else if (key === "type") {
+      // Check if 'type' should search within 'tags' array
+      finalQuery.find["tags"] = { $in: [new RegExp(value, "i")] };
     } else if (key === "attributes") {
       console.log("setting attributes");
       // Handle attribute search based on value
@@ -228,7 +268,7 @@ export default function convertParams(
       const contentValue = params["content"] || undefined;
       processTagsParam(finalQuery, params["tags"], contentValue);
     } else {
-      processWhereParam(finalQuery, model, key, params[key]);
+      processWhereParam(finalQuery, model, key, params[key], params);
     }
   });
 
