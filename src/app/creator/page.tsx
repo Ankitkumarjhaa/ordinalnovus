@@ -1,8 +1,7 @@
-import ListCollection from "@/Views/ListCollectionPage";
 import React from "react";
 
-function Creator() {
-  return <ListCollection />;
+function page() {
+  return <div>page</div>;
 }
 
-export default Creator;
+export default page;

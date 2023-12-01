@@ -168,11 +168,14 @@ export interface ICollectionBase {
   blockchain: BlockchainType;
   type: CollectionType;
   tags?: string[];
+  email?: string;
+  discord_id?: string;
+  json_uploaded?: boolean;
 }
 
 // Interface for adding a new collection
 export interface IAddCollection extends ICollectionBase {
-  inscription_icon?: IInscription;
+  inscription_icon?: string;
   icon?: string;
   supply?: number;
   twitter_link?: string;
@@ -181,7 +184,6 @@ export interface IAddCollection extends ICollectionBase {
   live: boolean;
   verified: boolean;
   updated_by: string;
-  json_uploaded?: boolean;
 }
 
 // Interface for the collection document

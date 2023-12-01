@@ -30,6 +30,7 @@ function CollectionsPage() {
         page,
         pageSize,
         sort,
+        live: true,
       });
       if (result && result.error) {
         dispatch(

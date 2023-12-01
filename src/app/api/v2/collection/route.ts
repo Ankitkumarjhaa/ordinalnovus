@@ -141,21 +141,24 @@ export async function GET(req: NextRequest, res: NextResponse) {
 
     // Try to fetch the result from Redis first
     let cachedResult =
-      process.env.NODE_ENV === "production" ? await getCache(cacheKey) : null;
+      process.env.NODE_ENV === "production" && query.find.live === "true"
+        ? await getCache(cacheKey)
+        : null;
 
     if (cachedResult) {
+      console.log("using cache");
       // If the result exists in the cache, return it
       cachedResult.collections = await getListingData(cachedResult.collections);
       return NextResponse.json(cachedResult);
     } else {
-      query.find.$expr = {
-        $and: [
-          { $gt: ["$supply", 1] },
-          { $gt: ["$updated", 1] },
-          { $eq: ["$supply", "$updated"] },
-        ],
-      };
-      query.find.live = true;
+      if (query.find.live === true)
+        query.find.$expr = {
+          $and: [
+            { $gt: ["$supply", 1] },
+            { $gt: ["$updated", 1] },
+            { $eq: ["$supply", "$updated"] },
+          ],
+        };
 
       if (req.nextUrl.searchParams.has("min")) {
         query.find["min"] = {

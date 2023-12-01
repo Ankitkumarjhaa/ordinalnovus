@@ -53,7 +53,7 @@ function Search() {
   const fetchCollectionsBySearch = async (id: string) => {
     if (id.trim()) {
       console.log("fetching coll data: ", id);
-      const result = await fetchCollections({ search: id });
+      const result = await fetchCollections({ search: id, live: true });
       if (result?.data) {
         setCollections(result.data.collections);
       }

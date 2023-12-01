@@ -112,6 +112,8 @@ export const collectionSchema = new Schema(
     max: { type: Number },
     priority: { type: Number, default: 0 },
     json_uploaded: { type: Boolean, default: false },
+    email: { type: String },
+    discord_id: { type: String },
   },
   {
     timestamps: { createdAt: "created_at", updatedAt: "updated_at" },

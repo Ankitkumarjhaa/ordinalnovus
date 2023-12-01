@@ -12,7 +12,7 @@ export async function generateMetadata(
   { params }: Props,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const collection = await fetchCollections({ slug: params.slug });
+  const collection = await fetchCollections({ slug: params.slug, live: true });
   if (!collection) {
     notFound();
   }
@@ -108,7 +108,7 @@ export default async function Page({
   params: { slug: string };
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
-  const data = await fetchCollections({ slug: params.slug });
+  const data = await fetchCollections({ slug: params.slug, live: true });
   if (!data) {
     notFound();
   }

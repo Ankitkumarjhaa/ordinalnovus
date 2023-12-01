@@ -10,10 +10,10 @@ interface CollectionResponse {
 
 export async function addCollection(
   params: IAddCollection
-): Promise<{ data: CollectionResponse; error: string | null } | undefined> {
+): Promise<{ data?: CollectionResponse; error: string | null } | undefined> {
   try {
     const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_URL}/api/v2/collection`,
+      `${process.env.NEXT_PUBLIC_URL}/api/v2/creator/collection/add`,
       params,
       {
         headers: {
@@ -25,9 +25,11 @@ export async function addCollection(
     if (response.status === 200) {
       return { data: response.data, error: null };
     } else {
-      return undefined;
+      // You might want to customize this message or extract more specific info from the response
+      return { error: `Request failed with status code: ${response.status}` };
     }
-  } catch (error) {
-    return undefined;
+  } catch (error: any) {
+    // Assuming error is of type any. You might want to add more specific type handling
+    return { error: error?.message || "An unknown error occurred" };
   }
 }
