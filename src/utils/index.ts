@@ -56,6 +56,12 @@ const { bitcoin } = mempoolJS({
 export const mempoolBitcoin = bitcoin;
 
 export const determineTypesFromId = (id: string): string[] => {
+  // Check for Bitcoin address
+  const bitcoinAddressRegex = /^bc1[a-z0-9]+$/;
+  if (bitcoinAddressRegex.test(id)) {
+    return ["address"];
+  }
+
   // Check if ID is a positive number
   if (!isNaN(Number(id)) && Number(id) < 0) {
     return ["inscription number"];
@@ -96,7 +102,7 @@ export const determineTypesFromId = (id: string): string[] => {
   // Check if ID is a normal string without special characters
   const normalStringRegex = /^[a-zA-Z0-9]*$/;
   if (normalStringRegex.test(id)) {
-    return ["collection", "sat name", "content"];
+    return ["collection", "sat name", "content", "address"];
   }
 
   // Fallback for normal strings

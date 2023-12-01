@@ -81,6 +81,7 @@ function Search() {
       case item.includes("bitmap"):
       case item.includes("domain"):
       case item.includes("content"):
+      case item.includes("address"):
         return `/search?q=${id}&type=${item}`;
       default:
         return "";

@@ -56,6 +56,8 @@ export async function GET(req: NextRequest, res: NextResponse) {
     if (middlewareResponse) {
       return middlewareResponse;
     }
+    const apiKeyInfo = req.apiKeyInfo;
+    console.log({ apiKeyInfo });
 
     const query = convertParams(Inscription, req.nextUrl);
     console.log(query, "QUERY");
