@@ -40,7 +40,7 @@ async function getCollections(query: any) {
       .where(query.where)
       .populate({
         path: "inscription_icon",
-        select: "inscription_id content_type number",
+        select: "inscription_id content_type inscription_number",
       })
       .sort(query.sort)
       .skip(query.start)

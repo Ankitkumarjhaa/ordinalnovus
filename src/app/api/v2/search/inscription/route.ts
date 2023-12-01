@@ -31,7 +31,9 @@ async function fetchInscriptions(query: any, page: number, limit: number) {
         path: "official_collection",
         select: "name slug supply updated verified featured",
       })
-      .select("-created_at -updated_at -error_tag -error-retry -error ");
+      .select(
+        "-created_at -updated_at -error_tag -error-retry -error -signed_psbt -unsigned_psbt"
+      );
 
     const inscriptions = response || [];
     const totalCount = response.length;
@@ -71,15 +73,6 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
     } else if (!isNaN(Number(id))) {
       query = { inscription_number: Number(id) };
     }
-    // else if (/^[0-9a-f]{64}$/i.test(id)) {
-    //   query = { sha: id };
-    // }
-    // else if (isNaN(Number(id))) {
-    //   query = {
-    //     sat_name: id,
-    //     content: id,
-    //   };
-    // }
 
     await dbConnect();
 
