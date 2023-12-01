@@ -1,9 +1,13 @@
+import { addCollection } from "@/apiHelper/addCollection";
 import CustomButton from "@/components/elements/CustomButton";
 import CustomInput from "@/components/elements/CustomInput";
-import React, { useState } from "react";
+import isSlugValid from "@/utils/slugValidator";
+import { useWalletAddress } from "bitcoin-wallet-adapter";
+import React, { useEffect, useState } from "react";
 import { FaPlus, FaTwitter, FaDiscord, FaGlobe } from "react-icons/fa";
 
 function CollectionForm() {
+  const walletDetails = useWalletAddress();
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
@@ -12,13 +16,42 @@ function CollectionForm() {
   const [discordUrl, setDiscordUrl] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
 
-  const isSlugValid = (slug: string) => {
-    return /^[a-z0-9-_]+$/.test(slug);
+  const [slugErr, setSlugErr] = useState("");
+
+  const slugValidator = async () => {
+    if (slug) {
+      const isValid = await isSlugValid(slug);
+      if (!isValid) {
+        setSlugErr("");
+      } else {
+        setSlugErr(isValid);
+      }
+    }
   };
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
-    // Form submission logic here
+    if (!walletDetails || !walletDetails.ordinal_address) {
+      return;
+    }
+    const result = await addCollection({
+      name,
+      slug,
+      description,
+      tags: tags.split(","),
+      twitter_link: twitterUrl,
+      discord_link: discordUrl,
+      website_link: websiteUrl,
+      blockchain: "btc",
+      updated_by: walletDetails?.ordinal_address,
+      live: false,
+      verified: false,
+      type: "official",
+      json_uploaded: false,
+    });
+
+    if (result && result.data.ok) {
+    }
   };
 
   return (
@@ -47,8 +80,9 @@ function CollectionForm() {
               placeholder="Slug"
               onChange={(value) => setSlug(value.toLowerCase())}
               fullWidth
-              error={slug ? !isSlugValid(slug) : false}
-              helperText={slug && !isSlugValid(slug) ? "Slug is invalid" : ""}
+              error={slugErr ? true : false}
+              helperText={slugErr}
+              onBlur={slugValidator}
             />
           </div>
           <div className="mb-2">
