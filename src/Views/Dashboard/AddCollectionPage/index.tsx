@@ -20,7 +20,6 @@ function ListCollection() {
     const result = await fetchCollections({
       wallet: walletDetails?.ordinal_address,
       live: false,
-      json_uploaded: false,
     });
     if (result?.data?.collections && result.data.collections.length > 0) {
       setUnpublishedColl(result?.data?.collections[0]);

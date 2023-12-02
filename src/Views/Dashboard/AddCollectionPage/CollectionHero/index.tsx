@@ -24,6 +24,7 @@ function CollectionHero({
   const router = useRouter();
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   async function handleSubmit() {
     try {
       setLoading(true);
@@ -42,7 +43,7 @@ function CollectionHero({
           })
         );
       } else {
-        router.push("/creator");
+        router.push("/dashboard");
       }
       setLoading(false);
     } catch (err: any) {
@@ -59,13 +60,77 @@ function CollectionHero({
     }
   }
 
+  const handleJsonSubmit = async (event: any) => {
+    event.preventDefault();
+    setUploading(true); // Set loading state for this action as well
+
+    const formData = new FormData();
+    formData.append("file", event.target.files[0]);
+    formData.append("slug", coll.slug); // Adding the slug to the formData
+
+    try {
+      const response = await fetch("/api/v2/creator/collection/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        dispatch(
+          addNotification({
+            id: new Date().valueOf(),
+            message: "File uploaded successfully",
+            open: true,
+            severity: "success",
+          })
+        );
+        fetchUnpublishedCollection(); // Refresh collection or perform necessary action
+      } else {
+        dispatch(
+          addNotification({
+            id: new Date().valueOf(),
+            message: result.error || "An error occurred during file upload",
+            open: true,
+            severity: "error",
+          })
+        );
+      }
+      setUploading(false);
+    } catch (err) {
+      console.error(err);
+      dispatch(
+        addNotification({
+          id: new Date().valueOf(),
+          message: "Network error or server is unreachable",
+          open: true,
+          severity: "error",
+        })
+      );
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const fileInputRef: any = React.useRef(null);
+
+  const handleFileInputChange = (event: any) => {
+    // Check if a file is selected
+    if (event.target.files.length > 0) {
+      handleJsonSubmit(event); // Submit the form
+    }
+  };
+
+  const triggerFileInput = () => {
+    if (fileInputRef && fileInputRef.current) fileInputRef.current.click(); // Trigger file input
+  };
+
   return (
     <div>
       <h2 className="text-3xl capitalize pb-16 font-bold">
         Your Collection Draft
       </h2>
       <div className="flex justify-between flex-wrap">
-        <div className="w-full lg:w-6/12 ">
+        <div className="w-full lg:w-3/12 2xl:w-3/12 ">
           <div className="w-full">
             <>
               {coll.inscription_icon ? (
@@ -97,7 +162,7 @@ function CollectionHero({
           </div>
         </div>
 
-        <div className="w-full lg:w-6/12 p-2">
+        <div className="w-full lg:w-9/12 2xl:w-9/12 p-2">
           <div className="mb-4">
             <p>
               <strong>Name: </strong>
@@ -139,12 +204,48 @@ function CollectionHero({
               {coll.website_link}
             </p>
           </div>
-          <div className="my-6">
-            <CustomButton
-              loading={loading}
-              text={"Delete Collection Draft"}
-              onClick={handleSubmit}
-            />
+
+          <div className="my-6 flex items-center ">
+            {!coll.json_uploaded ? (
+              <>
+                <div>
+                  <CustomButton
+                    bgColor="bg-red-500"
+                    loading={loading}
+                    text={"Delete Collection Draft"}
+                    onClick={handleSubmit}
+                  />
+                </div>
+                <div className="pl-4">
+                  <form onSubmit={handleJsonSubmit}>
+                    <input
+                      type="file"
+                      name="file"
+                      accept="application/json" // Allow only JSON files
+                      ref={fileInputRef}
+                      onChange={handleFileInputChange}
+                      style={{ display: "none" }}
+                      required
+                    />
+                    <button
+                      disabled={loading || uploading}
+                      onClick={triggerFileInput}
+                      className="px-4 py-2 bg-accent hover:bg-accent_dark text-white"
+                    >
+                      {uploading
+                        ? "Uploading..."
+                        : "Upload Inscriptions JSON File"}
+                    </button>
+                  </form>
+                </div>
+              </>
+            ) : (
+              <div>
+                <div className="bg-bitcoin text-yellow-900 px-4 py-2 ">
+                  Under Review
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

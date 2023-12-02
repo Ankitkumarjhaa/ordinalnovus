@@ -8,6 +8,7 @@ import { shortenString } from "@/utils";
 import { CircularProgress } from "@mui/material";
 import { fetchInscriptions } from "@/apiHelper/fetchInscriptions";
 import { useWalletAddress } from "bitcoin-wallet-adapter";
+import Link from "next/link";
 
 function AccountPage() {
   const [inscriptions, setInscriptions] = useState<IInscription[] | null>(null);
@@ -62,7 +63,7 @@ function AccountPage() {
 
   return (
     <div className="pt-16 text-white">
-      <div className="profile w-full flex items-center border-b-2 py-6 border-accent">
+      <div className="profile w-full flex flex-wrap items-center border-b-2 py-6 border-accent">
         <div className="w-[100px]">
           {inscriptions?.length && profile?.inscription_id ? (
             <CardContent
@@ -77,10 +78,19 @@ function AccountPage() {
           )}
         </div>
         <div className="pl-4">
-          <p className="text-white text-sm">{walletDetails?.ordinal_address}</p>
-          <p className="text-gray-400 text-xs">
+          <p className="text-white text-sm hidden lg:block">
+            {walletDetails?.ordinal_address}
+          </p>
+          <p className="text-gray-400 text-xs lg:hidden">
             {shortenString(walletDetails?.ordinal_address || "")}
           </p>
+        </div>
+        <div className="flex-1 flex justify-center lg:justify-end">
+          <Link href="/dashboard/add-collection">
+            <p className="px-4 py-1 bg-bitcoin text-yellow-900">
+              Add Collection
+            </p>
+          </Link>
         </div>
       </div>
       <div className="py-6">

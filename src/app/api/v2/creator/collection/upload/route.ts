@@ -1,8 +1,9 @@
 import mime from "mime";
 import { join } from "path";
-import { stat, mkdir, writeFile } from "fs/promises";
-import moment from "moment";
+import { stat, mkdir, writeFile, access } from "fs/promises";
 import { NextRequest, NextResponse } from "next/server";
+import dbConnect from "@/lib/dbConnect";
+import { Collection } from "@/models";
 
 export async function POST(request: NextRequest) {
   const formData = await request.formData();
@@ -18,8 +19,11 @@ export async function POST(request: NextRequest) {
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
-  const relativeUploadDir = `/collections/${slug}`; // Using slug in the path
-  const uploadDir = join("/home/assets", relativeUploadDir);
+  const relativeUploadDir = `/collections`; // Using slug in the path
+  const uploadDir = join("/home/crypticmeta/Desktop/assets", relativeUploadDir);
+
+  const filename = `${slug}.${mime.getExtension(file.type)}`;
+  const filePath = join(uploadDir, filename);
 
   try {
     await stat(uploadDir);
@@ -39,13 +43,24 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    const filename = `${file.name.replace(
-      /\.[^/.]+$/,
-      ""
-    )}-${uniqueSuffix}.${mime.getExtension(file.type)}`;
-    await writeFile(join(uploadDir, filename), buffer);
-    return NextResponse.json({ fileUrl: `${relativeUploadDir}/${filename}` });
+    try {
+      // Check if file already exists
+      await access(filePath);
+      // If the function reaches here, it means the file exists
+      return NextResponse.json(
+        { error: "File with this slug already exists." },
+        { status: 400 }
+      );
+    } catch (error) {
+      await dbConnect();
+      // If file does not exist, proceed with the upload
+      await writeFile(filePath, buffer);
+      await Collection.findOneAndUpdate({ slug }, { json_uploaded: true });
+      return NextResponse.json({
+        ok: true,
+        path: `${relativeUploadDir}/${filename}`,
+      });
+    }
   } catch (e) {
     console.error("Error while trying to upload a file\n", e);
     return NextResponse.json(

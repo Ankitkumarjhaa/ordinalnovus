@@ -74,7 +74,6 @@ function Search() {
         return `/sat/${id}`;
       case item.includes("inscription number"):
       case item.includes("inscription id"):
-      case item.includes("sha"):
       case item.includes("sat"):
         return `/inscription/${id}`;
       case item.includes("token"):
@@ -82,9 +81,11 @@ function Search() {
       case item.includes("domain"):
       case item.includes("content"):
       case item.includes("address"):
+      case item.includes("sha"):
+      case item.includes("txid"):
         return `/search?q=${id}&type=${item}`;
       default:
-        return "";
+        return "/search";
     }
   };
 
