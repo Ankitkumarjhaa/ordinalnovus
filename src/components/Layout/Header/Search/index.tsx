@@ -148,7 +148,7 @@ function Search() {
           setId("");
         }
       }}
-      className="flex relative items-center justify-center w-full md:max-w-md max-w-lg mx-auto pb-6 lg:pb-0"
+      className="flex relative items-center justify-center w-full md:max-w-md max-w-lg 2xl:max-w-3xl mx-auto pb-6 lg:pb-0"
     >
       <div
         id="main-searchbar"

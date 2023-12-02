@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
 import dbConnect from "@/lib/dbConnect";
-import apiKeyMiddleware from "@/newMiddlewares/apikeyMiddleware";
+import apiKeyMiddleware from "@/middlewares/apikeyMiddleware";
 import { CustomError } from "@/utils";
 import { Inscription } from "@/models";
 
@@ -10,7 +10,6 @@ type Data = {
   message: string;
   data?: any;
 };
-
 
 async function fetchInscriptions(query: any, page: number, limit: number) {
   console.log("Fetching Inscriptions...");

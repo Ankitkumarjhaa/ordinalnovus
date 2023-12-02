@@ -1,6 +1,6 @@
 import dbConnect from "@/lib/dbConnect";
 import { Collection } from "@/models";
-import apiKeyMiddleware from "@/newMiddlewares/apikeyMiddleware";
+import apiKeyMiddleware from "@/middlewares/apikeyMiddleware";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {

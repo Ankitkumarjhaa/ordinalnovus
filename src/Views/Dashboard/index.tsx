@@ -21,7 +21,7 @@ function AccountPage() {
   const fetchData = useCallback(async () => {
     try {
       const params = {
-        wallet: walletDetails.ordinal_address,
+        wallet: walletDetails?.ordinal_address,
         page_size: 100,
         page: 1,
       };
@@ -103,7 +103,7 @@ function AccountPage() {
                     .map((item) => (
                       <div
                         key={item.inscription_id}
-                        className="card_div p-2 w-full md:w-6/12 lg:w-3/12 relative"
+                        className="card_div p-2 w-full md:w-6/12 lg:w-3/12  2xl:w-2/12 relative"
                       >
                         <p className="absolute bg-bitcoin rounded-full font-bold text-yellow-900 text-sm p-1 z-10">
                           V{item.version}
@@ -139,7 +139,7 @@ function AccountPage() {
                     .map((item) => (
                       <div
                         key={item.inscription_id}
-                        className="card_div p-2 w-full md:w-6/12 lg:w-3/12 relative"
+                        className="card_div p-2 w-full md:w-6/12 lg:w-3/12  2xl:w-2/12 relative"
                       >
                         <CustomCard
                           number={item.inscription_number}
@@ -172,7 +172,7 @@ function AccountPage() {
                     .map((item) => (
                       <div
                         key={item.inscription_id}
-                        className="card_div p-2 w-full md:w-6/12 lg:w-3/12 relative"
+                        className="card_div p-2 w-full md:w-6/12 lg:w-3/12  2xl:w-2/12 relative"
                       >
                         {item.version && (
                           <p className="absolute bg-bitcoin rounded-full font-bold text-yellow-900 text-sm p-1 z-10">
@@ -221,7 +221,7 @@ function AccountPage() {
                     .map((item) => (
                       <div
                         key={item.inscription_id}
-                        className="card_div p-2 w-full md:w-6/12 lg:w-3/12 relative"
+                        className="card_div p-2 w-full md:w-6/12 lg:w-3/12  2xl:w-2/12 relative"
                       >
                         <CustomCard
                           number={item.inscription_number}
