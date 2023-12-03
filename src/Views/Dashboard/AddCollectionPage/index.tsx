@@ -4,8 +4,8 @@ import React, { useCallback, useEffect, useState } from "react";
 import CollectionForm from "./CollectionForm";
 import { ICollection } from "@/types";
 import { fetchCollections } from "@/apiHelper/fetchCollection";
-import CollectionHero from "./CollectionHero";
 import { CircularProgress } from "@mui/material";
+import CollectionHero from "./CollectionHero";
 
 function ListCollection() {
   const walletDetails = useWalletAddress();
@@ -44,7 +44,7 @@ function ListCollection() {
               {unpublishedColl ? (
                 <>
                   <CollectionHero
-                    coll={unpublishedColl}
+                    data={unpublishedColl}
                     fetchUnpublishedCollection={fetchUnpublishedCollection}
                   />
                 </>
