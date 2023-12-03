@@ -22,18 +22,18 @@ export default function RootLayout({
     <WalletProvider>
       <Provider store={store}>
         <html lang="en">
-          <Head key="head-main">
-            <link rel="icon" href="/favicon.ico" sizes="any" />
-            <Script src="https://www.googletagmanager.com/gtag/js?id=G-7KWT77M049" />
-            <Script id="google-analytics">
-              {`                
+          <Script src="https://www.googletagmanager.com/gtag/js?id=G-7KWT77M049" />
+          <Script id="google-analytics">
+            {`                
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
                  gtag('js', new Date());
 
                    gtag('config', 'G-7KWT77M049');
                 `}
-            </Script>
+          </Script>
+          <Head key="head-main">
+            <link rel="icon" href="/favicon.ico" sizes="any" />
           </Head>
           <body className=" bg-primary text-light_gray relative small-scrollbar">
             <main className=" py-52 lg:py-24 px-6 max-w-screen-2xl mx-auto relative">
