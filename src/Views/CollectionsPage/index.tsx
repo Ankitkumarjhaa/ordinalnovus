@@ -19,7 +19,7 @@ function CollectionsPage() {
   const [page, setPage] = useState<number>(1);
   const [data, setData] = useState<ICollection[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
-  const [pageSize, setPageSize] = useState<number>(12);
+  const [pageSize, setPageSize] = useState<number>(40);
   const [sort, setSort] = useState<string>("updated_at:1");
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -30,6 +30,7 @@ function CollectionsPage() {
         page,
         pageSize,
         sort,
+        live: true,
       });
       if (result && result.error) {
         dispatch(

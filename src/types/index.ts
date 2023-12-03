@@ -156,27 +156,51 @@ export interface Holder {
   address: string;
   count: number;
 }
+// Type aliases for repeated types
+type BlockchainType = "btc" | "ltc" | "doge";
+type CollectionType = "official" | "list";
 
-export interface ICollection extends Document {
-  _id: string;
+// Base interface for common properties
+export interface ICollectionBase {
   name: string;
+  slug: string;
+  description: string;
+  blockchain: BlockchainType;
+  type: CollectionType;
+  tags?: string[];
+  email?: string;
+  discord_id?: string;
+  json_uploaded?: boolean;
+}
+
+// Interface for adding a new collection
+export interface IAddCollection extends ICollectionBase {
+  inscription_icon?: string;
+  icon?: string;
+  supply?: number;
+  twitter_link?: string;
+  discord_link?: string;
+  website_link?: string;
+  live: boolean;
+  verified: boolean;
+  updated_by: string;
+}
+
+// Interface for the collection document
+export interface ICollection extends ICollectionBase, Document {
+  _id: string;
   inscription_icon?: IInscription;
   icon?: string;
   supply?: number;
-  slug: string;
-  description: string;
   twitter_link?: string;
   discord_link?: string;
   website_link?: string;
   live?: boolean;
   featured?: boolean;
-  blockchain: "btc" | "ltc" | "doge";
   flagged?: boolean;
   banned?: boolean;
   verified?: boolean;
   updated_by?: string;
-  type: "official" | "list";
-  tags?: string[];
   favorites: string[];
   updated?: number;
   errored?: number;

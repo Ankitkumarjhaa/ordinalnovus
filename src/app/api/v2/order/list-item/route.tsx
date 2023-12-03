@@ -1,7 +1,7 @@
 // app/api/v2/order/list-item.ts
 import { NextRequest, NextResponse } from "next/server";
 import { fetchLatestInscriptionData } from "@/utils/Marketplace";
-import apiKeyMiddleware from "@/newMiddlewares/apikeyMiddleware";
+import apiKeyMiddleware from "@/middlewares/apikeyMiddleware";
 import { IInscription } from "@/types";
 import {
   addFinalScriptWitness,

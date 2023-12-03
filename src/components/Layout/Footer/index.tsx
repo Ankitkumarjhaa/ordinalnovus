@@ -11,7 +11,7 @@ function Footer() {
   const dispatch = useDispatch();
   return (
     <footer>
-      <div className="flex justify-between flex-wrap items-start py-36 lg:py-12 px-6 lg:px-24 max-w-7xl mx-auto relative">
+      <div className="flex justify-between flex-wrap items-start py-36 lg:py-12 px-6 max-w-screen-2xl mx-auto relative">
         <div className="logoSection w-full md:w-6/12 lg:w-4/12  pb-6 lg:pb-0">
           <div className="flex items-center justify-start pb-3">
             <Image

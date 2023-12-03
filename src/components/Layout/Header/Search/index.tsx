@@ -53,7 +53,7 @@ function Search() {
   const fetchCollectionsBySearch = async (id: string) => {
     if (id.trim()) {
       console.log("fetching coll data: ", id);
-      const result = await fetchCollections({ search: id });
+      const result = await fetchCollections({ search: id, live: true });
       if (result?.data) {
         setCollections(result.data.collections);
       }
@@ -74,16 +74,18 @@ function Search() {
         return `/sat/${id}`;
       case item.includes("inscription number"):
       case item.includes("inscription id"):
-      case item.includes("sha"):
       case item.includes("sat"):
         return `/inscription/${id}`;
       case item.includes("token"):
       case item.includes("bitmap"):
       case item.includes("domain"):
       case item.includes("content"):
+      case item.includes("address"):
+      case item.includes("sha"):
+      case item.includes("txid"):
         return `/search?q=${id}&type=${item}`;
       default:
-        return "";
+        return "/search";
     }
   };
 
@@ -147,7 +149,7 @@ function Search() {
           setId("");
         }
       }}
-      className="flex relative items-center justify-center w-full md:max-w-md max-w-lg mx-auto pb-6 lg:pb-0"
+      className="flex relative items-center justify-center w-full md:max-w-md max-w-lg 2xl:max-w-3xl mx-auto pb-6 lg:pb-0"
     >
       <div
         id="main-searchbar"

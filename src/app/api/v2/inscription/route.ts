@@ -1,19 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Inscription, Collection } from "@/models";
 import dbConnect from "@/lib/dbConnect";
-import convertParams from "@/utils/api/newConvertParams";
+import convertParams from "@/utils/api/convertParams";
 
-import apiKeyMiddleware from "@/newMiddlewares/apikeyMiddleware";
+import apiKeyMiddleware from "@/middlewares/apikeyMiddleware";
 import { CustomError } from "@/utils";
 import moment from "moment";
 
 const getProjectionFields = (show: string) => {
   if (show === "prune") {
-    return "inscription_id number content_type rarity timestamp sha address signed_psbt listed_price listed_at";
+    return "inscription_id inscription_number content_type tags token rarity timestamp sha address listed_price listed_at";
   } else if (show === "all") {
-    return "-_id -__v -created_at -updated_at";
+    return "-_id -__v -created_at -updated_at -signed_psbt -unsigned_psbt -tap_internal_key";
   } else {
-    return show;
+    // Exclude sensitive fields from custom 'show' parameter
+    const excludedFields = ["signed_psbt", "unsigned_psbt", "tap_internal_key"];
+    let projectionFields = show
+      .split(" ")
+      .filter((field: string) => !excludedFields.includes(field))
+      .join(" ");
+    return projectionFields;
   }
 };
 
@@ -56,6 +62,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
     if (middlewareResponse) {
       return middlewareResponse;
     }
+    const apiKeyInfo = req.apiKeyInfo;
 
     const query = convertParams(Inscription, req.nextUrl);
     console.log(query, "QUERY");

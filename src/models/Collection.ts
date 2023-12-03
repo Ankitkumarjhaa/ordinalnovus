@@ -111,6 +111,9 @@ export const collectionSchema = new Schema(
     min: { type: Number },
     max: { type: Number },
     priority: { type: Number, default: 0 },
+    json_uploaded: { type: Boolean, default: false },
+    email: { type: String },
+    discord_id: { type: String },
   },
   {
     timestamps: { createdAt: "created_at", updatedAt: "updated_at" },
@@ -122,6 +125,7 @@ collectionSchema.index({ name: "text" });
 collectionSchema.index({ slug: 1 });
 collectionSchema.index({ updated: 1, errored: 1 });
 collectionSchema.index({ supply: 1 });
+collectionSchema.index({ json_uploaded: 1 });
 
 collectionSchema.pre(
   "deleteOne",

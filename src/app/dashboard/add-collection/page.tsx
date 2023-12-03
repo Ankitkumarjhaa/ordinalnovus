@@ -1,4 +1,4 @@
-import ListCollection from "@/Views/ListCollectionPage";
+import ListCollection from "@/Views/Dashboard/AddCollectionPage";
 import React from "react";
 
 function Creator() {

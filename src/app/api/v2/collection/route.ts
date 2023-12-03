@@ -2,9 +2,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Inscription, Collection } from "@/models";
 import dbConnect from "@/lib/dbConnect";
-import convertParams from "@/utils/api/newConvertParams";
+import convertParams from "@/utils/api/convertParams";
 import { getCache, setCache } from "@/lib/cache";
-import apiKeyMiddleware from "@/newMiddlewares/apikeyMiddleware";
+import apiKeyMiddleware from "@/middlewares/apikeyMiddleware";
 import { CustomError } from "@/utils";
 import { ICollection } from "@/types";
 
@@ -40,7 +40,7 @@ async function getCollections(query: any) {
       .where(query.where)
       .populate({
         path: "inscription_icon",
-        select: "inscription_id content_type number",
+        select: "inscription_id content_type inscription_number",
       })
       .sort(query.sort)
       .skip(query.start)
@@ -141,21 +141,24 @@ export async function GET(req: NextRequest, res: NextResponse) {
 
     // Try to fetch the result from Redis first
     let cachedResult =
-      process.env.NODE_ENV === "production" ? await getCache(cacheKey) : null;
+      process.env.NODE_ENV === "production" && query.find.live === "true"
+        ? await getCache(cacheKey)
+        : null;
 
     if (cachedResult) {
+      console.log("using cache");
       // If the result exists in the cache, return it
       cachedResult.collections = await getListingData(cachedResult.collections);
       return NextResponse.json(cachedResult);
     } else {
-      query.find.$expr = {
-        $and: [
-          { $gt: ["$supply", 1] },
-          { $gt: ["$updated", 1] },
-          { $eq: ["$supply", "$updated"] },
-        ],
-      };
-      query.find.live = true;
+      if (query.find.live === true)
+        query.find.$expr = {
+          $and: [
+            { $gt: ["$supply", 1] },
+            { $gt: ["$updated", 1] },
+            { $eq: ["$supply", "$updated"] },
+          ],
+        };
 
       if (req.nextUrl.searchParams.has("min")) {
         query.find["min"] = {

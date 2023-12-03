@@ -5,7 +5,7 @@ import { IconType } from "react-icons";
 // Customized TextField with bottom border on focus
 const CustomTextField = styled(TextField)(({ theme }) => ({
   "& .MuiOutlinedInput-root": {
-    borderRadius: 10,
+    borderRadius: 5,
     backgroundColor: "#0a0217",
     border: "none", // Remove borders
   },

@@ -2,9 +2,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Inscription, Collection } from "@/models";
 import dbConnect from "@/lib/dbConnect";
-import convertParams from "@/utils/api/newConvertParams";
+import convertParams from "@/utils/api/convertParams";
 import { getCache, setCache } from "@/lib/cache";
-import apiKeyMiddleware from "@/newMiddlewares/apikeyMiddleware";
+import apiKeyMiddleware from "@/middlewares/apikeyMiddleware";
 import { CustomError } from "@/utils";
 import { ICollection } from "@/types";
 import moment from "moment";

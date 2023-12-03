@@ -121,6 +121,8 @@ function SearchPage() {
           })
         );
       }
+    } else {
+      setLoading(false);
     }
   }, [searchParams, page]);
 

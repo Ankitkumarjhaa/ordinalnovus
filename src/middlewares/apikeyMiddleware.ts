@@ -4,6 +4,22 @@ import dbConnect from "@/lib/dbConnect";
 import corsMiddleware from "./corsMiddleware";
 import rateLimits, { UserType } from "@/lib/rateLimits";
 
+// Define a type for the API key information
+type APIKeyInfo = {
+  apiKey: string;
+  scopes: string[];
+  permissions: string[];
+  userType: UserType;
+  rateLimit: number;
+};
+
+// Modify the NextRequest type to include apiKeyInfo
+declare module "next/server" {
+  interface NextRequest {
+    apiKeyInfo?: APIKeyInfo;
+  }
+}
+
 const HOUR = 60 * 60 * 1000;
 
 const HTTP_STATUS = {
@@ -82,6 +98,20 @@ const apiKeyMiddleware =
       req.headers.set("X-RateLimit-Limit", rateLimit.toString());
       req.headers.set("X-RateLimit-Remaining", remaining.toString());
       req.headers.set("X-RateLimit-Reset", resetTime.toString());
+
+      if (hasRequiredPermission) {
+        const apiKeyInfo: APIKeyInfo = {
+          apiKey: apiKey,
+          scopes: apiKeyDoc.scopes.map((scopeObj: any) => scopeObj.scopeName),
+          permissions: apiKeyDoc.scopes.flatMap(
+            (scopeObj: any) => scopeObj.permissions
+          ),
+          userType: apiKeyDoc.userType,
+          rateLimit: rateLimit,
+        };
+
+        req.apiKeyInfo = apiKeyInfo;
+      }
 
       return null; // Continue to the main Route Handler function
     } catch (e) {

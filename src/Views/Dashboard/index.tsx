@@ -8,6 +8,7 @@ import { shortenString } from "@/utils";
 import { CircularProgress } from "@mui/material";
 import { fetchInscriptions } from "@/apiHelper/fetchInscriptions";
 import { useWalletAddress } from "bitcoin-wallet-adapter";
+import Link from "next/link";
 
 function AccountPage() {
   const [inscriptions, setInscriptions] = useState<IInscription[] | null>(null);
@@ -21,7 +22,7 @@ function AccountPage() {
   const fetchData = useCallback(async () => {
     try {
       const params = {
-        wallet: walletDetails.ordinal_address,
+        wallet: walletDetails?.ordinal_address,
         page_size: 100,
         page: 1,
       };
@@ -62,7 +63,7 @@ function AccountPage() {
 
   return (
     <div className="pt-16 text-white">
-      <div className="profile w-full flex items-center border-b-2 py-6 border-accent">
+      <div className="profile w-full flex flex-wrap items-center border-b-2 py-6 border-accent">
         <div className="w-[100px]">
           {inscriptions?.length && profile?.inscription_id ? (
             <CardContent
@@ -77,10 +78,19 @@ function AccountPage() {
           )}
         </div>
         <div className="pl-4">
-          <p className="text-white text-sm">{walletDetails?.ordinal_address}</p>
-          <p className="text-gray-400 text-xs">
+          <p className="text-white text-sm hidden lg:block">
+            {walletDetails?.ordinal_address}
+          </p>
+          <p className="text-gray-400 text-xs lg:hidden">
             {shortenString(walletDetails?.ordinal_address || "")}
           </p>
+        </div>
+        <div className="flex-1 flex justify-center lg:justify-end">
+          <Link href="/dashboard/add-collection">
+            <p className="px-4 py-1 bg-bitcoin text-yellow-900">
+              Add Collection
+            </p>
+          </Link>
         </div>
       </div>
       <div className="py-6">
@@ -103,7 +113,7 @@ function AccountPage() {
                     .map((item) => (
                       <div
                         key={item.inscription_id}
-                        className="card_div p-2 w-full md:w-6/12 lg:w-3/12 relative"
+                        className="card_div p-2 w-full md:w-6/12 lg:w-3/12  2xl:w-2/12 relative"
                       >
                         <p className="absolute bg-bitcoin rounded-full font-bold text-yellow-900 text-sm p-1 z-10">
                           V{item.version}
@@ -139,7 +149,7 @@ function AccountPage() {
                     .map((item) => (
                       <div
                         key={item.inscription_id}
-                        className="card_div p-2 w-full md:w-6/12 lg:w-3/12 relative"
+                        className="card_div p-2 w-full md:w-6/12 lg:w-3/12  2xl:w-2/12 relative"
                       >
                         <CustomCard
                           number={item.inscription_number}
@@ -172,7 +182,7 @@ function AccountPage() {
                     .map((item) => (
                       <div
                         key={item.inscription_id}
-                        className="card_div p-2 w-full md:w-6/12 lg:w-3/12 relative"
+                        className="card_div p-2 w-full md:w-6/12 lg:w-3/12  2xl:w-2/12 relative"
                       >
                         {item.version && (
                           <p className="absolute bg-bitcoin rounded-full font-bold text-yellow-900 text-sm p-1 z-10">
@@ -221,7 +231,7 @@ function AccountPage() {
                     .map((item) => (
                       <div
                         key={item.inscription_id}
-                        className="card_div p-2 w-full md:w-6/12 lg:w-3/12 relative"
+                        className="card_div p-2 w-full md:w-6/12 lg:w-3/12  2xl:w-2/12 relative"
                       >
                         <CustomCard
                           number={item.inscription_number}

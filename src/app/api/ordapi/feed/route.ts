@@ -1,7 +1,7 @@
 import axios from "axios";
 import { NextRequest, NextResponse } from "next/server";
 
-import apiKeyMiddleware from "@/newMiddlewares/apikeyMiddleware";
+import apiKeyMiddleware from "@/middlewares/apikeyMiddleware";
 
 import { getCache, setCache } from "@/lib/cache";
 

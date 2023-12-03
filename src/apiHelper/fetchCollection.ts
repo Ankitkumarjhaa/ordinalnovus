@@ -10,6 +10,9 @@ export interface FetchCollectionParams {
   search?: string;
   pageSize?: number;
   page?: number;
+  wallet?: string;
+  json_uploaded?: boolean;
+  live: boolean;
 }
 
 export interface CollectionResponse {
@@ -31,12 +34,18 @@ export async function fetchCollections(
     search,
     pageSize = 12,
     page = 1,
+    wallet,
+    json_uploaded,
+    live,
   } = params;
   try {
     const response = await axios.get(
       `${process.env.NEXT_PUBLIC_URL}/api/v2/collection`,
       {
         params: {
+          updated_by: wallet,
+          json_uploaded,
+          live,
           slug,
           collectionId,
           _sort: sort,
