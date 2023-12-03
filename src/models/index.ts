@@ -6,6 +6,7 @@ import { TXCacheSchema } from "./tx";
 import { BlocksSchema } from "./block";
 import { InscribeSchema } from "./Inscribe";
 import { salesSchema } from "./Sale";
+import { WalletSchema } from "./Wallets";
 
 const Inscription =
   models.Inscription || model("Inscription", inscriptionSchema);
@@ -16,5 +17,6 @@ const Tx = models.Tx || model("Tx", TXCacheSchema);
 const Block = models.Block || model("Block", BlocksSchema);
 const Inscribe = models.Inscribe || model("Inscribe", InscribeSchema);
 const Sale = models.Sale || model("Sale", salesSchema);
+const Wallet = models.Wallet || model("Wallet", WalletSchema);
 
-export { Inscribe, Inscription, Collection, APIKey, Tx, Block, Sale };
+export { Inscribe, Inscription, Collection, APIKey, Tx, Block, Sale, Wallet };

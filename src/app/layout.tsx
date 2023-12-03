@@ -13,25 +13,35 @@ import { Provider } from "react-redux";
 import { store } from "@/stores";
 import Header from "@/components/Layout/Header";
 import Script from "next/script";
+import initMixpanel from "@/lib/mixpanelConfig";
+import { useEffect } from "react";
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  useEffect(() => {
+    initMixpanel()
+  }, [])
+  
   return (
     <WalletProvider>
       <Provider store={store}>
         <html lang="en">
-          <Script src="https://www.googletagmanager.com/gtag/js?id=G-7KWT77M049" />
-          <Script id="google-analytics">
-            {`                
+          {process.env.NEXT_PUBLIC_URL === "https://ordinalnovus.com" && (
+            <>
+              <Script src="https://www.googletagmanager.com/gtag/js?id=G-7KWT77M049" />
+              <Script id="google-analytics">
+                {`                
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
                  gtag('js', new Date());
 
                    gtag('config', 'G-7KWT77M049');
                 `}
-          </Script>
+              </Script>
+            </>
+          )}
           <Head key="head-main">
             <link rel="icon" href="/favicon.ico" sizes="any" />
           </Head>

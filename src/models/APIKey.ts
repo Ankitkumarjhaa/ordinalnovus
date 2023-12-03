@@ -58,6 +58,9 @@ export const APIKeySchema = new mongoose.Schema(
         default: [],
       },
     ],
+    tag: {
+      type: String,
+    },
   },
   {
     timestamps: true,

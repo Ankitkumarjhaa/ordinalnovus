@@ -6,6 +6,8 @@ import rateLimits, { UserType } from "@/lib/rateLimits";
 
 // Define a type for the API key information
 type APIKeyInfo = {
+  _id: string;
+  tag: string;
   apiKey: string;
   scopes: string[];
   permissions: string[];
@@ -108,6 +110,8 @@ const apiKeyMiddleware =
           ),
           userType: apiKeyDoc.userType,
           rateLimit: rateLimit,
+          tag: apiKeyDoc.tag,
+          _id: apiKeyDoc._id,
         };
 
         req.apiKeyInfo = apiKeyInfo;
