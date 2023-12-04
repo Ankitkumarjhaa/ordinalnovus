@@ -81,7 +81,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
     const totalCount = await countInscriptions(query);
     const endTime = Date.now(); // Record the end time
     const timeTaken = endTime - startTime; // Calculate the elapsed time
-    console.log(
+    console.debug(
       "Time Taken to process this: ",
       moment.duration(timeTaken).humanize()
     );

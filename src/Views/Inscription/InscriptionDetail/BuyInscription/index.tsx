@@ -85,7 +85,6 @@ function BuyInscription({ data }: InscriptionProps) {
 
           setUnsignedPsbtBase64(result.unsigned_psbt_base64);
 
-          // console.log(result, "UNSIGNED DUMMY");
         } else {
           setAction("buy");
           setInputLength(result?.input_length || 0);
@@ -98,7 +97,6 @@ function BuyInscription({ data }: InscriptionProps) {
             wallet: walletDetails.ordinal_address,
             // Additional properties if needed
           });
-          // console.log(result, "UNSIGNED BUY");
         }
       } else {
         throw Error(result.message);
@@ -137,7 +135,6 @@ function BuyInscription({ data }: InscriptionProps) {
         signed_psbt: signedPsbt,
       });
       setLoading(false);
-      // console.log(data);
       router.refresh();
       // Track successful broadcast
       mixpanel.track("Broadcast Success", {

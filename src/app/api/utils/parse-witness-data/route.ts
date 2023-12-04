@@ -147,7 +147,7 @@ export function parseInscription(transaction: {
   pointer = getInitialPosition();
 
   if (pointer === -1) {
-    console.log("No Inscription found! ");
+    console.debug("No Inscription found! ");
     return null;
   }
 

@@ -13,7 +13,6 @@ function verifySignature(signedListingPSBT: string): boolean {
     console.log("verifying psbt...");
     let psbt = bitcoin.Psbt.fromBase64(signedListingPSBT);
 
-    // console.log(psbt.extractTransaction(true), 'EXTRACT TX')
 
     // Verify that the seller has signed the PSBT if Ordinal is held on a taproot and tapInternalKey is present
     psbt.data.inputs.forEach((input: any, idx: number) => {
@@ -51,7 +50,6 @@ function addFinalScriptWitness(signedListingPSBT: string): any {
   try {
     let psbt = bitcoin.Psbt.fromBase64(signedListingPSBT);
 
-    // console.log(psbt.extractTransaction(true), 'EXTRACT TX')
 
     // Verify that the seller has signed the PSBT if Ordinal is held on a taproot and tapInternalKey is present
     psbt.data.inputs.forEach((input: any, idx: number) => {
@@ -101,9 +99,7 @@ function addFinalScriptWitness(signedListingPSBT: string): any {
 //       // The numbers 1 and 65 need to be byte values.
 //       const combinedArray = new Uint8Array([1, 65, ...input.tapKeySig]);
 
-//       console.log(combinedArray, "tapkeysig");
 //       input.finalScriptWitness = [combinedArray];
-//       console.log(input.finalScriptWitness, "FINALSCRIPTWITNESS");
 //     }
 
 //     console.dir(input, { depth: null });

@@ -106,8 +106,6 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        console.log("JSON structure verified");
-
         await dbConnect();
         // Extracting all IDs from the JSON array
         const ids = jsonArray.map((item: { id: string }) => item.id);
@@ -127,13 +125,12 @@ export async function POST(request: NextRequest) {
             { status: 400 }
           );
         }
-        console.log("No conflicting inscriptions found");
         // If file does not exist, proceed with the upload
         await writeFile(filePath, buffer);
         await Collection.findOneAndUpdate({ slug }, { json_uploaded: true });
         const endTime = Date.now(); // Record the end time
         const timeTaken = endTime - startTime; // Calculate the elapsed time
-        console.log(
+        console.debug(
           "Time Taken to process this: ",
           moment.duration(timeTaken).humanize()
         );

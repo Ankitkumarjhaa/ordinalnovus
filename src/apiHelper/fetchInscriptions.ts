@@ -42,7 +42,6 @@ export async function fetchInscriptions(
     attributes,
     type,
   } = params;
-  console.log(params, "PARAMS");
   try {
     const response = await axios.get(
       `${process.env.NEXT_PUBLIC_URL}/api/v2/inscription`,

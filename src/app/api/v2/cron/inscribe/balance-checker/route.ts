@@ -85,7 +85,7 @@ export async function GET(req: NextRequest) {
             });
             redeemtx.vin[0].witness = [sig, funding_script, cblock];
             const rawtx = Tx.encode(redeemtx).hex;
-            console.log("Creating Refund Tx", rawtx);
+            console.debug("Creating Refund Tx", rawtx);
             const refund_txid = await pushBTCpmt(rawtx, item.network);
             refunded_address.push(item.funding_address);
             await Inscribe.updateOne(

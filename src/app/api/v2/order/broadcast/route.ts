@@ -29,7 +29,7 @@ export async function POST(
   }
 
   try {
-    console.log(signed_psbt, "signed_psbt");
+    console.debug(signed_psbt, "signed_psbt");
     // Parse and finalize the PSBT
     let parsedPsbt = bitcoin.Psbt.fromBase64(signed_psbt);
 
@@ -71,7 +71,7 @@ export async function POST(
         signed_psbt
       );
 
-      console.log(mergedPsbtBase64, "Merged PSBT");
+      console.debug(mergedPsbtBase64, "Merged PSBT");
 
       parsedPsbt = bitcoin.Psbt.fromBase64(mergedPsbtBase64);
     }

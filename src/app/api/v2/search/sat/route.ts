@@ -38,13 +38,11 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
       throw new CustomError("No id provided for search", 400);
     }
 
-    // console.log(query, "SEARCH QUERY");
     const satData = await fetchSatData(id);
     if (!satData) {
       throw new CustomError("Invalid query", 404);
     }
     await dbConnect();
-    // console.log(satData, "satdata");
     if (satData.inscriptions.length > 0) {
       satData.inscriptions = await Inscription.find({
         inscription_id: { $in: satData.inscriptions },

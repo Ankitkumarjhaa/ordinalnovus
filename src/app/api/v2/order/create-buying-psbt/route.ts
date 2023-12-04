@@ -48,7 +48,6 @@ async function processOrdItem(
   fee_rate: number
 ) {
   const ordItem: any = await fetchLatestInscriptionData(inscription_id);
-  //   console.log("got ordItem", ordItem);
   await dbConnect();
   const dbItem: any | null = await Inscription.findOne({
     inscription_id,

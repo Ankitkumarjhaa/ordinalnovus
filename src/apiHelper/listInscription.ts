@@ -31,7 +31,7 @@ async function listInscription(
       throw new Error("Error posting order");
     }
   } catch (error) {
-    console.log(error, "error");
+    console.error(error, "error");
     return {
       ok: false,
       message: "Error listing ordinal",

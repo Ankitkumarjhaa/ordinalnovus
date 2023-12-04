@@ -64,7 +64,7 @@ function ListInscription({ data }: InscriptionProps) {
           publickey: walletDetails.ordinal_pubkey,
         });
 
-        console.log(result, "RESULT");
+        console.debug(result, "RESULT");
         if (result.ok && result.unsigned_psbt_base64) {
           mixpanel.track("Listing Completed", {
             inscription_id: data.inscription_id,
@@ -214,7 +214,7 @@ function ListInscription({ data }: InscriptionProps) {
     // Handling Leather Wallet Sign Results/Errors
     if (result) {
       // Handle successful result from leather wallet sign
-      console.log("Sign Result:", result);
+      console.debug("Sign Result:", result);
 
       if (result) {
         listOrdinal(result);

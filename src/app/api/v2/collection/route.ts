@@ -12,7 +12,6 @@ import { ICollection } from "@/types";
 async function getListingData(collections: ICollection[]) {
   const updatedCollections = await Promise.all(
     collections.map(async (collection: any) => {
-      console.log(collection._id, "id");
       // Fetch inscriptions for each collection
       const inscriptions = await Inscription.find({
         official_collection: collection._id,
@@ -98,7 +97,6 @@ async function getInscriptionsRange(collections: any) {
         .sort("-inscription_number") // Sorting in descending order
         .select("inscription_number"); // Select only the 'number' field
 
-      console.log({ lowestInscription, highestInscription });
       // Update the collection with new min and max
       if (lowestInscription && highestInscription) {
         collection.min = lowestInscription.inscription_number;
@@ -114,7 +112,7 @@ async function getInscriptionsRange(collections: any) {
 
     throw new CustomError("All inscriptions not connected to collection");
   } catch (error) {
-    console.log(error);
+    console.error(error);
     throw new CustomError("Error fetching inscriptions");
   }
 }
@@ -145,10 +143,8 @@ export async function GET(req: NextRequest, res: NextResponse) {
         ? await getCache(cacheKey)
         : null;
 
-    console.log(await getCacheExpiry(cacheKey), "TIME FOR CACHE TO EXPIRE");
-
     if (cachedResult) {
-      console.log("using cache");
+      console.debug("using cache");
       // If the result exists in the cache, return it
       cachedResult.collections = await getListingData(cachedResult.collections);
       return NextResponse.json(cachedResult);
@@ -233,7 +229,7 @@ const resetCollections = async () => {
       { $set: { live: false } } // Update operation
     );
 
-    console.log(
+    console.debug(
       `Successfully reset collections. Updated count: ${result.modifiedCount}`
     );
   } catch (error) {
@@ -273,7 +269,6 @@ const resetCollections = async () => {
 //           }
 //         );
 
-//         console.log(`Updated collection ${collection.slug} due to mismatch.`);
 //       }
 //     }
 

@@ -5,10 +5,6 @@ const InscribePreviewCard = ({
   file: any;
   dataURL: string;
 }) => {
-  // console.log(file, "FILE_IN_INSCRIBE_PREVIEW_CARD", dataURL);
-  // const fileUrl = URL.createObjectURL(file);
-  // console.log(fileUrl, "FILE_URL");
-
   const renderPreview = () => {
     const fileType = file.type.split("/")[0];
     switch (fileType) {
