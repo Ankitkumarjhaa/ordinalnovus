@@ -14,7 +14,11 @@ const initMixpanel = () => {
   }
 
   mixpanel.init(mixpanelToken, {
-    debug: true || process.env.NODE_ENV !== "production",
+    debug: process.env.NODE_ENV !== "production",
+  });
+  mixpanel.set_config({
+    ip: true,
+    ignore_dnt: true,
   });
 
   isMixpanelInitialized = true;
