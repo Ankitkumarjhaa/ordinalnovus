@@ -22,6 +22,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   useEffect(() => {
+    console.log("initializing mix panel");
     initMixpanel();
   }, []);
 

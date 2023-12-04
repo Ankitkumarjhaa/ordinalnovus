@@ -7,7 +7,8 @@ const initMixpanel = () => {
     return;
   }
 
-  let mixpanelToken = "863cacfbbada1077c3128e23849ff611"; // Default token
+  let mixpanelToken =
+    process.env.NEXT_PUBLIC_MIXPANEL || "670cc838c8dd3bbaff43b48867c465c0"; // Default token
 
   console.log(process.env.NEXT_PUBLIC_URL, "URL");
   if (process.env.NEXT_PUBLIC_URL !== "https://ordinalnovus.com") {
@@ -16,7 +17,7 @@ const initMixpanel = () => {
 
   console.log(mixpanelToken, "TOKEN");
   mixpanel.init(mixpanelToken, {
-    debug: process.env.NODE_ENV === "production",
+    debug: true || process.env.NODE_ENV === "production",
   });
   mixpanel.set_config({
     ip: true,

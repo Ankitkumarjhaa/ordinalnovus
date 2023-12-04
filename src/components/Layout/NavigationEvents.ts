@@ -14,6 +14,7 @@ export function NavigationEvents() {
   const walletDetails = useWalletAddress();
 
   useEffect(() => {
+    console.log("initializing_mixpanel_nav_events");
     initMixpanel();
   }, []);
 
