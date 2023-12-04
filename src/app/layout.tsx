@@ -14,16 +14,17 @@ import { store } from "@/stores";
 import Header from "@/components/Layout/Header";
 import Script from "next/script";
 import initMixpanel from "@/lib/mixpanelConfig";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
+import { NavigationEvents } from "@/components/Layout/NavigationEvents";
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   useEffect(() => {
-    initMixpanel()
-  }, [])
-  
+    initMixpanel();
+  }, []);
+
   return (
     <WalletProvider>
       <Provider store={store}>
@@ -46,6 +47,9 @@ export default function RootLayout({
             <link rel="icon" href="/favicon.ico" sizes="any" />
           </Head>
           <body className=" bg-primary text-light_gray relative small-scrollbar">
+            <Suspense fallback={null}>
+              <NavigationEvents />
+            </Suspense>
             <main className=" py-52 lg:py-24 px-6 max-w-screen-2xl mx-auto relative">
               {/* <main className=" py-52 lg:py-24 px-6 lg:px-24 max-w-7xl mx-auto relative"> */}
               <Header />

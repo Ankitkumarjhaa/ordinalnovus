@@ -43,18 +43,28 @@ function Header() {
         wallet: walletDetails.wallet,
       });
   }
+
   useEffect(() => {
-    if (walletDetails) {
-      if (walletDetails.connected) {
-        collectWalletDetails();
-        // Track wallet connection
-        mixpanel.track("Wallet Connected", {
-          ordinal_address: walletDetails.ordinal_address,
-          cardinal_address: walletDetails.cardinal_address,
-          wallet: walletDetails.wallet,
-          // Add more properties if needed
-        });
-      }
+    if (walletDetails && walletDetails.connected) {
+      collectWalletDetails();
+      // Identify the user with Mixpanel
+      mixpanel.identify(walletDetails.ordinal_address);
+
+      // Set user profile properties
+      mixpanel.people.set({
+        name: walletDetails.ordinal_address,
+        ordinal_address: walletDetails.ordinal_address,
+        cardinal_address: walletDetails.cardinal_address,
+        wallet: walletDetails.wallet,
+        // Additional properties
+      });
+
+      // Track wallet connection event
+      mixpanel.track("Wallet Connected", {
+        "Ordinal Address": walletDetails.ordinal_address,
+        "Cardinal Address": walletDetails.cardinal_address,
+        // Event-specific properties
+      });
     }
   }, [walletDetails]);
 
