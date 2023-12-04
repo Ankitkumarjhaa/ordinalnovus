@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { APIKey } from "../models";
+import { APIKey, APIKeyUsage } from "../models";
 import dbConnect from "@/lib/dbConnect";
 import corsMiddleware from "./corsMiddleware";
 import rateLimits, { UserType } from "@/lib/rateLimits";
 
 // Define a type for the API key information
 type APIKeyInfo = {
+  _id: string;
+  tag: string;
   apiKey: string;
   scopes: string[];
   permissions: string[];
@@ -56,6 +58,12 @@ const apiKeyMiddleware =
       if (!apiKeyDoc) {
         return sendResponse("Invalid API key.", HTTP_STATUS.UNAUTHORIZED);
       }
+      // Log the API key usage
+      if (apiKeyDoc.userType !== "admin")
+        await APIKeyUsage.create({
+          apikey: apiKeyDoc._id,
+          endpoint: req.nextUrl.pathname,
+        });
 
       const hasRequiredPermission = apiKeyDoc.scopes.some(
         (scopeObj: any) =>
@@ -108,6 +116,8 @@ const apiKeyMiddleware =
           ),
           userType: apiKeyDoc.userType,
           rateLimit: rateLimit,
+          tag: apiKeyDoc.tag,
+          _id: apiKeyDoc._id,
         };
 
         req.apiKeyInfo = apiKeyInfo;

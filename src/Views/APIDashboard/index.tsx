@@ -7,6 +7,7 @@ import { CreateApikey } from "@/apiHelper/createApikey";
 import { useDispatch } from "react-redux";
 import { addNotification } from "@/stores/reducers/notificationReducer";
 import { copyToClipboard } from "@/utils";
+import mixpanel from "mixpanel-browser";
 
 function HomePage() {
   const dispatch = useDispatch();
@@ -32,6 +33,11 @@ function HomePage() {
     if (walletDetails && walletDetails.ordinal_address) {
       const createRes = await CreateApikey({
         walletId: walletDetails.ordinal_address,
+      });
+      // Mixpanel Tracking for API Key Creation
+      mixpanel.track("API Key Created", {
+        wallet: walletDetails.ordinal_address,
+        // Additional properties if needed
       });
       if (createRes && createRes.success) {
         await checkApikey();

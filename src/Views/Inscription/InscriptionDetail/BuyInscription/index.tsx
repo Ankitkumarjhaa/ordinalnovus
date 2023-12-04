@@ -5,16 +5,13 @@ import { IInscription } from "@/types";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/stores";
-import {
-  base64ToHex,
-  calculateBTCCostInDollars,
-  convertSatToBtc,
-} from "@/utils";
+import { calculateBTCCostInDollars, convertSatToBtc } from "@/utils";
 import getUnsignedBuyPsbt from "@/apiHelper/getUnsignedBuyPsbt";
 import FeePicker from "@/components/elements/FeePicker";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useWalletAddress, useSignTx } from "bitcoin-wallet-adapter";
+import mixpanel from "mixpanel-browser";
 type InscriptionProps = {
   data: IInscription;
 };
@@ -70,6 +67,12 @@ function BuyInscription({ data }: InscriptionProps) {
 
       if (result.ok && result.unsigned_psbt_base64) {
         if (result.for === "dummy") {
+          mixpanel.track("Dummy Psbt Created", {
+            action: result.for || "dummy", // Assuming 'result.for' is part of your response
+            inscription_id: data.inscription_id,
+            wallet: walletDetails.ordinal_address,
+            // Additional properties if needed
+          });
           dispatch(
             addNotification({
               id: new Date().valueOf(),
@@ -82,14 +85,20 @@ function BuyInscription({ data }: InscriptionProps) {
 
           setUnsignedPsbtBase64(result.unsigned_psbt_base64);
 
-          console.log(result, "UNSIGNED DUMMY");
+          // console.log(result, "UNSIGNED DUMMY");
         } else {
           setAction("buy");
           setInputLength(result?.input_length || 0);
 
           setUnsignedPsbtBase64(result.unsigned_psbt_base64);
 
-          console.log(result, "UNSIGNED BUY");
+          mixpanel.track("Buy Psbt Created", {
+            action: result.for || "buy", // Assuming 'result.for' is part of your response
+            inscription_id: data.inscription_id,
+            wallet: walletDetails.ordinal_address,
+            // Additional properties if needed
+          });
+          // console.log(result, "UNSIGNED BUY");
         }
       } else {
         throw Error(result.message);
@@ -97,6 +106,18 @@ function BuyInscription({ data }: InscriptionProps) {
 
       return 0;
     } catch (e: any) {
+      // Track error in buy attempt
+      mixpanel.track("Error", {
+        tag: `Buy Attempt Error`,
+        message: e.message || e || "Error creating buy psbt",
+        ordinal_address: walletDetails.ordinal_address,
+        cardinal_address: walletDetails.cardinal_address,
+        ordinal_pubkey: walletDetails.ordinal_pubkey,
+        cardinal_pubkey: walletDetails.cardinal_pubkey,
+        wallet: walletDetails.wallet,
+        wallet_name: walletDetails.wallet,
+        // Additional properties if needed
+      });
       setLoading(false);
       dispatch(
         addNotification({
@@ -110,14 +131,22 @@ function BuyInscription({ data }: InscriptionProps) {
   }, [walletDetails, data]);
 
   const broadcast = async (signedPsbt: string) => {
+    const inscription = { ...data };
     try {
-      console.log({ signedPsbt });
       const { data } = await axios.post("/api/v2/order/broadcast", {
         signed_psbt: signedPsbt,
       });
       setLoading(false);
-      console.log(data);
+      // console.log(data);
       router.refresh();
+      // Track successful broadcast
+      mixpanel.track("Broadcast Success", {
+        action: action, // Assuming 'action' is defined in your component
+        txid: data.data.txid,
+        inscription_id: inscription.inscription_id,
+        collection: inscription?.official_collection?.name,
+        // Additional properties if needed
+      });
       dispatch(
         addNotification({
           id: new Date().valueOf(),
@@ -136,6 +165,22 @@ function BuyInscription({ data }: InscriptionProps) {
       );
       window.open(`https://mempool.space/tx/${data.data.txid}`, "_blank");
     } catch (err: any) {
+      // Track error in broadcasting
+      mixpanel.track("Error", {
+        tag: `Broadcast Error ${action}`,
+        message:
+          err.response?.data?.message ||
+          err.message ||
+          err ||
+          "Error broadcasting tx",
+        ordinal_address: walletDetails?.ordinal_address,
+        ordinal_pubkey: walletDetails?.ordinal_pubkey,
+        cardinal_address: walletDetails?.cardinal_address,
+        cardinal_pubkey: walletDetails?.cardinal_pubkey,
+        wallet: walletDetails?.ordinal_address,
+        wallet_name: walletDetails?.wallet,
+        // Additional properties if needed
+      });
       setLoading(false);
       dispatch(
         addNotification({
@@ -149,6 +194,17 @@ function BuyInscription({ data }: InscriptionProps) {
   };
 
   const signTx = useCallback(async () => {
+    if (!walletDetails) {
+      dispatch(
+        addNotification({
+          id: new Date().valueOf(),
+          message: "Connect wallet to proceed",
+          open: true,
+          severity: "warning",
+        })
+      );
+      return;
+    }
     let inputs = [];
     if (action === "dummy") {
       inputs.push({
@@ -201,6 +257,18 @@ function BuyInscription({ data }: InscriptionProps) {
     }
 
     if (error) {
+      mixpanel.track("Error", {
+        tag: `wallet sign error ${action} psbt`,
+        inscription_id: data.inscription_id,
+        message: error || "Wallet signing failed",
+        ordinal_address: walletDetails?.ordinal_address,
+        ordinal_pubkey: walletDetails?.ordinal_pubkey,
+        cardinal_address: walletDetails?.cardinal_address,
+        cardinal_pubkey: walletDetails?.cardinal_pubkey,
+        wallet: walletDetails?.ordinal_address,
+        wallet_name: walletDetails?.wallet,
+        // Additional properties if needed
+      });
       console.error("Sign Error:", error);
       dispatch(
         addNotification({

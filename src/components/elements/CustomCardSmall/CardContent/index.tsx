@@ -10,6 +10,7 @@ import GLTF from "../../GLTFViewer";
 
 import JSZip from "jszip";
 import AudioPlayer from "../../AudioPlayer";
+import mixpanel from "mixpanel-browser";
 
 type CardContentProps = {
   inscriptionId: string;
@@ -235,6 +236,7 @@ const CardContent: React.FC<CardContentProps> = ({
           />
         );
       case "text/html;charset=utf-8":
+      case "text/html":
         return (
           <iframe
             sandbox="allow-scripts"
@@ -276,6 +278,13 @@ const CardContent: React.FC<CardContentProps> = ({
           </div>
         );
       default:
+        // Mixpanel Tracking for Unsupported Content Type
+        mixpanel.track("Error", {
+          content_type: contentType,
+          inscription_id: inscriptionId,
+          tag: "unsupported content type",
+          // Additional properties if needed
+        });
         return <div>Unsupported content type: {contentType}</div>;
     }
   };

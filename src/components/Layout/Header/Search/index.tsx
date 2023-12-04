@@ -17,27 +17,36 @@ import {
 import { HiDocument } from "react-icons/hi";
 import { RiCharacterRecognitionFill } from "react-icons/ri";
 import Link from "next/link";
+import mixpanel from "mixpanel-browser";
+import { useWalletAddress } from "bitcoin-wallet-adapter";
 
 function Search() {
+  const walletDetails = useWalletAddress();
   const [id, setId] = useState("");
   const [collections, setCollections] = useState<ICollection[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<any>(null);
   const [possibleTypes, setPossibleTypes] = useState<string[]>([]);
-  const router = useRouter();
 
   const handleIDChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setId(event.target.value);
   };
 
   const debouncedFetch = useRef(
-    debounce((id) => handleSearch(id), 500)
+    debounce((id) => handleSearch(id), 1000)
   ).current;
 
   async function handleSearch(id: string) {
     try {
       setLoading(true);
       const possible = determineTypesFromId(id);
+      if (id)
+        mixpanel.track("Search Initiated", {
+          query: id,
+          possible_types: possible,
+          wallet: walletDetails?.ordinal_address || "",
+          timestamp: new Date().toISOString(),
+        });
       setPossibleTypes(possible);
       if (possible.includes("collection") && id) {
         console.log({ possible, id });
@@ -56,6 +65,19 @@ function Search() {
       const result = await fetchCollections({ search: id, live: true });
       if (result?.data) {
         setCollections(result.data.collections);
+        mixpanel.track("Search Results Returned", {
+          query: id,
+          wallet: walletDetails?.ordinal_address || "",
+          result_count: result.data.collections.length,
+          collections: result.data.collections.length > 0,
+          timestamp: new Date().toISOString(),
+        });
+      } else {
+        mixpanel.track("No Search Results", {
+          query: id,
+          wallet: walletDetails?.ordinal_address || "",
+          timestamp: new Date().toISOString(),
+        });
       }
     }
   };
@@ -111,7 +133,8 @@ function Search() {
     };
 
     return (
-      <Link tabIndex={idx} key={item} shallow href={url}>
+      //@ts-ignore
+      <Link className="search" tabIndex={idx} key={item} shallow href={url}>
         <div className="cursor-pointer">
           <div className="bg-primary text-xs items-center flex justify-start font-bold p-2 capitalize text-white">
             {renderIcon(item)}

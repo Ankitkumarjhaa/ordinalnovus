@@ -1,5 +1,6 @@
 "use client"; // Error components must be Client components
 
+import mixpanel from "mixpanel-browser";
 import { useEffect } from "react";
 import { FaDiscord, FaGlobe, FaTwitter } from "react-icons/fa";
 
@@ -11,8 +12,15 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log the error to an error reporting serv            ice
+    // Log the error to an error reporting service
     console.error(error);
+
+    // Mixpanel Error Tracking
+    mixpanel.track("Error", {
+      message: error.message,
+      tag: "inscription search error",
+      // Additional properties if necessary
+    });
   }, [error]);
 
   return (

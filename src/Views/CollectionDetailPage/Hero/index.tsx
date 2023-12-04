@@ -1,13 +1,23 @@
 "use client";
 import { ICollection } from "@/types";
-import React from "react";
+import React, { useEffect } from "react";
 import { AiFillCheckCircle } from "react-icons/ai";
 import { FaDiscord, FaFlag, FaGlobe, FaTwitter } from "react-icons/fa";
 import CardContent from "@/components/elements/CustomCardSmall/CardContent";
+import mixpanel from "mixpanel-browser";
 type HeroProps = {
   data: ICollection;
 };
 function Hero({ data }: HeroProps) {
+  function handleSocialClick(platform: string, url: string) {
+    mixpanel.track("Social Media Click", {
+      referrer: document.referrer,
+      platform: platform,
+      url,
+      collection: data.name, // Additional properties
+    });
+  }
+
   return (
     <div className="relative h-auto lg:h-[60vh] 2xl:max-h-96 rounded-xl overflow-hidden border xl:border-2 border-accent bg-secondary">
       <div className="flex justify-between items-start flex-wrap h-full w-full p-6">
@@ -50,6 +60,9 @@ function Hero({ data }: HeroProps) {
                   href={data.twitter_link}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() =>
+                    handleSocialClick("x", data.twitter_link || "")
+                  }
                 >
                   <FaTwitter size={24} color="white" />
                 </a>
@@ -59,6 +72,9 @@ function Hero({ data }: HeroProps) {
                   href={data.discord_link}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() =>
+                    handleSocialClick("discord", data.discord_link || "")
+                  }
                 >
                   <FaDiscord size={24} color="white" />
                 </a>
@@ -68,6 +84,10 @@ function Hero({ data }: HeroProps) {
                   href={data.website_link}
                   target="_blank"
                   rel="noopener noreferrer"
+                  data-platform="Website"
+                  onClick={() =>
+                    handleSocialClick("website", data.website_link || "")
+                  }
                 >
                   <FaGlobe size={24} color="white" />
                 </a>

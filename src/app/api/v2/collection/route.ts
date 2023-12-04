@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Inscription, Collection } from "@/models";
 import dbConnect from "@/lib/dbConnect";
 import convertParams from "@/utils/api/convertParams";
-import { getCache, setCache } from "@/lib/cache";
+import { getCache, getCacheExpiry, setCache } from "@/lib/cache";
 import apiKeyMiddleware from "@/middlewares/apikeyMiddleware";
 import { CustomError } from "@/utils";
 import { ICollection } from "@/types";
@@ -145,6 +145,8 @@ export async function GET(req: NextRequest, res: NextResponse) {
         ? await getCache(cacheKey)
         : null;
 
+    console.log(await getCacheExpiry(cacheKey), "TIME FOR CACHE TO EXPIRE");
+
     if (cachedResult) {
       console.log("using cache");
       // If the result exists in the cache, return it
@@ -222,7 +224,12 @@ const resetCollections = async () => {
   try {
     // Update collections where supply is less than 1
     const result = await Collection.updateMany(
-      { supply: { $lt: 2 } }, // Query filter
+      {
+        $or: [
+          { supply: { $lt: 2 } },
+          { $expr: { $ne: ["$supply", "$updated"] } }, // Replace 'updated' with the appropriate check
+        ],
+      }, // Query filter
       { $set: { live: false } } // Update operation
     );
 

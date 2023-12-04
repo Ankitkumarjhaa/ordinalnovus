@@ -7,8 +7,17 @@ import { shortenString } from "@/utils";
 import copy from "copy-to-clipboard";
 import { addNotification } from "@/stores/reducers/notificationReducer";
 import { useDispatch } from "react-redux";
+import mixpanel from "mixpanel-browser";
 function Footer() {
   const dispatch = useDispatch();
+  function handleSocialClick(platform: string, url: string) {
+    mixpanel.track("Social Media Click", {
+      referrer: document.referrer,
+      platform: platform,
+      url,
+      collection: "ordinalnovus", // Additional properties
+    });
+  }
   return (
     <footer>
       <div className="flex justify-between flex-wrap items-start py-36 lg:py-12 px-6 max-w-screen-2xl mx-auto relative">
@@ -48,12 +57,24 @@ function Footer() {
           <p className="underline font-bold pb-6">Follow Us</p>
           <ul className="flex justify-start items-center text-2xl">
             <li className="pr-6">
-              <a href="https://discord.gg/Wuy45UfxsG" target={"#"}>
+              <a
+                onClick={() =>
+                  handleSocialClick("discord", "https://discord.gg/Wuy45UfxsG")
+                }
+                href="https://discord.gg/Wuy45UfxsG"
+                target={"#"}
+              >
                 <FaDiscord />
               </a>
             </li>
             <li>
-              <a href="https://twitter.com/OrdinalNovus" target={"#"}>
+              <a
+                onClick={() =>
+                  handleSocialClick("x", "https://twitter.com/OrdinalNovus")
+                }
+                href="https://twitter.com/OrdinalNovus"
+                target={"#"}
+              >
                 <FaTwitter />
               </a>
             </li>

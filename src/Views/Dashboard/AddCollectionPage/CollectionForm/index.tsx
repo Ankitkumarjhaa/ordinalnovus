@@ -11,6 +11,7 @@ import { IInscription } from "@/types";
 import CardContent from "@/components/elements/CustomCardSmall/CardContent";
 import { addNotification } from "@/stores/reducers/notificationReducer";
 import { useDispatch } from "react-redux";
+import mixpanel from "mixpanel-browser";
 function CollectionForm({
   fetchUnpublishedCollection,
 }: {
@@ -114,6 +115,13 @@ function CollectionForm({
     });
 
     if (result && result?.data?.ok) {
+      // Success Tracking
+      mixpanel.track("Collection Added", {
+        name: name,
+        slug: slug,
+        wallet: walletDetails.ordinal_address,
+        // Additional properties if needed
+      });
       setLoading(false);
       fetchUnpublishedCollection();
       dispatch(
@@ -125,6 +133,15 @@ function CollectionForm({
         })
       );
     } else {
+      // Error Tracking for Exception
+      mixpanel.track("Error", {
+        name: name,
+        slug: slug,
+        message: result?.error || "Failed to List your collection",
+        tag: "collection addition exception",
+        wallet: walletDetails.ordinal_address,
+        // Additional properties if needed
+      });
       setLoading(false);
       dispatch(
         addNotification({
