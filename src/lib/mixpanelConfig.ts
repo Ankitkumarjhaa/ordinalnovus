@@ -9,6 +9,7 @@ const initMixpanel = () => {
 
   let mixpanelToken = "670cc838c8dd3bbaff43b48867c465c0"; // Default token
 
+  console.log(process.env.NEXT_PUBLIC_URL, "URL");
   if (process.env.NEXT_PUBLIC_URL === "https://ordinalnovus.com") {
     mixpanelToken = "863cacfbbada1077c3128e23849ff611";
   }
