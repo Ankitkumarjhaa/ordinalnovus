@@ -8,6 +8,7 @@ import { useDispatch } from "react-redux";
 import CollectionItemCard from "./CollectionItemCard";
 import SkeletonCollectionItemCard from "./SkeletonCollectionItemCard";
 import { fetchCollections } from "@/apiHelper/fetchCollection";
+import mixpanel from "mixpanel-browser";
 
 const options = [
   { value: "updated_at:1", label: "Default" },
@@ -32,6 +33,15 @@ function CollectionsPage() {
         sort,
         live: true,
       });
+
+      // Mixpanel Tracking
+      mixpanel.track("Collection Fetch Data", {
+        page: page,
+        page_size: pageSize,
+        sort: sort,
+        // Additional properties if needed
+      });
+
       if (result && result.error) {
         dispatch(
           addNotification({
@@ -58,7 +68,6 @@ function CollectionsPage() {
     setPage(value);
   };
 
-  console.log(data, "DATA");
   return (
     <section>
       <p className="text-center ">Contact us to verify your collection data</p>

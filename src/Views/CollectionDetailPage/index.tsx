@@ -43,8 +43,8 @@ function CollectionDetailPage({
             setTab("holders");
             if (collections[0].holders_count)
               mixpanel.track("Holders Tab Selected", {
-                collectionName: collections[0].name,
-                holdersCount: collections[0].holders_count,
+                collection: collections[0].name,
+                holders_count: collections[0].holders_count,
                 wallet: walletDetails?.ordinal_address,
                 // Additional properties if needed
               });

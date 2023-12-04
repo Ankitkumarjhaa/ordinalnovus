@@ -45,6 +45,7 @@ function Items({ collection }: ItemProps) {
       sort,
       page_size: pageSize,
       page,
+      live: true,
     };
 
     // Check if search is a valid number greater than 0

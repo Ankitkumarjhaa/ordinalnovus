@@ -8,7 +8,6 @@ import { RootState } from "@/stores";
 import getUnsignedListingPsbt from "@/apiHelper/getUnsignedListingPsbt";
 
 import {
-  base64ToHex,
   calculateBTCCostInDollars,
   convertBtcToSat,
   convertSatToBtc,
@@ -16,6 +15,7 @@ import {
 import { useWalletAddress, useSignTx } from "bitcoin-wallet-adapter";
 import listInscription from "@/apiHelper/listInscription";
 import { useRouter } from "next/navigation";
+import mixpanel from "mixpanel-browser";
 type InscriptionProps = {
   data: IInscription;
 };
@@ -66,12 +66,43 @@ function ListInscription({ data }: InscriptionProps) {
 
         console.log(result, "RESULT");
         if (result.ok && result.unsigned_psbt_base64) {
+          mixpanel.track("Listing Completed", {
+            inscription_id: data.inscription_id,
+            price: convertBtcToSat(Number(price)),
+            // Additional properties if needed
+          });
           setUnsignedPsbtBase64(result.unsigned_psbt_base64);
         } else {
+          mixpanel.track("Error", {
+            inscription_id: data.inscription_id,
+            message: result.message || "Error creating listing psbt",
+            tag: "listing psbt error",
+            wallet: walletDetails.ordinal_address,
+            inscription: data.inscription_id,
+            price: convertBtcToSat(Number(price)),
+            receive_address: walletDetails.cardinal_address,
+            wallet_name: walletDetails.wallet,
+            publickey: walletDetails.ordinal_pubkey,
+          });
           setUnsignedPsbtBase64("");
           throw Error(result.message);
         }
       } catch (e: any) {
+        mixpanel.track("Error", {
+          inscription_id: data.inscription_id,
+          message:
+            e.response.data.message ||
+            e.message ||
+            e ||
+            "Error creating listing psbt",
+          tag: "listing psbt error catch",
+          wallet: walletDetails.ordinal_address,
+          inscription: data.inscription_id,
+          price: convertBtcToSat(Number(price)),
+          receive_address: walletDetails.cardinal_address,
+          wallet_name: walletDetails.wallet,
+          publickey: walletDetails.ordinal_pubkey,
+        });
         setLoading(false);
         dispatch(
           addNotification({
@@ -86,6 +117,17 @@ function ListInscription({ data }: InscriptionProps) {
   }, [data, dispatch, price, walletDetails]);
 
   const signTx = async () => {
+    if (!walletDetails) {
+      dispatch(
+        addNotification({
+          id: new Date().valueOf(),
+          message: "Connect wallet to proceed",
+          open: true,
+          severity: "warning",
+        })
+      );
+      return;
+    }
     const options: any = {
       psbt: unsignedPsbtBase64,
       network: "Mainnet",
@@ -105,6 +147,17 @@ function ListInscription({ data }: InscriptionProps) {
 
   const listOrdinal = async (signedPsbt: string) => {
     try {
+      if (!walletDetails) {
+        dispatch(
+          addNotification({
+            id: new Date().valueOf(),
+            message: "Connect wallet to proceed",
+            open: true,
+            severity: "warning",
+          })
+        );
+        return;
+      }
       const result = await listInscription({
         seller_receive_address: walletDetails.cardinal_address || "",
         price: convertBtcToSat(Number(price)),
@@ -114,6 +167,13 @@ function ListInscription({ data }: InscriptionProps) {
         signed_listing_psbt_base64: signedPsbt,
       });
       if (result.ok) {
+        mixpanel.track("Listing Completed", {
+          inscription_id: data.inscription_id,
+          price: convertBtcToSat(Number(price)),
+          collection: data?.official_collection?.name,
+          wallet: walletDetails.ordinal_address,
+          // Additional properties if needed
+        });
         // copy(result.unsigned_psbt_base64);
         setUnsignedPsbtBase64("");
         dispatch(
@@ -131,6 +191,13 @@ function ListInscription({ data }: InscriptionProps) {
         throw Error(result.message);
       }
     } catch (e: any) {
+      mixpanel.track("Error", {
+        inscription_id: data.inscription_id,
+        message: e.response.data.message || e.message || e || "Listing failed",
+        tag: "Listing Error",
+        wallet: walletDetails?.ordinal_address,
+        // Additional properties if needed
+      });
       setLoading(false);
       dispatch(
         addNotification({
@@ -157,6 +224,19 @@ function ListInscription({ data }: InscriptionProps) {
     }
 
     if (error) {
+      mixpanel.track("Error", {
+        inscription_id: data.inscription_id,
+        message: error || "Wallet signing failed",
+        tag: "wallet sign error listing psbt",
+        ordinal_address: walletDetails?.ordinal_address,
+        ordinal_pubkey: walletDetails?.ordinal_pubkey,
+        cardinal_address: walletDetails?.cardinal_address,
+        cardinal_pubkey: walletDetails?.cardinal_pubkey,
+        wallet: walletDetails?.ordinal_address,
+        wallet_name: walletDetails?.wallet,
+
+        // Additional properties if needed
+      });
       // Handle error from leather wallet sign
       console.error(" Sign Error:", error);
 

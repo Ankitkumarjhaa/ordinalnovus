@@ -6,6 +6,7 @@ import CustomSelector from "@/components/elements/CustomSelector";
 import InscriptionDisplay from "@/components/elements/InscriptionDisplay";
 import { addNotification } from "@/stores/reducers/notificationReducer";
 import { IInscription } from "@/types";
+import mixpanel from "mixpanel-browser";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
@@ -98,6 +99,15 @@ function SearchPage() {
         const result = await fetchInscriptions(params);
 
         if (result && result.error) {
+          // Track catch block error
+          mixpanel.track("Error", {
+            tag: `Fetch Data Exception`,
+            message: result.error || "Search page fetch error",
+            search_query: tempSearch,
+            search_type: tempType,
+            page_number: page,
+            // Additional properties if needed
+          });
           dispatch(
             addNotification({
               id: new Date().valueOf(),
@@ -107,11 +117,27 @@ function SearchPage() {
             })
           );
         } else if (result) {
+          mixpanel.track("Search Page Fetch Success", {
+            search_query: tempSearch,
+            search_type: tempType,
+            page_number: page,
+            total_results: result.data.pagination.total,
+            // Additional properties if needed
+          });
           setData(result.data.inscriptions);
           setTotalCount(result.data.pagination.total);
           setLoading(false);
         }
       } catch (err: any) {
+        // Track catch block error
+        mixpanel.track("Error", {
+          tag: `search page fetch error catch`,
+          message: err?.response?.data?.message || err?.message || err,
+          search_query: tempSearch,
+          search_type: tempType,
+          page_number: page,
+          // Additional properties if needed
+        });
         dispatch(
           addNotification({
             id: new Date().valueOf(),

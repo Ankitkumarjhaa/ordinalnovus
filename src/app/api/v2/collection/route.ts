@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Inscription, Collection } from "@/models";
 import dbConnect from "@/lib/dbConnect";
 import convertParams from "@/utils/api/convertParams";
-import { getCache, setCache } from "@/lib/cache";
+import { getCache, getCacheExpiry, setCache } from "@/lib/cache";
 import apiKeyMiddleware from "@/middlewares/apikeyMiddleware";
 import { CustomError } from "@/utils";
 import { ICollection } from "@/types";
@@ -145,6 +145,8 @@ export async function GET(req: NextRequest, res: NextResponse) {
         ? await getCache(cacheKey)
         : null;
 
+    console.log(await getCacheExpiry(cacheKey), "TIME FOR CACHE TO EXPIRE");
+
     if (cachedResult) {
       console.log("using cache");
       // If the result exists in the cache, return it
@@ -204,7 +206,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
       // await Collection.deleteOne({ slug: "btc-artifacts" });
 
       // Store the result in Redis for 2 hours
-      await setCache(cacheKey, result, 60 * 120);
+      await setCache(cacheKey, result, 60 * 1);
 
       // Return the result
       return NextResponse.json(result);

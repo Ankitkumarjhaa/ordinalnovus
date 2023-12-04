@@ -9,11 +9,14 @@ import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { deleteCollectionDraft } from "@/apiHelper/deleteCollectionDraft";
 import CustomButton from "@/components/elements/CustomButton";
+import mixpanel from "mixpanel-browser";
+import { useWalletAddress } from "bitcoin-wallet-adapter";
 type HeroProps = {
   data: ICollection;
   fetchUnpublishedCollection: any;
 };
 function CollectionHero({ data, fetchUnpublishedCollection }: HeroProps) {
+  const walletDetails = useWalletAddress();
   const router = useRouter();
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
@@ -27,6 +30,13 @@ function CollectionHero({ data, fetchUnpublishedCollection }: HeroProps) {
       });
 
       if (result?.error) {
+        // Error Tracking
+        mixpanel.track("Error", {
+          slug: data.slug,
+          message: result.error,
+          tag: "collection draft deletion error",
+          // Additional properties if needed
+        });
         dispatch(
           addNotification({
             id: new Date().valueOf(),
@@ -36,12 +46,24 @@ function CollectionHero({ data, fetchUnpublishedCollection }: HeroProps) {
           })
         );
       } else {
+        mixpanel.track("Collection Draft Deleted", {
+          slug: data.slug,
+          wallet: walletDetails?.ordinal_address,
+          // Additional properties if needed
+        });
         router.push("/dashboard");
       }
       setLoading(false);
     } catch (err: any) {
       setLoading(false);
       console.log({ err });
+      // Error Tracking for Exception
+      mixpanel.track("Error", {
+        slug: data.slug,
+        message: err.message || "Unknown error",
+        tag: "collection draft deletion error catch",
+        // Additional properties if needed
+      });
       dispatch(
         addNotification({
           id: new Date().valueOf(),
@@ -70,6 +92,11 @@ function CollectionHero({ data, fetchUnpublishedCollection }: HeroProps) {
 
       const result = await response.json();
       if (response.ok) {
+        mixpanel.track("Collection JSON File Uploaded", {
+          slug: data.slug,
+          wallet: walletDetails?.ordinal_address,
+          // Additional properties if needed
+        });
         dispatch(
           addNotification({
             id: new Date().valueOf(),
@@ -80,6 +107,13 @@ function CollectionHero({ data, fetchUnpublishedCollection }: HeroProps) {
         );
         fetchUnpublishedCollection(); // Refresh collection or perform necessary action
       } else {
+        mixpanel.track("Error", {
+          slug: data.slug,
+          message: result.error || "Unknown error",
+          tag: "collection JSON file upload error",
+          wallet: walletDetails?.wallet,
+          // Additional properties if needed
+        });
         dispatch(
           addNotification({
             id: new Date().valueOf(),
@@ -91,7 +125,14 @@ function CollectionHero({ data, fetchUnpublishedCollection }: HeroProps) {
       }
       setUploading(false);
     } catch (err) {
-      console.error(err);
+      // console.error(err);
+      // Error Tracking for Network or Server Issue
+      mixpanel.track("Error", {
+        slug: data.slug,
+        message: "Network error or server is unreachable",
+        tag: "collection JSON file upload network error",
+        // Additional properties if needed
+      });
       dispatch(
         addNotification({
           id: new Date().valueOf(),

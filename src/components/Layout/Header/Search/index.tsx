@@ -43,7 +43,7 @@ function Search() {
       if (id)
         mixpanel.track("Search Initiated", {
           query: id,
-          possibleTypes: possible,
+          possible_types: possible,
           wallet: walletDetails?.ordinal_address || "",
           timestamp: new Date().toISOString(),
         });
