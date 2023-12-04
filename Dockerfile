@@ -10,6 +10,9 @@ ARG MONGODB_URI
 
 ENV MONGODB_URI=$MONGODB_URI
 
+ARG NEXT_PUBLIC_URL
+ENV NEXT_PUBLIC_URL $NEXT_PUBLIC_URL
+
 # Install git, gnupg, nano, and Playwright dependencies
 RUN apt-get update && \
     apt-get install -y git nano curl gnupg libxss1 libasound2 libxtst6 libatk-bridge2.0-0 libgtk-3-0
