@@ -10,6 +10,7 @@ import { useDispatch } from "react-redux";
 import CollectionItemCard from "./CollectionItemCard";
 import SkeletonCollectionItemCard from "./SkeletonCollectionItemCard";
 import { FaSearch } from "react-icons/fa";
+import mixpanel from "mixpanel-browser";
 
 type ItemProps = {
   total: number;
@@ -66,6 +67,17 @@ function Items({ collection }: ItemProps) {
         })
       );
     } else if (result) {
+      // Mixpanel tracking
+      if (search)
+        mixpanel.track("Collection Item Search Performed", {
+          collection: collection.name,
+          search_query: search,
+          sort_option: sort,
+          page_number: page,
+          page_size: pageSize,
+
+          // Additional properties if needed
+        });
       console.log({ result });
       setData(result.data.inscriptions);
       setTotalCount(result.data.pagination.total);

@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import Hero from "./Hero";
 import Items from "./Items";
 import Holders from "./Holders";
+import mixpanel from "mixpanel-browser";
+import { useWalletAddress } from "bitcoin-wallet-adapter";
 type CollectionDetailPageProps = {
   collections: ICollection[];
   inscriptionCount: number;
@@ -12,6 +14,7 @@ function CollectionDetailPage({
   collections,
   inscriptionCount,
 }: CollectionDetailPageProps) {
+  const walletDetails = useWalletAddress();
   const [tab, setTab] = useState("items");
   return (
     <div className="pt-16">
@@ -36,7 +39,16 @@ function CollectionDetailPage({
           } text-sm tracking-widest px-4 py-2 ${
             !collections[0].holders_count && " cursor-not-allowed"
           }`}
-          onClick={() => setTab("holders")}
+          onClick={() => {
+            setTab("holders");
+            if (collections[0].holders_count)
+              mixpanel.track("Holders Tab Selected", {
+                collectionName: collections[0].name,
+                holdersCount: collections[0].holders_count,
+                wallet: walletDetails?.ordinal_address,
+                // Additional properties if needed
+              });
+          }}
         >
           Holders
         </button>
