@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { APIKey } from "../models";
+import { APIKey, APIKeyUsage } from "../models";
 import dbConnect from "@/lib/dbConnect";
 import corsMiddleware from "./corsMiddleware";
 import rateLimits, { UserType } from "@/lib/rateLimits";
@@ -58,6 +58,12 @@ const apiKeyMiddleware =
       if (!apiKeyDoc) {
         return sendResponse("Invalid API key.", HTTP_STATUS.UNAUTHORIZED);
       }
+      // Log the API key usage
+      if (apiKeyDoc.userType !== "admin")
+        await APIKeyUsage.create({
+          apikey: apiKeyDoc._id,
+          endpoint: req.nextUrl.pathname,
+        });
 
       const hasRequiredPermission = apiKeyDoc.scopes.some(
         (scopeObj: any) =>

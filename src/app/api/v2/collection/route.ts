@@ -206,7 +206,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
       // await Collection.deleteOne({ slug: "btc-artifacts" });
 
       // Store the result in Redis for 2 hours
-      await setCache(cacheKey, result, 60 * 1);
+      await setCache(cacheKey, result, 60 * 120);
 
       // Return the result
       return NextResponse.json(result);
@@ -224,7 +224,12 @@ const resetCollections = async () => {
   try {
     // Update collections where supply is less than 1
     const result = await Collection.updateMany(
-      { supply: { $lt: 2 } }, // Query filter
+      {
+        $or: [
+          { supply: { $lt: 2 } },
+          { $expr: { $ne: ["$supply", "$updated"] } }, // Replace 'updated' with the appropriate check
+        ],
+      }, // Query filter
       { $set: { live: false } } // Update operation
     );
 
