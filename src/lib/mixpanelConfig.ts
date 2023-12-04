@@ -14,8 +14,9 @@ const initMixpanel = () => {
     mixpanelToken = "863cacfbbada1077c3128e23849ff611";
   }
 
+  console.log(mixpanelToken, "TOKEN");
   mixpanel.init(mixpanelToken, {
-    debug: process.env.NODE_ENV !== "production",
+    debug: process.env.NODE_ENV === "production",
   });
 
   isMixpanelInitialized = true;
