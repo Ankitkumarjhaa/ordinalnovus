@@ -10,7 +10,6 @@ import { ICollection } from "@/types";
 import moment from "moment";
 
 async function calculateHoldersData(collectionId: string) {
-  console.log({ collectionId });
   const aggregationPipeline = [
     { $match: { official_collection: collectionId } },
     { $group: { _id: "$address", count: { $sum: 1 } } },
@@ -21,13 +20,11 @@ async function calculateHoldersData(collectionId: string) {
   //@ts-ignore
   const holders = await Inscription.aggregate(aggregationPipeline);
 
-  console.log("Aggregated " + holders.length + " holders");
-
   return { holders };
 }
 async function updateHoldersData(collection: ICollection) {
   if (collection && needToUpdateHolders(collection)) {
-    console.log("Updating Holders...");
+    console.debug("Updating Holders...");
 
     const updatedData = await calculateHoldersData(collection._id);
     if (Array.isArray(updatedData.holders)) {
@@ -44,7 +41,7 @@ async function updateHoldersData(collection: ICollection) {
     }
 
     collection.holders_check = new Date();
-    console.log({ holders: collection.holders }, "UPDATED COLL");
+    console.debug({ holders: collection.holders }, "UPDATED COLL");
 
     try {
       // Assuming collection is a Mongoose document and not just a plain object
@@ -66,7 +63,6 @@ function needToUpdateHolders(collection: ICollection) {
     ? true
     : moment().diff(lastChecked, "hours") > threshold;
 
-  console.log({ check });
   return check;
 }
 
@@ -77,7 +73,7 @@ async function getCollections(query: any) {
       // .where(query.where)
       .sort({ supply: -1 })
       .skip(query.start)
-      .limit(2)
+      .limit(50)
       .exec();
 
     return coll;
@@ -112,7 +108,6 @@ async function getInscriptionsRange(collection: ICollection) {
         .sort("-inscription_number") // Sorting in descending order
         .select("inscription_number"); // Select only the 'number' field
 
-      console.log({ lowestInscription, highestInscription });
       // Update the collection with new min and max
       if (lowestInscription && highestInscription) {
         collection.min = lowestInscription.inscription_number;
@@ -128,7 +123,7 @@ async function getInscriptionsRange(collection: ICollection) {
 
     throw new CustomError("All inscriptions not connected to collection");
   } catch (error) {
-    console.log(error);
+    console.error(error);
     throw new CustomError("Error fetching inscriptions");
   }
 }
@@ -184,7 +179,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
 
     const endTime = Date.now(); // Record the end time
     const timeTaken = endTime - startTime; // Calculate the elapsed time
-    console.log(
+    console.debug(
       "Time Taken to process this: ",
       moment.duration(timeTaken).humanize()
     );

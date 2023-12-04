@@ -6,7 +6,6 @@ export default async function searchInscription({ id }: { id: string }) {
     cache: "no-store",
   });
 
-  // console.log(res, "res");
   // The return value is *not* serialized
   // You can return Date, Map, Set, etc.
 

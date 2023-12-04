@@ -12,10 +12,8 @@ type Data = {
 };
 
 async function getListingData(collections: ICollection[]) {
-  console.log(collections.length);
   const updatedCollections = await Promise.all(
     collections.map(async (collection: any) => {
-      console.log(collection._id, "id");
       // Fetch inscriptions for each collection
       const inscriptions = await Inscription.find({
         official_collection: collection._id,
@@ -77,13 +75,11 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
       featured: data.featured,
       verified: data.verified ? await getListingData(data.verified) : [],
     };
-    // console.log(data.verified[1]);
 
     const highestInDB = await Inscription.findOne({})
       .sort({ inscription_number: -1 })
       .select("inscription_number");
 
-    console.log(highestInDB, "HIGHEST");
 
     const response = await axios.get(
       `${process.env.NEXT_PUBLIC_URL}/api/ordapi/feed?apikey=${process.env.API_KEY}`

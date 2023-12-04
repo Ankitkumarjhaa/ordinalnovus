@@ -33,7 +33,7 @@ async function fetchInscriptionsFromOutput(
 ): Promise<IInscriptionDetails[]> {
   try {
     const apiUrl = `${process.env.NEXT_PUBLIC_PROVIDER}/api/output/${output}`;
-    // console.log(apiUrl, "apiUrl");
+
     const { data } = await axios.get(apiUrl);
     if (!data.inscription_details?.length) {
       return [];
@@ -87,7 +87,7 @@ async function parseTxData(sort: 1 | -1, skip: number) {
       };
     }
 
-    console.log(
+    console.debug(
       `Parsing ${nonParsedTxs.length} Transactions. starting: ${nonParsedTxs[0].txid}`
     );
 
@@ -237,7 +237,6 @@ export async function GET(req: NextRequest, res: NextResponse) {
 
     await Tx.deleteMany({ ...query });
 
-    console.log("Starting parsing...");
     // const result = await parseTxData(1, 0);
     const result = await Promise.allSettled([
       parseTxData(1, 0),
@@ -275,7 +274,7 @@ async function resetParsedAndRemoveFields() {
     };
     const updateOptions = { multi: true };
     const result: any = await Tx.updateMany({}, updateQuery, updateOptions);
-    console.log(`${result.nModified} documents were updated.`);
+    console.debug(`${result.nModified} documents were updated.`);
   } catch (error) {
     console.error(
       "Error in resetting parsed field and removing specific fields:",

@@ -19,7 +19,6 @@ async function fetchInscriptionDetails(
       `${process.env.NEXT_PUBLIC_PROVIDER}/api/inscription/${inscription.inscription_id}`
     );
     if (!data.sat) {
-      console.log(data, "DATA");
       if (
         !data.inscription_number &&
         !data.genesis_transaction &&
@@ -143,7 +142,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     if (inscriptionsWithoutSat.length < 1)
       return NextResponse.json({ message: "All inscriptions have sat" });
 
-    console.log(inscriptionsWithoutSat.length, "iws");
     const promises = inscriptionsWithoutSat.map(async (inscription) => {
       const inscriptionDetails = await fetchInscriptionDetails(inscription);
       return { _id: inscription._id, ...inscriptionDetails };

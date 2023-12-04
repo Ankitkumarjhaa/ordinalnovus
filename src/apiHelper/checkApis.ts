@@ -6,15 +6,12 @@ const checkApis = async () => {
   const apiCalls = [
     (() => {
       const url = `${api}/apikey/create`;
-      // console.log("Fetching data from:", url);
       return axios
         .post(url, {
           wallet:
             "bc1plsnrsv33djf28eqm8dr4dfaxgnhvu3flcyft58fu3zhdp4af04fqtvfpex",
         })
         .then((res) => {
-          // console.log("Response in apiKeyCreate:", res.data);
-
           return {
             name: "apiKeyCreate",
             status: "success",
@@ -38,11 +35,9 @@ const checkApis = async () => {
     })(),
     (() => {
       const url = `${api}/apikey/64897623-31ea-4735-9f1b-7b6f53c6e0bd`;
-      // console.log("Fetching data from:", url);
       return axios
         .get(url)
         .then((res) => {
-          // console.log("Response in apiKeyDetail:", res.data);
           return {
             name: "apiKeyDetail",
             status: "success",
@@ -72,7 +67,6 @@ const checkApis = async () => {
     })(),
     (() => {
       const url = `${api}/ordapi/feed?apiKey=${process.env.API_KEY}`;
-      // console.log("Fetching data from:", url);
       return axios
         .get(url)
         .then((res) => {
@@ -85,7 +79,6 @@ const checkApis = async () => {
     })(),
     (() => {
       const url = `${api}/v2/inscription?apikey=${process.env.API_KEY}`;
-      // console.log("Fetching data from:", url);
       return axios
         .get(url)
         .then((res) => {
@@ -98,7 +91,6 @@ const checkApis = async () => {
     })(),
     (() => {
       const url = `${api}/v2/search/inscription?id=12&apikey=${process.env.API_KEY}`;
-      // console.log("Fetching data from:", url);
       return axios
         .get(url)
         .then((res) => {
@@ -137,7 +129,6 @@ const checkApis = async () => {
   ];
   const results = await Promise.all(apiCalls);
 
-  // console.log(results, "RES");
   return results;
 };
 

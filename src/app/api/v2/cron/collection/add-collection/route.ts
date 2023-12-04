@@ -55,7 +55,6 @@ export async function GET(req: NextRequest, res: NextResponse) {
       body: JSON.stringify({ query, variables }),
     });
 
-    // console.log({ query, variables }, "PARAMS");
     const data = await response.json();
     // console.dir(data, "DATA");
 
@@ -67,7 +66,6 @@ export async function GET(req: NextRequest, res: NextResponse) {
       "roboiz ordinals",
     ];
     const collectionsEntries = data.data.repository.object.entries;
-    console.log(collectionsEntries.length, "CE");
     const collectionsFolders = collectionsEntries
       .filter((item: { type: string }) => item.type === "tree")
       .filter(
@@ -76,19 +74,16 @@ export async function GET(req: NextRequest, res: NextResponse) {
           !excludeSlugs.includes(item.name)
       );
 
-    console.log(collectionsFolders.length, "TOTAL COLLECTIONS TO PROCESS");
     if (collectionsFolders.length === 0)
       return NextResponse.json({ message: "All Collections added" });
 
     try {
       const batchLimit = 100;
       const processItems = collectionsFolders.slice(0, batchLimit);
-      console.log(processItems.length, " Processing items");
 
       await Promise.all(
         processItems.map(async (folder: any) => {
           const result = await processCollection(folder);
-          console.log(result, "RESULT for ", folder);
           if (result.success) {
             successfulSlugs.push(result.slug);
           } else {
@@ -120,7 +115,6 @@ export async function GET(req: NextRequest, res: NextResponse) {
 
 const processCollection = async (folder: any) => {
   const startTime = performance.now(); // Starting the performance timer
-  console.log(`Starting process for folder: ${folder.name}`);
 
   try {
     const metaResponse = await fetch(
@@ -132,24 +126,24 @@ const processCollection = async (folder: any) => {
     }
 
     const metaData = await metaResponse.json();
-    console.log(`Metadata fetched for ${folder.name}`);
+    console.debug(`Metadata fetched for ${folder.name}`);
 
     // Process twitter link
     if (metaData.twitter_link && !validateUrl(metaData.twitter_link)) {
-      console.log("Invalid Twitter link");
+      console.debug("Invalid Twitter link");
       metaData.twitter_link = "";
     }
     // Process discord link
     if (metaData.discord_link && !validateUrl(metaData.discord_link)) {
-      console.log("Invalid Discord link");
+      console.debug("Invalid Discord link");
       metaData.discord_link = "";
     }
     // Process website link
     if (metaData.website_link && !validateUrl(metaData.website_link)) {
-      console.log("Invalid website link");
+      console.debug("Invalid website link");
       metaData.website_link = "";
     }
-    console.log("Links verified: ", folder.name);
+
     // Validate slug
     if (!validateSlug(metaData.slug)) {
       metaData.error = true;
@@ -180,7 +174,7 @@ const processCollection = async (folder: any) => {
         metaData.inscription_icon = null;
         metaData.error = true;
         metaData.error_tag = "Inscription icon not in db";
-        console.log(
+        console.debug(
           "Adding to error file because inscription_icon wasn't found in db: ",
           folder.name
         );
@@ -188,14 +182,14 @@ const processCollection = async (folder: any) => {
     } else {
       metaData.inscription_icon = null;
     }
-    console.log("Adding collection to the database...", folder.name);
+    console.debug("Adding collection to the database...", folder.name);
 
     const newCollection = new Collection(metaData);
     await newCollection.save();
-    console.log(`Successfully processed collection for ${folder.name}`);
+    console.debug(`Successfully processed collection for ${folder.name}`);
 
     const endTime = performance.now(); // Ending the performance timer
-    console.log(
+    console.debug(
       `Processing time for ${folder.name}: ${(endTime - startTime).toFixed(
         2
       )} milliseconds`

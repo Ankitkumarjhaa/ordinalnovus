@@ -64,16 +64,11 @@ async function verifyPreviousBlockhash(blockhash: string): Promise<boolean> {
   });
 
   if (txCount !== previousBlockDetail.tx_count) {
-    console.log({
-      inDb: txCount,
-      total: previousBlockDetail.tx_count,
-      previousBlockhash,
-    });
-    console.log("Transaction count mismatch, updating...");
+    console.debug("Transaction count mismatch, updating...");
     await addBlockTxToDB(previousBlockhash);
     return true;
   } else {
-    console.log("Transaction count verified, no need for update.");
+    console.debug("Transaction count verified, no need for update.");
     return false;
   }
 }
@@ -82,7 +77,6 @@ async function verifyPreviousBlockhash(blockhash: string): Promise<boolean> {
 
 const fetchTransactions = async (index: number, blockhash: string) => {
   try {
-    console.log({ index, blockhash });
     const response = await axios.get(
       `https://mempool.space/api/block/${blockhash}/txs/${index}`
     );
@@ -101,7 +95,6 @@ const fetchTransactions = async (index: number, blockhash: string) => {
 async function addBlockTxToDB(blockhash: string) {
   await dbConnect();
   const dbBlockDetail = await Block.findOne({ id: blockhash });
-  console.log(dbBlockDetail, "DB To process");
   const bulkOps: Array<any> = [];
   const newTxIds: string[] = [];
   const inscriptionTxIds: { txid: string; inscriptions: any }[] = [];
@@ -137,8 +130,6 @@ async function addBlockTxToDB(blockhash: string) {
     startIndex += batchSize;
   }
 
-  // console.log({ promises });
-
   const results = await Promise.all(promises);
   for (const blockTxsData of results) {
     if (blockTxsData.length === 0) {
@@ -148,9 +139,7 @@ async function addBlockTxToDB(blockhash: string) {
     allBlockTxsData = allBlockTxsData.concat(blockTxsData);
   }
 
-  // console.log({ results }, "RES");
-
-  console.log({
+  console.debug({
     txsSentByMempool: allBlockTxsData.length,
     txMempoolShouldBe: dbBlockDetail.tx_count,
     existingTxInDB: existingTxIds.length,
@@ -193,7 +182,7 @@ async function addBlockTxToDB(blockhash: string) {
   }
 
   if (bulkOps.length > 0) {
-    console.log(bulkOps.length, " tx are being added");
+    console.debug(bulkOps.length, " tx are being added");
     await Tx.bulkWrite(bulkOps);
   }
 
@@ -253,14 +242,12 @@ export async function GET(req: NextRequest, res: NextResponse) {
           : lastSavedBlock.height
         : latestBlockHeight;
 
-      console.log({ lastSavedBlockHeight });
-
       // If the latest block height is the same as the last saved block height, process it
       if (lastSavedBlockHeight) {
-        console.log("Processing block at height: ", lastSavedBlockHeight);
+        console.debug("Processing block at height: ", lastSavedBlockHeight);
         await processBlockHeight(lastSavedBlockHeight);
       } else {
-        console.log(
+        console.debug(
           "No new blocks to process. Latest block height is already saved."
         );
       }
@@ -290,7 +277,7 @@ async function processBlockHeight(blockHeight: number) {
   // Fetch the previous block hash. This could be based on your database or an external service
   // const previousBlockHash = await getPreviousBlockhash(currentBlockHash);
   // if (!previousBlockHash) {
-  //   console.log(`Sync completed for block height ${blockHeight}`);
+  //   console.debug(`Sync completed for block height ${blockHeight}`);
   // }
 }
 // New GET function for a single block height
@@ -319,7 +306,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
     // Add transactions for this block to the database
     if (!updatingPrevious) await addBlockTxToDB(blockHash);
     else {
-      console.log("not adding new blockhash items as older one was updated");
+      console.debug("not adding new blockhash items as older one was updated");
     }
 
     return NextResponse.json({

@@ -17,7 +17,6 @@ async function processChunk(chunk: any, collection: any) {
   const err = collection.errored_inscriptions || [];
   const bulkOps = [];
 
-  console.log(`Processing chunk for collection: ${collection.name}`);
   // console.dir(chunk, { depth: null });
 
   for (const inscription of chunk) {
@@ -40,15 +39,12 @@ async function processChunk(chunk: any, collection: any) {
     if (inscription.meta && inscription.meta.attributes)
       attributes = inscription.meta.attributes || [];
 
-    // console.log(`Processing inscription: ${inscription_id}`);
-
     try {
       const inscription = await Inscription.findOne({
         inscription_id,
       });
 
       if (inscription && inscription._id) {
-        // console.log(`Found inscription: ${inscription_id}`);
         bulkOps.push({
           updateOne: {
             filter: { inscription_id: inscription_id },
@@ -64,11 +60,11 @@ async function processChunk(chunk: any, collection: any) {
         });
 
         collection.updated += 1;
-        console.log(
+        console.debug(
           `Updated count for collection ${collection.name} is : ${collection.updated}`
         );
       } else {
-        console.log(`Inscription not found: ${inscription_id}`);
+        console.debug(`Inscription not found: ${inscription_id}`);
         err.push(inscription_id);
         collection.errored += 1;
       }
@@ -81,38 +77,38 @@ async function processChunk(chunk: any, collection: any) {
   collection.errored_inscriptions = err;
 
   if (bulkOps.length > 0) {
-    console.log(
+    console.debug(
       `Performing bulk write operation for ${bulkOps.length} inscriptions.`
     );
     await Inscription.bulkWrite(bulkOps);
-    console.log("Bulk write operation completed.");
+    console.debug("Bulk write operation completed.");
   }
 }
 
 export async function GET() {
   try {
     await dbConnect();
-    console.log("Searching for collections to update");
+    console.debug("Searching for collections to update");
     let collection = await Collection.findOne({
       supply: 0,
       error: false,
     }).populate("inscription_icon");
 
     if (!collection) {
-      console.log("No collections to update");
+      console.debug("No collections to update");
       return NextResponse.json({ message: "No collections to update" });
     }
 
-    console.log(`Found collection to update: ${collection.name}`);
+    console.debug(`Found collection to update: ${collection.name}`);
     const inscriptionsCount = await Inscription.countDocuments({
       official_collection: collection._id,
     });
 
-    console.log(
+    console.debug(
       `Number of inscriptions in database for collection: ${inscriptionsCount}`
     );
     if (collection.supply && inscriptionsCount === collection.supply) {
-      console.log("All items already in DB");
+      console.debug("All items already in DB");
       collection.updated = collection.supply;
       collection.errored = 0;
       collection.erroredInscriptions = [];
@@ -124,7 +120,7 @@ export async function GET() {
     }
 
     const inscriptions = await fetchInscriptions(collection.slug);
-    console.log(
+    console.debug(
       `Fetched ${inscriptions.length} inscriptions from GitHub for collection: ${collection.name}`
     );
 
@@ -150,7 +146,7 @@ export async function GET() {
     collection.save();
 
     if (collection.supply && inscriptions.length !== collection.supply) {
-      console.log(
+      console.debug(
         "Updating collection supply to match number of inscriptions from GitHub"
       );
       collection.supply = inscriptions.length;
@@ -161,18 +157,18 @@ export async function GET() {
       chunks.push(inscriptions.slice(i, i + CHUNK_SIZE));
     }
 
-    console.log(
+    console.debug(
       `Processing ${chunks.length} chunks for collection: ${collection.name}`
     );
     for (const chunk of chunks) {
       await processChunk(chunk, collection);
     }
-    console.log("Saving updated collection");
-    console.log(collection, "UPDATED");
+    console.debug("Saving updated collection");
+    console.debug(collection, "UPDATED");
     await wait(3);
     await collection.save();
 
-    console.log("Collection updated successfully");
+    console.debug("Collection updated successfully");
     return NextResponse.json({
       collection,
       message: "Collection updated successfully",

@@ -259,7 +259,7 @@ async function processFunding(
 
   // Encode and broadcast the raw transaction to the network.
   const rawtx = Tx.encode(redeemtx).hex;
-  console.log("Signed Raw Transaction:", rawtx);
+  console.debug("Signed Raw Transaction:", rawtx);
 
   // This function call should broadcast the transaction and return the transaction ID.
   const funding_txid = await pushBTCpmt(rawtx, network);

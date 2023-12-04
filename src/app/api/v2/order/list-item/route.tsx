@@ -82,9 +82,6 @@ export async function POST(req: NextRequest) {
       console.log("adding final script witness");
 
       const psbt = addFinalScriptWitness(orderInput.signed_listing_psbt_base64);
-      //   console.log("verifying signature");
-      //   console.log(orderInput.signed_listing_psbt_base64, "BEFORE");
-      //   console.log(psbt, "after");
       const validSig = verifySignature(psbt);
       if (!validSig) {
         return NextResponse.json(

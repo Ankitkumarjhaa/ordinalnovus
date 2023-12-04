@@ -124,8 +124,8 @@ function generateFundingAddress(
   //@ts-ignore
   var funding_address = Address.p2tr.encode(tapkey, network);
 
-  console.log("Funding Tapkey:", tapkey);
-  console.log("Funding address: ", funding_address);
+  console.debug("Funding Tapkey:", tapkey);
+  console.debug("Funding address: ", funding_address);
 
   return { funding_address, pubkey };
 }
@@ -190,8 +190,8 @@ function processInscriptions(
     //@ts-ignore
     let inscriptionAddress = Address.p2tr.encode(tapkey, network);
 
-    console.log("Inscription address: ", inscriptionAddress);
-    console.log("Tapkey:", tapkey);
+    console.debug("Inscription address: ", inscriptionAddress);
+    console.debug("Tapkey:", tapkey);
 
     let txsize = PREFIX + Math.floor(data.length / 4);
 

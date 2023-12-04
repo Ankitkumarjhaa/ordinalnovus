@@ -27,11 +27,9 @@ export async function GET(req: NextRequest) {
     const cachedData = await getCache("ordapi-feed");
 
     if (cachedData) {
-      console.log("Returning cached ordapi feed");
       // Send cached data as response
       return NextResponse.json(cachedData);
     } else {
-      console.log("Cache miss, fetching data from API");
       const feedResponse = await axios.get(
         `${process.env.NEXT_PUBLIC_PROVIDER}/api/feed`
       );

@@ -37,7 +37,7 @@ async function getUnsignedListingPsbt(data: CreateListingPsbtData): Promise<{
       throw new Error("Error generating unsigned PSBT");
     }
   } catch (error: any) {
-    console.log(error, "ERROr");
+    console.error(error, "ERROr");
     return {
       ok: false,
       message: error.response.data.message || "Error generating unsigned PSBT",

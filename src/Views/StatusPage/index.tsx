@@ -49,7 +49,6 @@ export default function StatusPage() {
 }`}
         apiExample={`axios.post('/apikey/create', { wallet: 'your-wallet-address' })
   .then(response => {
-    console.log(response.data);
     // Handle the response data here
   })
   .catch(error => {
@@ -72,7 +71,6 @@ export default function StatusPage() {
 }`}
         apiExample={`axios.get('/apikey/your-api-key-here')
   .then(response => {
-    console.log(response.data);
     // Handle the response data here
   })
   .catch(error => {
@@ -135,7 +133,6 @@ export default function StatusPage() {
         apiExample={`
   axios.get('/collection?apiKey=09b92b2d-1311-47d8-9131-fade4e2e15ca&slug=bitcoinapes')
   .then(response => {
-    console.log(response.data);
     // Handle the response data here
   })
   .catch(error => {
@@ -170,7 +167,6 @@ export default function StatusPage() {
 }`}
         apiExample={`axios.get('/inscription?apiKey=09b92b2d-1311-47d8-9131-fade4e2e15ca&inscriptionId=e0e0ea646bffd69b304f0beeb135c8c17b35494f5490868af988559e22058d2bi0')
   .then(response => {
-    console.log(response.data);
     // Handle the response data here
   })
   .catch(error => {
@@ -199,7 +195,6 @@ export default function StatusPage() {
     }]`}
         apiExample={`axios.get('/ordapi/feed?apiKey=09b92b2d-1311-47d8-9131-fade4e2e15ca')
   .then(response => {
-    console.log(response.data);
     // Handle the response data here
   })
   .catch(error => {
@@ -312,7 +307,6 @@ export default function StatusPage() {
 }`}
         apiExample={`axios.get('/search?id=your-id-here')
   .then(response => {
-    console.log(response.data);
     // Handle the response data here
   })
   .catch(error => {

@@ -59,7 +59,7 @@ const apiKeyMiddleware =
         return sendResponse("Invalid API key.", HTTP_STATUS.UNAUTHORIZED);
       }
       // Log the API key usage
-      if (apiKeyDoc.userType !== "admin")
+      if (apiKeyDoc.userType !== "admin" && !apiKeyDoc.tag.includes("coderixx"))
         await APIKeyUsage.create({
           apikey: apiKeyDoc._id,
           endpoint: req.nextUrl.pathname,

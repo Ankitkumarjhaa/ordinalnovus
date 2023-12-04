@@ -18,7 +18,6 @@ async function fetchInscriptionDetails(
       `${process.env.NEXT_PUBLIC_PROVIDER}/api/inscription/${inscriptionId}`
     );
     if (!data.sat) {
-      console.log(data, "DATA");
       if (
         !data.inscription_number &&
         !data.genesis_transaction &&
@@ -70,7 +69,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const url = `${process.env.NEXT_PUBLIC_PROVIDER}/api/inscriptions/${
       start + BATCH
     }/${BATCH}`;
-    console.log(url, "URL");
     const inscriptionsRes = await axios.get(url);
     const inscriptionIdList = inscriptionsRes.data.inscriptions.reverse();
 
@@ -289,8 +287,6 @@ const handlePreSaveLogic = async (bulkDocs: Array<Partial<any>>) => {
 
     // Updated SHA version logic
     if (doc.sha && !doc.token) {
-      // console.log(doc.sha, " Working on this SHA");
-
       if (shaMap[doc.sha] != null) {
         shaMap[doc.sha]++;
       } else {
@@ -317,8 +313,7 @@ const handlePreSaveLogic = async (bulkDocs: Array<Partial<any>>) => {
     transformedBulkOps.push(doc);
   }
 
-  // console.log(uniqueShas, "UNIQUESHAS");
-  console.log(shaMap, "SHAMAP");
+  console.debug(shaMap, "SHAMAP");
   return transformedBulkOps;
 };
 
@@ -328,7 +323,7 @@ const deleteInscriptionsAboveThreshold = async (number: number) => {
       inscription_number: { $gt: number },
     });
 
-    console.log(`Successfully deleted ${result.deletedCount} documents.`);
+    console.debug(`Successfully deleted ${result.deletedCount} documents.`);
   } catch (err) {
     console.error("An error occurred while deleting documents:", err);
   }
