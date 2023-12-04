@@ -21,3 +21,5 @@ const initMixpanel = () => {
 };
 
 export default initMixpanel;
+
+export const dynamic = "force-dynamic";
