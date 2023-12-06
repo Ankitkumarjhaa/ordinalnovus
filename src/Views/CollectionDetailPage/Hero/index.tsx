@@ -113,17 +113,21 @@ function Hero({ data }: HeroProps) {
               <span>Supply</span>
               <span className="text-white">{data.supply}</span>
             </div>
-            {data?.max && (
+            {data?.max && data.max > 0 ? (
               <div className="supply bg-primary-dark px-3 py-1 rounded-lg my-3 md:m-3 text-sm md:ml-0 w-full flex justify-between items-center">
                 <span>Max</span>
                 <span className="text-white">{data.max}</span>
               </div>
+            ) : (
+              <></>
             )}
-            {data?.min && (
+            {data?.min && data.min > 0 ? (
               <div className="supply bg-primary-dark px-3 py-1 rounded-lg my-3 md:m-3 text-sm md:ml-0 w-full flex justify-between items-center">
                 <span>Min</span>
                 <span className="text-white">{data.min}</span>
               </div>
+            ) : (
+              <></>
             )}
             {data?.holders && (
               <div className="supply bg-primary-dark px-3 py-1 rounded-lg my-3 md:m-3 text-sm md:ml-0 w-full flex justify-between items-center">

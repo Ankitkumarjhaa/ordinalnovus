@@ -11,6 +11,7 @@ import { deleteCollectionDraft } from "@/apiHelper/deleteCollectionDraft";
 import CustomButton from "@/components/elements/CustomButton";
 import mixpanel from "mixpanel-browser";
 import { useWalletAddress } from "bitcoin-wallet-adapter";
+import { uploadCollectionFile } from "@/apiHelper/uploadCollectionFile";
 type HeroProps = {
   data: ICollection;
   fetchUnpublishedCollection: any;
@@ -77,26 +78,24 @@ function CollectionHero({ data, fetchUnpublishedCollection }: HeroProps) {
 
   const handleJsonSubmit = async (event: any) => {
     event.preventDefault();
-    // Set loading state for this action as well
-
-    const formData = new FormData();
-    formData.append("file", event.target.files[0]);
-    formData.append("slug", data.slug); // Adding the slug to the formData
+    setUploading(true); // Assuming this sets the loading state
 
     try {
-      setUploading(true);
-      const response = await fetch("/api/v2/creator/collection/upload", {
-        method: "POST",
-        body: formData,
-      });
+      const file = event.target.files[0];
+      const slug = data.slug; // Assuming 'data' contains the slug
 
-      const result = await response.json();
-      if (response.ok) {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("slug", slug);
+      const response = await uploadCollectionFile(formData);
+
+      if (response && response.data && response.data.ok) {
         mixpanel.track("Collection JSON File Uploaded", {
           slug: data.slug,
           wallet: walletDetails?.ordinal_address,
           // Additional properties if needed
         });
+
         dispatch(
           addNotification({
             id: new Date().valueOf(),
@@ -105,34 +104,34 @@ function CollectionHero({ data, fetchUnpublishedCollection }: HeroProps) {
             severity: "success",
           })
         );
+
         fetchUnpublishedCollection(); // Refresh collection or perform necessary action
       } else {
         mixpanel.track("Error", {
           slug: data.slug,
-          message: result.error || "Unknown error",
+          message: response?.error || "Unknown error",
           tag: "collection JSON file upload error",
           wallet: walletDetails?.wallet,
           // Additional properties if needed
         });
+
         dispatch(
           addNotification({
             id: new Date().valueOf(),
-            message: result.error || "An error occurred during file upload",
+            message: response?.error || "An error occurred during file upload",
             open: true,
             severity: "error",
           })
         );
       }
-      setUploading(false);
     } catch (err) {
-      // console.error(err);
-      // Error Tracking for Network or Server Issue
       mixpanel.track("Error", {
         slug: data.slug,
         message: "Network error or server is unreachable",
         tag: "collection JSON file upload network error",
         // Additional properties if needed
       });
+
       dispatch(
         addNotification({
           id: new Date().valueOf(),
@@ -142,7 +141,7 @@ function CollectionHero({ data, fetchUnpublishedCollection }: HeroProps) {
         })
       );
     } finally {
-      setUploading(false);
+      setUploading(false); // Reset loading state
     }
   };
 
@@ -290,17 +289,21 @@ function CollectionHero({ data, fetchUnpublishedCollection }: HeroProps) {
                 <span>Supply</span>
                 <span className="text-white">{data.supply}</span>
               </div>
-              {data?.max && (
+              {data?.max && data.max > 0 ? (
                 <div className="supply bg-primary-dark px-3 py-1 rounded-lg my-3 md:m-3 text-sm md:ml-0 w-full flex justify-between items-center">
                   <span>Max</span>
                   <span className="text-white">{data.max}</span>
                 </div>
+              ) : (
+                <></>
               )}
-              {data?.min && (
+              {data?.min && data.min > 0 ? (
                 <div className="supply bg-primary-dark px-3 py-1 rounded-lg my-3 md:m-3 text-sm md:ml-0 w-full flex justify-between items-center">
                   <span>Min</span>
                   <span className="text-white">{data.min}</span>
                 </div>
+              ) : (
+                <></>
               )}
               {data?.holders && (
                 <div className="supply bg-primary-dark px-3 py-1 rounded-lg my-3 md:m-3 text-sm md:ml-0 w-full flex justify-between items-center">

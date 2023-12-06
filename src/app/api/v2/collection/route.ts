@@ -110,7 +110,12 @@ async function getInscriptionsRange(collections: any) {
       return { lowestInscription, highestInscription };
     }
 
-    throw new CustomError("All inscriptions not connected to collection");
+    return {
+      lowestInscription: { inscription_number: 0 },
+      highestInscription: { inscription_number: 0 },
+    };
+
+    // throw new CustomError("All inscriptions not connected to collection");
   } catch (error) {
     console.error(error);
     throw new CustomError("Error fetching inscriptions");
@@ -200,6 +205,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
 
       // await resetCollections();
       // await Collection.deleteOne({ slug: "btc-artifacts" });
+      // await resetInscription();
 
       // Store the result in Redis for 2 hours
       await setCache(cacheKey, result, 60 * 120);
@@ -216,6 +222,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
   }
 }
 export const dynamic = "force-dynamic";
+
 const resetCollections = async () => {
   try {
     // Update collections where supply is less than 1
@@ -234,6 +241,26 @@ const resetCollections = async () => {
     );
   } catch (error) {
     console.error("Error resetting collections:", error);
+  }
+};
+
+const resetInscription = async () => {
+  try {
+    // Update collections where supply is less than 1
+    const result = await Inscription.updateMany(
+      {
+        official_collection: "65700e94ab7c0c4832fa63d2",
+      }, // Query filter
+      {
+        $unset: { official_collection: "" }, // Remove 'official_collection'
+      }
+    );
+
+    console.debug(
+      `Successfully reset inscription. Updated count: ${result.modifiedCount}`
+    );
+  } catch (error) {
+    console.error("Error resetting inscription:", error);
   }
 };
 

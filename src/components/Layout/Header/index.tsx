@@ -9,7 +9,7 @@ import {
   useWalletAddress,
 } from "bitcoin-wallet-adapter";
 import Link from "next/link";
-
+import { MdDashboard } from "react-icons/md";
 import { usePathname } from "next/navigation";
 import { fetchFees, getBTCPriceInDollars } from "@/utils";
 import { setBTCPrice } from "@/stores/reducers/generalReducer";
@@ -18,7 +18,10 @@ import mixpanel from "mixpanel-browser";
 import { CollectWallet } from "@/apiHelper/collectWalletHelper";
 const additionalItems = [
   <Link key={"dashboard"} href="/dashboard" shallow>
-    <p className="bwa-text-xs">Dashboard</p>
+    <div className="flex items-center">
+      <MdDashboard />
+      <p className="bwa-text-xs bwa-ml-2">Dashboard</p>
+    </div>
   </Link>,
 ];
 function Header() {
