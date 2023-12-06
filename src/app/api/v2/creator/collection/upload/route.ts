@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/dbConnect";
 import { Collection, Inscription } from "@/models";
 import moment from "moment";
-
+import apiKeyMiddleware from "@/middlewares/apikeyMiddleware";
 function validateJsonStructure(jsonArray: any) {
   if (!Array.isArray(jsonArray)) {
     return false;
@@ -45,6 +45,17 @@ function validateJsonStructure(jsonArray: any) {
 
 export async function POST(request: NextRequest) {
   console.log("***** INSCRIPTIONS FILE UPLOAD API CALLED *****");
+  const middlewareResponse = await apiKeyMiddleware(
+    ["collection"],
+    "delete",
+    [],
+    "admin"
+  )(request);
+
+  if (middlewareResponse) {
+    return middlewareResponse;
+  }
+
   const formData = await request.formData();
   const startTime = Date.now();
 
@@ -60,10 +71,10 @@ export async function POST(request: NextRequest) {
 
   const buffer = Buffer.from(await file.arrayBuffer());
   const relativeUploadDir = `/collections`; // Using slug in the path
-  const baseDir = `/home/crypticmeta/Desktop/assets`;
-  // process.env.NODE_ENV === "production"
-  //   ? "/usr/src/app/assets"
-  //   : "/home/crypticmeta/Desktop/assets";
+  const baseDir =
+    process.env.NEXT_PUBLIC_URL === "https://ordinalnovus.com"
+      ? "/usr/src/app/assets"
+      : "/home/crypticmeta/Desktop/assets";
   const uploadDir = join(baseDir, relativeUploadDir);
 
   const filename = `${slug}.${mime.getExtension(file.type)}`;
@@ -92,7 +103,7 @@ export async function POST(request: NextRequest) {
       await access(filePath);
       // If the function reaches here, it means the file exists
       return NextResponse.json(
-        { error: "File with this slug already exists." },
+        { message: "File with this slug already exists." },
         { status: 400 }
       );
     } catch (error) {
@@ -101,7 +112,7 @@ export async function POST(request: NextRequest) {
         const jsonArray = JSON.parse(buffer.toString());
         if (!validateJsonStructure(jsonArray)) {
           return NextResponse.json(
-            { error: "Invalid JSON structure." },
+            { message: "Invalid JSON structure." },
             { status: 400 }
           );
         }
@@ -120,14 +131,17 @@ export async function POST(request: NextRequest) {
           // Returning error if there are any conflicts
           return NextResponse.json(
             {
-              error: `${conflictingInscriptions[0].inscription_id} belongs to another collection`,
+              message: `${conflictingInscriptions[0].inscription_id} belongs to another collection`,
             },
             { status: 400 }
           );
         }
         // If file does not exist, proceed with the upload
         await writeFile(filePath, buffer);
-        await Collection.findOneAndUpdate({ slug }, { json_uploaded: true });
+        await Collection.findOneAndUpdate(
+          { slug },
+          { json_uploaded: true, supply: ids.length }
+        );
         const endTime = Date.now(); // Record the end time
         const timeTaken = endTime - startTime; // Calculate the elapsed time
         console.debug(

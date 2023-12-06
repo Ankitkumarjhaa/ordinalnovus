@@ -38,7 +38,12 @@ const sendResponse = (message: string, status: number) => {
 };
 
 const apiKeyMiddleware =
-  (scopes: string[], requiredPermission: string, allowedOrigins?: string[]) =>
+  (
+    scopes: string[],
+    requiredPermission: string,
+    allowedOrigins?: string[],
+    role?: string
+  ) =>
   async (req: NextRequest): Promise<NextResponse | null> => {
     try {
       const corsResult = corsMiddleware()(req);
@@ -64,6 +69,10 @@ const apiKeyMiddleware =
           apikey: apiKeyDoc._id,
           endpoint: req.nextUrl.pathname,
         });
+
+      if (role && apiKeyDoc.userType !== role) {
+        return sendResponse("Unauthorized.", HTTP_STATUS.UNAUTHORIZED);
+      }
 
       const hasRequiredPermission = apiKeyDoc.scopes.some(
         (scopeObj: any) =>
@@ -134,3 +143,5 @@ const apiKeyMiddleware =
   };
 
 export default apiKeyMiddleware;
+
+export const dynamic = "force-dynamic";
