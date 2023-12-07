@@ -21,7 +21,7 @@ const options = [
   { value: "rarity", label: "Rarity" },
   { value: "bitmap", label: "Bitmap" },
   { value: "domain", label: "Domain" },
-  { value: "txid", label: "Transaction" },
+  // { value: "txid", label: "Transaction" },
   { value: "address", label: "Address" },
 ];
 

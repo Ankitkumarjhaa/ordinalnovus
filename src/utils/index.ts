@@ -80,7 +80,7 @@ export const determineTypesFromId = (id: string): string[] => {
   // Check if ID is a sha
   const shaRegex = /^[0-9a-fA-F]{64}$/;
   if (shaRegex.test(id)) {
-    return ["sha", "txid"];
+    return ["sha"];
   }
 
   // Check for strings ending with ' token'
