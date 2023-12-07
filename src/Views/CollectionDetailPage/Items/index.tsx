@@ -79,7 +79,7 @@ function Items({ collection }: ItemProps) {
 
           // Additional properties if needed
         });
-      console.log({ result });
+      // console.log({ result });
       setData(result.data.inscriptions);
       setTotalCount(result.data.pagination.total);
       setLoading(false);

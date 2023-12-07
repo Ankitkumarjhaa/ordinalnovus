@@ -155,6 +155,16 @@ const CardContent: React.FC<CardContentProps> = ({
             console.error("Error parsing JSON: ", error);
             jsonContent = fetchedContent;
           }
+          if (parsedJson.op && parsedJson.tick && parsedJson.amt) {
+            return (
+              <div className="w-full h-full flex flex-col justify-center items-center text-sm tracking-widest">
+                <p className="uppercase">{parsedJson.op}</p>
+                <p className="text-3xl">{parsedJson.amt}</p>
+                <hr />
+                <p className="uppercase font-bold">{parsedJson.tick}</p>
+              </div>
+            );
+          }
           return (
             <pre className="whitespace-pre-wrap p-2 text-white overflow-y-auto max-h-full">
               {!showFull && jsonContent && jsonContent?.length > 60

@@ -19,7 +19,7 @@ function Hero({ data }: HeroProps) {
   }
 
   return (
-    <div className="relative h-auto lg:h-[60vh] 2xl:max-h-96 rounded-xl overflow-hidden border xl:border-2 border-accent bg-secondary">
+    <div className="relative h-auto lg:h-[40vh] 2xl:max-h-96 rounded-xl overflow-hidden border xl:border-2 border-accent bg-secondary">
       <div className="flex justify-between items-start flex-wrap h-full w-full p-6">
         <div className="w-full lg:w-4/12 h-full flex justify-center lg:justify-start items-center">
           {data?.inscription_icon?.inscription_id ? (

@@ -45,13 +45,19 @@ function Footer() {
         </div>
         <div className="LinksSection w-full md:w-6/12 lg:w-4/12  pb-6 lg:pb-0">
           <p className="underline font-bold pb-6">Links</p>
-          <Link shallow href="/collection">
-            <p>Collection</p>
-          </Link>
+          <div>
+            <div>
+              <Link shallow href="/collection">
+                <span className="hover:text-white">Collection</span>
+              </Link>
+            </div>
 
-          <Link shallow href="/developer">
-            <p>Developer</p>
-          </Link>
+            <div>
+              <Link shallow href="/developer">
+                <span className="hover:text-white">Developer</span>
+              </Link>
+            </div>
+          </div>
         </div>
         <div className="socials w-full md:w-6/12 lg:w-4/12  pb-6 lg:pb-0">
           <p className="underline font-bold pb-6">Follow Us</p>
