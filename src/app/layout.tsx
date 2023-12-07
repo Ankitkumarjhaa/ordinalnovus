@@ -26,8 +26,8 @@ export default function RootLayout({
   }, []);
 
   return (
-    <WalletProvider>
-      <Provider store={store}>
+    <Provider store={store}>
+      <WalletProvider>
         <html lang="en">
           {process.env.NEXT_PUBLIC_URL === "https://ordinalnovus.com" && (
             <>
@@ -67,7 +67,7 @@ export default function RootLayout({
             </div>
           </body>
         </html>
-      </Provider>
-    </WalletProvider>
+      </WalletProvider>
+    </Provider>
   );
 }
