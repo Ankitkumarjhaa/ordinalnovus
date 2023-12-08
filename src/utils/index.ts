@@ -1,3 +1,4 @@
+import { saveAs } from "file-saver";
 export function shortenString(str: string, length?: number): string {
   if (str.length <= (length || 8)) {
     return str;
@@ -62,13 +63,8 @@ export const determineTypesFromId = (id: string): string[] => {
     return ["address"];
   }
 
-  // Check if ID is a positive number
-  if (!isNaN(Number(id)) && Number(id) < 0) {
+  if (!isNaN(Number(id))) {
     return ["inscription number"];
-  }
-
-  if (!isNaN(Number(id)) && Number(id) > 0) {
-    return ["inscription number", "sat"];
   }
 
   // Check if ID is an inscription_id
@@ -175,4 +171,19 @@ export function base64ToHex(str: string) {
 export function base64ToBytes(base64: string) {
   const buffer = Buffer.from(base64, "base64");
   return new Uint8Array(buffer);
+}
+
+export async function downloadInscription(inscription: string) {
+  await axios
+    .get(`/content/${inscription}`, {
+      responseType: "arraybuffer", // Important
+    })
+    .then((response) => {
+      const contentType = response.headers["content-type"];
+      const filename = `${inscription}.${contentType}`;
+
+      const blob = new Blob([response.data], { type: contentType });
+      saveAs(blob, filename || inscription);
+    })
+    .catch((error) => console.error(error));
 }

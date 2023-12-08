@@ -83,6 +83,7 @@ const CardContent: React.FC<CardContentProps> = ({
       case "image/webp":
       case "image/avif":
       case "image/svg+xml":
+      case "image/svg+xml;charset=utf-8":
         //@ts-ignore
         return (
           <div
