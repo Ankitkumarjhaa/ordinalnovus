@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
 import dbConnect from "@/lib/dbConnect";
-import { Block, Tx, Inscription } from "@/models";
-import { IVIN, IVOUT, MempoolBlockTx } from "@/types/Tx";
+import { Block, Tx } from "@/models";
 import { ObjectId } from "mongodb";
-import moment from "moment";
+import { sendEmailAlert } from "@/utils/sendEmailAlert";
+import { getCache, setCache } from "@/lib/cache";
 
 async function fetchBlockhashFromHeight(height: number): Promise<string> {
   const tipResponse = await axios.get(
@@ -77,6 +77,7 @@ async function verifyPreviousBlockhash(blockhash: string): Promise<boolean> {
 
 const fetchTransactions = async (index: number, blockhash: string) => {
   try {
+    console.debug({ index });
     const response = await axios.get(
       `https://mempool.space/api/block/${blockhash}/txs/${index}`
     );
@@ -181,34 +182,16 @@ async function addBlockTxToDB(blockhash: string) {
     });
   }
 
+  if (newTxIds.length > 0) {
+    await Tx.deleteMany({ txid: { $in: newTxIds } });
+  }
+
   if (bulkOps.length > 0) {
     console.debug(bulkOps.length, " tx are being added");
     await Tx.bulkWrite(bulkOps);
   }
 
   return { newTxIds, inscriptionTxIds };
-}
-
-async function getPreviousBlockhash(
-  currentBlockHash: string
-): Promise<string | null> {
-  try {
-    const url = `https://mempool.space/api/block/${currentBlockHash}`;
-    const response = await axios.get(url);
-
-    if (
-      response.status === 200 &&
-      response.data &&
-      response.data.previousblockhash
-    ) {
-      return response.data.previousblockhash;
-    }
-
-    return null;
-  } catch (error) {
-    console.error(`Error fetching previous block hash: ${error}`);
-    return null;
-  }
 }
 
 async function getLatestBlockHeight(): Promise<number> {
@@ -235,6 +218,27 @@ export async function GET(req: NextRequest, res: NextResponse) {
         lastSavedBlock = await Block.findOne({}).sort({
           height: -1,
         });
+      }
+
+      if (latestBlockHeight - lastSavedBlock.height > 5) {
+        const cacheKey = "blockProcessingAlert";
+        const cache = await getCache(cacheKey);
+        if (cache) {
+          try {
+            await sendEmailAlert({
+              subject: "Block Processing Stopped",
+              html: `<h1>Ordinalnovus Email Alert</h1><br/>
+              <p>Block Processing Has Stopped<p><br/>
+              <p>Last Processed Block: ${lastSavedBlock.height}</p><br/>
+              <p>Latest Block Height: ${latestBlockHeight}</p></br/>
+              <p>Difference: ${
+                latestBlockHeight - lastSavedBlock.height
+              } Blocks to process</p>`,
+            });
+
+            setCache(cacheKey, { emailSent: true }, 2 * 60 * 60);
+          } catch {}
+        }
       }
       lastSavedBlockHeight = lastSavedBlock
         ? lastSavedBlock.processed
