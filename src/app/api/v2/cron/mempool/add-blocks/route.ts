@@ -223,7 +223,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
       if (latestBlockHeight - lastSavedBlock.height > 5) {
         const cacheKey = "blockProcessingAlert";
         const cache = await getCache(cacheKey);
-        if (cache) {
+        if (!cache) {
           try {
             await sendEmailAlert({
               subject: "Block Processing Stopped",
