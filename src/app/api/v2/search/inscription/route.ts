@@ -74,6 +74,13 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
       query = { inscription_number: Number(id) };
     }
 
+    if (!query) {
+      return NextResponse.json({
+        statusCode: 404,
+        message: "No inscriptions found",
+        data: null,
+      });
+    }
     await dbConnect();
 
     const { inscriptions, totalCount } = await fetchInscriptions(

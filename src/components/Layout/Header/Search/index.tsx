@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { ICollection } from "@/types";
 import { fetchCollections } from "@/apiHelper/fetchCollection";
 import SearchCard from "./SearchCard";
@@ -19,6 +18,7 @@ import { RiCharacterRecognitionFill } from "react-icons/ri";
 import Link from "next/link";
 import mixpanel from "mixpanel-browser";
 import { useWalletAddress } from "bitcoin-wallet-adapter";
+import { FaFile } from "react-icons/fa";
 
 function Search() {
   const walletDetails = useWalletAddress();
@@ -105,6 +105,7 @@ function Search() {
       case item.includes("address"):
       case item.includes("sha"):
       case item.includes("txid"):
+      case item.includes("content-type"):
         return `/search?q=${id}&type=${item}`;
       default:
         return "/search";
@@ -125,6 +126,7 @@ function Search() {
         "sat name": <RiCharacterRecognitionFill className="mr-2" />,
         domain: <BsBrowserChrome className="mr-2" />,
         bitmap: <SiHiveBlockchain className="mr-2" />,
+        "content-type": <FaFile className="mr-2" />,
       };
       return Object.keys(icons).find((key) => item.includes(key))
         ? //@ts-ignore
@@ -138,7 +140,7 @@ function Search() {
         <div className="cursor-pointer">
           <div className="bg-primary text-xs items-center flex justify-start font-bold p-2 capitalize text-white">
             {renderIcon(item)}
-            {item}
+            {item?.includes(" ") ? item?.split("_")[0] : item}
           </div>
           {collections && item.includes("collection") && id ? (
             <div className="w-full max-h-[50vh] overflow-y-scroll no-scrollbar">
