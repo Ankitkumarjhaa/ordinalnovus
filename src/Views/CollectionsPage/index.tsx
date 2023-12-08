@@ -36,7 +36,7 @@ function CollectionsPage() {
 
       // Mixpanel Tracking
       mixpanel.track("Collection Fetch Data", {
-        page: page,
+        page_number: page,
         page_size: pageSize,
         sort: sort,
         // Additional properties if needed
