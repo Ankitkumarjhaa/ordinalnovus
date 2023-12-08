@@ -207,6 +207,17 @@ function SearchPage() {
         </div>
       </div>
       <InscriptionDisplay data={data} loading={loading} pageSize={pageSize} />
+      {totalCount > 0 ? (
+        <div className="flex-1 flex justify-end">
+          <CustomPaginationComponent
+            count={Math.ceil(totalCount / pageSize)}
+            onChange={handlePageChange}
+            page={page}
+          />
+        </div>
+      ) : (
+        <></>
+      )}
     </div>
   );
 }

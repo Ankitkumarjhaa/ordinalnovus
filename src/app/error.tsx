@@ -2,7 +2,7 @@
 
 import mixpanel from "mixpanel-browser";
 import { useEffect } from "react";
-import { FaDiscord, FaGlobe, FaTwitter } from "react-icons/fa";
+import { FaDiscord, FaGlobe } from "react-icons/fa";
 
 export default function Error({
   error,

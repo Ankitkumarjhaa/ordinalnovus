@@ -4,7 +4,9 @@ import CustomInput from "@/components/elements/CustomInput";
 import isSlugValid from "@/utils/slugValidator";
 import { useWalletAddress } from "bitcoin-wallet-adapter";
 import React, { useState } from "react";
-import { FaPlus, FaTwitter, FaDiscord, FaGlobe, FaImage } from "react-icons/fa";
+import { FaPlus, FaDiscord, FaGlobe, FaImage } from "react-icons/fa";
+
+import { FaXTwitter } from "react-icons/fa6";
 import Modal from "@mui/material/Modal";
 import inscriptionIsValid from "@/utils/inscriptionIdValidator";
 import { IInscription } from "@/types";
@@ -242,7 +244,7 @@ function CollectionForm({
           </div>
           <div className="my-4">
             <CustomInput
-              icon={FaTwitter}
+              icon={FaXTwitter}
               value={twitterUrl}
               placeholder="Twitter URL"
               onChange={setTwitterUrl}

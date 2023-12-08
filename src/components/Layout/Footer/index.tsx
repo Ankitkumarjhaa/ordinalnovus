@@ -1,7 +1,8 @@
 "use client";
 import Link from "next/link";
 import React from "react";
-import { FaCopy, FaDiscord, FaTwitter } from "react-icons/fa";
+import { FaCopy, FaDiscord } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
 import Image from "next/image";
 import { shortenString } from "@/utils";
 import copy from "copy-to-clipboard";
@@ -81,7 +82,7 @@ function Footer() {
                 href="https://twitter.com/OrdinalNovus"
                 target={"#"}
               >
-                <FaTwitter />
+                <FaXTwitter />
               </a>
             </li>
           </ul>

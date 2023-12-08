@@ -2,7 +2,8 @@
 import { ICollection } from "@/types";
 import React, { useState } from "react";
 import { AiFillCheckCircle } from "react-icons/ai";
-import { FaDiscord, FaFlag, FaGlobe, FaTwitter } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
+import { FaDiscord, FaFlag, FaGlobe } from "react-icons/fa";
 import CardContent from "@/components/elements/CustomCardSmall/CardContent";
 import { addNotification } from "@/stores/reducers/notificationReducer";
 import { useRouter } from "next/navigation";
@@ -200,7 +201,7 @@ function CollectionHero({ data, fetchUnpublishedCollection }: HeroProps) {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <FaTwitter size={24} color="white" />
+                    <FaXTwitter size={24} color="white" />
                   </a>
                 )}
                 {data.discord_link && (
