@@ -32,20 +32,20 @@ const ListingCard: React.FC<ListingCardProps> = ({
     (state: RootState) => state.general.btc_price_in_dollar
   );
   return (
-    <div className={`card_div p-2 w-full`}>
+    <div className={`card_div p-2 w-full relative`}>
+      {inscription?.version && inscription?.version > 0 && (
+        <p className="absolute bg-bitcoin rounded-full font-bold text-yellow-900 text-xl p-1 z-10 top-[0px] left-[0px] ">
+          V{inscription.version}
+        </p>
+      )}
       <Link shallow href={`/inscription/${inscriptionId}`}>
         <div
           className={
-            "relative rounded-xl border xl:border-2 border-accent bg-secondary shadow-xl p-3 " +
+            " overflow-hidden relative rounded-xl border xl:border-2 border-accent bg-secondary shadow-xl p-3 " +
             className
           }
         >
           <div className="content-div h-full overflow-hidden">
-            {inscription?.version && inscription?.version > 0 && (
-              <p className="absolute bg-bitcoin rounded-full font-bold text-yellow-900 text-xl p-1 z-10 top-[-10px] left-[-10px] ">
-                V{inscription.version}
-              </p>
-            )}
             <CardContent
               inscriptionId={inscriptionId}
               content_type={content_type}

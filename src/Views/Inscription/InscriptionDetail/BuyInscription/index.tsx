@@ -84,7 +84,6 @@ function BuyInscription({ data }: InscriptionProps) {
           setAction("dummy");
 
           setUnsignedPsbtBase64(result.unsigned_psbt_base64);
-
         } else {
           setAction("buy");
           setInputLength(result?.input_length || 0);
@@ -287,7 +286,6 @@ function BuyInscription({ data }: InscriptionProps) {
       signTx();
     }
   }, [unsignedPsbtBase64]);
-
   return (
     <>
       <div className="w-full  py-6 border-b-2 border-accent">
@@ -304,7 +302,7 @@ function BuyInscription({ data }: InscriptionProps) {
         )}
         <CustomButton
           loading={loading}
-          disabled={!data.signed_psbt}
+          disabled={!data.listed}
           text={`${
             action === "dummy"
               ? "Confirm Transaction for Dummy UTXO"

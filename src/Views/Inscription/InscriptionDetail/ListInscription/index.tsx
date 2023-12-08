@@ -16,6 +16,7 @@ import { useWalletAddress, useSignTx } from "bitcoin-wallet-adapter";
 import listInscription from "@/apiHelper/listInscription";
 import { useRouter } from "next/navigation";
 import mixpanel from "mixpanel-browser";
+import deleteListing from "@/apiHelper/deleteListing";
 type InscriptionProps = {
   data: IInscription;
 };
@@ -27,6 +28,7 @@ function ListInscription({ data }: InscriptionProps) {
   const { loading: signLoading, result, error, signTx: sign } = useSignTx();
 
   const [loading, setLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [unsignedPsbtBase64, setUnsignedPsbtBase64] = useState("");
 
   const btcPrice = useSelector(
@@ -210,6 +212,76 @@ function ListInscription({ data }: InscriptionProps) {
     }
   };
 
+  const deListOrdinal = async () => {
+    try {
+      if (!walletDetails) {
+        dispatch(
+          addNotification({
+            id: new Date().valueOf(),
+            message: "Connect wallet to proceed",
+            open: true,
+            severity: "warning",
+          })
+        );
+        return;
+      }
+      setDeleteLoading(true);
+      const result = await deleteListing({
+        seller_receive_address: walletDetails.cardinal_address || "",
+        inscription_id: data.inscription_id,
+        tap_internal_key: walletDetails.ordinal_pubkey || "",
+      });
+      if (result.ok) {
+        mixpanel.track("Listing Removed", {
+          inscription_id: data.inscription_id,
+          price: convertBtcToSat(Number(price)),
+          collection: data?.official_collection?.name,
+          wallet: walletDetails.ordinal_address,
+          // Additional properties if needed
+        });
+        // copy(result.unsigned_psbt_base64);
+        setUnsignedPsbtBase64("");
+        dispatch(
+          addNotification({
+            id: new Date().valueOf(),
+            message: "Listing Removed",
+            open: true,
+            severity: "success",
+          })
+        );
+        router.refresh();
+        setUnsignedPsbtBase64("");
+        setLoading(false);
+      } else {
+        setUnsignedPsbtBase64("");
+        throw Error(result.message);
+      }
+    } catch (e: any) {
+      mixpanel.track("Error", {
+        inscription_id: data.inscription_id,
+        message:
+          e.response.data.message ||
+          e.message ||
+          e ||
+          "Error in removing listing",
+        tag: "Remove Listing Error",
+        wallet: walletDetails?.ordinal_address,
+        // Additional properties if needed
+      });
+      setLoading(false);
+      dispatch(
+        addNotification({
+          id: new Date().valueOf(),
+          message: e.message || "Some error occurred",
+          open: true,
+          severity: "error",
+        })
+      );
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   useEffect(() => {
     // Handling Leather Wallet Sign Results/Errors
     if (result) {
@@ -261,9 +333,9 @@ function ListInscription({ data }: InscriptionProps) {
   }, [unsignedPsbtBase64]);
 
   return (
-    <>
+    <div className="border-b-2   py-6 border-accent">
       {" "}
-      <div className="center  py-6 border-b-2 border-accent">
+      <div className="center   pb-6">
         <div className="flex-1 mr-3 border border-white rounded-xl">
           <div className="flex items-center">
             <input
@@ -298,7 +370,21 @@ function ListInscription({ data }: InscriptionProps) {
           />
         </div>
       </div>
-    </>
+      {data.listed && (
+        <div className="flex-1">
+          <CustomButton
+            loading={deleteLoading}
+            text={data.listed_price ? "Cancel Listing" : ``}
+            hoverBgColor="hover:bg-accent_dark"
+            hoverTextColor="text-white"
+            bgColor="bg-accent"
+            textColor="text-white"
+            className="transition-all w-full rounded-xl"
+            onClick={() => deListOrdinal()} // Add this line to make the button functional
+          />
+        </div>
+      )}
+    </div>
   ); // We render the content state variable here
 }
 
