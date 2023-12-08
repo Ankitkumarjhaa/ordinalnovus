@@ -64,7 +64,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       : -1;
 
     const savedInscriptionIds: string[] = [];
-    const BATCH = 300;
+    const BATCH = 20;
 
     const url = `${process.env.NEXT_PUBLIC_PROVIDER}/api/inscriptions/${
       start + BATCH

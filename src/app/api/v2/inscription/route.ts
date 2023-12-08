@@ -62,8 +62,6 @@ export async function GET(req: NextRequest, res: NextResponse) {
     if (middlewareResponse) {
       return middlewareResponse;
     }
-    const apiKeyInfo = req.apiKeyInfo;
-
     const query = convertParams(Inscription, req.nextUrl);
     console.log(query, "QUERY");
     if (req.nextUrl.searchParams.has("slug")) {

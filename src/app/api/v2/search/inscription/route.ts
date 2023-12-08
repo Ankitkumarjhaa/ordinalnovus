@@ -98,7 +98,7 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
         },
       });
     } else if (/^[0-9A-Fa-f]{64}i\d$/gm.test(id)) {
-      console.log(
+      console.debug(
         "if no inscription data in db and id is inscriptionId, try fetching latest data"
       );
       const iData = await fetchLatestInscriptionData(id);
@@ -116,7 +116,40 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
           },
         },
       });
+    } else if (!isNaN(Number(id)) && Number(id) < 0) {
+      console.debug("negative number searched");
+      const url = `${process.env.NEXT_PUBLIC_PROVIDER}/api/inscriptions/${id}`;
+      const response = await fetch(url);
+      const inscriptionIds = await response.json();
+      // Check if there are any inscriptions and use the first ID
+      if (inscriptionIds.inscriptions.length > 0) {
+        const inscriptionId = inscriptionIds.inscriptions[0];
+        const iData = await fetchLatestInscriptionData(inscriptionId);
+        iData.inscription_id = inscriptionId;
+        iData.from_ord = true;
+
+        return NextResponse.json({
+          statusCode: 200,
+          message: "Fetched Latest Inscription data successfully",
+          data: {
+            inscriptions: [iData],
+            pagination: {
+              page,
+              limit,
+              total: totalCount,
+            },
+          },
+        });
+      } else {
+        // Handle the case where no inscriptions are returned
+        return NextResponse.json({
+          statusCode: 404,
+          message: "No inscriptions found",
+          data: null,
+        });
+      }
     } else {
+      console.debug("ID is invalid");
       return NextResponse.json(
         {
           message: "ID is invalid",
