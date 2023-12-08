@@ -171,6 +171,24 @@ const CardContent: React.FC<CardContentProps> = ({
                 <p className="text-3xl">{parsedJson.name}</p>
               </div>
             );
+          } else if (
+            parsedJson.p &&
+            parsedJson.op &&
+            parsedJson.tick &&
+            parsedJson.max &&
+            parsedJson.lim
+          ) {
+            return (
+              <div className="w-full h-full flex flex-col justify-center items-center text-sm tracking-widest">
+                <p className="uppercase">{parsedJson.op}</p>
+                <p className="text-xl">{parsedJson.max}</p>
+                <p className="uppercase font-bold">{parsedJson.tick}</p>
+                <hr className="mb-2" />
+                <hr className="mb-2" />
+
+                <p className="text-xs font-bold">Limit: {parsedJson.lim}</p>
+              </div>
+            );
           }
           return (
             <pre className="whitespace-pre-wrap p-2 text-white overflow-y-auto max-h-full">
