@@ -265,6 +265,9 @@ const CardContent: React.FC<CardContentProps> = ({
       case "model/stl":
         return <STL url={`/content/${inscriptionId}`} />;
       case "model/gltf-binary":
+        if (fetchedContent?.includes("/content/")) {
+          return <GLTF url={fetchedContent} />;
+        }
         return <GLTF url={`/content/${inscriptionId}`} />;
       case "application/zip":
       case "application/x-zip-compressed":
