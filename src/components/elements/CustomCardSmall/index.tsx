@@ -19,18 +19,16 @@ const CustomCard: React.FC<CustomCardProps> = ({
   inscriptionId,
   content_type,
   number,
-  timestamp,
-  price,
   inscription,
   className = "h-[220px] 2xl:h-[300px]",
   showCollection = false,
 }) => {
   return (
-    <div className={`card_div p-2 w-full`}>
+    <div className={`card_div p-2 w-full overflow-hidden`}>
       <Link shallow href={`/inscription/${inscriptionId}`}>
         <div
           className={
-            "relative rounded-xl border xl:border-2 border-accent bg-secondary shadow-xl p-3 " +
+            "overflow-hidden relative rounded-xl border xl:border-2 border-accent bg-secondary shadow-xl p-3 " +
             className
           }
         >

@@ -13,7 +13,7 @@ const CollectionItemCard: React.FC<CollectionCardProps> = ({ item }) => {
     <div className={`card_div  p-2 w-full md:w-6/12 lg:w-3/12  2xl:w-2/12`}>
       <Link href={`/collection/${item.slug}`} shallow>
         <Tooltip title={item.name} placement={"top"}>
-          <div className="relative rounded-xl border xl:border-2 border-accent bg-secondary shadow-xl p-3 h-[300px]">
+          <div className="overflow-hidden relative rounded-xl border xl:border-2 border-accent bg-secondary shadow-xl p-3 h-[300px]">
             {item?.inscription_icon?.inscription_id ? (
               <div className="content-div h-full overflow-hidden">
                 <CardContent
