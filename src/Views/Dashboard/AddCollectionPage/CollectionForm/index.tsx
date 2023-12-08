@@ -55,7 +55,7 @@ function CollectionForm({
   const inscriptionIdValidator = async () => {
     if (inscription_icon) {
       const isValid: any = await inscriptionIsValid(inscription_icon);
-      console.log({ isValid });
+      // console.log({ isValid });
       if (isValid && isValid.err) {
         setInscriptionErr(isValid.err);
       } else {
@@ -157,7 +157,7 @@ function CollectionForm({
 
   return (
     <div>
-      <h2 className="text-3xl capitalize pb-16 font-bold">
+      <h2 className="text-white text-3xl capitalize pb-16 font-bold">
         List Your Collection
       </h2>
       <div className="flex justify-between flex-wrap">

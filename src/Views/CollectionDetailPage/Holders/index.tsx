@@ -3,6 +3,7 @@ import { ICollection } from "@/types";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { useWalletAddress } from "bitcoin-wallet-adapter";
+import { shortenString } from "@/utils";
 
 type ItemProps = {
   collection: ICollection;
@@ -49,7 +50,7 @@ function Holders({ collection }: ItemProps) {
           value={search}
           onChange={handleSearchChange}
         />
-        <p className="text-xs">
+        <p className="pl-2 text-right text-xs">
           updated {moment(collection.holders_check).fromNow()}
         </p>
       </div>
@@ -58,7 +59,7 @@ function Holders({ collection }: ItemProps) {
           {holders.map((item: { address: string; count: number }) => (
             <div
               key={item.address}
-              className=" relative flex justify-between items-center py-2 px-6"
+              className=" relative flex justify-between items-center py-2 pr-2  lg:px-6"
             >
               {maxCount && (
                 <div
@@ -74,7 +75,8 @@ function Holders({ collection }: ItemProps) {
                 ></div>
               )}
 
-              <p>{item.address}</p>
+              <p className="hidden lg:block text-xs">{item.address}</p>
+              <p className="lg:hidden">{shortenString(item.address)}</p>
               <p>{item.count}</p>
             </div>
           ))}

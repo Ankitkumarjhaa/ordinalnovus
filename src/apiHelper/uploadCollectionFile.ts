@@ -24,7 +24,7 @@ export async function uploadCollectionFile(
       return { data: response.data, error: null };
     } else {
       // Customize error message based on response
-      console.log({ response }, "Response");
+      // console.log({ response }, "Response");
       return {
         data: { ok: false, result: null },
         error:
@@ -33,7 +33,7 @@ export async function uploadCollectionFile(
       };
     }
   } catch (error: any) {
-    console.log({ error: error.response.data.message }, "Error");
+    // console.log({ error: error.response.data.message }, "Error");
     return {
       data: { ok: false, result: null },
       error: error?.response?.data?.message || "An unknown error occurred",

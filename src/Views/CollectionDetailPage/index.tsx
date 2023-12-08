@@ -19,7 +19,7 @@ function CollectionDetailPage({
   return (
     <div className="pt-16">
       <Hero data={collections[0]} />
-      <div className="-mt-2">
+      <div className="mb-2 mt-4 flex justify-center lg:justify-start">
         <button
           className={`${
             tab === "items"

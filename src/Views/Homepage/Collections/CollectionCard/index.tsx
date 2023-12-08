@@ -17,7 +17,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ item }) => {
   const btcPrice = useSelector(
     (state: RootState) => state.general.btc_price_in_dollar
   );
-  console.log({ item });
+  // console.log({ item });
   return (
     <div className="w-full md:w-6/12 lg:w-4/12 px-0 py-3 md:p-3">
       <Link href={`/collection/${item.slug}`} shallow prefetch={false}>

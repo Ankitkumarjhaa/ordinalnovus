@@ -3,9 +3,11 @@ import React from "react";
 import { IInscription } from "@/types";
 import CardContent from "@components/elements/CustomCardSmall/CardContent";
 import { ImEnlarge } from "react-icons/im";
+import { FaExternalLinkAlt } from "react-icons/fa";
 import { BsDownload, BsChevronLeft, BsChevronRight } from "react-icons/bs";
 import Modal from "@mui/material/Modal";
 import Link from "next/link";
+import { downloadInscription } from "@/utils";
 type ContentProps = {
   data: IInscription;
 };
@@ -34,8 +36,16 @@ function Content({ data }: ContentProps) {
             <ImEnlarge className="hover:text-white" />
           </div>
           <div className="mx-4 cursor-pointer">
-            <BsDownload className="hover:text-white" />
+            <BsDownload
+              onClick={() => downloadInscription(data.inscription_id)}
+              className="hover:text-white"
+            />
           </div>
+          <Link target="_blank " href={`/content/${data.inscription_id}`}>
+            <div className="mx-4 cursor-pointer">
+              <FaExternalLinkAlt className="hover:text-white" />
+            </div>
+          </Link>
           <Link shallow href={`/inscription/${data.next}`}>
             <div className="mx-4 cursor-pointer">
               <BsChevronRight className="hover:text-white" />

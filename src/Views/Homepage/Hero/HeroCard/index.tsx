@@ -11,7 +11,7 @@ interface HeroCardProps {
 
 const HeroCard: React.FC<HeroCardProps> = ({ item }) => {
   return (
-    <div className="relative h-auto lg:h-[60vh] 2xl:max-h-96 rounded-xl overflow-hidden border xl:border-2 border-accent bg-secondary">
+    <div className="relative h-auto lg:h-[40vh] 2xl:max-h-96 rounded-xl overflow-hidden border xl:border-2 border-accent bg-secondary">
       <div className="flex justify-between items-start flex-wrap h-full w-full p-6">
         <div className=" w-full lg:w-7/12 p-6 order-2 lg:order-1">
           <h1 className="text-white text-xl xl:text-3xl font-bold uppercase flex items-start">

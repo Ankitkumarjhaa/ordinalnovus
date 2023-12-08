@@ -16,26 +16,39 @@ function Listed({ data }: ListedInscriptionsProps) {
     infinite: false,
     arrows: true,
     speed: 500,
-    slidesToShow: 4,
-    slidesToScroll: 1,
+    slidesToShow: 6,
+    slidesToScroll: 6,
     autoplay: true,
     autoplaySpeed: 3000,
     loop: true,
-    prevArrow: <CustomLeftArrow />,
-    nextArrow: <CustomRightArrow />,
+    prevArrow: <CustomLeftArrow skip={6} />,
+    nextArrow: <CustomRightArrow skip={6} />,
     responsive: [
+      {
+        breakpoint: 1500, // tablet breakpoint
+        settings: {
+          slidesToShow: 4,
+          slidesToScroll: 4,
+          prevArrow: <CustomLeftArrow skip={4} />,
+          nextArrow: <CustomRightArrow skip={4} />,
+        },
+      },
       {
         breakpoint: 1300, // tablet breakpoint
         settings: {
           slidesToShow: 3,
-          slidesToScroll: 1,
+          slidesToScroll: 3,
+          prevArrow: <CustomLeftArrow skip={3} />,
+          nextArrow: <CustomRightArrow skip={3} />,
         },
       },
       {
         breakpoint: 768, // additional breakpoint
         settings: {
           slidesToShow: 2,
-          slidesToScroll: 1,
+          slidesToScroll: 2,
+          prevArrow: <CustomLeftArrow skip={2} />,
+          nextArrow: <CustomRightArrow skip={2} />,
         },
       },
 
@@ -44,6 +57,8 @@ function Listed({ data }: ListedInscriptionsProps) {
         settings: {
           slidesToShow: 1,
           slidesToScroll: 1,
+          prevArrow: <CustomLeftArrow skip={1} />,
+          nextArrow: <CustomRightArrow skip={1} />,
         },
       },
     ],
