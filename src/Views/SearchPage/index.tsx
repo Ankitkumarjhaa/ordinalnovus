@@ -35,7 +35,7 @@ function SearchPage() {
   const [type, setType] = useState("");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(40);
+  const [pageSize] = useState(100);
   const [totalCount, setTotalCount] = useState(0);
   const [url, setUrl] = useState("");
 

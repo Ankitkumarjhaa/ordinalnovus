@@ -201,8 +201,8 @@ const CardContent: React.FC<CardContentProps> = ({
           // If the content is not JSON, display it as plain text
           return (
             <pre className="whitespace-pre-wrap p-2 text-sm text-white">
-              {!showFull && fetchedContent && fetchedContent?.length > 50
-                ? fetchedContent?.slice(0, 50) + "..."
+              {!showFull && fetchedContent && fetchedContent?.length > 150
+                ? fetchedContent?.slice(0, 150) + "..."
                 : fetchedContent}
             </pre>
           );

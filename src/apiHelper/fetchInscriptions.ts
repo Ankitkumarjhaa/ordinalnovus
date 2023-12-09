@@ -15,6 +15,7 @@ export interface FetchInscriptionsParams {
   tag?: string;
   attributes?: string;
   type?: string;
+  listed?: boolean;
 }
 
 export interface InscriptionResponse {
@@ -41,6 +42,7 @@ export async function fetchInscriptions(
     tag,
     attributes,
     type,
+    listed,
   } = params;
   try {
     const response = await axios.get(
@@ -58,6 +60,7 @@ export async function fetchInscriptions(
           _limit: page_size,
           _start: (page - 1) * page_size,
           tag,
+          listed,
           ...(collection_item_number && { collection_item_number }),
           apikey: process.env.API_KEY,
         },

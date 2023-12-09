@@ -1,5 +1,5 @@
 import React from "react";
-const CollectionItemCard = () => {
+const SkeletonCard = () => {
   return (
     <div className="relative p-3 md:max-w-[300px] md:max-h-[350px] w-full md:w-3/12 2xl:w-2/12 ">
       <div className="border xl:border-2 border-accent bg-secondary rounded-xl shadow-xl p-3">
@@ -12,4 +12,4 @@ const CollectionItemCard = () => {
   );
 };
 
-export default CollectionItemCard;
+export default SkeletonCard;

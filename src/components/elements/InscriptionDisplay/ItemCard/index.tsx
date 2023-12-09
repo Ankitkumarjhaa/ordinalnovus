@@ -3,66 +3,78 @@ import React from "react";
 import Link from "next/link";
 import CardContent from "@/components/elements/CustomCardSmall/CardContent";
 
-import { FaBitcoin } from "react-icons/fa6";
+import { FaBitcoin, FaDollarSign } from "react-icons/fa6";
 import { useSelector } from "react-redux";
 import { RootState } from "@/stores";
 import { calculateBTCCostInDollars, convertSatToBtc } from "@/utils";
 interface CollectionCardProps {
-  item: IInscription;
+  inscription: IInscription;
 }
 
-const CollectionItemCard: React.FC<CollectionCardProps> = ({ item }) => {
+const ItemCard: React.FC<CollectionCardProps> = ({ inscription }) => {
   const btcPrice = useSelector(
     (state: RootState) => state.general.btc_price_in_dollar
   );
   return (
     <div className="relative p-3 md:w-6/12 lg:w-3/12  2xl:w-2/12 w-full cursor-pointer">
-      <Link href={`/inscription/${item.inscription_id}`}>
+      <Link href={`/inscription/${inscription.inscription_id}`}>
         <div className="border xl:border-2 border-accent bg-secondary rounded-xl shadow-xl p-3">
-          {item.version && (
-            <p className="absolute top-0 text-xs font-bold left-0 bg-bitcoin text-yellow-900 rounded-full p-2">
-              V{item.version}
-            </p>
-          )}
-          <div className="min-h-[300px] md:min-h-[150px] lg:w-full relative rounded-xl overflow-hidden">
+          <div className="content-div h-[60%] rounded overflow-hidden relative">
+            {inscription?.version && inscription?.version > 0 && (
+              <p className="absolute bg-bitcoin rounded font-bold text-yellow-900 text-xs p-1 z-10 top-[5px] right-[5px] ">
+                V{inscription.version}
+              </p>
+            )}
             <CardContent
-              inscriptionId={item.inscription_id + ""}
-              content_type={item.content_type}
+              inscriptionId={inscription.inscription_id}
+              content_type={inscription.content_type}
+              showTag={true}
             />
-            {item.listed_price ? (
-              <div className="absolute bottom-0 bg-black bg-opacity-70 py-1 px-2 left-0 right-0">
-                <div className="flex justify-between items-center py-1">
-                  <div className="flex items-center">
-                    <div className="mr-3 text-bitcoin">
+          </div>
+
+          <div className={`h-[40%] flex flex-col justify-end `}>
+            <div className="p-5 mb-2 center">
+              <div className="flex-1">
+                <h5 className=" text-sm font-bold tracking-tight text-white">
+                  #{inscription.inscription_number}
+                </h5>
+                <p className="text-gray-500 text-xs">
+                  {inscription.content_type &&
+                    inscription.content_type.split(";")[0]}
+                </p>
+              </div>
+              {inscription.listed_price && (
+                <div>
+                  <div className="text-sm font-bold tracking-tight text-white flex items-center">
+                    <div className="mr-2 text-bitcoin">
                       <FaBitcoin className="" />
                     </div>
-                    <p>{convertSatToBtc(item?.listed_price)}</p>
+                    <p className=" ">
+                      {convertSatToBtc(inscription?.listed_price)}
+                    </p>
                   </div>
-                  {item.in_mempool ? (
-                    <p className="text-xs bg-bitcoin text-yellow-900 font-bold p-1 rounded">
-                      In Mempool
-                    </p>
+                  {inscription.in_mempool ? (
+                    <p className="text-gray-500 text-sm">In Mempool</p>
                   ) : (
-                    <p className="text-xs bg-bitcoin text-yellow-900 font-bold p-1 rounded">
-                      USD{" "}
-                      {calculateBTCCostInDollars(
-                        convertSatToBtc(item?.listed_price),
-                        btcPrice
-                      )}
-                    </p>
+                    <div className="flex items-center text-gray-500 text-sm">
+                      <div className="mr-2 text-bitcoin">
+                        <FaDollarSign className="text-green-500" />
+                      </div>{" "}
+                      <p>
+                        {calculateBTCCostInDollars(
+                          convertSatToBtc(inscription?.listed_price),
+                          btcPrice
+                        )}
+                      </p>
+                    </div>
                   )}
                 </div>
-              </div>
-            ) : (
-              <></>
-            )}
-          </div>
-          <div className="p-3 flex justify-between items-center">
-            <p className="text-sm text-white">#{item.inscription_number}</p>
-            {item.official_collection && (
-              <p className="text-xs text-gray-300">
-                {item.official_collection.name}
-              </p>
+              )}
+            </div>
+            {inscription && inscription?.collection_item_name && (
+              <span className="bg-yellow-500 rounded-md text-center text-xs py-1 px-3 font-bold text-yellow-900">
+                {inscription.collection_item_name}
+              </span>
             )}
           </div>
         </div>
@@ -71,4 +83,4 @@ const CollectionItemCard: React.FC<CollectionCardProps> = ({ item }) => {
   );
 };
 
-export default CollectionItemCard;
+export default ItemCard;

@@ -32,7 +32,7 @@ export async function fetchCollections(
     slug,
     sort = "name:1",
     search,
-    pageSize = 12,
+    pageSize = 100,
     page = 1,
     wallet,
     json_uploaded,
