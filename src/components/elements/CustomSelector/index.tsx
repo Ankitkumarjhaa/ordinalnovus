@@ -62,11 +62,12 @@ const CustomSelector: React.FC<CustomSelectorProps> = ({
 
   return (
     <StyledFormControl variant="outlined">
-      <StyledInputLabel htmlFor={label}>{label}</StyledInputLabel>
+      {/* <StyledInputLabel htmlFor={label}>{label}</StyledInputLabel> */}
       <StyledSelect
         value={value || options[0]?.value}
         //@ts-ignore
         onChange={handleChange}
+        displayEmpty
         label={label}
         inputProps={{
           id: label,

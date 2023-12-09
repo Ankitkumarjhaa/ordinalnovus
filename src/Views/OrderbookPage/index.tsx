@@ -2,40 +2,42 @@
 import CustomPaginationComponent from "@/components/elements/CustomPagination";
 import CustomSelector from "@/components/elements/CustomSelector";
 import { addNotification } from "@/stores/reducers/notificationReducer";
-import { ICollection } from "@/types";
+import { IInscription } from "@/types";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import CollectionItemCard from "./CollectionItemCard";
-import SkeletonCollectionItemCard from "./SkeletonCollectionItemCard";
-import { fetchCollections } from "@/apiHelper/fetchCollection";
 import mixpanel from "mixpanel-browser";
+import { fetchInscriptions } from "@/apiHelper/fetchInscriptions";
+import InscriptionDisplay from "@/components/elements/InscriptionDisplay";
 
 const options = [
-  { value: "updated_at:1", label: "Default" },
-  { value: "name:1", label: "Name" },
+  { value: "updated_at:-1", label: "Default" },
+  { value: "listed_price:1", label: "Price Low" },
+  { value: "listed_price:-1", label: "Price High" },
+  { value: "inscription_number:1", label: "Inscription Number Low" },
+  { value: "inscription_number:-1", label: "Inscription Number High" },
 ];
 
-function CollectionsPage() {
+function OrderbookPage() {
   const dispatch = useDispatch();
   const [page, setPage] = useState<number>(1);
-  const [data, setData] = useState<ICollection[]>([]);
+  const [data, setData] = useState<IInscription[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(100);
-  const [sort, setSort] = useState<string>("updated_at:1");
+  const [sort, setSort] = useState<string>("updated_at:-1");
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      const result = await fetchCollections({
+      const result = await fetchInscriptions({
         page,
-        pageSize,
+        page_size: pageSize,
         sort,
-        live: true,
+        listed: true,
       });
 
       // Mixpanel Tracking
-      mixpanel.track("Collection Fetch Data", {
+      mixpanel.track("Orderbook Fetch Data", {
         page_number: page,
         page_size: pageSize,
         sort: sort,
@@ -52,7 +54,7 @@ function CollectionsPage() {
           })
         );
       } else if (result && result.data) {
-        setData(result.data.collections);
+        setData(result.data.inscriptions);
         setTotalCount(result.data.pagination.total);
         setLoading(false);
       }
@@ -69,8 +71,7 @@ function CollectionsPage() {
   };
 
   return (
-    <section>
-      <p className="text-center ">Contact us to verify your collection data</p>
+    <section className="min-h-[40vh]">
       <div className="SortSearchPages py-6 flex flex-wrap justify-between">
         <div className="w-full lg:w-auto flex justify-start items-center flex-wrap">
           <div className="w-full center pb-4 lg:pb-0 lg:w-auto">
@@ -93,17 +94,7 @@ function CollectionsPage() {
         )}
       </div>
       <div className="flex items-center flex-wrap">
-        {loading ? (
-          Array.from(Array(pageSize)).map((_, i) => (
-            <SkeletonCollectionItemCard key={i} />
-          ))
-        ) : data.length > 0 ? (
-          data.map((item) => <CollectionItemCard key={item._id} item={item} />)
-        ) : (
-          <div className="center w-full">
-            <p className="text-lg">No Item Found</p>
-          </div>
-        )}
+        <InscriptionDisplay data={data} loading={loading} pageSize={pageSize} />
       </div>
       <div className="SortSearchPages py-6 flex justify-end">
         {data.length > 0 && (
@@ -120,4 +111,4 @@ function CollectionsPage() {
   );
 }
 
-export default CollectionsPage;
+export default OrderbookPage;

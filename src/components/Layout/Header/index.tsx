@@ -76,7 +76,7 @@ function Header() {
       <CustomNotification />
       <Notification />
       <Logo />
-      {pathname !== "/search" && <Search />}
+      <Search />
       <div className="w-full lg:w-auto flex justify-center lg:justify-end">
         <ConnectMultiButton
           additionalMenuItems={additionalItems}

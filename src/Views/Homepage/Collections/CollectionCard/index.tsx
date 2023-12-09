@@ -35,7 +35,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ item }) => {
                 <img src={item.icon} />
               </div>
             )}
-            <div className="flex justify-between items-end w-full">
+            <div className="flex justify-between items-center w-full">
               <div className="flex-1 p-3">
                 <h3 className="text-white text-sm font-bold capitalize flex items-start">
                   {item.name.length > 10
@@ -62,7 +62,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ item }) => {
                         btcPrice
                       )}
                     </p>
-                    <div className="ml-2 text-green-300">
+                    <div className="ml-2 text-green-500">
                       <FaDollarSign className="" />
                     </div>
                   </div>

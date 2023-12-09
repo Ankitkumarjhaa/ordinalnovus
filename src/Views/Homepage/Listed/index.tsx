@@ -7,6 +7,7 @@ import React from "react";
 import Slider from "react-slick";
 import { IInscription } from "@/types";
 import ListingCard from "./ListingCard";
+import CustomButton from "@/components/elements/CustomButton";
 type ListedInscriptionsProps = {
   data: IInscription[];
 };
@@ -66,10 +67,22 @@ function Listed({ data }: ListedInscriptionsProps) {
 
   return (
     <section className="pt-16 w-full">
-      <div>
+      <div className="flex justify-between items-center">
         <h2 className="font-bold text-2xl lg:text-4xl text-white pb-6">
           Listed
         </h2>
+        <div>
+          <CustomButton
+            link={true}
+            text="View All"
+            href="/orderbook"
+            hoverBgColor="hover:bg-accent_dark"
+            hoverTextColor="text-white"
+            bgColor="bg-accent"
+            textColor="text-white"
+            className="flex transition-all"
+          />
+        </div>
       </div>
       <Slider {...settings}>
         {data?.map((item: IInscription) => (
@@ -80,7 +93,7 @@ function Listed({ data }: ListedInscriptionsProps) {
               key={item.inscription_id}
               inscriptionId={item.inscription_id}
               content_type={item.content_type}
-              className="h-[300px]"
+              showCollection={true}
             />
           </div>
         ))}

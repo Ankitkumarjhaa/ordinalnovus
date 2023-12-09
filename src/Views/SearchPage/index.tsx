@@ -35,7 +35,7 @@ function SearchPage() {
   const [type, setType] = useState("");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(40);
+  const [pageSize] = useState(100);
   const [totalCount, setTotalCount] = useState(0);
   const [url, setUrl] = useState("");
 
@@ -207,6 +207,17 @@ function SearchPage() {
         </div>
       </div>
       <InscriptionDisplay data={data} loading={loading} pageSize={pageSize} />
+      {totalCount > 0 ? (
+        <div className="flex-1 flex justify-end">
+          <CustomPaginationComponent
+            count={Math.ceil(totalCount / pageSize)}
+            onChange={handlePageChange}
+            page={page}
+          />
+        </div>
+      ) : (
+        <></>
+      )}
     </div>
   );
 }

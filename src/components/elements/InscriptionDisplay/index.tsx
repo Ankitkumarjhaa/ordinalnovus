@@ -1,7 +1,7 @@
 import { IInscription } from "@/types";
 import React from "react";
-import CollectionItemCard from "./ItemCard";
-import SkeletonCollectionItemCard from "./SkeletonItemCard";
+import ItemCard from "./ItemCard";
+import SkeletonCard from "./SkeletonItemCard";
 
 type ItemProps = {
   data?: IInscription[] | null;
@@ -14,12 +14,10 @@ function InscriptionDisplay({ data, loading, pageSize }: ItemProps) {
     <section>
       <div className="flex items-center flex-wrap">
         {loading ? (
-          Array.from(Array(pageSize)).map((_, i) => (
-            <SkeletonCollectionItemCard key={i} />
-          ))
+          Array.from(Array(pageSize)).map((_, i) => <SkeletonCard key={i} />)
         ) : data && data?.length > 0 ? (
           data?.map((item) => (
-            <CollectionItemCard key={item.inscription_id} item={item} />
+            <ItemCard key={item.inscription_id} inscription={item} />
           ))
         ) : (
           <div className="center w-full py-16">

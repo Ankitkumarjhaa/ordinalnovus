@@ -1,6 +1,8 @@
 import React from "react";
 import CustomButton from "@components/elements/CustomButton";
-import { FaTwitter, FaDiscord, FaGlobe } from "react-icons/fa";
+
+import { FaXTwitter } from "react-icons/fa6";
+import { FaDiscord, FaGlobe } from "react-icons/fa";
 import { ICollection } from "@/types";
 import { AiFillCheckCircle } from "react-icons/ai";
 import CardContent from "@/components/elements/CustomCardSmall/CardContent";
@@ -45,7 +47,7 @@ const HeroCard: React.FC<HeroCardProps> = ({ item }) => {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <FaTwitter size={24} color="white" />
+                <FaXTwitter size={24} color="white" />
               </a>
             )}
             {item.discord_link && (
