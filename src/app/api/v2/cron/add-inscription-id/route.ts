@@ -6,6 +6,40 @@ import crypto from "crypto";
 import fetchContentFromProviders from "@/utils/api/fetchContentFromProviders";
 import { IInscription } from "@/types";
 import moment from "moment";
+function domain_format_validator(input: string) {
+  // Check for leading and trailing whitespaces or newlines
+  if (/^\s/u.test(input)) {
+    return false;
+  }
+
+  // Convert to lowercase and trim whitespace
+  input = input.toLowerCase().trim();
+
+  // Check if input contains a period (to distinguish between name and namespace)
+  const containsPeriod = (input.match(/\./g) || []).length === 1;
+
+  if (containsPeriod) {
+    // Validating as a name
+    // Split the input at the first whitespace or newline
+    // This is now removed since we handle leading and trailing spaces/newlines above
+    // input = input.split(/\s|\n/)[0];
+
+    // Validate that there is only one period in the name
+    if ((input.match(/\./g) || []).length !== 1) {
+      return false;
+    }
+  } else {
+    return false;
+  }
+
+  // Validate UTF-8 characters (including emojis)
+  // This regex allows letters, numbers, emojis, and some punctuation
+  if (!/^[\p{L}\p{N}\p{P}\p{Emoji}]+$/u.test(input)) {
+    return false;
+  }
+
+  return true;
+}
 
 // Function to fetch details of a single inscription
 async function fetchInscriptionDetails(
@@ -50,6 +84,15 @@ async function fetchInscriptionDetails(
   }
 }
 
+async function checkDomainValid(domain: string) {
+  const olderValidDomain = await Inscription.findOne({
+    domain_name: domain,
+    domain_valid: true,
+  });
+  if (!olderValidDomain) return true;
+  else return false;
+}
+
 // Main handler function
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const bulkOps: any[] = [];
@@ -83,6 +126,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         let contentType = null;
         let contentResponse = null;
         let domain_name = null;
+        let domain_valid = null;
 
         try {
           contentResponse = await fetchContentFromProviders(inscriptionId);
@@ -94,8 +138,14 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             try {
               const domainPattern =
                 /^(?!\d+\.)[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.[a-zA-Z]+$/;
-              if (domainPattern.test(content) && !tags.includes("domain")) {
+              if (
+                domainPattern.test(content) &&
+                !tags.includes("domain") &&
+                domain_format_validator(content)
+              ) {
                 tags.push("domain");
+                domain_name = content;
+                domain_valid = await checkDomainValid(content);
               }
 
               // Check if content is a bitmap pattern (number followed by .bitmap)
@@ -135,9 +185,13 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
                 parsedContent.op === "reg" &&
                 parsedContent.name
               ) {
-                if (typeof parsedContent.name === "string") {
+                if (
+                  typeof parsedContent.name === "string" &&
+                  domain_format_validator(parsedContent.name)
+                ) {
                   tags.push("domain");
                   domain_name = parsedContent.name;
+                  domain_valid = await checkDomainValid(parsedContent.name);
                 }
               }
             } catch (error) {}
@@ -183,6 +237,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
               ...(sha && { sha }),
               ...(token && { token }),
               ...(domain_name && { domain_name }),
+              ...(domain_valid && { domain_valid }),
               tags,
               ...inscriptionDetails,
             },
