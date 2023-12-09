@@ -144,3 +144,5 @@ const resetInscription = async () => {
     console.error("Error resetting inscription:", error);
   }
 };
+
+export const dynamic = "force-dynamic";
