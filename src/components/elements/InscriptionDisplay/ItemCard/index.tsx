@@ -71,6 +71,11 @@ const ItemCard: React.FC<CollectionCardProps> = ({ inscription }) => {
                 </div>
               )}
             </div>
+            {inscription?.domain_valid && (
+              <span className="bg-yellow-500 rounded-md text-center text-xs py-1 px-3 font-bold text-yellow-900">
+                VALID
+              </span>
+            )}
             {inscription && inscription?.collection_item_name && (
               <span className="bg-yellow-500 rounded-md text-center text-xs py-1 px-3 font-bold text-yellow-900">
                 {inscription.collection_item_name}

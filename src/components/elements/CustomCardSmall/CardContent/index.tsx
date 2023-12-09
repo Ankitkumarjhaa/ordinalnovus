@@ -167,7 +167,7 @@ const CardContent: React.FC<CardContentProps> = ({
             );
           } else if (parsedJson.p && parsedJson.op && parsedJson.name) {
             return (
-              <div className="w-full h-full flex flex-col justify-center items-center text-sm tracking-widest">
+              <div className="w-full h-full flex flex-col justify-center items-center text-sm tracking-widest py-6">
                 <p className="text-3xl">{parsedJson.name}</p>
               </div>
             );

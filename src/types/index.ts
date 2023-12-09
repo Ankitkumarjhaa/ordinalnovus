@@ -150,6 +150,7 @@ export interface IInscription {
   last_checked?: Date;
   version?: number;
   token?: boolean;
+  domain_valid?: boolean;
 }
 
 export interface Holder {
