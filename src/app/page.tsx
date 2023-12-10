@@ -11,7 +11,6 @@ export default async function Home() {
   );
 }
 
-// or dynamic metadata
 export async function generateMetadata(
   parent: ResolvingMetadata
 ): Promise<Metadata> {
