@@ -194,3 +194,43 @@ export async function downloadInscription(inscription: string) {
     })
     .catch((error) => console.error(error));
 }
+
+export function domain_format_validator(input: string) {
+  // Check for leading and trailing whitespaces or newlines
+  if (/^\s/u.test(input)) {
+    return false;
+  }
+
+  // Convert to lowercase and trim whitespace
+  input = input.toLowerCase().trim();
+
+  // Check if content is a bitmap pattern (number followed by .bitmap)
+  const bitmapPattern = /^\d+\.bitmap$/;
+  if (bitmapPattern.test(input)) {
+    return false;
+  }
+  // Check if input contains a period (to distinguish between name and namespace)
+  const containsPeriod = (input.match(/\./g) || []).length === 1;
+
+  if (containsPeriod) {
+    // Validating as a name
+    // Split the input at the first whitespace or newline
+    // This is now removed since we handle leading and trailing spaces/newlines above
+    // input = input.split(/\s|\n/)[0];
+
+    // Validate that there is only one period in the name
+    if ((input.match(/\./g) || []).length !== 1) {
+      return false;
+    }
+  } else {
+    return false;
+  }
+
+  // Validate UTF-8 characters (including emojis)
+  // This regex allows letters, numbers, emojis, and some punctuation
+  if (!/^[\p{L}\p{N}\p{P}\p{Emoji}]+$/u.test(input)) {
+    return false;
+  }
+
+  return true;
+}

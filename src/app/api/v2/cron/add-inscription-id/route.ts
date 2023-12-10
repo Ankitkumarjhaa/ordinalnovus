@@ -6,46 +6,7 @@ import crypto from "crypto";
 import fetchContentFromProviders from "@/utils/api/fetchContentFromProviders";
 import { IInscription } from "@/types";
 import moment from "moment";
-
-function domain_format_validator(input: string) {
-  // Check for leading and trailing whitespaces or newlines
-  if (/^\s/u.test(input)) {
-    return false;
-  }
-
-  // Convert to lowercase and trim whitespace
-  input = input.toLowerCase().trim();
-
-  // Check if content is a bitmap pattern (number followed by .bitmap)
-  const bitmapPattern = /^\d+\.bitmap$/;
-  if (bitmapPattern.test(input)) {
-    return false;
-  }
-  // Check if input contains a period (to distinguish between name and namespace)
-  const containsPeriod = (input.match(/\./g) || []).length === 1;
-
-  if (containsPeriod) {
-    // Validating as a name
-    // Split the input at the first whitespace or newline
-    // This is now removed since we handle leading and trailing spaces/newlines above
-    // input = input.split(/\s|\n/)[0];
-
-    // Validate that there is only one period in the name
-    if ((input.match(/\./g) || []).length !== 1) {
-      return false;
-    }
-  } else {
-    return false;
-  }
-
-  // Validate UTF-8 characters (including emojis)
-  // This regex allows letters, numbers, emojis, and some punctuation
-  if (!/^[\p{L}\p{N}\p{P}\p{Emoji}]+$/u.test(input)) {
-    return false;
-  }
-
-  return true;
-}
+import { domain_format_validator } from "@/utils";
 
 // Function to fetch details of a single inscription
 async function fetchInscriptionDetails(
@@ -91,8 +52,12 @@ async function fetchInscriptionDetails(
 }
 
 async function checkDomainValid(domain: string) {
+  if (!domain) return false;
+  const domainPattern =
+    /^(?!\d+\.)[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.[a-zA-Z]+$/;
+  if (!domainPattern.test(domain)) return false;
   const olderValidDomain = await Inscription.findOne({
-    domain_name: domain,
+    domain_name: domain.toLowerCase().trim(),
     domain_valid: true,
   });
   if (!olderValidDomain) return true;
@@ -113,7 +78,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       : -1;
 
     const savedInscriptionIds: string[] = [];
-    const BATCH = 20;
+    const BATCH = 100;
 
     const url = `${process.env.NEXT_PUBLIC_PROVIDER}/api/inscriptions/${
       start + BATCH
@@ -150,7 +115,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
                 domain_format_validator(content)
               ) {
                 tags.push("domain");
-                domain_name = content;
+                domain_name = domain_format_validator(content);
                 domain_valid = await checkDomainValid(content);
               }
 
@@ -253,8 +218,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
                 : { content: contentResponse.data.toString("utf-8") }),
               ...(sha && { sha }),
               ...(token && { token }),
-              ...(domain_name && { domain_name }),
-              ...(domain_valid && { domain_valid }),
+              ...(domain_name && {
+                domain_name: domain_name?.toLowerCase().trim(),
+              }),
+              ...(content && { domain_valid }),
               tags,
               ...inscriptionDetails,
             },
@@ -327,10 +294,15 @@ const handlePreSaveLogic = async (bulkDocs: Array<Partial<any>>) => {
   // domain processing
   // Unique domain pre-processing
   bulkDocs.forEach((doc) => {
-    const domainName = doc.insertOne.document.domain_name;
-    if (domainName) {
-      if (!(domainName in domainMap)) {
-        domainMap[domainName] = 0; // Set initial count to 0
+    if (doc.insertOne.document.domain_name) {
+      console.log({ doc });
+      const domainName = doc.insertOne.document.domain_name
+        .toLowerCase()
+        .trim();
+      if (domainName) {
+        if (!(domainName in domainMap)) {
+          domainMap[domainName] = 0; // Set initial count to 0
+        }
       }
     }
   });

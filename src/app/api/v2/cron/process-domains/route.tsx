@@ -2,48 +2,6 @@ import dbConnect from "@/lib/dbConnect";
 import { Inscription } from "@/models";
 import { NextRequest, NextResponse } from "next/server";
 
-function domain_format_validator(input: string) {
-  // Check for leading and trailing whitespaces or newlines
-  if (/^\s/u.test(input)) {
-    return false;
-  }
-
-  // console.log({ input });
-  // Convert to lowercase and trim whitespace
-  input = input.toLowerCase().trim();
-
-  // Check if content is a bitmap pattern (number followed by .bitmap)
-  const bitmapPattern = /^\d+\.bitmap$/;
-  if (bitmapPattern.test(input)) {
-    return false;
-  }
-
-  // Check if input contains a period (to distinguish between name and namespace)
-  const containsPeriod = (input.match(/\./g) || []).length === 1;
-
-  if (containsPeriod) {
-    // Validating as a name
-    // Split the input at the first whitespace or newline
-    // This is now removed since we handle leading and trailing spaces/newlines above
-    // input = input.split(/\s|\n/)[0];
-
-    // Validate that there is only one period in the name
-    if ((input.match(/\./g) || []).length !== 1) {
-      return false;
-    }
-  } else {
-    return false;
-  }
-
-  // Validate UTF-8 characters (including emojis)
-  // This regex allows letters, numbers, emojis, and some punctuation
-  if (!/^[\p{L}\p{N}\p{P}\p{Emoji}]+$/u.test(input)) {
-    return false;
-  }
-
-  return true;
-}
-
 async function checkDomainValid(domain: string) {
   const olderValidDomain = await Inscription.findOne({
     domain_name: domain,
@@ -54,61 +12,22 @@ async function checkDomainValid(domain: string) {
 export async function GET(req: NextRequest) {
   await dbConnect();
 
-  // const inscriptions = await Inscription.find({
-  //   content: { $exists: true },
-  //   tags: { $in: ["text", "json"] },
-  //   domain_valid: { $exists: false },
-  // })
-  //   .select(
-  //     "inscription_number content tags domain_name domain_valid inscription_id inscription_number"
-  //   )
-
-  //   .limit(10000)
-  //   .sort({ inscription_number: -1 });
-  // Find the inscriptions that match your criteria
-
   const inscriptions = await Inscription.find({
-    tags: { $all: ["bitmap", "domain"] },
+    content: { $exists: true },
+    tags: { $in: ["text", "json"] },
+    domain_valid: { $exists: false },
   })
     .select(
       "inscription_number content tags domain_name domain_valid inscription_id inscription_number"
     )
 
-    .limit(10000);
+    .limit(10000)
+    .sort({ inscription_number: -1 });
+
+  // Find the inscriptions that match your criteria
 
   if (!inscriptions.length) {
     return NextResponse.json({ message: "All domains processed" });
-  }
-
-  // // Iterate over each inscription and update
-  for (const inscription of inscriptions) {
-    let isBitmap = false;
-    // Check if content is a bitmap pattern (number followed by .bitmap)
-    const bitmapPattern = /^\d+\.bitmap$/;
-    if (bitmapPattern.test(inscription.content)) {
-      isBitmap = true;
-    }
-
-    if (isBitmap) {
-      // Remove "domain" tag if it exists
-      inscription.tags = inscription.tags.filter(
-        (tag: string) => tag !== "domain" && tag !== "token"
-      );
-
-      // Add "bitmap" to tags if it's not already present
-      if (!inscription.tags.includes("bitmap")) {
-        inscription.tags.push("bitmap");
-      }
-
-      // Set token field to false
-      inscription.token = false;
-      inscription.domain_valid = false;
-
-      // Save the updated inscription
-      await inscription.save();
-    } else {
-      console.log("confused");
-    }
   }
 
   // // Iterate through each inscription and update domain_valid

@@ -31,7 +31,7 @@ function processTagsParam(
 
     // If 'domain' is one of the tags and content value is provided, set domain_name to contentValue
     if (tags.includes("domain") && contentValue) {
-      finalQuery.find.domain_name = contentValue;
+      finalQuery.find.domain_name = contentValue.toLowerCase().trim();
       finalQuery.find.version = 1;
     }
   }
@@ -42,7 +42,7 @@ function processTagsParam(
 
     // If 'domain' is one of the tags and content value is provided, set domain_name to contentValue
     if (tags.includes("domain") && contentValue) {
-      finalQuery.find.domain_name = contentValue;
+      finalQuery.find.domain_name = contentValue.toLowerCase().trim();
       finalQuery.find.version = 1;
     }
   }
@@ -52,7 +52,7 @@ function processTagsParam(
 
     // If the tag is 'domain' and content value is provided, set domain_name to contentValue
     if (tagsValue === "domain" && contentValue) {
-      finalQuery.find.domain_name = contentValue;
+      finalQuery.find.domain_name = contentValue.toLowerCase().trim();
       finalQuery.find.version = 1;
     }
   }

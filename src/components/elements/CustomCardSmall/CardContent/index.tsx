@@ -11,6 +11,7 @@ import GLTF from "../../GLTFViewer";
 import JSZip from "jszip";
 import AudioPlayer from "../../AudioPlayer";
 import mixpanel from "mixpanel-browser";
+import { domain_format_validator } from "@/utils";
 
 type CardContentProps = {
   inscriptionId: string;
@@ -198,6 +199,13 @@ const CardContent: React.FC<CardContentProps> = ({
             </pre>
           );
         } else {
+          if (domain_format_validator(fetchedContent + "")) {
+            return (
+              <div className="w-full h-full flex flex-col justify-center items-center text-sm tracking-widest py-6">
+                <p className="text-3xl">{fetchedContent}</p>
+              </div>
+            );
+          }
           // If the content is not JSON, display it as plain text
           return (
             <pre className="whitespace-pre-wrap p-2 text-sm text-white">
