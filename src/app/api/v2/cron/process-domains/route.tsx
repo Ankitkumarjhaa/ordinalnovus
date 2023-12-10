@@ -8,8 +8,15 @@ function domain_format_validator(input: string) {
     return false;
   }
 
+  // console.log({ input });
   // Convert to lowercase and trim whitespace
   input = input.toLowerCase().trim();
+
+  // Check if content is a bitmap pattern (number followed by .bitmap)
+  const bitmapPattern = /^\d+\.bitmap$/;
+  if (bitmapPattern.test(input)) {
+    return false;
+  }
 
   // Check if input contains a period (to distinguish between name and namespace)
   const containsPeriod = (input.match(/\./g) || []).length === 1;
@@ -47,84 +54,154 @@ async function checkDomainValid(domain: string) {
 export async function GET(req: NextRequest) {
   await dbConnect();
 
+  // const inscriptions = await Inscription.find({
+  //   content: { $exists: true },
+  //   tags: { $in: ["text", "json"] },
+  //   domain_valid: { $exists: false },
+  // })
+  //   .select(
+  //     "inscription_number content tags domain_name domain_valid inscription_id inscription_number"
+  //   )
+
+  //   .limit(10000)
+  //   .sort({ inscription_number: -1 });
+  // Find the inscriptions that match your criteria
+
   const inscriptions = await Inscription.find({
-    content: { $exists: true },
-    tags: { $in: ["text", "json"] },
-    domain_valid: { $exists: false },
+    tags: { $all: ["bitmap", "domain"] },
   })
     .select(
       "inscription_number content tags domain_name domain_valid inscription_id inscription_number"
     )
 
-    .limit(5000)
-    .sort({ inscription_number: 1 });
+    .limit(10000);
 
   if (!inscriptions.length) {
     return NextResponse.json({ message: "All domains processed" });
   }
 
-  // await resetInscription();
-
-  // // Iterate through each inscription and update domain_valid
+  // // Iterate over each inscription and update
   for (const inscription of inscriptions) {
-    if (inscription.content) {
-      let name = null;
-      try {
-        name = JSON.parse(inscription.content.toString("utf-8"))?.name || null;
-      } catch (err: any) {
-        name = inscription.content;
+    let isBitmap = false;
+    // Check if content is a bitmap pattern (number followed by .bitmap)
+    const bitmapPattern = /^\d+\.bitmap$/;
+    if (bitmapPattern.test(inscription.content)) {
+      isBitmap = true;
+    }
+
+    if (isBitmap) {
+      // Remove "domain" tag if it exists
+      inscription.tags = inscription.tags.filter(
+        (tag: string) => tag !== "domain" && tag !== "token"
+      );
+
+      // Add "bitmap" to tags if it's not already present
+      if (!inscription.tags.includes("bitmap")) {
+        inscription.tags.push("bitmap");
       }
-      if (name) {
-        const patternValid = domain_format_validator(name);
-        const isDomainValid = await checkDomainValid(name);
-        // if domain pattern is valid
-        if (patternValid) {
-          // add domain name for all domains that have valid pattern
-          inscription.domain_name = name.trim();
-          // add domain tag only if its not already there
-          if (!inscription.tags.includes("domain"))
-            inscription.tags.push("domain");
 
-          // domain_valid will be true only for domains that have valid pattern
-          // and are valid (first time inscribed)
-          // for others it will be false
-          inscription.domain_valid = isDomainValid;
-        } else {
-          // If the domain is not valid pattern, remove the "domain" tag if it exists
-          inscription.tags = inscription.tags.filter(
-            (tag: string) => tag !== "domain"
-          );
-          // Optionally, clear the domain_name if it is not valid pattern
-          // inscription.domain_name = null;
+      // Set token field to false
+      inscription.token = false;
+      inscription.domain_valid = false;
 
-          // domain_valid will be true only for domains that have valid pattern
-          // and are valid (first time inscribed)
-          // for others it will be false
-          inscription.domain_valid = false;
-
-          // console.log({ inscription }, "INVALID CONTENT");
-        }
-      } else {
-        // If the domain is not valid pattern, remove the "domain" tag if it exists
-        inscription.tags = inscription.tags.filter(
-          (tag: string) => tag !== "domain"
-        );
-        // Optionally, clear the domain_name if it is not valid pattern
-        // inscription.domain_name = null;
-
-        // domain_valid will be true only for domains that have valid pattern
-        // and are valid (first time inscribed)
-        // for others it will be false
-        inscription.domain_valid = false;
-
-        // console.log({ inscription }, "INVALID CONTENT");
-      }
-      await inscription.save(); // Save the updated inscription
+      // Save the updated inscription
+      await inscription.save();
     } else {
-      // console.log({ inscription }, "NO CONTENT");
+      console.log("confused");
     }
   }
-  return NextResponse.json({ total: inscriptions.length, inscriptions });
+
+  // // Iterate through each inscription and update domain_valid
+  // for (const inscription of inscriptions) {
+  //   if (inscription.content) {
+  //     let name = null;
+  //     try {
+  //       name = JSON.parse(inscription.content.toString("utf-8"))?.name || null;
+  //     } catch (err: any) {
+  //       name = inscription.content;
+  //     }
+  //     if (name) {
+  //       try {
+  //         const patternValid = domain_format_validator(name);
+  //         const isDomainValid = await checkDomainValid(name);
+  //         // if domain pattern is valid
+  //         if (patternValid) {
+  //           // add domain name for all domains that have valid pattern
+  //           inscription.domain_name = name.trim();
+  //           // add domain tag only if its not already there
+  //           if (!inscription.tags.includes("domain"))
+  //             inscription.tags.push("domain");
+
+  //           // domain_valid will be true only for domains that have valid pattern
+  //           // and are valid (first time inscribed)
+  //           // for others it will be false
+  //           inscription.domain_valid = isDomainValid;
+  //         } else {
+  //           // If the domain is not valid pattern, remove the "domain" tag if it exists
+  //           inscription.tags = inscription.tags.filter(
+  //             (tag: string) => tag !== "domain"
+  //           );
+  //           // Optionally, clear the domain_name if it is not valid pattern
+  //           // inscription.domain_name = null;
+
+  //           // domain_valid will be true only for domains that have valid pattern
+  //           // and are valid (first time inscribed)
+  //           // for others it will be false
+  //           inscription.domain_valid = false;
+
+  //           // console.log({ inscription }, "INVALID CONTENT");
+  //         }
+  //       } catch (err: any) {
+  //         // If the domain is not valid pattern, remove the "domain" tag if it exists
+  //         inscription.tags = inscription.tags.filter(
+  //           (tag: string) => tag !== "domain"
+  //         );
+  //         // Optionally, clear the domain_name if it is not valid pattern
+  //         // inscription.domain_name = null;
+
+  //         // domain_valid will be true only for domains that have valid pattern
+  //         // and are valid (first time inscribed)
+  //         // for others it will be false
+  //         inscription.domain_valid = false;
+
+  //         // console.log({ inscription }, "INVALID CONTENT");
+  //       }
+  //     } else {
+  //       // If the domain is not valid pattern, remove the "domain" tag if it exists
+  //       inscription.tags = inscription.tags.filter(
+  //         (tag: string) => tag !== "domain"
+  //       );
+  //       // Optionally, clear the domain_name if it is not valid pattern
+  //       // inscription.domain_name = null;
+
+  //       // domain_valid will be true only for domains that have valid pattern
+  //       // and are valid (first time inscribed)
+  //       // for others it will be false
+  //       inscription.domain_valid = false;
+
+  //       // console.log({ inscription }, "INVALID CONTENT");
+  //     }
+  //   } else {
+  //     // If the domain is not valid pattern, remove the "domain" tag if it exists
+  //     inscription.tags = inscription.tags.filter(
+  //       (tag: string) => tag !== "domain"
+  //     );
+  //     // Optionally, clear the domain_name if it is not valid pattern
+  //     // inscription.domain_name = null;
+
+  //     // domain_valid will be true only for domains that have valid pattern
+  //     // and are valid (first time inscribed)
+  //     // for others it will be false
+  //     inscription.domain_valid = false;
+
+  //     // console.log({ inscription }, "INVALID CONTENT");
+  //   }
+  //   await inscription.save(); // Save the updated inscription
+  // }
+  return NextResponse.json({
+    processed: inscriptions.length,
+    inscriptions,
+  });
 }
 
 const resetInscription = async () => {

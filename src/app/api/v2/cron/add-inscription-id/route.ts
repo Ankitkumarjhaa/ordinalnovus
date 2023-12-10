@@ -6,6 +6,7 @@ import crypto from "crypto";
 import fetchContentFromProviders from "@/utils/api/fetchContentFromProviders";
 import { IInscription } from "@/types";
 import moment from "moment";
+
 function domain_format_validator(input: string) {
   // Check for leading and trailing whitespaces or newlines
   if (/^\s/u.test(input)) {
@@ -15,6 +16,11 @@ function domain_format_validator(input: string) {
   // Convert to lowercase and trim whitespace
   input = input.toLowerCase().trim();
 
+  // Check if content is a bitmap pattern (number followed by .bitmap)
+  const bitmapPattern = /^\d+\.bitmap$/;
+  if (bitmapPattern.test(input)) {
+    return false;
+  }
   // Check if input contains a period (to distinguish between name and namespace)
   const containsPeriod = (input.match(/\./g) || []).length === 1;
 
@@ -175,7 +181,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
               } else if (
                 parsedContent.p &&
                 parsedContent.op &&
-                parsedContent.dep
+                (parsedContent.dep || parsedContent.tick || parsedContent.amt)
               ) {
                 token = true;
                 tags.push("token");
@@ -201,10 +207,21 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
               if (typeof content === "object") {
                 content = contentResponse.data.toString("utf-8");
               }
-              sha = crypto
-                .createHash("sha256")
-                .update(content, "utf8")
-                .digest("hex");
+              // handle multiple tap mints like inscription 46225391
+              if (
+                content.includes(`"p":`) &&
+                content.includes(`"op":`) &&
+                (content.includes(`"tick":`) || content.includes(`"amt":`))
+              ) {
+                if (!tags.includes("token")) tags.push("token");
+                token = true;
+              }
+
+              if (!token)
+                sha = crypto
+                  .createHash("sha256")
+                  .update(content, "utf8")
+                  .digest("hex");
             }
           } else if (!token && !/video|audio/.test(contentType)) {
             // if content is not a token or video/audio
@@ -306,10 +323,37 @@ const handlePreSaveLogic = async (bulkDocs: Array<Partial<any>>) => {
     }
   }
 
+  let domainMap: { [domain_name: string]: number } = {};
+  // domain processing
+  // Unique domain pre-processing
+  bulkDocs.forEach((doc) => {
+    const domainName = doc.insertOne.document.domain_name;
+    if (domainName) {
+      if (!(domainName in domainMap)) {
+        domainMap[domainName] = 0; // Set initial count to 0
+      }
+    }
+  });
+
   for (let i = 0; i < bulkDocs.length; i++) {
     let bulkDoc = { ...bulkDocs[i] };
     const insertOne = bulkDoc.insertOne;
     const doc = insertOne.document;
+
+    // Domain name validation logic
+    // db validation already done.
+    // now we are comparing to data in this array itself
+    // Domain name validation logic
+    if (doc.domain_name && doc.domain_valid) {
+      if (domainMap[doc.domain_name] === 0) {
+        // First instance of domain name
+        doc.domain_valid = true; // Set to true if needed
+        domainMap[doc.domain_name]++;
+      } else {
+        // Duplicate domain name found
+        doc.domain_valid = false;
+      }
+    }
 
     if (i === 0 && doc.inscription_number > 0) {
       const prevDocument = await Inscription.findOne({
