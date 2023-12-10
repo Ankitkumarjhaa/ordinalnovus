@@ -7,10 +7,27 @@ import { sendEmailAlert } from "@/utils/sendEmailAlert";
 import { getCache, setCache } from "@/lib/cache";
 
 async function fetchBlockhashFromHeight(height: number): Promise<string> {
-  const tipResponse = await axios.get(
-    "https://mempool.space/api/block-height/" + height
-  );
-  return tipResponse.data;
+  try {
+    const tipResponse = await axios.get(
+      `https://mempool.space/api/block-height/${height}`
+    );
+    return tipResponse.data;
+  } catch (error: any) {
+    if (
+      axios.isAxiosError(error) &&
+      error.response &&
+      error.response.status === 404
+    ) {
+      // If block not found, set a cache entry to halt processing for 5 minutes (300 seconds)
+      await setCache("haltProcessing", true, 300);
+      throw new Error(
+        "Block not found. Latest data already in DB. Processing halted for 5 minutes."
+      );
+    } else {
+      // Handle other errors or rethrow
+      throw error;
+    }
+  }
 }
 
 async function fetchBlockDetails(latestBlockhash: string): Promise<any> {
@@ -204,6 +221,11 @@ async function getLatestBlockHeight(): Promise<number> {
 // API Handler
 export async function GET(req: NextRequest, res: NextResponse) {
   try {
+    // Check if a 'halt processing' cache entry exists
+    const haltProcessing = await getCache("haltProcessing");
+    if (haltProcessing) {
+      return NextResponse.json({ message: "All Blocks already processed" });
+    }
     await dbConnect();
     let latestBlockHeight: number;
     let lastSavedBlockHeight: number;
