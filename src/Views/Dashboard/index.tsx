@@ -10,6 +10,9 @@ import { fetchInscriptions } from "@/apiHelper/fetchInscriptions";
 import { useWalletAddress } from "bitcoin-wallet-adapter";
 import Link from "next/link";
 import InscriptionDisplay from "@/components/elements/InscriptionDisplay";
+import copy from "copy-to-clipboard";
+import { addNotification } from "@/stores/reducers/notificationReducer";
+import { useDispatch } from "react-redux";
 
 function AccountPage() {
   const [inscriptions, setInscriptions] = useState<IInscription[] | null>(null);
@@ -62,9 +65,11 @@ function AccountPage() {
     }
   }, [walletDetails, loading]);
 
+  const dispatch = useDispatch();
+
   return (
     <div className="pt-16 text-white">
-      <div className="profile w-full flex flex-wrap items-center border-b-2 py-6 border-accent">
+      <div className="profile w-full flex flex-wrap items-start border-b-2 py-6 border-accent">
         <div className="w-[100px]">
           {inscriptions?.length && profile?.inscription_id ? (
             <CardContent
@@ -80,12 +85,75 @@ function AccountPage() {
           )}
         </div>
         <div className="pl-4">
-          <p className="text-white text-sm hidden lg:block">
-            {walletDetails?.ordinal_address}
-          </p>
-          <p className="text-gray-400 text-xs lg:hidden">
-            {shortenString(walletDetails?.ordinal_address || "")}
-          </p>
+          <div className="text-white text-sm hidden lg:block">
+            <p
+              onClick={() => {
+                copy(walletDetails?.ordinal_address + "");
+                dispatch(
+                  addNotification({
+                    id: new Date().valueOf(),
+                    message: "Address Copied",
+                    open: true,
+                    severity: "success",
+                  })
+                );
+              }}
+              className="bg-secondary border-accent border rounded my-2 py-1 px-2 text-xs cursor-pointer hover:text-yellow-900 hover:bg-bitcoin"
+            >
+              {walletDetails?.ordinal_address}
+            </p>
+            <p
+              onClick={() => {
+                copy(walletDetails?.cardinal_address + "");
+                dispatch(
+                  addNotification({
+                    id: new Date().valueOf(),
+                    message: "Address Copied",
+                    open: true,
+                    severity: "success",
+                  })
+                );
+              }}
+              className="bg-secondary border-accent border rounded my-2 py-1 px-2 text-xs cursor-pointer hover:text-yellow-900 hover:bg-bitcoin"
+            >
+              {" "}
+              {walletDetails?.cardinal_address}
+            </p>
+          </div>
+          <div className="text-gray-400 text-xs lg:hidden">
+            <p
+              onClick={() => {
+                copy(walletDetails?.ordinal_address + "");
+                dispatch(
+                  addNotification({
+                    id: new Date().valueOf(),
+                    message: "Address Copied",
+                    open: true,
+                    severity: "success",
+                  })
+                );
+              }}
+              className="bg-secondary border-accent border rounded my-2 py-1 px-2 text-xs cursor-pointer hover:text-yellow-900 hover:bg-bitcoin"
+            >
+              {shortenString(walletDetails?.ordinal_address || "")}
+            </p>
+            <p
+              onClick={() => {
+                copy(walletDetails?.cardinal_address + "");
+                dispatch(
+                  addNotification({
+                    id: new Date().valueOf(),
+                    message: "Address Copied",
+                    open: true,
+                    severity: "success",
+                  })
+                );
+              }}
+              className="bg-secondary border-accent border rounded my-2 py-1 px-2 text-xs cursor-pointer hover:text-yellow-900 hover:bg-bitcoin"
+            >
+              {shortenString(walletDetails?.ordinal_address || "")}
+            </p>
+          </div>
         </div>
         <div className="flex-1 flex justify-center lg:justify-end">
           <Link href="/dashboard/add-collection">

@@ -43,7 +43,7 @@ const ItemCard: React.FC<CollectionCardProps> = ({ inscription }) => {
                     inscription.content_type.split(";")[0]}
                 </p>
               </div>
-              {inscription.listed_price && (
+              {inscription.listed_price ? (
                 <div>
                   <div className="text-sm font-bold tracking-tight text-white flex items-center">
                     <div className="mr-2 text-bitcoin">
@@ -69,6 +69,8 @@ const ItemCard: React.FC<CollectionCardProps> = ({ inscription }) => {
                     </div>
                   )}
                 </div>
+              ) : (
+                <></>
               )}
             </div>
             {inscription?.domain_valid && (

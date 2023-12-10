@@ -132,14 +132,7 @@ const CardContent: React.FC<CardContentProps> = ({
 
           if (parsedJson.p && parsedJson.op && parsedJson.name) {
             return (
-              <div className="w-full h-full flex flex-col justify-center items-center text-sm tracking-widest py-6">
-                {inscription?.domain_valid && (
-                  <div className="absolute top-5 right-5 z-50">
-                    <span className="text-xs rounded  bg-bitcoin text-yellow-900 px-4 py-1 ">
-                      Valid Domain
-                    </span>
-                  </div>
-                )}{" "}
+              <div className="w-full h-full flex flex-col justify-center items-center text-sm tracking-widest py-12">
                 <p className="text-3xl">{parsedJson.name}</p>
               </div>
             );
@@ -149,7 +142,7 @@ const CardContent: React.FC<CardContentProps> = ({
           jsonContent = fetchedContent;
         }
         return (
-          <pre className="whitespace-pre-wrap p-2 text-white">
+          <pre className="whitespace-pre-wrap p-2 text-white py-12">
             {jsonContent}
           </pre>
         );
@@ -175,14 +168,7 @@ const CardContent: React.FC<CardContentProps> = ({
           }
           if (parsedJson.op && parsedJson.tick && parsedJson.amt) {
             return (
-              <div className="w-full h-full flex flex-col justify-center items-center text-sm tracking-widest">
-                {inscription?.token && (
-                  <div className="absolute top-5 right-5 z-50">
-                    <span className="text-xs rounded  bg-bitcoin text-yellow-900 px-4 py-1 ">
-                      TOKEN
-                    </span>
-                  </div>
-                )}{" "}
+              <div className="w-full h-full flex flex-col justify-center items-center text-sm tracking-widest  py-12">
                 <p className="uppercase">{parsedJson.op}</p>
                 <p className="text-3xl">{parsedJson.amt}</p>
                 <hr />
@@ -191,14 +177,7 @@ const CardContent: React.FC<CardContentProps> = ({
             );
           } else if (parsedJson.p && parsedJson.op && parsedJson.name) {
             return (
-              <div className="w-full h-full flex flex-col justify-center items-center text-sm tracking-widest py-6">
-                {inscription?.domain_valid && (
-                  <div className="absolute top-5 right-5 z-50">
-                    <span className="text-xs rounded  bg-bitcoin text-yellow-900 px-4 py-1 ">
-                      Valid Domain
-                    </span>
-                  </div>
-                )}{" "}
+              <div className="w-full h-full flex flex-col justify-center items-center text-sm tracking-widest py-12">
                 <p className="text-3xl">{parsedJson.name}</p>
               </div>
             );
@@ -210,14 +189,7 @@ const CardContent: React.FC<CardContentProps> = ({
             parsedJson.lim
           ) {
             return (
-              <div className="w-full h-full flex flex-col justify-center items-center text-sm tracking-widest">
-                {inscription?.token && (
-                  <div className="absolute top-5 right-5 z-50">
-                    <span className="text-xs rounded  bg-bitcoin text-yellow-900 px-4 py-1 ">
-                      TOKEN
-                    </span>
-                  </div>
-                )}{" "}
+              <div className="w-full h-full flex flex-col justify-center items-center text-sm tracking-widest py-12">
                 <p className="uppercase">{parsedJson.op}</p>
                 <p className="text-xl">{parsedJson.max}</p>
                 <p className="uppercase font-bold">{parsedJson.tick}</p>
@@ -228,7 +200,7 @@ const CardContent: React.FC<CardContentProps> = ({
             );
           }
           return (
-            <pre className="whitespace-pre-wrap p-2 text-white overflow-y-auto max-h-full">
+            <pre className="whitespace-pre-wrap p-2 text-white overflow-y-auto max-h-full py-12">
               {!showFull && jsonContent && jsonContent?.length > 60
                 ? jsonContent?.slice(0, 60)
                 : jsonContent}
@@ -237,14 +209,7 @@ const CardContent: React.FC<CardContentProps> = ({
         } else {
           if (domain_format_validator(fetchedContent + "")) {
             return (
-              <div className="w-full h-full flex flex-col justify-center items-center text-sm tracking-widest py-6">
-                {inscription?.domain_valid && (
-                  <div className="absolute top-5 right-5 z-50">
-                    <span className="text-xs rounded  bg-bitcoin text-yellow-900 px-4 py-1 ">
-                      Valid Domain
-                    </span>
-                  </div>
-                )}{" "}
+              <div className="w-full h-full flex flex-col justify-center items-center text-sm tracking-widest py-12">
                 <p className="text-3xl">{fetchedContent}</p>
               </div>
             );
@@ -380,6 +345,26 @@ const CardContent: React.FC<CardContentProps> = ({
 
   return (
     <div className="w-full h-full overflow-y-auto overflow-x-hidden no-scrollbar">
+      {inscription?.domain_valid && (
+        <span className="absolute bg-bitcoin rounded font-bold text-yellow-900 capitalize text-xs p-1 z-10 top-[5px] left-[5px] ">
+          Valid Domain
+        </span>
+      )}
+      {!inscription?.domain_valid && inscription?.tags?.includes("domain") && (
+        <span className="absolute bg-bitcoin rounded font-bold text-yellow-900 capitalize text-xs p-1 z-10 top-[5px] left-[5px] ">
+          Invalid Domain
+        </span>
+      )}{" "}
+      {inscription?.token && (
+        <span className="absolute bg-bitcoin rounded font-bold text-yellow-900 capitalize text-xs p-1 z-10 top-[5px] left-[5px] ">
+          TOKEN
+        </span>
+      )}{" "}
+      {inscription?.tags?.includes("bitmap") && (
+        <span className="absolute bg-bitcoin rounded font-bold text-yellow-900 capitalize text-xs p-1 z-10 top-[5px] left-[5px] ">
+          BITMAP
+        </span>
+      )}{" "}
       {isLoading ? (
         <div className="flex justify-center items-center h-full text-white py-6  w-full">
           {/* <CircularProgress color="inherit" size={10} />{" "} */}
