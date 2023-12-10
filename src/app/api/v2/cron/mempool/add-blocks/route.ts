@@ -124,7 +124,7 @@ async function addBlockTxToDB(blockhash: string) {
   let allBlockTxsData: any = [];
   const maxTransactions = 100;
   const batchSize = 25; // Each call handles 25 transactions
-  const parallelCalls = 10; // Total 4 API calls
+  const parallelCalls = 20; // Total 4 API calls
   const promises = [];
   for (let i = 0; i < parallelCalls; i++) {
     promises.push(fetchTransactions(startIndex, blockhash));
