@@ -44,8 +44,8 @@ export async function generateMetadata(
         url: `https://ordinalnovus.com/inscription/${inscription.inscription_id}`,
         siteName: "Ordinal Novus",
         images: `${
-          process.env.NEXT_PUBLIC_API
-        }/generate-image?url=${encodeURIComponent(
+          process.env.NEXT_PUBLIC_URL
+        }/api/generate-image?url=${encodeURIComponent(
           "https://ordinalnovus.com/inscription/" + inscription.inscription_id
         )}`,
         locale: "en-US",
@@ -57,8 +57,8 @@ export async function generateMetadata(
 
         creator: "@OrdinalNovus",
         images: `${
-          process.env.NEXT_PUBLIC_API
-        }/generate-image?url=${encodeURIComponent(
+          process.env.NEXT_PUBLIC_URL
+        }/api/generate-image?url=${encodeURIComponent(
           "https://ordinalnovus.com/inscription/" + inscription.inscription_id
         )}`,
       },
@@ -91,8 +91,8 @@ export async function generateMetadata(
         images: [
           {
             url: `${
-              process.env.NEXT_PUBLIC_API
-            }/generate-image?url=${encodeURIComponent(
+              process.env.NEXT_PUBLIC_URL
+            }/api/generate-image?url=${encodeURIComponent(
               "https://ordinalnovus.com"
             )}`,
           },
@@ -108,8 +108,8 @@ export async function generateMetadata(
         creator: "@OrdinalNovus",
         images: [
           `${
-            process.env.NEXT_PUBLIC_API
-          }/generate-image?url=${encodeURIComponent(
+            process.env.NEXT_PUBLIC_URL
+          }/api/generate-image?url=${encodeURIComponent(
             "https://ordinalnovus.com"
           )}`,
         ],
