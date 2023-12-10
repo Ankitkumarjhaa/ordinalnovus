@@ -234,3 +234,12 @@ export function domain_format_validator(input: string) {
 
   return true;
 }
+
+export function bitmap_format_validator(input: string) {
+  const bitmapPattern = /^\d+\.bitmap$/;
+  if (bitmapPattern.test(input)) {
+    return true;
+  } else {
+    return false;
+  }
+}

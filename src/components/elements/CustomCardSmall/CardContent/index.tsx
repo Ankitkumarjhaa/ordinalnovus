@@ -9,7 +9,7 @@ import GLTF from "../../GLTFViewer";
 import JSZip from "jszip";
 import AudioPlayer from "../../AudioPlayer";
 import mixpanel from "mixpanel-browser";
-import { domain_format_validator } from "@/utils";
+import { bitmap_format_validator, domain_format_validator } from "@/utils";
 import { IInscription } from "@/types";
 
 type CardContentProps = {
@@ -211,6 +211,12 @@ const CardContent: React.FC<CardContentProps> = ({
             return (
               <div className="w-full h-full flex flex-col justify-center items-center text-sm tracking-widest py-12">
                 <p className="text-3xl">{fetchedContent}</p>
+              </div>
+            );
+          } else if (bitmap_format_validator(fetchedContent + "")) {
+            return (
+              <div className="w-full h-full flex flex-col justify-center items-center text-sm tracking-widest py-12">
+                <p className="text-sm uppercase">{fetchedContent}</p>
               </div>
             );
           }
