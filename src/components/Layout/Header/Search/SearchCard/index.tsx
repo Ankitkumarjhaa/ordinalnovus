@@ -29,6 +29,7 @@ const SearchCard: React.FC<SearchCardProps> = ({
               <CardContent
                 inscriptionId={collection.inscription_icon.inscription_id}
                 content_type={collection.inscription_icon.content_type}
+                inscription={collection.inscription_icon}
               />
             </div>
           ) : (

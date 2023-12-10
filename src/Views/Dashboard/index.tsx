@@ -70,6 +70,7 @@ function AccountPage() {
             <CardContent
               inscriptionId={profile?.inscription_id}
               content_type={profile?.content_type}
+              inscription={profile}
             />
           ) : (
             <CardContent

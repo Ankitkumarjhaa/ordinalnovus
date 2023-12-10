@@ -36,7 +36,7 @@ const CustomCard: React.FC<CustomCardProps> = ({
             <CardContent
               inscriptionId={inscriptionId}
               content_type={content_type}
-              showTag={true}
+              inscription={inscription}
             />
           </div>
 

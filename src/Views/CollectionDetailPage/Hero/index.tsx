@@ -28,6 +28,7 @@ function Hero({ data }: HeroProps) {
               <CardContent
                 inscriptionId={data.inscription_icon.inscription_id}
                 content_type={data.inscription_icon.content_type}
+                inscription={data.inscription_icon}
               />
             </div>
           ) : (

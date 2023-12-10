@@ -48,7 +48,7 @@ function DisplayProperties({ data }: InscriptionProps) {
     },
     {
       label: "Block",
-      value: data?.block || "none",
+      value: data?.genesis_height || "none",
     },
     { label: "Offset", value: data?.offset || 0 },
     {

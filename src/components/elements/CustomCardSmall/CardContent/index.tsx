@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 
-import CircularProgress from "@mui/material/CircularProgress";
-
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -12,14 +10,15 @@ import JSZip from "jszip";
 import AudioPlayer from "../../AudioPlayer";
 import mixpanel from "mixpanel-browser";
 import { domain_format_validator } from "@/utils";
+import { IInscription } from "@/types";
 
 type CardContentProps = {
   inscriptionId: string;
   content_type?: string;
   content?: string;
   className?: string;
-  showTag?: boolean;
   showFull?: boolean;
+  inscription?: IInscription;
 };
 
 const CardContent: React.FC<CardContentProps> = ({
@@ -27,8 +26,8 @@ const CardContent: React.FC<CardContentProps> = ({
   content_type,
   content,
   className,
-  showTag = false,
   showFull = false,
+  inscription,
 }) => {
   const [fileNames, setFileNames] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -122,12 +121,29 @@ const CardContent: React.FC<CardContentProps> = ({
         );
       case "application/json":
         let jsonContent;
+
         try {
+          let parsedJson = JSON.parse(fetchedContent + "");
           jsonContent = JSON.stringify(
             JSON.parse(fetchedContent + ""),
             null,
             2
           );
+
+          if (parsedJson.p && parsedJson.op && parsedJson.name) {
+            return (
+              <div className="w-full h-full flex flex-col justify-center items-center text-sm tracking-widest py-6">
+                {inscription?.domain_valid && (
+                  <div className="absolute top-5 right-5 z-50">
+                    <span className="text-xs rounded  bg-bitcoin text-yellow-900 px-4 py-1 ">
+                      Valid Domain
+                    </span>
+                  </div>
+                )}{" "}
+                <p className="text-3xl">{parsedJson.name}</p>
+              </div>
+            );
+          }
         } catch (error) {
           console.error("Error parsing JSON: ", error);
           jsonContent = fetchedContent;
@@ -160,6 +176,13 @@ const CardContent: React.FC<CardContentProps> = ({
           if (parsedJson.op && parsedJson.tick && parsedJson.amt) {
             return (
               <div className="w-full h-full flex flex-col justify-center items-center text-sm tracking-widest">
+                {inscription?.token && (
+                  <div className="absolute top-5 right-5 z-50">
+                    <span className="text-xs rounded  bg-bitcoin text-yellow-900 px-4 py-1 ">
+                      TOKEN
+                    </span>
+                  </div>
+                )}{" "}
                 <p className="uppercase">{parsedJson.op}</p>
                 <p className="text-3xl">{parsedJson.amt}</p>
                 <hr />
@@ -169,6 +192,13 @@ const CardContent: React.FC<CardContentProps> = ({
           } else if (parsedJson.p && parsedJson.op && parsedJson.name) {
             return (
               <div className="w-full h-full flex flex-col justify-center items-center text-sm tracking-widest py-6">
+                {inscription?.domain_valid && (
+                  <div className="absolute top-5 right-5 z-50">
+                    <span className="text-xs rounded  bg-bitcoin text-yellow-900 px-4 py-1 ">
+                      Valid Domain
+                    </span>
+                  </div>
+                )}{" "}
                 <p className="text-3xl">{parsedJson.name}</p>
               </div>
             );
@@ -181,12 +211,18 @@ const CardContent: React.FC<CardContentProps> = ({
           ) {
             return (
               <div className="w-full h-full flex flex-col justify-center items-center text-sm tracking-widest">
+                {inscription?.token && (
+                  <div className="absolute top-5 right-5 z-50">
+                    <span className="text-xs rounded  bg-bitcoin text-yellow-900 px-4 py-1 ">
+                      TOKEN
+                    </span>
+                  </div>
+                )}{" "}
                 <p className="uppercase">{parsedJson.op}</p>
                 <p className="text-xl">{parsedJson.max}</p>
                 <p className="uppercase font-bold">{parsedJson.tick}</p>
                 <hr className="mb-2" />
                 <hr className="mb-2" />
-
                 <p className="text-xs font-bold">Limit: {parsedJson.lim}</p>
               </div>
             );
@@ -202,6 +238,13 @@ const CardContent: React.FC<CardContentProps> = ({
           if (domain_format_validator(fetchedContent + "")) {
             return (
               <div className="w-full h-full flex flex-col justify-center items-center text-sm tracking-widest py-6">
+                {inscription?.domain_valid && (
+                  <div className="absolute top-5 right-5 z-50">
+                    <span className="text-xs rounded  bg-bitcoin text-yellow-900 px-4 py-1 ">
+                      Valid Domain
+                    </span>
+                  </div>
+                )}{" "}
                 <p className="text-3xl">{fetchedContent}</p>
               </div>
             );
@@ -337,11 +380,6 @@ const CardContent: React.FC<CardContentProps> = ({
 
   return (
     <div className="w-full h-full overflow-y-auto overflow-x-hidden no-scrollbar">
-      {showTag && fetchedContent && fetchedContent.includes(`"p":"brc-20"`) && (
-        <span className="px-2 py-1 rounded-xl border border-yellow-500 bg-yellow-300 text-yellow-800 text-xs font-bold">
-          BRC 20
-        </span>
-      )}
       {isLoading ? (
         <div className="flex justify-center items-center h-full text-white py-6  w-full">
           {/* <CircularProgress color="inherit" size={10} />{" "} */}

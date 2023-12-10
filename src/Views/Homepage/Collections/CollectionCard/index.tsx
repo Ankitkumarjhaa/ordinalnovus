@@ -28,6 +28,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ item }) => {
                 <CardContent
                   inscriptionId={item.inscription_icon.inscription_id}
                   content_type={item.inscription_icon.content_type}
+                  inscription={item.inscription_icon}
                 />
               </div>
             ) : (

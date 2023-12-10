@@ -49,7 +49,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
             <CardContent
               inscriptionId={inscriptionId}
               content_type={content_type}
-              showTag={true}
+              inscription={inscription}
             />
           </div>
 

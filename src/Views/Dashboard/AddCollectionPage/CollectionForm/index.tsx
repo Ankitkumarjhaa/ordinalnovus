@@ -176,6 +176,7 @@ function CollectionForm({
                     inscriptionId={inscription_icon}
                     content_type={inscription.content_type}
                     className="h-full w-full"
+                    inscription={inscription}
                   />
                 ) : (
                   <>

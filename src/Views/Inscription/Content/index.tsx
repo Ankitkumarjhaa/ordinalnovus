@@ -18,11 +18,13 @@ function Content({ data }: ContentProps) {
   const handleClose = () => setOpen(false);
 
   return (
-    <div className="w-full lg:w-4/12 h-full flex flex-col justify-center lg:justify-start items-center">
+    <div className="w-full lg:w-4/12 h-full flex relative flex-col justify-center lg:justify-start items-center">
       <div className="max-w-[300px] max-h-[300px] min-w-[300px] xl:min-w-[350px] min-h-[300px] xl:min-h-[350px] xl:h-[350px] p-6 rounded-xl lg:w-full bg-secondary border xl:border-2 border-accent lg:h-full relative overflow-hidden center">
         <CardContent
           inscriptionId={data.inscription_id}
           content_type={data.content_type}
+          inscription={data}
+        
         />
       </div>
       {
@@ -65,6 +67,7 @@ function Content({ data }: ContentProps) {
                         showFull={true}
                         inscriptionId={data?.inscription_id}
                         content_type={data?.content_type}
+                        inscription={data}
                       />
                     </div>
                   </div>

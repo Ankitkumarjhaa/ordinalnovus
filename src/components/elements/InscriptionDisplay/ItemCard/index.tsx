@@ -28,7 +28,7 @@ const ItemCard: React.FC<CollectionCardProps> = ({ inscription }) => {
             <CardContent
               inscriptionId={inscription.inscription_id}
               content_type={inscription.content_type}
-              showTag={true}
+              inscription={inscription}
             />
           </div>
 

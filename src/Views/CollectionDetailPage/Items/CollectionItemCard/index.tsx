@@ -29,6 +29,7 @@ const CollectionItemCard: React.FC<CollectionCardProps> = ({
             <CardContent
               inscriptionId={item.inscription_id + ""}
               content_type={item.content_type}
+              inscription={item}
             />
             {item.listed_price ? (
               <div className="absolute bottom-0 bg-black bg-opacity-70 py-1 px-2 left-0 right-0">
