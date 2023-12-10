@@ -46,7 +46,7 @@ export async function generateMetadata(
         images: `${
           process.env.NEXT_PUBLIC_API
         }/generate-image?url=${encodeURIComponent(
-          "https://ordinalnovus.com/content/" + inscription.inscription_id
+          "https://ordinalnovus.com/inscription/" + inscription.inscription_id
         )}`,
         locale: "en-US",
       },
@@ -59,7 +59,7 @@ export async function generateMetadata(
         images: `${
           process.env.NEXT_PUBLIC_API
         }/generate-image?url=${encodeURIComponent(
-          "https://ordinalnovus.com/content/" + inscription.inscription_id
+          "https://ordinalnovus.com/inscription/" + inscription.inscription_id
         )}`,
       },
     };
