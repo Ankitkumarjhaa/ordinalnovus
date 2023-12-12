@@ -80,15 +80,20 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
       .sort({ inscription_number: -1 })
       .select("inscription_number");
 
+    let recentInscriptions = null;
 
-    const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_URL}/api/ordapi/feed?apikey=${process.env.API_KEY}`
-    );
-    const recentInscriptions: RecentInscription[] = response?.data || [];
+    try {
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_URL}/api/ordapi/feed?apikey=${process.env.API_KEY}`
+      );
+      recentInscriptions = response?.data || [];
+    } catch (err: any) {}
 
     // Add the recentInscriptions to the data
-    data.recentInscriptions = recentInscriptions;
-    const latestInscription = recentInscriptions[0].number;
+    data.recentInscriptions = recentInscriptions || [];
+    const latestInscription = recentInscriptions
+      ? recentInscriptions[0].number
+      : highestInDB.inscription_number;
     data.latest = latestInscription;
     data.highest = highestInDB.inscription_number;
     data.percentParsed = Number(
@@ -97,6 +102,8 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
 
     const listings = await Inscription.find({ listed: true }).limit(50);
     data.listings = listings;
+
+    console.log({ data });
 
     // Return data in the desired format
     return NextResponse.json({

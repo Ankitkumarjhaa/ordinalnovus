@@ -127,6 +127,9 @@ function Homepage({ data }: HomepageProps) {
           </span>
         </div>
       )}
+      <div className="bg-yellow-700 py-2 w-full my-2 text-center text-xs uppercase font-bold text-white">
+        <p className="text-center">Updating node. Maintenance Mode. 🛠️</p>
+      </div>
       {/* <div className="center p-2 flex-wrap">
         {list.map((item) => (
           <div
