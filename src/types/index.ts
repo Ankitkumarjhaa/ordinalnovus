@@ -151,6 +151,12 @@ export interface IInscription {
   version?: number;
   token?: boolean;
   domain_valid?: boolean;
+
+  // v12.1.3
+  metadata?: Map<string, string>;
+  metaprotocol?: string;
+  parsed_metaprotocol?: string[];
+  charms?: number;
 }
 
 export interface Holder {

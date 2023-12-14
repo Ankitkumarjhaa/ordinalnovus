@@ -7,8 +7,6 @@ import fetchContentFromProviders from "@/utils/api/fetchContentFromProviders";
 import { IInscription } from "@/types";
 import moment from "moment";
 import { domain_format_validator } from "@/utils";
-import { getCache, setCache } from "@/lib/cache";
-import { sendEmailAlert } from "@/utils/sendEmailAlert";
 
 // Function to fetch details of a single inscription
 async function fetchInscriptionDetails(
@@ -69,7 +67,6 @@ async function checkDomainValid(domain: string) {
 // Main handler function
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const bulkOps: any[] = [];
-  const savedInscriptions: number[] = [];
 
   try {
     await dbConnect();
@@ -77,25 +74,22 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       inscription_number: -1,
     });
     const start = highestInscription
-      ? highestInscription.inscription_number + 1
+      ? highestInscription.inscription_number
       : -1;
 
-    const BATCH = 500;
+    const savedInscriptionIds: string[] = [];
+    const BATCH = 100;
 
-    // Initialize the array with undefined values, then map each element to its incremented value.
-    const inscriptionArray = Array.from(
-      { length: BATCH },
-      (_, index) => start + index
-    );
+    const url = `${process.env.NEXT_PUBLIC_PROVIDER}/api/inscriptions/${
+      start + BATCH
+    }/${BATCH}`;
+    const inscriptionsRes = await axios.get(url);
+    const inscriptionIdList = inscriptionsRes.data.inscriptions.reverse();
 
-    console.log({ inscriptionArray });
-
-    // await deleteInscriptionsAboveThreshold(47062404);
-    // return NextResponse.json({});
     // Fetch inscriptions asynchronously
-    const promises = inscriptionArray.map(
-      async (inscription_number: string, index: number) => {
-        if (!inscription_number) return;
+    const promises = inscriptionIdList.map(
+      async (inscriptionId: string, index: number) => {
+        if (!inscriptionId) return;
         let tags: string[] = [];
         let content = null;
         let sha;
@@ -103,10 +97,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         let contentType = null;
         let contentResponse = null;
         let domain_name = null;
-        let domain_valid = false;
+        let domain_valid = null;
 
         try {
-          contentResponse = await fetchContentFromProviders(inscription_number);
+          contentResponse = await fetchContentFromProviders(inscriptionId);
           contentType = contentResponse.headers["content-type"];
 
           if (/text|html|json|javascript/.test(contentType)) {
@@ -129,12 +123,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
               const bitmapPattern = /^\d+\.bitmap$/;
               if (bitmapPattern.test(content)) {
                 tags.push("bitmap");
-              }
-
-              if (content.startsWith("cbrc-20:")) {
-                tags.push("cbrc");
-                tags.push("token");
-                token = true;
               }
               const parsedContent = JSON.parse(content.toString("utf-8"));
 
@@ -210,61 +198,17 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         } catch (e) {}
 
         let inscriptionDetails: any = {};
-        inscriptionDetails = await fetchInscriptionDetails(inscription_number);
-        tags = tags.filter((tag) => tag).map((tag) => tag.toLowerCase());
-
-        if (inscriptionDetails.metadata)
-          inscriptionDetails.metadata = new Map(
-            Object.entries(inscriptionDetails.metadata)
-          );
-
-        if (inscriptionDetails.metaprotocol)
-          console.log(inscriptionDetails.metaprotocol, "PARSED");
-        if (
-          inscriptionDetails.metaprotocol &&
-          inscriptionDetails.metaprotocol?.startsWith("cbrc-20")
-        ) {
-          token = true;
-          tags.push("token");
-          tags.push("cbrc");
-
-          // // Check if a 'halt processing' cache entry exists
-          // const haltProcessing = await getCache("haltInscriptionsProcessing");
-          // const cacheKey = "addInscriptionAlert";
-          // const cache = await getCache(cacheKey);
-          // if (!cache) {
-          //   try {
-          //     await sendEmailAlert({
-          //       subject: "Inscriptions Processing Stopped",
-          //       html: `<h1>Ordinalnovus Email Alert</h1><br/>
-          //     <p>Inscriptions Processing Stopped<p><br/>
-          //     <p>Inscription Number: ${inscription_number}</p><br/>
-          //     <p>Metaprotocol: ${inscriptionDetails.metaprotocol}</p></br/>`,
-          //     });
-
-          //     setCache(cacheKey, { emailSent: true }, 2 * 60 * 60);
-          //   } catch {}
-          // }
-          // if (haltProcessing) {
-          //   return NextResponse.json({
-          //     message: "Received  a CBRC Token",
-          //   });
-          // } else {
-          //   setCache("haltInscriptionsProcessing", true, 2 * 60 * 60);
-          //   return NextResponse.json({
-          //     message: "Received  a CBRC Token",
-          //   });
-          // }
+        if (!token) {
+          // if content is not a token
+          inscriptionDetails = await fetchInscriptionDetails(inscriptionId);
+        } else {
+          inscriptionDetails.inscription_number = start + 1 + index;
         }
-        if (inscriptionDetails.metaprotocol)
-          inscriptionDetails.parsed_metaprotocol =
-            inscriptionDetails?.metaprotocol;
-        // .split(":")
-        // .map((element: string) => element.trim());
-
+        tags = tags.filter((tag) => tag).map((tag) => tag.toLowerCase());
         bulkOps.push({
           insertOne: {
             document: {
+              inscription_id: inscriptionId,
               content_type: contentType,
               ...(token ||
               !contentResponse ||
@@ -272,11 +216,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
               /image|audio|zip|video/.test(contentType)
                 ? {}
                 : { content: contentResponse.data.toString("utf-8") }),
-              ...(sha &&
-                (!inscriptionDetails.metaprotocol ||
-                  !inscriptionDetails.metaprotocol.includes("transfer")) && {
-                  sha,
-                }),
+              ...(sha && { sha }),
               ...(token && { token }),
               ...(domain_name && {
                 domain_name: domain_name?.toLowerCase().trim(),
@@ -288,7 +228,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
           },
         });
 
-        savedInscriptions.push(Number(inscription_number));
+        savedInscriptionIds.push(inscriptionId);
       }
     );
 
@@ -302,10 +242,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       );
     });
 
-    savedInscriptions.sort((a, b) => {
-      return a - b;
-    });
-
     const transformedBulkDocs = await handlePreSaveLogic(bulkOps);
 
     const bulkWriteOperations = transformedBulkDocs.map((transformedDoc) => {
@@ -316,15 +252,15 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       };
     });
 
+    // await deleteInscriptionsAboveThreshold(43038000);
+
+    // Perform the bulk insert after transformations are done
     if (bulkWriteOperations.length > 0)
       await Inscription.bulkWrite(bulkWriteOperations);
+
     return NextResponse.json({
       message: "Inscriptions fetched and saved successfully",
-      stats: {
-        saved: savedInscriptions.length,
-      },
-      // savedInscriptions,
-      // bulkWriteOperations,
+      savedInscriptionIds,
     });
   } catch (error) {
     console.error(error);
@@ -359,6 +295,7 @@ const handlePreSaveLogic = async (bulkDocs: Array<Partial<any>>) => {
   // Unique domain pre-processing
   bulkDocs.forEach((doc) => {
     if (doc.insertOne.document.domain_name) {
+      console.log({ doc });
       const domainName = doc.insertOne.document.domain_name
         .toLowerCase()
         .trim();

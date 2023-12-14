@@ -174,6 +174,26 @@ export const inscriptionSchema = new mongoose.Schema(
     token: { type: Boolean, default: false },
     domain_name: { type: String, set: (v: string) => v.trim() },
     domain_valid: { type: Boolean },
+
+    // new fields (metadata + metaprotocols)
+    charms: { type: Number },
+    metaprotocol: { type: String },
+    parsed_metaprotocol: {
+      type: [String],
+      set: function (value: string) {
+        // Check if the value is a string and not empty
+        if (typeof value === "string" && value.trim().length > 0) {
+          // Split the string by a delimiter (e.g., comma), trim and convert each part to lowercase
+          return value.split(":").map((item) => item.trim().toLowerCase());
+        } else {
+          return [];
+        }
+      },
+    },
+    metadata: {
+      type: Map,
+      of: String,
+    },
   },
   {
     timestamps: { createdAt: "created_at", updatedAt: "updated_at" },
@@ -213,3 +233,7 @@ inscriptionSchema.index({ tags: 1 });
 inscriptionSchema.index({ inscription_number: 1 });
 inscriptionSchema.index({ "attributes.value": 1, "attributes.trait_type": 1 });
 inscriptionSchema.index({ rarity: 1 });
+
+// metadata and metaprotocol index
+
+inscriptionSchema.index({ metaprotocol: 1, parsed_metaprotocol: 1 });
