@@ -391,6 +391,36 @@ const CardContent: React.FC<CardContentProps> = ({
           BITMAP
         </span>
       )}{" "}
+      {inscription?.metaprotocol?.includes("cbrc-20") && (
+        <div>
+          <span className="absolute bg-bitcoin rounded font-bold text-yellow-900 capitalize text-xs p-1 z-10 top-[5px] left-[5px] ">
+            CBRC-20
+          </span>
+        </div>
+      )}{" "}
+      {inscription?.metaprotocol?.includes("cbrc-20") && (
+        <div>
+          <span
+            className={`absolute text-center ${
+              inscription?.cbrc_valid
+                ? "bg-green-400 text-green-900 "
+                : "bg-red-400 text-red-900 "
+            } rounded font-bold  capitalize text-sm py-3 z-10 bottom-0 right-0 left-0 `}
+          >
+            {inscription?.cbrc_valid
+              ? "Valid Transfer Note"
+              : "Invalid Transfer Note"}
+          </span>
+        </div>
+      )}{" "}
+      {inscription?.parsed_metaprotocol &&
+        inscription?.parsed_metaprotocol?.length > 2 && (
+          <div>
+            <span className="absolute bg-bitcoin rounded font-bold text-yellow-900 capitalize text-xs p-1 z-10 top-[5px] right-[5px] ">
+              {inscription?.parsed_metaprotocol[1]}
+            </span>
+          </div>
+        )}{" "}
       {isLoading ? (
         <div className="flex justify-center items-center h-full text-white py-6  w-full">
           {/* <CircularProgress color="inherit" size={10} />{" "} */}

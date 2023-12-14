@@ -157,6 +157,7 @@ export interface IInscription {
   metaprotocol?: string;
   parsed_metaprotocol?: string[];
   charms?: number;
+  cbrc_valid?: boolean;
 }
 
 export interface Holder {

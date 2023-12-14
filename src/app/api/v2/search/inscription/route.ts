@@ -23,7 +23,6 @@ async function fetchInscriptions(query: any, page: number, limit: number) {
 
   console.log({ query }, "sending to fetch");
 
-  const skip = (page - 1) * limit;
   try {
     const response = await Inscription.find({ ...query })
       .limit(limit || 20)
@@ -33,7 +32,8 @@ async function fetchInscriptions(query: any, page: number, limit: number) {
       })
       .select(
         "-created_at -updated_at -error_tag -error-retry -error -signed_psbt -unsigned_psbt"
-      );
+      )
+      .lean();
 
     const inscriptions = response || [];
     const totalCount = response.length;
@@ -92,6 +92,24 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
     console.log(inscriptions.length, " inscriptions found in db");
 
     if (inscriptions.length) {
+      const ins = inscriptions[0];
+      if (ins && ins.parsed_metaprotocol) {
+        if (
+          ins.parsed_metaprotocol.includes("cbrc-20") &&
+          ins.parsed_metaprotocol.includes("transfer")
+        ) {
+          try {
+            const valid = await checkCbrcValidity(ins.inscription_id);
+            if (valid !== undefined) {
+              inscriptions[0].cbrc_valid = valid;
+            } else {
+              console.debug("checkCbrcValidity returned undefined");
+            }
+          } catch (error) {
+            console.error("Error in checkCbrcValidity: ", error);
+          }
+        }
+      }
       return NextResponse.json({
         statusCode: 200,
         message: "Fetched Inscription data successfully",
@@ -111,6 +129,26 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
       const iData = await fetchLatestInscriptionData(id);
       iData.inscription_id = id;
       iData.from_ord = true;
+      if (iData) {
+        const ins = iData;
+        if (ins && ins.metaprotocol) {
+          if (
+            ins.metaprotocol.includes("cbrc-20") &&
+            ins.metaprotocol.includes("transfer")
+          ) {
+            try {
+              const valid = await checkCbrcValidity(ins.inscription_id);
+              if (valid !== undefined) {
+                iData.cbrc_valid = valid;
+              } else {
+                console.log("checkCbrcValidity returned undefined");
+              }
+            } catch (error) {
+              console.error("Error in checkCbrcValidity: ", error);
+            }
+          }
+        }
+      }
       return NextResponse.json({
         statusCode: 200,
         message: "Fetched Latest Inscription data successfully",
@@ -175,4 +213,15 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
   }
 }
 
+const checkCbrcValidity = async (id: string) => {
+  try {
+    console.log("checking cbrc validity...");
+    const { data } = await axios.get(`https://api.cybord.org/transfer?q=${id}`);
+    if (data) {
+      return true;
+    }
+  } catch (e: any) {
+    return false;
+  }
+};
 export const dynamic = "force-dynamic";

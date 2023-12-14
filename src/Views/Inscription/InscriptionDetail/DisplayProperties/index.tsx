@@ -76,6 +76,21 @@ function DisplayProperties({ data }: InscriptionProps) {
         ? shortenString(String(data?.official_collection?.name) || "none")
         : null,
     },
+    {
+      label: "Metaprotocol",
+      value: data?.metaprotocol || null,
+      shortenValue: data?.metaprotocol
+        ? shortenString(String(data?.metaprotocol) || "none")
+        : null,
+    },
+    {
+      label: "CBRC Valid",
+      value:
+        data?.parsed_metaprotocol &&
+        data?.parsed_metaprotocol.includes("cbrc-20")
+          ? data?.cbrc_valid
+          : null,
+    },
   ];
   return (
     <div className="flex items-center justify-start flex-wrap">
@@ -88,7 +103,10 @@ function DisplayProperties({ data }: InscriptionProps) {
           },
           index: React.Key | null | undefined
         ) => {
-          if (property.value || property.value === 0)
+          if (
+            (property.value || property.value === 0) &&
+            property.label !== "CBRC Valid"
+          )
             return (
               <div key={index} className="p-3 w-6/12 md:w-4/12">
                 <Tooltip title={property.value}>
