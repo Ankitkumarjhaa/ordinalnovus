@@ -111,7 +111,7 @@ function CBRC() {
           <CustomButton
             link={true}
             text="View All"
-            href="/cbrc"
+            href="/cbrc-20"
             hoverBgColor="hover:bg-accent_dark"
             hoverTextColor="text-white"
             bgColor="bg-accent"

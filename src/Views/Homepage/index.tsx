@@ -9,7 +9,6 @@ import Recent from "./RecentlyInscribed";
 import Collections from "./Collections";
 import { ICollection, IInscription } from "@/types";
 import Listed from "./Listed";
-import CardContent from "@/components/elements/CustomCardSmall/CardContent";
 import CBRC from "./CBRC";
 // import CustomCard from "@/components/elements/CustomCardSmall";
 type Data = {

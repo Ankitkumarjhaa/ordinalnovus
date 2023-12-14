@@ -39,7 +39,7 @@ function Hero({ data }: HeroProps) {
               {`${data.tick} is a CBRC-20 Token on BTC Blockchain with a supply of ${data.max}`}
             </p>
           </div>
-          <div className="w-ull md:w-4/12">
+          <div className="w-full md:w-4/12">
             <div className="supply bg-primary-dark px-3 py-1 rounded-lg my-3 md:m-3 text-sm md:ml-0 w-full flex justify-between items-center">
               <span>Max</span>
               <span className="text-white">{data.max}</span>

@@ -76,8 +76,8 @@ function CBRC() {
 
   return (
     <section className="pt-16 w-full">
-      <div className="flex justify-between items-center">
-        <h2 className="font-bold text-2xl lg:text-4xl text-white pb-6">
+      <div className="flex justify-between items-center flex-wrap">
+        <h2 className="font-bold text-2xl lg:text-4xl text-white pb-6 w-full lg:w-auto ">
           Cyborg BRC-20 Protocol
         </h2>
         {data && data.length > 0 && (
@@ -111,7 +111,11 @@ function CBRC() {
             borderColor: "#3d0263",
           }}
         >
-          <Table sx={{ minWidth: 650 }} aria-label="cbrc-20 table">
+          <Table
+            size={"small"}
+            sx={{ minWidth: 650 }}
+            aria-label="cbrc-20 table"
+          >
             <TableHead sx={{ bgcolor: "#84848a", color: "white" }}>
               <TableRow>
                 <TableCell sx={{ fontWeight: "bold", fontSize: "1.25rem" }}>
