@@ -103,8 +103,6 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
     const listings = await Inscription.find({ listed: true }).limit(50);
     data.listings = listings;
 
-    console.log({ data });
-
     // Return data in the desired format
     return NextResponse.json({
       statusCode: 200,

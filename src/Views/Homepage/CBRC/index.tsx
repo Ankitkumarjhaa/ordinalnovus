@@ -83,17 +83,7 @@ function CBRC() {
         mode: "deploy",
         sort,
       });
-
-      if (result && result.error) {
-        dispatch(
-          addNotification({
-            id: new Date().valueOf(),
-            severity: "error",
-            message: result.error,
-            open: true,
-          })
-        );
-      } else if (result && result.data) {
+      if (result && result.data) {
         setData(result.data.items);
         setTotalCount(result.data.count);
         setLoading(false);
@@ -102,6 +92,10 @@ function CBRC() {
 
     fetchData();
   }, [sort, page, dispatch]);
+
+  if (loading) {
+    return <></>;
+  }
 
   return (
     <section className="pt-16 w-full">
