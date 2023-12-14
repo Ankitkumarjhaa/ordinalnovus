@@ -127,7 +127,7 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
         "if no inscription data in db and id is inscriptionId, try fetching latest data"
       );
       const iData = await fetchLatestInscriptionData(id);
-      iData.inscription_id = id;
+      // iData.inscription_id = id;
       iData.from_ord = true;
       if (iData) {
         const ins = iData;
@@ -217,12 +217,24 @@ const checkCbrcValidity = async (id: string) => {
   try {
     console.log("checking cbrc validity...");
     const { data } = await axios.get(`https://api.cybord.org/transfer?q=${id}`);
+
     if (data) {
-      if (data.transfer.transferred) {
-        return false;
-      } else return true;
+      console.log({ check_data: data });
+      return !data.transfer.transferred;
     }
+
+    throw new Error("No data received from the API");
   } catch (e: any) {
+    // Check if the error is a 500 status code
+    if (
+      e.response &&
+      (e.response.status === 500 || e.response.status === 400)
+    ) {
+      throw new Error("Cyborg API is down (500 Server Error)");
+    }
+
+    // Handle other types of errors
+    console.error("Error checking CBRC validity:", e.message);
     return false;
   }
 };

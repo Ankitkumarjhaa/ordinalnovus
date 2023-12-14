@@ -92,7 +92,7 @@ const CardContent: React.FC<CardContentProps> = ({
           <p>Minted: {((cbrc.supply / cbrc.max) * 100).toFixed(3)}%</p>
         </div>
       );
-    } else if (inscription?.metaprotocol?.includes("cbrc-20:")) {
+    } else if (inscription?.metaprotocol?.includes("cbrc-20:transfer")) {
       const [tag, mode, tokenAmt] = inscription.metaprotocol.split(":");
       const [token, amt] = tokenAmt.split("=");
       return (
@@ -420,7 +420,9 @@ const CardContent: React.FC<CardContentProps> = ({
           >
             {inscription?.cbrc_valid
               ? "Valid Transfer Note"
-              : "Invalid Transfer Note"}
+              : inscription?.cbrc_valid === false
+              ? "Invalid Transfer Note"
+              : "Cyborg Down !! Can't Validate!"}
           </span>
         </div>
       )}{" "}

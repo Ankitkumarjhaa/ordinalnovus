@@ -6,6 +6,7 @@ type SearchDetailProps = {
   data: IInscription;
 };
 function SearchDetailPage({ data }: SearchDetailProps) {
+  console.log({ data });
   return (
     <div className="min-h-[40vh] py-16 flex justify-center flex-wrap">
       <Content data={data} />

@@ -7,14 +7,15 @@ import { usePathname, useSearchParams } from "next/navigation";
 import mixpanel from "mixpanel-browser";
 import { useWalletAddress } from "bitcoin-wallet-adapter";
 import initMixpanel from "@/lib/mixpanelConfig";
+import { useParams } from "next/navigation";
 
 export function NavigationEvents() {
   const pathname = usePathname();
+  const params = useParams();
   const searchParams = useSearchParams();
   const walletDetails = useWalletAddress();
 
   useEffect(() => {
-    console.log("initializing_mixpanel_nav_events");
     initMixpanel();
   }, []);
 
@@ -26,6 +27,9 @@ export function NavigationEvents() {
       switch (true) {
         case pathname === "/":
           pageName = "Homepage";
+          break;
+        case pathname === "/cbrc-20":
+          pageName = "CBRC";
           break;
         case pathname === "/search":
           pageName = "Search";
@@ -54,6 +58,9 @@ export function NavigationEvents() {
           break;
         case pathname.startsWith("/sat/"):
           pageName = "Sat Search";
+          break;
+        case pathname.startsWith("/cbrc-20/"):
+          pageName = "CBRC 20 Token";
           break;
         default:
           pageName = "Unknown Page";

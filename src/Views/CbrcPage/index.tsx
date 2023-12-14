@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 import CustomSearch from "@/components/elements/CustomSearch";
 
 import { FaSearch } from "react-icons/fa";
+import mixpanel from "mixpanel-browser";
 function CBRC() {
   const dispatch = useDispatch();
   const [data, setData] = useState<Icbrc[] | null>(null);
@@ -52,6 +53,11 @@ function CBRC() {
       setData(result.data.items);
       setTotalCount(result.data.count);
       setLoading(false);
+      mixpanel.track("CBRC Search Performed", {
+        search_query: search,
+        sort_option: sort,
+        page_number: page,
+      });
     }
   }, [page, search, sort]);
 

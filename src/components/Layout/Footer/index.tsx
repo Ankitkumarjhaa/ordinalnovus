@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import React from "react";
-import { FaCopy, FaDiscord } from "react-icons/fa";
+import { FaBitcoin, FaCopy, FaDiscord } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import Image from "next/image";
 import { shortenString } from "@/utils";
@@ -9,6 +9,7 @@ import copy from "copy-to-clipboard";
 import { addNotification } from "@/stores/reducers/notificationReducer";
 import { useDispatch } from "react-redux";
 import mixpanel from "mixpanel-browser";
+import { RiNftFill } from "react-icons/ri";
 function Footer() {
   const dispatch = useDispatch();
   function handleSocialClick(platform: string, url: string) {
@@ -97,7 +98,7 @@ function Footer() {
               dispatch(
                 addNotification({
                   id: new Date().valueOf(),
-                  message: "Copied donation address",
+                  message: "Copied BTC donation address",
                   open: true,
                   severity: "success",
                 })
@@ -105,8 +106,39 @@ function Footer() {
             }}
             className="mx-3 flex cursor-pointer items-center justify-center bg-secondary py-2 px-4 rounded-xl"
           >
+            <p className="mr-3 text-yellow-500">
+              <FaBitcoin />
+            </p>
             <p className="">
               {shortenString("bc1qhg8828sk4yq6ac08rxd0rh7dzfjvgdch3vfsm4")}{" "}
+            </p>
+            <p className="ml-3 text-yellow-500">
+              <FaCopy />
+            </p>
+          </div>
+          <div
+            onClick={() => {
+              copy(
+                "bc1pe3j6wuwgc6xw7f6dtz36amn4u9fgg4cp3j2as6h5qvnhgff9qw2qhs6wzr"
+              );
+              dispatch(
+                addNotification({
+                  id: new Date().valueOf(),
+                  message: "Copied Inscription donation address",
+                  open: true,
+                  severity: "success",
+                })
+              );
+            }}
+            className="mx-3 flex cursor-pointer items-center justify-center bg-secondary py-2 px-4 rounded-xl"
+          >
+            <p className="mr-3 text-yellow-500">
+              <RiNftFill />
+            </p>
+            <p className="">
+              {shortenString(
+                "bc1pe3j6wuwgc6xw7f6dtz36amn4u9fgg4cp3j2as6h5qvnhgff9qw2qhs6wzr"
+              )}{" "}
             </p>
             <p className="ml-3 text-yellow-500">
               <FaCopy />
