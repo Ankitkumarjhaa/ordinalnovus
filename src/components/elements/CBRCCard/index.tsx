@@ -26,7 +26,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
 }) => {
   return (
     <div className={`card_div p-2 w-full relative`}>
-      <Link shallow href={`/inscription/${inscriptionId}`}>
+      <Link shallow href={`/cbrc-20/${inscription.tick}`}>
         <div
           className={
             " overflow-hidden relative rounded-xl border xl:border-2 border-accent bg-secondary shadow-xl p-3 " +

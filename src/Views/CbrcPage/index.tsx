@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { FetchCBRC } from "@/apiHelper/getCBRC";
 import { addNotification } from "@/stores/reducers/notificationReducer";
 import { useDispatch } from "react-redux";
@@ -16,7 +16,9 @@ import {
 } from "@mui/material";
 import CustomPaginationComponent from "@/components/elements/CustomPagination";
 import { useRouter } from "next/navigation";
+import CustomSearch from "@/components/elements/CustomSearch";
 
+import { FaSearch } from "react-icons/fa";
 function CBRC() {
   const dispatch = useDispatch();
   const [data, setData] = useState<Icbrc[] | null>(null);
@@ -28,34 +30,34 @@ function CBRC() {
   const router = useRouter();
 
   const [sort, setSort] = useState<string>("creation:1");
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    const result = await FetchCBRC({
+      offset: (page - 1) * page_size,
+      mode: "deploy",
+      sort,
+      search,
+    });
+
+    if (result && result.error) {
+      dispatch(
+        addNotification({
+          id: new Date().valueOf(),
+          severity: "error",
+          message: result.error,
+          open: true,
+        })
+      );
+    } else if (result && result.data) {
+      setData(result.data.items);
+      setTotalCount(result.data.count);
+      setLoading(false);
+    }
+  }, [page, search, sort]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      const result = await FetchCBRC({
-        offset: (page - 1) * page_size,
-        mode: "deploy",
-        sort,
-      });
-
-      if (result && result.error) {
-        dispatch(
-          addNotification({
-            id: new Date().valueOf(),
-            severity: "error",
-            message: result.error,
-            open: true,
-          })
-        );
-      } else if (result && result.data) {
-        setData(result.data.items);
-        setTotalCount(result.data.count);
-        setLoading(false);
-      }
-    };
-
     fetchData();
-  }, [sort, page, dispatch, search]);
+  }, [sort, page, dispatch]);
 
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
@@ -67,6 +69,11 @@ function CBRC() {
     //@ts-ignore
     router.push(`/cbrc-20/${tick}`);
   };
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+  };
+
   return (
     <section className="pt-16 w-full">
       <div className="flex justify-between items-center">
@@ -82,6 +89,17 @@ function CBRC() {
             />
           </div>
         )}
+      </div>
+      <div className="w-full center lg:w-auto my-2">
+        <CustomSearch
+          placeholder="CBRC Token..."
+          value={search}
+          onChange={handleSearchChange}
+          icon={FaSearch}
+          end={true}
+          onIconClick={fetchData}
+          fullWidth
+        />
       </div>
       <div className="">
         <TableContainer

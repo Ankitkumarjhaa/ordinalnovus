@@ -5,7 +5,7 @@ import CustomSearch from "@/components/elements/CustomSearch";
 import CustomSelector from "@/components/elements/CustomSelector";
 import { addNotification } from "@/stores/reducers/notificationReducer";
 import { ICollection, IInscription } from "@/types";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import CollectionItemCard from "./CollectionItemCard";
 import SkeletonCollectionItemCard from "./SkeletonCollectionItemCard";
