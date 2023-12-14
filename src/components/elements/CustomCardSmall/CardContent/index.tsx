@@ -92,7 +92,7 @@ const CardContent: React.FC<CardContentProps> = ({
           <p>Minted: {((cbrc.supply / cbrc.max) * 100).toFixed(3)}%</p>
         </div>
       );
-    } else if (inscription?.metaprotocol?.includes("cbrc-20:transfer")) {
+    } else if (inscription?.metaprotocol?.includes("cbrc-20:")) {
       const [tag, mode, tokenAmt] = inscription.metaprotocol.split(":");
       const [token, amt] = tokenAmt.split("=");
       return (
@@ -409,7 +409,7 @@ const CardContent: React.FC<CardContentProps> = ({
           </span>
         </div>
       )}{" "}
-      {inscription?.metaprotocol?.includes("cbrc-20") && (
+      {inscription?.metaprotocol?.includes("cbrc-20:transfer") && (
         <div>
           <span
             className={`absolute text-center ${

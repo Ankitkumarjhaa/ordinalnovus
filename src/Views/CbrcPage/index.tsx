@@ -40,15 +40,16 @@ function CBRC() {
       search,
     });
 
-    if (result && result.error) {
+    if (!result) {
       dispatch(
         addNotification({
           id: new Date().valueOf(),
           severity: "error",
-          message: result.error,
+          message: "Cyborg API Down!!",
           open: true,
         })
       );
+      setLoading(false);
     } else if (result && result.data) {
       setData(result.data.items);
       setTotalCount(result.data.count);
@@ -150,33 +151,52 @@ function CBRC() {
                 </TableRow>
               </TableBody>
             ) : (
-              <TableBody sx={{ bgcolor: "#3d0263", color: "white" }}>
-                {data?.map((item: Icbrc) => (
-                  <TableRow
-                    onClick={() => handleRowClick(item.tick)}
-                    key={item.op.id}
-                    sx={{
-                      "&:last-child td, &:last-child th": { border: 0 },
-                      "&:hover": { bgcolor: "#1f1d3e" },
-                      color: "white",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <TableCell
-                      component="th"
-                      scope="row"
-                      sx={{ color: "white" }}
-                    >
-                      {item.tick}
-                    </TableCell>
-                    <TableCell sx={{ color: "white" }}>{item.max}</TableCell>
-                    <TableCell sx={{ color: "white" }}>{item.lim}</TableCell>
-                    <TableCell sx={{ color: "white" }}>
-                      {((item.supply / item.max) * 100).toFixed(3)}%
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
+              <>
+                {data && data.length ? (
+                  <TableBody sx={{ bgcolor: "#3d0263", color: "white" }}>
+                    {data?.map((item: Icbrc) => (
+                      <TableRow
+                        onClick={() => handleRowClick(item.tick)}
+                        key={item.op.id}
+                        sx={{
+                          "&:last-child td, &:last-child th": { border: 0 },
+                          "&:hover": { bgcolor: "#1f1d3e" },
+                          color: "white",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <TableCell
+                          component="th"
+                          scope="row"
+                          sx={{ color: "white" }}
+                        >
+                          {item.tick}
+                        </TableCell>
+                        <TableCell sx={{ color: "white" }}>
+                          {item.max}
+                        </TableCell>
+                        <TableCell sx={{ color: "white" }}>
+                          {item.lim}
+                        </TableCell>
+                        <TableCell sx={{ color: "white" }}>
+                          {((item.supply / item.max) * 100).toFixed(3)}%
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                ) : (
+                  <TableBody>
+                    <TableRow>
+                      <TableCell
+                        colSpan={4}
+                        style={{ textAlign: "center", color: "white" }}
+                      >
+                        No DATA Found
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                )}
+              </>
             )}
           </Table>
         </TableContainer>

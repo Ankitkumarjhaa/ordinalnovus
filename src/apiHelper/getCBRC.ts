@@ -27,7 +27,7 @@ export async function FetchCBRC(
       params: {
         order: sort,
         offset,
-        q: search,
+        ...(search && { q: search }),
       },
     });
 
