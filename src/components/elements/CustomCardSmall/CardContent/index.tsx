@@ -11,6 +11,7 @@ import AudioPlayer from "../../AudioPlayer";
 import mixpanel from "mixpanel-browser";
 import { bitmap_format_validator, domain_format_validator } from "@/utils";
 import { IInscription } from "@/types";
+import { Icbrc } from "@/types/CBRC";
 
 type CardContentProps = {
   inscriptionId: string;
@@ -19,6 +20,7 @@ type CardContentProps = {
   className?: string;
   showFull?: boolean;
   inscription?: IInscription;
+  cbrc?: Icbrc;
 };
 
 const CardContent: React.FC<CardContentProps> = ({
@@ -28,6 +30,7 @@ const CardContent: React.FC<CardContentProps> = ({
   className,
   showFull = false,
   inscription,
+  cbrc,
 }) => {
   const [fileNames, setFileNames] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -40,39 +43,56 @@ const CardContent: React.FC<CardContentProps> = ({
   >(content_type);
 
   useEffect(() => {
-    setIsLoading(true); // Set isLoading to true when starting the fetch
-    fetch(`/content/${inscriptionId}`)
-      .then((response: any) => {
-        if (!response.ok) {
-          throw new Error("HTTP error " + response.status);
-        }
-        setFetchedContentType(response?.headers?.get("Content-Type") + "");
+    if (!cbrc) {
+      setIsLoading(true); // Set isLoading to true when starting the fetch
+      fetch(`/content/${inscriptionId}`)
+        .then((response: any) => {
+          if (!response.ok) {
+            throw new Error("HTTP error " + response.status);
+          }
+          setFetchedContentType(response?.headers?.get("Content-Type") + "");
 
-        // Check the content type to decide how to parse the response
-        const contentType = response?.headers?.get("Content-Type") + "";
-        if (
-          contentType === "application/zip" ||
-          contentType === "application/x-zip-compressed"
-        ) {
-          // For zip files, use arrayBuffer
-          return response.arrayBuffer();
-        } else {
-          // For other content types, use text
-          return response.text();
-        }
-      })
-      .then((data) => {
-        setFetchedContent(data);
-      })
-      .catch((error) => {
-        console.error("Fetching error: ", error);
-      })
-      .finally(() => {
-        setIsLoading(false); // Set isLoading to false when fetch is completed
-      });
-  }, [inscriptionId]);
+          // Check the content type to decide how to parse the response
+          const contentType = response?.headers?.get("Content-Type") + "";
+          if (
+            contentType === "application/zip" ||
+            contentType === "application/x-zip-compressed"
+          ) {
+            // For zip files, use arrayBuffer
+            return response.arrayBuffer();
+          } else {
+            // For other content types, use text
+            return response.text();
+          }
+        })
+        .then((data) => {
+          setFetchedContent(data);
+        })
+        .catch((error) => {
+          console.error("Fetching error: ", error);
+        })
+        .finally(() => {
+          setIsLoading(false); // Set isLoading to false when fetch is completed
+        });
+    } else {
+      setIsLoading(false);
+      setFetchedContent("cbrc");
+    }
+  }, [inscriptionId, cbrc]);
 
   const renderContent = (showFull: boolean) => {
+    if (cbrc) {
+      return (
+        <div className="w-full h-full flex flex-col justify-center items-center text-xs tracking-widest  py-12">
+          <p className="text-3xl uppercase">{cbrc.tick}</p>
+          <hr />
+          <p className=" font-bold">Max: {cbrc.max}</p>
+          <p className=" font-bold">Limit: {cbrc.lim}</p>
+          <hr className="mt-2" />
+          <p>Minted: {((cbrc.supply / cbrc.max) * 100).toFixed(3)}%</p>
+        </div>
+      );
+    }
     const contentType = fetchedContentType
       ? fetchedContentType
       : "No content type provided";

@@ -10,6 +10,7 @@ import Collections from "./Collections";
 import { ICollection, IInscription } from "@/types";
 import Listed from "./Listed";
 import CardContent from "@/components/elements/CustomCardSmall/CardContent";
+import CBRC from "./CBRC";
 // import CustomCard from "@/components/elements/CustomCardSmall";
 type Data = {
   percentParsed: number;
@@ -146,6 +147,7 @@ function Homepage({ data }: HomepageProps) {
         ))}
       </div> */}
       <Hero data={data.featured} />
+      <CBRC />
       <Collections data={data.verified} />
       {data.listings.length ? <Listed data={data.listings} /> : <></>}
       {data.recentInscriptions && data?.recentInscriptions.length ? (

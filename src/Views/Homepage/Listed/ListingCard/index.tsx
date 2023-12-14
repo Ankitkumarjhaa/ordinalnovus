@@ -10,7 +10,7 @@ import { IInscription } from "@/types";
 import { FaBitcoin, FaDollarSign } from "react-icons/fa6";
 import { useSelector } from "react-redux";
 import { RootState } from "@/stores";
-type ListingCardProps = {
+type CBRCCardProps = {
   inscriptionId: string;
   content_type?: string;
   content?: string;
@@ -20,7 +20,7 @@ type ListingCardProps = {
   showCollection?: Boolean;
 };
 
-const ListingCard: React.FC<ListingCardProps> = ({
+const CBRCCard: React.FC<CBRCCardProps> = ({
   inscriptionId,
   content_type,
   number,
@@ -105,4 +105,4 @@ const ListingCard: React.FC<ListingCardProps> = ({
   );
 };
 
-export default ListingCard;
+export default CBRCCard;
