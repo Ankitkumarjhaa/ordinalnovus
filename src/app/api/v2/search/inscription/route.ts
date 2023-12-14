@@ -218,7 +218,9 @@ const checkCbrcValidity = async (id: string) => {
     console.log("checking cbrc validity...");
     const { data } = await axios.get(`https://api.cybord.org/transfer?q=${id}`);
     if (data) {
-      return true;
+      if (data.transfer.transferred) {
+        return false;
+      } else return true;
     }
   } catch (e: any) {
     return false;
