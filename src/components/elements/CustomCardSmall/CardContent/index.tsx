@@ -92,6 +92,17 @@ const CardContent: React.FC<CardContentProps> = ({
           <p>Minted: {((cbrc.supply / cbrc.max) * 100).toFixed(3)}%</p>
         </div>
       );
+    } else if (inscription?.metaprotocol?.includes("cbrc-20:")) {
+      const [tag, mode, tokenAmt] = inscription.metaprotocol.split(":");
+      const [token, amt] = tokenAmt.split("=");
+      return (
+        <div className="w-full h-full flex flex-col justify-center items-center text-sm tracking-widest  py-12">
+          <p className="uppercase">{mode}</p>
+          <p className="text-3xl">{amt}</p>
+          <hr />
+          <p className="uppercase font-bold">{token}</p>
+        </div>
+      );
     }
     const contentType = fetchedContentType
       ? fetchedContentType

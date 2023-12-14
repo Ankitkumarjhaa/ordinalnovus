@@ -122,7 +122,7 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
           },
         },
       });
-    } else if (/^[0-9A-Fa-f]{64}i\d$/gm.test(id)) {
+    } else if (/^[0-9A-Fa-f]{64}i\d$/gm.test(id) || !isNaN(Number(id))) {
       console.debug(
         "if no inscription data in db and id is inscriptionId, try fetching latest data"
       );
