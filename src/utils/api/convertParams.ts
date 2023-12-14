@@ -66,6 +66,47 @@ function processTagsParam(
 }
 
 /**
+ * Processes the 'tags' parameter and updates the find query object to match the tag logic.
+ * If the 'domain' tag is present, sets `domain_name` to the value of the `content` key.
+ * @param finalQuery The final query object being constructed.
+ * @param tagsValue The tags string that will be processed.
+ * @param contentValue The value of the content key, if available.
+ */
+function processMetaprotocolParams(
+  finalQuery: FinalQuery,
+  values: string,
+  contentValue?: string
+): void {
+  console.debug(`Processing metaprotocols parameter: ${values}`); // Log the input tagsValue for debugging
+
+  // Check if the values is using the 'or' operator
+  if (values.includes("|")) {
+    const parsed_metaprotocol = values.split("|").filter(Boolean); // Split the tags by the '|' operator and remove any empty strings
+    // If multiple tags are provided, use $in operator
+    if (parsed_metaprotocol.length > 1) {
+      // if (
+      //   parsed_metaprotocol.includes("deploy") &&
+      //   parsed_metaprotocol.includes("cbrc-20")
+      // ) {
+      //   finalQuery.find.metaprotocol = "cbrc-20:deploy";
+      // } else
+      finalQuery.find.parsed_metaprotocol = { $all: parsed_metaprotocol };
+    }
+  }
+  // If no operator is found, treat it as a single tag
+  else {
+    finalQuery.find.parsed_metaprotocol = values;
+  }
+
+  console.debug(
+    `Updated finalQuery.find with tags: ${JSON.stringify(
+      finalQuery.find.$or || finalQuery.find.$and || finalQuery.find.tags
+    )}`
+  );
+  // Log the outcome of the tags parameter process
+}
+
+/**
  * This function processes the sorting parameters and updates the query object accordingly.
  * @param finalQuery The final query object that is being constructed.
  * @param sortParam The sorting parameter obtained from the URL.
@@ -228,7 +269,7 @@ function processWhereParamWithOptions(
         finalQuery.find[field] = {};
       }
 
-      finalQuery.find[field][mongoOperator] = value;
+      finalQuery.find[field][mongoOperator] = Number(value);
     }
   });
 }
@@ -263,6 +304,8 @@ export default function convertParams(
   Object.keys(params).forEach((key) => {
     if (key.includes("_sort")) {
       processSortParam(finalQuery, params[key]);
+    } else if (key === "metaprotocol") {
+      processMetaprotocolParams(finalQuery, params["metaprotocol"]);
     } else if (key === "tags") {
       // Check if there's a content parameter to pair with the domain tag
       const contentValue = params["content"] || undefined;

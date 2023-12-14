@@ -25,6 +25,7 @@ const getProjectionFields = (show: string) => {
 
 const fetchInscriptions = async (query: any, projectionFields: string) => {
   if (query.sort["listed_price"]) query.find["listed"] = true;
+
   return await Inscription.find(query.find)
     .select(projectionFields)
     .where(query.where)
@@ -63,7 +64,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
       return middlewareResponse;
     }
     const query = convertParams(Inscription, req.nextUrl);
-    console.log(query, "QUERY");
+    console.dir(query, { depth: null });
     if (req.nextUrl.searchParams.has("slug")) {
       const collection = await Collection.findOne({
         slug: req.nextUrl.searchParams.get("slug"),
@@ -76,6 +77,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
 
     await dbConnect();
     const inscriptions = await fetchInscriptions(query, projectionFields);
+
     const totalCount = await countInscriptions(query);
     const endTime = Date.now(); // Record the end time
     const timeTaken = endTime - startTime; // Calculate the elapsed time

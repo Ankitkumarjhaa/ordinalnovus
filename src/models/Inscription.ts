@@ -236,4 +236,11 @@ inscriptionSchema.index({ rarity: 1 });
 
 // metadata and metaprotocol index
 
-inscriptionSchema.index({ metaprotocol: 1, parsed_metaprotocol: 1 });
+inscriptionSchema.index(
+  { inscription_number: 1, parsed_metaprotocol: 1 },
+  { sparse: true }
+);
+inscriptionSchema.index(
+  { inscription_number: 1, metaprotocol: 1 },
+  { sparse: true }
+);
