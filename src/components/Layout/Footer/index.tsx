@@ -89,9 +89,9 @@ function Footer() {
           </ul>
         </div>
       </div>
-      <div className="w-full bg-primary-dark">
-        <div className=" py-12 lg:py-3 px-6 lg:px-24 max-w-7xl mx-auto relative center">
-          <p>Donate with ❤️ on </p>
+      <div className="w-full bg-primary-dark ">
+        <div className=" py-12 lg:py-3 px-6 lg:px-24 max-w-7xl mx-auto relative center flex flex-wrap justify-center items-center">
+          <p className="w-full md:w-auto text-center">Donate with ❤️ on </p>
           <div
             onClick={() => {
               copy("bc1qhg8828sk4yq6ac08rxd0rh7dzfjvgdch3vfsm4");
@@ -104,7 +104,7 @@ function Footer() {
                 })
               );
             }}
-            className="mx-3 flex cursor-pointer items-center justify-center bg-secondary py-2 px-4 rounded-xl"
+            className="mx-3 flex cursor-pointer items-center justify-center bg-secondary py-2 px-4 rounded-xl w-full md:w-auto"
           >
             <p className="mr-3 text-yellow-500">
               <FaBitcoin />
@@ -130,7 +130,7 @@ function Footer() {
                 })
               );
             }}
-            className="mx-3 flex cursor-pointer items-center justify-center bg-secondary py-2 px-4 rounded-xl"
+            className="mx-3 flex cursor-pointer items-center justify-center bg-secondary py-2 px-4 rounded-xl w-full md:w-auto"
           >
             <p className="mr-3 text-yellow-500">
               <RiNftFill />

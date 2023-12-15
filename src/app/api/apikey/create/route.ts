@@ -19,6 +19,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const wallet = body.wallet;
+    const tag = body?.tag;
 
     const ip = req.headers.get("x-forwarded-for") || req.ip;
 
@@ -29,7 +30,7 @@ export async function POST(req: NextRequest) {
     const currentDay = new Date().toISOString().split("T")[0]; // e.g., '2023-10-07'
     const redisKey = `${ip}:${currentDay}:apikey`;
 
-    if (!wallet || !validateWalletAddress(wallet)) {
+    if (!wallet) {
       throw new CustomError("Please provide a valid wallet address", 400);
     }
     await dbConnect();
@@ -80,6 +81,7 @@ export async function POST(req: NextRequest) {
         { scopeName: "order", permissions: ["read", "write"] },
       ],
       userType: "free",
+      ...(tag && { tag }),
     });
 
     //admin key
