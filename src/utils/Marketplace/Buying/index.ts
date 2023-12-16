@@ -515,7 +515,10 @@ async function generateUnsignedBuyingPSBTBase64(
     0
   );
 
-  const changeValue = totalInput - totalOutput - Math.floor(fee / 1.5);
+  const changeValue =
+    totalInput -
+    totalOutput -
+    Math.floor(listing.buyer.fee_rate < 100 ? fee / 1.5 : fee);
 
   if (changeValue < 0) {
     throw `Your wallet needs ${Number(
