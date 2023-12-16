@@ -18,7 +18,7 @@ import CustomPaginationComponent from "@/components/elements/CustomPagination";
 import { useRouter } from "next/navigation";
 import CustomSearch from "@/components/elements/CustomSearch";
 
-import { FaSearch } from "react-icons/fa";
+import { FaHome, FaSearch } from "react-icons/fa";
 import mixpanel from "mixpanel-browser";
 import { ITransaction } from "@/types";
 import { fetchTxes } from "@/apiHelper/fetchTxes";
@@ -366,7 +366,12 @@ function CBRC() {
                               {amount}
                             </TableCell>
                             <TableCell sx={{ color: "white" }}>
-                              {moment(item.timestamp).fromNow()}{" "}
+                              <div className="flex justify-start items-center">
+                                {moment(item.timestamp).fromNow()}{" "}
+                                {item?.marketplace === "ordinalnovus" && (
+                                  <FaHome className="ml-3" />
+                                )}
+                              </div>
                             </TableCell>
                           </TableRow>
                         );

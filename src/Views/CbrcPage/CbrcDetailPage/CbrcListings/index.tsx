@@ -1,7 +1,6 @@
 import { RootState } from "@/stores";
 import { IInscription } from "@/types";
 import { Icbrc } from "@/types/CBRC";
-import { shortenString } from "@/utils";
 import {
   Paper,
   Table,
@@ -28,6 +27,9 @@ function CbrcListings({ data, listings }: HeroProps) {
   const dispatch = useDispatch();
   const handleListingClick = (id: string) => {
     router.push(`/inscription/${id}`);
+  };
+  const handleMempoolClick = (txid: string) => {
+    window.open(`https://mempool.space/tx/${txid}`);
   };
 
   return (
@@ -62,6 +64,9 @@ function CbrcListings({ data, listings }: HeroProps) {
               <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
                 TIMESTAMP
               </TableCell>
+              <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+                STATUS
+              </TableCell>
             </TableRow>
           </TableHead>
           <>
@@ -81,7 +86,11 @@ function CbrcListings({ data, listings }: HeroProps) {
                   if (item.parsed_metaprotocol[0] === "cbrc-20")
                     return (
                       <TableRow
-                        onClick={() => handleListingClick(item.inscription_id)}
+                        onClick={() =>
+                          item.in_mempool
+                            ? handleMempoolClick(item.txid)
+                            : handleListingClick(item.inscription_id)
+                        }
                         key={item.txid}
                         sx={{
                           "&:last-child td, &:last-child th": { border: 0 },
@@ -148,6 +157,9 @@ function CbrcListings({ data, listings }: HeroProps) {
                         <TableCell sx={{ color: "white" }}>{amount}</TableCell>
                         <TableCell sx={{ color: "white" }}>
                           {moment(item.listed_at).fromNow()}{" "}
+                        </TableCell>
+                        <TableCell sx={{ color: "white" }}>
+                          {item.in_mempool ? "In Mempool" : "Buy Now"}
                         </TableCell>
                       </TableRow>
                     );
