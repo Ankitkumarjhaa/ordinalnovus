@@ -7,7 +7,6 @@ import { IInscription } from "@/types";
 import React, { useState } from "react";
 import { AiFillCheckCircle } from "react-icons/ai";
 import { BsFillShareFill } from "react-icons/bs";
-import { FaFlag } from "react-icons/fa";
 import { TfiReload } from "react-icons/tfi";
 import DisplayProperties from "./DisplayProperties";
 import { useRouter } from "next/navigation";
@@ -30,11 +29,6 @@ function InscriptionDetail({ data }: InscriptionProps) {
     <div className="p-6 md:pt-0 pb-6 flex-1">
       <div className="pb-2 border-b xl:border-b-2 border-accent">
         <div className="relative">
-          {/* <div className="hidden md:block md:absolute top-0 right-0 ml-2">
-            <div className="bg-accent w-[30px] h-[30px] rounded-lg center p-1">
-              <FaFlag className="text-white " />
-            </div>
-          </div> */}
           <h3 className="text-3xl font-extrabold text-white">
             Inscription {data?.inscription_number}
             {data?.version && (
@@ -43,6 +37,21 @@ function InscriptionDetail({ data }: InscriptionProps) {
               </span>
             )}
           </h3>
+          {data?.parsed_metaprotocol &&
+            data?.parsed_metaprotocol.length === 3 && (
+              <Link
+                href={`/cbrc-20/${data.parsed_metaprotocol[2].split("=")[0]}`}
+              >
+                <div className="hidden md:block md:absolute top-0 right-0 ml-2">
+                  <div className="bg-bitcoin text-yellow-900 px-4 py-1 text-xs font-bold uppercase rounded-lg center">
+                    {/* <FaFlag className="text-white " /> */}
+                    {data.parsed_metaprotocol[2].split("=")[0] === "B0RD"
+                      ? "FAKE BORD"
+                      : data.parsed_metaprotocol[2].split("=")[0]}
+                  </div>
+                </div>
+              </Link>
+            )}
         </div>
         {data?.official_collection && (
           <Link shallow href={`/collection/${data?.official_collection?.slug}`}>

@@ -213,7 +213,7 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
   }
 }
 
-const checkCbrcValidity = async (id: string) => {
+export const checkCbrcValidity = async (id: string) => {
   try {
     console.log("checking cbrc validity...");
     const { data } = await axios.get(`https://api.cybord.org/transfer?q=${id}`);

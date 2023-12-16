@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
+import { IoMdWarning } from "react-icons/io";
+
 import STL from "../../STLViewer";
 import GLTF from "../../GLTFViewer";
 
@@ -12,6 +14,7 @@ import mixpanel from "mixpanel-browser";
 import { bitmap_format_validator, domain_format_validator } from "@/utils";
 import { IInscription } from "@/types";
 import { Icbrc } from "@/types/CBRC";
+import { Tooltip } from "@mui/material";
 
 type CardContentProps = {
   inscriptionId: string;
@@ -412,6 +415,18 @@ const CardContent: React.FC<CardContentProps> = ({
           </span>
         </div>
       )}{" "}
+      {inscription?.metaprotocol?.includes("cbrc-20:mint") &&
+        inscription.listed && (
+          <div>
+            <Tooltip title="Buying Mint Inscription wont increase CBRC-20 Balance">
+              <span
+                className={`absolute flex justify-center items-center bg-red-400 text-red-900  rounded  capitalize text-xs py-3 z-10 bottom-0 right-0 left-0 `}
+              >
+                <IoMdWarning /> <p>Warning</p>
+              </span>
+            </Tooltip>
+          </div>
+        )}
       {inscription?.metaprotocol?.includes("cbrc-20:transfer") && (
         <div>
           <span
