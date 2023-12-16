@@ -56,6 +56,7 @@ async function fetchInscriptionsFromOutput(
         unsigned_psbt: "",
         in_mempool: false,
         txid: i.location.split(":")[0],
+        ...(i.metaprotocol && { metaprotocol: i.metaprotocol }),
       },
     }));
 
@@ -128,6 +129,11 @@ async function parseTxData(sort: 1 | -1, skip: number) {
       let txData: ITXDATA | null =
         inscriptions && inscriptions.length ? inscriptions[0].txData : null;
 
+      let metaprotocol =
+        inscriptions && inscriptions.length
+          ? inscriptions[0].body.metaprotocol
+          : null;
+
       txBulkOps.push({
         updateOne: {
           filter: { _id },
@@ -148,6 +154,7 @@ async function parseTxData(sort: 1 | -1, skip: number) {
               ...(txData && { to: txData.to }),
               ...(txData && { price: txData.price }),
               ...(txData && { marketplace: txData.marketplace }),
+              ...(metaprotocol && { parsed_metaprotocol: metaprotocol }),
             },
           },
         },
@@ -185,6 +192,7 @@ async function parseTxData(sort: 1 | -1, skip: number) {
                 to: txData.to || "", // buyer_ordinal_address,
                 txid: tx.txid,
                 marketplace_fee: txData.fee || 0,
+                ...(metaprotocol && { parsed_metaprotocol: metaprotocol }),
               },
             },
           });
