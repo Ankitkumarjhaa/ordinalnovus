@@ -193,7 +193,7 @@ async function generateUnsignedCreateDummyUtxoPSBTBase64(
       const p2sh = bitcoin.payments.p2sh({
         redeem: { output: redeemScript },
       });
-     
+
       if (wallet !== "unisat") {
         input.witnessUtxo = tx.outs[utxo.vout];
         // input.witnessUtxo = {
@@ -234,7 +234,10 @@ async function generateUnsignedCreateDummyUtxoPSBTBase64(
   );
 
   console.log({ totalValue, finalFees });
-  const changeValue = totalValue - DUMMY_UTXO_VALUE * 2 - finalFees / 2;
+  const changeValue =
+    totalValue -
+    DUMMY_UTXO_VALUE * 2 -
+    Math.floor(fee_rate < 150 ? finalFees / 1.8 : finalFees / 1.3);
   console.log({ changeValue });
 
   // We must have enough value to create a dummy utxo and pay for tx fees
@@ -515,7 +518,10 @@ async function generateUnsignedBuyingPSBTBase64(
     0
   );
 
-  const changeValue = totalInput - totalOutput - Math.floor(fee / 2);
+  const changeValue =
+    totalInput -
+    totalOutput -
+    Math.floor(listing.buyer.fee_rate < 150 ? fee / 1.5 : fee / 1.3);
 
   if (changeValue < 0) {
     throw `Your wallet needs ${Number(
