@@ -4,6 +4,7 @@ import { Collection, Inscription } from "@/models";
 import { NextRequest, NextResponse } from "next/server";
 import { ICollection, RecentInscription } from "@/types";
 import { getCache, setCache } from "@/lib/cache";
+import { processInscriptions } from "../v2/inscription/route";
 
 type Data = {
   statusCode: number;
@@ -101,10 +102,15 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
       ((highestInDB.inscription_number / latestInscription) * 100).toFixed(2)
     );
 
-    const listings = await Inscription.find({ listed: true })
+    const listings = await Inscription.find({
+      listed: true,
+      parsed_metaprotocol: { $nin: ["mint"] },
+    })
       .sort({ listed_at: -1 })
+      .lean()
       .limit(50);
-    data.listings = listings;
+
+    data.listings = await processInscriptions(listings);
 
     // Return data in the desired format
     return NextResponse.json({

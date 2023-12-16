@@ -59,7 +59,7 @@ const countInscriptions = async (query: any) => {
   return await Inscription.countDocuments({ ...query.find }, { limit: 100000 });
 };
 
-async function processInscriptions(inscriptions: IInscription[]) {
+export async function processInscriptions(inscriptions: IInscription[]) {
   for (const ins of inscriptions) {
     if (ins && ins.parsed_metaprotocol) {
       if (

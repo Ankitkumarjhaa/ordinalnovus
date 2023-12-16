@@ -114,12 +114,15 @@ export default async function Page({
   params: { tick: string };
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
+  console.log({ params });
   const cbrcs = await FetchCBRC({
     mode: "deploy",
     search: params.tick,
     offset: 0,
     sort: "creation:1",
   });
+
+  console.log({ cbrcs });
 
   if (!cbrcs) {
     notFound();

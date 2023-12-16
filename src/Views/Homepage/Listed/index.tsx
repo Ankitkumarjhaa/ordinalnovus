@@ -19,7 +19,7 @@ function Listed({ data }: ListedInscriptionsProps) {
     speed: 500,
     slidesToShow: 6,
     slidesToScroll: 6,
-    autoplay: true,
+    autoplay: false,
     autoplaySpeed: 3000,
     loop: true,
     prevArrow: <CustomLeftArrow skip={6} />,
