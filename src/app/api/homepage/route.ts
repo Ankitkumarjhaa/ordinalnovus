@@ -96,6 +96,7 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
       : highestInDB.inscription_number;
     data.latest = latestInscription;
     data.highest = highestInDB.inscription_number;
+    data.height = highestInDB.genesis_height;
     data.percentParsed = Number(
       ((highestInDB.inscription_number / latestInscription) * 100).toFixed(2)
     );

@@ -45,6 +45,10 @@ function Hero({ data }: HeroProps) {
               <span className="text-white">{data.max}</span>
             </div>
             <div className="supply bg-primary-dark px-3 py-1 rounded-lg my-3 md:m-3 text-sm md:ml-0 w-full flex justify-between items-center">
+              <span>Lim</span>
+              <span className="text-white">{data.lim}</span>
+            </div>
+            <div className="supply bg-primary-dark px-3 py-1 rounded-lg my-3 md:m-3 text-sm md:ml-0 w-full flex justify-between items-center">
               <span>Supply</span>
               <span className="text-white">{data.supply}</span>
             </div>
