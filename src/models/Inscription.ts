@@ -191,8 +191,7 @@ export const inscriptionSchema = new mongoose.Schema(
       },
     },
     metadata: {
-      type: Map,
-      of: String,
+      type: Schema.Types.Mixed,
     },
   },
   {
