@@ -1,24 +1,13 @@
 "use client";
-import React, { useEffect } from "react";
-import { AiFillCheckCircle } from "react-icons/ai";
-import { FaDiscord, FaGlobe } from "react-icons/fa";
-import { FaXTwitter } from "react-icons/fa6";
+import React from "react";
 import CardContent from "@/components/elements/CustomCardSmall/CardContent";
-import mixpanel from "mixpanel-browser";
 import { Icbrc } from "@/types/CBRC";
+import { IInscription } from "@/types";
 type HeroProps = {
   data: Icbrc;
+  listings: IInscription[];
 };
-function Hero({ data }: HeroProps) {
-  //   function handleSocialClick(platform: string, url: string) {
-  //     mixpanel.track("Social Media Click", {
-  //       referrer: document.referrer,
-  //       platform: platform,
-  //       url,
-  //       collection: data.name, // Additional properties
-  //     });
-  //   }
-
+function Hero({ data, listings }: HeroProps) {
   return (
     <div className="relative h-auto lg:h-[50vh] 2xl:max-h-96 rounded-xl overflow-hidden border xl:border-2 border-accent bg-secondary">
       <div className="flex justify-between items-start flex-wrap h-full w-full p-6">
