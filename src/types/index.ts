@@ -1,6 +1,21 @@
 import mongoose, { Document, Schema } from "mongoose";
 import * as bitcoin from "bitcoinjs-lib";
 
+export interface ITransaction {
+  txid: string;
+  _id: string;
+  parsed: boolean;
+  height: number;
+  inscriptions: string[];
+  marketplace: string;
+  tag: string;
+  to: string;
+  from: string;
+  price: number; // in sats
+  fee: number;
+  timestamp: Date;
+  parsed_metaprotocol: string[];
+}
 export interface ISat {
   number: number;
   decimal: string;

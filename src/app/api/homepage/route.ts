@@ -101,7 +101,9 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
       ((highestInDB.inscription_number / latestInscription) * 100).toFixed(2)
     );
 
-    const listings = await Inscription.find({ listed: true }).limit(50);
+    const listings = await Inscription.find({ listed: true })
+      .sort({ listed_at: -1 })
+      .limit(50);
     data.listings = listings;
 
     // Return data in the desired format
