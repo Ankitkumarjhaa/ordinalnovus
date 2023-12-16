@@ -54,6 +54,18 @@ export const TXCacheSchema = new mongoose.Schema(
     status: { confirmed: { type: Boolean } },
     marketplace: { type: String },
     timestamp: { type: Date, required: true },
+    parsed_metaprotocol: {
+      type: [String],
+      set: function (value: string) {
+        // Check if the value is a string and not empty
+        if (typeof value === "string" && value.trim().length > 0) {
+          // Split the string by a delimiter (e.g., comma), trim and convert each part to lowercase
+          return value.split(":").map((item) => item.trim().toLowerCase());
+        } else {
+          return [];
+        }
+      },
+    },
   },
   {
     timestamps: true,
@@ -67,3 +79,7 @@ TXCacheSchema.index({ from: 1, to: 1, price: 1, marketplace: 1 });
 TXCacheSchema.index({ inscription: 1 });
 TXCacheSchema.index({ blockhash: 1 });
 TXCacheSchema.index({ timestamp: 1 });
+TXCacheSchema.index(
+  { parsed_metaprotocol: 1 },
+  { sparse: true }
+);
