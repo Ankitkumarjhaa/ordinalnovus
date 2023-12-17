@@ -40,7 +40,8 @@ export async function fetchTxes(
       {
         params: {
           _sort: sort,
-          page_size,
+          _limit: page_size,
+          _start: (page - 1) * page_size,
           tag,
           parsed,
           metaprotocol,
