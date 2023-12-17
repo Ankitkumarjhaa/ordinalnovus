@@ -19,7 +19,10 @@ async function getListingData(collections: ICollection[]) {
       const inscriptions = await Inscription.find({
         official_collection: collection._id,
         listed: true,
-      }).sort({ listed_price: 1 });
+      })
+        .select("listed_price")
+        .sort({ listed_price: 1 })
+        .lean();
 
       // Count the number of listed
       const listed = inscriptions.length || 0;
@@ -53,13 +56,20 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
     if (!data) {
       const featuredCollections = await Collection.find({ featured: true })
         .limit(10)
-        .populate("inscription_icon")
+        .populate({
+          path: "inscription_icon",
+          select: "content_type inscription_id inscription_number token tags",
+        })
+        .lean()
         .exec();
 
       const verifiedCollections = await Collection.find({
         $and: [{ verified: true }],
       })
-        .populate("inscription_icon")
+        .populate({
+          path: "inscription_icon",
+          select: "content_type inscription_id inscription_number token tags",
+        })
         .limit(12)
         .lean()
         .exec();
@@ -69,7 +79,7 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
         featured: featuredCollections,
         verified: verifiedCollections,
       };
-      await setCache(cacheKey, data, 2 * 60 * 60);
+      // await setCache(cacheKey, data, 2 * 60 * 60);
     }
 
     data = {
@@ -79,7 +89,8 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
 
     const highestInDB = await Inscription.findOne({})
       .sort({ inscription_number: -1 })
-      .select("inscription_number");
+      .select("inscription_number")
+      .lean();
 
     let recentInscriptions = null;
 
@@ -102,15 +113,15 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
       ((highestInDB.inscription_number / latestInscription) * 100).toFixed(2)
     );
 
-    const listings = await Inscription.find({
-      listed: true,
-      parsed_metaprotocol: { $nin: ["mint"] },
-    })
-      .sort({ listed_at: -1 })
-      .lean()
-      .limit(50);
+    // const listings = await Inscription.find({
+    //   listed: true,
+    //   parsed_metaprotocol: { $nin: ["mint"] },
+    // })
+    //   .sort({ listed_at: -1 })
+    //   .lean()
+    //   .limit(50);
 
-    data.listings = await processInscriptions(listings);
+    // data.listings = await processInscriptions(listings);
 
     // Return data in the desired format
     return NextResponse.json({

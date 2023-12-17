@@ -152,10 +152,10 @@ function Homepage({ data }: HomepageProps) {
       </div> */}
       <Hero data={data.featured} />
       <CBRC />
-      <CBRCListings/>
-      <CBRCSales/>
+      <CBRCListings />
+      <CBRCSales />
       <Collections data={data.verified} />
-      {data.listings.length ? <Listed data={data.listings} /> : <></>}
+      {/* {data.listings.length ? <Listed data={data.listings} /> : <></>} */}
       {data.recentInscriptions && data?.recentInscriptions.length ? (
         <Recent data={data.recentInscriptions} />
       ) : (
