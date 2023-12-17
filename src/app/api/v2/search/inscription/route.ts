@@ -228,7 +228,7 @@ export const checkCbrcValidity = async (id: string) => {
     const { data } = await axios.get(`https://api.cybord.org/transfer?q=${id}`);
 
     if (data) {
-      console.dir(data, { depth: null });
+      // console.dir(data, { depth: null });
       const isValid = !data.transfer.transfered;
 
       // If invalid, store 'false' in the cache

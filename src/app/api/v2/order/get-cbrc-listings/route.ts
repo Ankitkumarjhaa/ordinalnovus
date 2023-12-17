@@ -60,6 +60,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
   const startTime = Date.now(); // Record the start time
 
   try {
+    let cacheKey = "";
     const middlewareResponse = await apiKeyMiddleware(
       ["inscription"],
       "read",
@@ -87,20 +88,20 @@ export async function GET(req: NextRequest, res: NextResponse) {
           parsed_metaprotocol: { $nin: ["mint", "deploy"] },
         },
       ];
+
+      // Generate a unique cache key based on the query
+      cacheKey = `cbrcListings:${JSON.stringify(query)}`;
+
+      // Try to get cached data
+      let cachedData = await getCache(cacheKey);
+      if (cachedData) {
+        console.log("Responding from cache");
+        return NextResponse.json(JSON.parse(cachedData));
+      }
     }
     console.log("QUERY>>>");
 
     console.dir(query, { depth: null });
-
-    // Generate a unique cache key based on the query
-    const cacheKey = `cbrcListings:${JSON.stringify(query)}`;
-
-    // Try to get cached data
-    let cachedData = await getCache(cacheKey);
-    if (cachedData) {
-      console.log("Responding from cache");
-      return NextResponse.json(JSON.parse(cachedData));
-    }
 
     await dbConnect();
     const inscriptions = await fetchInscriptions(query);
