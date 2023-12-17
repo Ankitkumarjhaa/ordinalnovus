@@ -3,29 +3,48 @@ import { webhooks } from "@/lib/cbrc-20-sales-webhook";
 import { getBTCPriceInDollars, shortenString } from "..";
 import { getCache, setCache } from "@/lib/cache";
 
-const sendWebhook = async (body: any) => {
-  console.log({ body });
-  for (const webhookUrl of webhooks) {
-    try {
-      const response = await fetch(webhookUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      });
+const sendWebhook = async (transactions: any[]) => {
+  for (const transaction of transactions) {
+    for (const webhookUrl of webhooks) {
+      try {
+        const response = await fetch(webhookUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(transaction),
+        });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        console.log(
+          `Webhook sent to ${webhookUrl} for transaction ${
+            transaction.id || ""
+          }`
+        );
+      } catch (error) {
+        console.error(`Error sending webhook to ${webhookUrl}:`, error);
       }
-      console.log(`Webhook sent to ${webhookUrl}`);
-    } catch (error) {
-      console.error(`Error sending webhook to ${webhookUrl}:`, error);
     }
   }
 };
 
 const discordWebhookCBRCSaleAlert = async (txBulkOps: any[]) => {
+  const aggregatedData = [];
+  // Create a Set to track unique txids
+  const uniqueTxids = new Set();
+
+  // Filter out transactions with duplicate txids
+  const uniqueTransactions = txBulkOps.filter((tx) => {
+    const txid = tx.updateOne?.filter?._id; // Adjust this line if the txid is located elsewhere in your data structure
+    if (txid && !uniqueTxids.has(txid)) {
+      uniqueTxids.add(txid);
+      return true;
+    }
+    return false;
+  });
+
   console.log("Processing transactions");
   let btcPrice = 0;
 
@@ -34,10 +53,11 @@ const discordWebhookCBRCSaleAlert = async (txBulkOps: any[]) => {
   if (cache) btcPrice = cache;
   else {
     btcPrice = await getBTCPriceInDollars();
-    await setCache(cacheKey, true, 30 * 60);
+    await setCache(cacheKey, btcPrice, 30 * 60);
   }
+  console.log({ btcPrice });
 
-  for (const tx of txBulkOps) {
+  for (const tx of uniqueTransactions) {
     const { updateOne } = tx;
     if (updateOne) {
       const { filter, update } = updateOne;
@@ -127,7 +147,7 @@ const discordWebhookCBRCSaleAlert = async (txBulkOps: any[]) => {
             attachments: [],
           };
           if (body) {
-            await sendWebhook(body);
+            aggregatedData.push(body);
           }
         }
 
@@ -139,6 +159,10 @@ const discordWebhookCBRCSaleAlert = async (txBulkOps: any[]) => {
 
       // Further processing can be done here
     }
+  }
+
+  if (aggregatedData.length > 0) {
+    await sendWebhook(aggregatedData);
   }
 
   // Additional code for the rest of the function

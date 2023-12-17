@@ -1,3 +1,3 @@
 export const webhooks = [
-  "https://discord.com/api/webhooks/1185992603074838549/iOMEnQjat9cFXYi_O5A67oVVsN8iVWSQofDqoICPPeE3mdTKXbX8cvpswhKPVYphaf93",
+  "https://discord.com/api/webhooks/1186060583754272879/YhL-hewnAl4fsCTICWWnh4JdjTq8fwTIAqb6HYcaQvn-Sjhe8AoJhJ-uU--68X3nP7Ba",
 ];

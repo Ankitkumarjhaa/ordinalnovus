@@ -205,6 +205,9 @@ async function parseTxData(sort: 1 | -1, skip: number) {
       }
     }
 
+    if (txBulkOps.length > 0 && inscriptionBulkOps.length > 0) {
+      await discordWebhookCBRCSaleAlert(txBulkOps);
+    }
     if (txBulkOps.length > 0) {
       await Tx.bulkWrite(txBulkOps);
     }
@@ -216,10 +219,6 @@ async function parseTxData(sort: 1 | -1, skip: number) {
     if (inscriptionBulkOps.length > 0) {
       await Inscription.bulkWrite(inscriptionBulkOps);
     }
-
-    // if (txBulkOps.length > 0 && inscriptionBulkOps.length > 0) {
-    //   await discordWebhookCBRCSaleAlert(txBulkOps);
-    // }
 
     return {
       modifiedTxIds: modifiedTxIds.length,
@@ -250,14 +249,21 @@ export async function GET(req: NextRequest, res: NextResponse) {
     };
 
     await Tx.deleteMany({ ...query });
+    const MAX_CALLS = 4;
 
-    // const result = await parseTxData(-1, 0);
-    const result = await Promise.allSettled([
-      parseTxData(1, 0),
-      parseTxData(1, LIMIT),
-      parseTxData(-1, 0),
-      parseTxData(-1, LIMIT),
-    ]);
+    const nonParsedTxs = await Tx.countDocuments({ parsed: false });
+    const numberOfCalls = Math.min(Math.ceil(nonParsedTxs / LIMIT), MAX_CALLS);
+
+    const results = [];
+    for (let i = 0; i < numberOfCalls; i++) {
+      // Determine the parameters based on the iteration
+      let sortOrder: 1 | -1 = i % 2 === 0 ? 1 : -1; // Alternates between 1 and -1 for each call
+      let offset = i < 2 ? 0 : LIMIT; // Uses 0 for the first two calls, then LIMIT for the others
+
+      results.push(parseTxData(sortOrder, offset));
+    }
+
+    const result = await Promise.allSettled(results);
 
     return NextResponse.json({
       message: "Processing completed, check logs for details",

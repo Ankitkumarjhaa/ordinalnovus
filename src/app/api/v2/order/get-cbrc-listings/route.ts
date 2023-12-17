@@ -70,6 +70,9 @@ export async function GET(req: NextRequest, res: NextResponse) {
     if (middlewareResponse) {
       return middlewareResponse;
     }
+
+    console.log(req.nextUrl.toString(), "nexturl");
+
     const query = convertParams(Inscription, req.nextUrl);
     console.dir(query, { depth: null });
 
@@ -88,20 +91,19 @@ export async function GET(req: NextRequest, res: NextResponse) {
           parsed_metaprotocol: { $nin: ["mint", "deploy"] },
         },
       ];
-
-      // Generate a unique cache key based on the query
-      cacheKey = `cbrcListings:${JSON.stringify(query)}`;
-
-      // Try to get cached data
-      let cachedData = await getCache(cacheKey);
-      if (cachedData) {
-        console.log("Responding from cache");
-        return NextResponse.json(JSON.parse(cachedData));
-      }
     }
     console.log("QUERY>>>");
 
     console.dir(query, { depth: null });
+    // Generate a unique cache key based on the query
+    cacheKey = `cbrcListings:${req.nextUrl.toString()}`;
+
+    // Try to get cached data
+    let cachedData = await getCache(cacheKey);
+    if (cachedData) {
+      console.log("Responding from cache");
+      return NextResponse.json(JSON.parse(cachedData));
+    }
 
     await dbConnect();
     const inscriptions = await fetchInscriptions(query);
