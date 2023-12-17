@@ -1,19 +1,18 @@
 "use client";
 import { Icbrc } from "@/types/CBRC";
 import React, { useEffect, useState } from "react";
-import Hero from "./CbrcHero";
 import { fetchInscriptions } from "@/apiHelper/fetchInscriptions";
 import { useDispatch } from "react-redux";
 import { IInscription } from "@/types";
 import mixpanel from "mixpanel-browser";
 import { addNotification } from "@/stores/reducers/notificationReducer";
-import CbrcListings from "./CbrcListings";
+import CbrcListings from "../../CbrcPage/CbrcDetailPage/CbrcListings";
 
 type CbrcDetailPageProps = {
-  cbrc: Icbrc;
+  cbrc?: Icbrc;
 };
 
-function CbrcDetailPage({ cbrc }: CbrcDetailPageProps) {
+function CBRCListings({ cbrc }: CbrcDetailPageProps) {
   const dispatch = useDispatch();
   const [page, setPage] = useState<number>(1);
   const [data, setData] = useState<IInscription[]>([]);
@@ -42,14 +41,13 @@ function CbrcDetailPage({ cbrc }: CbrcDetailPageProps) {
 
   return (
     <div>
-      <Hero data={cbrc} listings={data} />
       {data && data?.length ? (
         <CbrcListings listings={data} />
       ) : (
-        <p className="min-h-[20vh] center"> No Listings Found</p>
+        <p className="min-h-[20vh] center"> No CBRC Listings Found</p>
       )}
     </div>
   );
 }
 
-export default CbrcDetailPage;
+export default CBRCListings;

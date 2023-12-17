@@ -16,10 +16,9 @@ import React from "react";
 import { FaBitcoin, FaDollarSign } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 type HeroProps = {
-  data: Icbrc;
   listings: IInscription[];
 };
-function CbrcListings({ data, listings }: HeroProps) {
+function CbrcListings({ listings }: HeroProps) {
   const router = useRouter();
   const btcPrice = useSelector(
     (state: RootState) => state.general.btc_price_in_dollar

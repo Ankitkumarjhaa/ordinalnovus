@@ -10,6 +10,8 @@ import Collections from "./Collections";
 import { ICollection, IInscription } from "@/types";
 import Listed from "./Listed";
 import CBRC from "./CBRC";
+import CBRCListings from "./CBRCListings";
+import CBRCSales from "./CBRCSales";
 // import CustomCard from "@/components/elements/CustomCardSmall";
 type Data = {
   height: number;
@@ -150,6 +152,8 @@ function Homepage({ data }: HomepageProps) {
       </div> */}
       <Hero data={data.featured} />
       <CBRC />
+      <CBRCListings/>
+      <CBRCSales/>
       <Collections data={data.verified} />
       {data.listings.length ? <Listed data={data.listings} /> : <></>}
       {data.recentInscriptions && data?.recentInscriptions.length ? (
