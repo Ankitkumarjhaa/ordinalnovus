@@ -44,6 +44,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
     // Try to get cached data
     let cachedData = await getCache(cacheKey);
     if (cachedData) {
+      console.log("responding from cache");
       return NextResponse.json(JSON.parse(cachedData));
     }
 
@@ -69,7 +70,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
       time_taken_to_process: moment.duration(Date.now() - startTime).humanize(),
       processing_time: Date.now() - startTime,
     };
-    await setCache(cacheKey, JSON.stringify(responseData), 10 * 60 * 60);
+    await setCache(cacheKey, JSON.stringify(responseData), 1 * 60 * 60);
 
     return NextResponse.json(responseData);
   } catch (error: any) {

@@ -7,6 +7,7 @@ import apiKeyMiddleware from "@/middlewares/apikeyMiddleware";
 import moment from "moment";
 import { IInscription } from "@/types";
 import { checkCbrcValidity } from "../../search/inscription/route";
+import { getCache, setCache } from "@/lib/cache";
 
 const fetchInscriptions = async (query: any) => {
   query.find["listed"] = true;
@@ -91,6 +92,16 @@ export async function GET(req: NextRequest, res: NextResponse) {
     const query = convertParams(Inscription, req.nextUrl);
     console.dir(query, { depth: null });
 
+    // Generate a unique cache key based on the query
+    const cacheKey = `cbrcListings:${JSON.stringify(query)}`;
+
+    // Try to get cached data
+    let cachedData = await getCache(cacheKey);
+    if (cachedData) {
+      console.log("Responding from cache");
+      return NextResponse.json(JSON.parse(cachedData));
+    }
+
     await dbConnect();
     const inscriptions = await fetchInscriptions(query);
 
@@ -104,7 +115,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
       moment.duration(timeTaken).humanize()
     );
 
-    return NextResponse.json({
+    const responseData = {
       inscriptions: processedIns,
       pagination: {
         page: query.start / query.limit + 1,
@@ -113,7 +124,11 @@ export async function GET(req: NextRequest, res: NextResponse) {
       },
       time_taken_to_process: moment.duration(timeTaken).humanize(),
       processing_time: timeTaken,
-    });
+    };
+    // Cache the result
+    await setCache(cacheKey, JSON.stringify(responseData), 3 * 60);
+
+    return NextResponse.json(responseData);
   } catch (error: any) {
     if (!error?.status) console.error("Catch Error: ", error);
     return NextResponse.json(
