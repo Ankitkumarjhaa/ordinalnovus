@@ -60,6 +60,7 @@ export const determineTypesFromId = (id: string): string[] => {
   // Check for Bitcoin address
   const bitcoinAddressRegex = /^bc1[a-z0-9]+$/;
   if (bitcoinAddressRegex.test(id)) {
+    if (id.length === 4) return ["CBRC-20", "address"];
     return ["address"];
   }
 
@@ -98,7 +99,14 @@ export const determineTypesFromId = (id: string): string[] => {
   // Check if ID is a normal string without special characters
   const normalStringRegex = /^[a-zA-Z0-9]*$/;
   if (normalStringRegex.test(id)) {
-    return ["collection", "sat name", "content", "address", "content-type"];
+    return [
+      "CBRC-20",
+      "collection",
+      "sat name",
+      "content",
+      "address",
+      "content-type",
+    ];
   }
 
   // Check for file extension patterns (single or combined with '|')
@@ -108,7 +116,7 @@ export const determineTypesFromId = (id: string): string[] => {
   }
 
   // Fallback for normal strings
-  return ["collection", "content"];
+  return ["CBRC-20", "collection", "content"];
 };
 
 export async function getBTCPriceInDollars() {

@@ -12,6 +12,16 @@ export const WalletSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    ordinal_pubkey: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    cardinal_pubkey: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     wallet: {
       type: String,
       required: true,

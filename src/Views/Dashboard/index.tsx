@@ -13,12 +13,14 @@ import InscriptionDisplay from "@/components/elements/InscriptionDisplay";
 import copy from "copy-to-clipboard";
 import { addNotification } from "@/stores/reducers/notificationReducer";
 import { useDispatch } from "react-redux";
+import { FetchCBRCBalance } from "@/apiHelper/getCBRCWalletBalance";
 
 function AccountPage() {
   const [inscriptions, setInscriptions] = useState<IInscription[] | null>(null);
   const [total, setTotal] = useState<number>(0);
   const [profile, setProfile] = useState<IInscription | null>(null);
   const [loading, setLoading] = useState(true);
+  const [cbrcs, setCbrcs] = useState<any>(null);
   const router = useRouter();
 
   const walletDetails = useWalletAddress();
@@ -48,6 +50,20 @@ function AccountPage() {
     }
   }, [walletDetails]);
 
+  const fetchCbrcBrc20 = useCallback(async () => {
+    try {
+      if (!walletDetails?.ordinal_address) return;
+      const params = {
+        address: walletDetails.ordinal_address,
+      };
+
+      const result = await FetchCBRCBalance(params);
+      if (result && result.data) {
+        setCbrcs(result.data);
+      }
+    } catch (e: any) {}
+  }, [walletDetails]);
+
   useEffect(() => {
     if (
       walletDetails?.connected &&
@@ -56,6 +72,7 @@ function AccountPage() {
       loading
     ) {
       fetchData();
+      fetchCbrcBrc20();
     }
   }, [walletDetails, inscriptions, loading]);
 
@@ -66,6 +83,8 @@ function AccountPage() {
   }, [walletDetails, loading]);
 
   const dispatch = useDispatch();
+
+  console.log({ cbrcs });
 
   return (
     <div className="pt-16 text-white">
@@ -162,6 +181,32 @@ function AccountPage() {
             </p>
           </Link>
         </div>
+      </div>
+      <div className="">
+        {cbrcs && cbrcs.length ? (
+          <div className="py-16">
+            <h2 className="text-xl ">Your Valid CBRC-20 Balance</h2>
+            <div className="flex justify-start items-center flex-wrap">
+              {cbrcs.map((item: any) => (
+                <div
+                  key={item.tick}
+                  className="w-full md:w-6/12 lg:w-4/12 2xl:w-3/12 p-2"
+                >
+                  <p className="p-2 rounded border border-accent w-full min-h-[200px] center flex-col">
+                    <p className="uppercase text-center text-sm text-gray-300 ">
+                      {item.tick}
+                    </p>
+                    <p className="text-center text-2xl text-white">
+                      {item.amt}
+                    </p>
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <></>
+        )}
       </div>
       <div className="py-6">
         {inscriptions?.length ? (
