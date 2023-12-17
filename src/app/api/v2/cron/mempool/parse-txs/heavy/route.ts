@@ -213,9 +213,9 @@ async function parseTxData(sort: 1 | -1, skip: number) {
       await Inscription.bulkWrite(inscriptionBulkOps);
     }
 
-    if (txBulkOps.length > 0 && inscriptionBulkOps.length > 0) {
-      await discordWebhookCBRCSaleAlert(txBulkOps);
-    }
+    // if (txBulkOps.length > 0 && inscriptionBulkOps.length > 0) {
+    //   await discordWebhookCBRCSaleAlert(txBulkOps);
+    // }
 
     return {
       modifiedTxIds: modifiedTxIds.length,

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
 import dbConnect from "@/lib/dbConnect";
-import moment from "moment";
 import { Tx, Sale, Inscription } from "@/models";
 import { IVIN, IVOUT } from "@/types/Tx";
 import { ITXDATA, constructTxData } from "@/utils/api/constructTxData";
@@ -34,7 +33,6 @@ async function fetchInscriptionsFromOutput(
 ): Promise<IInscriptionDetails[]> {
   try {
     const apiUrl = `${process.env.NEXT_PUBLIC_PROVIDER}/api/output/${output}`;
-
     const { data } = await axios.get(apiUrl);
     if (!data.inscription_details?.length) {
       return [];
@@ -101,8 +99,6 @@ async function parseTxData(sort: 1 | -1, skip: number) {
 
       const outputPromises = vout.map(async (v: IVOUT, index: number) => {
         if (index < 10) {
-          // const isInscribeTx = parseInscription({ vin });
-          // if (!isInscribeTx?.base64Data)
           return fetchInscriptionsFromOutput(
             `${txid}:${index}`,
             tx.vin,
@@ -237,26 +233,14 @@ export async function GET(req: NextRequest, res: NextResponse) {
   try {
     console.log(`***** Parse Txs [CRONJOB] Called *****`);
     await dbConnect();
-    const oneDayAgo = moment().subtract(1, "days").toDate();
-
-    const query = {
-      parsed: true,
-      createdAt: { $lt: oneDayAgo },
-      $or: [
-        { tag: { $exists: false } },
-        { tag: { $eq: "inscribed" } },
-        { tag: { $eq: "others" } },
-      ],
-    };
-
-    await Tx.deleteMany({ ...query });
-
-    // const result = await parseTxData(-1, 0);
+    const nonParsedTxs = await Tx.countDocuments({ parsed: false });
+    if (nonParsedTxs < 7000)
+      return NextResponse.json({ message: "Not enough Txs" });
     const result = await Promise.allSettled([
-      parseTxData(1, 0),
-      parseTxData(1, LIMIT),
-      parseTxData(-1, 0),
-      parseTxData(-1, LIMIT),
+      parseTxData(1, 7000),
+      parseTxData(1, 7000 + LIMIT),
+      parseTxData(-1, 7000),
+      // parseTxData(-1, 3000 + LIMIT),
     ]);
 
     return NextResponse.json({

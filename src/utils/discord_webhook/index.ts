@@ -1,6 +1,7 @@
 "use server";
 import { webhooks } from "@/lib/cbrc-20-sales-webhook";
 import { getBTCPriceInDollars, shortenString } from "..";
+import { getCache, setCache } from "@/lib/cache";
 
 const sendWebhook = async (body: any) => {
   console.log({ body });
@@ -26,7 +27,15 @@ const sendWebhook = async (body: any) => {
 
 const discordWebhookCBRCSaleAlert = async (txBulkOps: any[]) => {
   console.log("Processing transactions");
-  const btcPrice = await getBTCPriceInDollars();
+  let btcPrice = 0;
+
+  const cacheKey = "bitcoinPrice";
+  const cache = await getCache(cacheKey);
+  if (cache) btcPrice = cache;
+  else {
+    btcPrice = await getBTCPriceInDollars();
+    await setCache(cacheKey, true, 30 * 60);
+  }
 
   for (const tx of txBulkOps) {
     const { updateOne } = tx;
