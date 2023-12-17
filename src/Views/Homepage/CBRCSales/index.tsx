@@ -65,6 +65,7 @@ function CBRCSales() {
       ...(tick ? { tick } : { metaprotocol: "transfer" }),
     };
     const result = await fetchTxes(q);
+    console.log(result, "tx result");
 
     if (result && result.data) {
       setTxs(result.data.txes);

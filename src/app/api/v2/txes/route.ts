@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Tx } from "@/models";
 import dbConnect from "@/lib/dbConnect";
 import convertParams from "@/utils/api/convertParams";
-
+import { setCache, getCache } from "@/lib/cache";
 import apiKeyMiddleware from "@/middlewares/apikeyMiddleware";
 import moment from "moment";
 
@@ -35,8 +35,18 @@ export async function GET(req: NextRequest, res: NextResponse) {
     if (middlewareResponse) {
       return middlewareResponse;
     }
+
     const query = convertParams(Tx, req.nextUrl);
     console.dir(query, { depth: null });
+    // Generate a unique cache key based on the query
+    const cacheKey = `txes:${JSON.stringify(query)}`;
+
+    // Try to get cached data
+    let cachedData = await getCache(cacheKey);
+    if (cachedData) {
+      return NextResponse.json(JSON.parse(cachedData));
+    }
+
     await dbConnect();
     const txes = await fetchTxes(query);
 
@@ -48,16 +58,20 @@ export async function GET(req: NextRequest, res: NextResponse) {
       moment.duration(timeTaken).humanize()
     );
 
-    return NextResponse.json({
+    // Cache the result
+    const responseData = {
       txes,
       pagination: {
         page: query.start / query.limit + 1,
         limit: query.limit,
         total: totalCount,
       },
-      time_taken_to_process: moment.duration(timeTaken).humanize(),
-      processing_time: timeTaken,
-    });
+      time_taken_to_process: moment.duration(Date.now() - startTime).humanize(),
+      processing_time: Date.now() - startTime,
+    };
+    await setCache(cacheKey, JSON.stringify(responseData), 10 * 60 * 60);
+
+    return NextResponse.json(responseData);
   } catch (error: any) {
     if (!error?.status) console.error("Catch Error: ", error);
     return NextResponse.json(
