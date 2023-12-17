@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { IInscription } from "@/types";
-import CustomCard from "@/components/elements/CustomCardSmall";
 import { useRouter } from "next/navigation";
 import CardContent from "@/components/elements/CustomCardSmall/CardContent";
 import { shortenString } from "@/utils";
@@ -14,6 +13,9 @@ import copy from "copy-to-clipboard";
 import { addNotification } from "@/stores/reducers/notificationReducer";
 import { useDispatch } from "react-redux";
 import { FetchCBRCBalance } from "@/apiHelper/getCBRCWalletBalance";
+import CustomSearch from "@/components/elements/CustomSearch";
+import { FaSearch } from "react-icons/fa";
+import CustomPaginationComponent from "@/components/elements/CustomPagination";
 
 function AccountPage() {
   const [inscriptions, setInscriptions] = useState<IInscription[] | null>(null);
@@ -22,6 +24,9 @@ function AccountPage() {
   const [loading, setLoading] = useState(true);
   const [cbrcs, setCbrcs] = useState<any>(null);
   const router = useRouter();
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [page_size, setPage_size] = useState(10);
 
   const walletDetails = useWalletAddress();
 
@@ -29,8 +34,9 @@ function AccountPage() {
     try {
       const params = {
         wallet: walletDetails?.ordinal_address,
-        page_size: 100,
-        page: 1,
+        page_size: page_size,
+        page,
+        inscription_number: Number(search),
       };
 
       const result = await fetchInscriptions(params);
@@ -48,7 +54,7 @@ function AccountPage() {
     } catch (e: any) {
       setLoading(false);
     }
-  }, [walletDetails]);
+  }, [walletDetails, page, search]);
 
   const fetchCbrcBrc20 = useCallback(async () => {
     try {
@@ -65,16 +71,16 @@ function AccountPage() {
   }, [walletDetails]);
 
   useEffect(() => {
-    if (
-      walletDetails?.connected &&
-      walletDetails.ordinal_address &&
-      !inscriptions &&
-      loading
-    ) {
+    if (walletDetails?.connected && walletDetails.ordinal_address) {
       fetchData();
+    }
+  }, [walletDetails, page]);
+
+  useEffect(() => {
+    if (walletDetails?.connected && walletDetails.ordinal_address) {
       fetchCbrcBrc20();
     }
-  }, [walletDetails, inscriptions, loading]);
+  }, [walletDetails]);
 
   useEffect(() => {
     if (!walletDetails?.connected && !loading) {
@@ -84,7 +90,15 @@ function AccountPage() {
 
   const dispatch = useDispatch();
 
-  console.log({ cbrcs });
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+  };
+  const handlePageChange = (
+    event: React.ChangeEvent<unknown>,
+    value: number
+  ) => {
+    setPage(value);
+  };
 
   return (
     <div className="pt-16 text-white">
@@ -221,12 +235,35 @@ function AccountPage() {
           <></>
         )}
       </div>
+      <div className="SortSearchPages py-6 flex flex-wrap justify-between">
+        <div className="w-full lg:w-auto flex justify-start items-center flex-wrap">
+          <div className="w-full center pb-4 lg:pb-0 md:pl-4 lg:w-auto">
+            <CustomSearch
+              placeholder="Inscription Number #"
+              value={search}
+              onChange={handleSearchChange}
+              icon={FaSearch}
+              end={true}
+              onIconClick={fetchData}
+            />
+          </div>
+        </div>
+        {inscriptions && inscriptions?.length > 0 && (
+          <div className="w-full lg:w-auto center">
+            <CustomPaginationComponent
+              count={Math.ceil(total / page_size)}
+              onChange={handlePageChange}
+              page={page}
+            />
+          </div>
+        )}
+      </div>
       <div className="py-6">
         {inscriptions?.length ? (
           <InscriptionDisplay
             data={inscriptions}
             loading={loading}
-            pageSize={100}
+            pageSize={10}
           />
         ) : (
           <>

@@ -41,13 +41,6 @@ export async function GET(req: NextRequest, res: NextResponse) {
     // Generate a unique cache key based on the query
     const cacheKey = `txes:${JSON.stringify(query)}`;
 
-    // Try to get cached data
-    let cachedData = await getCache(cacheKey);
-    if (cachedData) {
-      console.log("responding from cache");
-      return NextResponse.json(JSON.parse(cachedData));
-    }
-
     await dbConnect();
     const txes = await fetchTxes(query);
 
@@ -70,7 +63,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
       time_taken_to_process: moment.duration(Date.now() - startTime).humanize(),
       processing_time: Date.now() - startTime,
     };
-    await setCache(cacheKey, JSON.stringify(responseData), 30 * 60);
+    await setCache(cacheKey, JSON.stringify(responseData), 10 * 60);
 
     return NextResponse.json(responseData);
   } catch (error: any) {
