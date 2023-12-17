@@ -4,6 +4,7 @@ import dbConnect from "@/lib/dbConnect";
 import apiKeyMiddleware from "@/middlewares/apikeyMiddleware";
 import { CustomError } from "@/utils";
 import { Inscription } from "@/models";
+import { getCache, setCache } from "@/lib/cache";
 
 type Data = {
   statusCode: number;
@@ -215,27 +216,35 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
 
 export const checkCbrcValidity = async (id: string) => {
   try {
-    // console.log("checking cbrc validity...");
+    const cacheKey = `cbrc_status_${id}`;
+
+    // First, check if the status is already in cache
+    const cachedData = await getCache(cacheKey);
+    if (cachedData !== null) {
+      console.log("Invalid. Returning cached data");
+      return cachedData; // cachedData is expected to be a boolean
+    }
+
     const { data } = await axios.get(`https://api.cybord.org/transfer?q=${id}`);
 
     if (data) {
-      // console.log({ check_data: data });
-      return !data.transfer.transferred;
+      console.dir(data, { depth: null });
+      const isValid = !data.transfer.transferred;
+
+      // If invalid, store 'false' in the cache
+      if (!isValid) {
+        await setCache(cacheKey, false, 24 * 60 * 60); // Cache for 2 hours
+      }
+
+      return isValid;
     }
 
     throw new Error("No data received from the API");
   } catch (e: any) {
-    // Check if the error is a 500 status code
-    if (
-      e.response &&
-      (e.response.status === 500 || e.response.status === 400)
-    ) {
-      throw new Error("Cyborg API is down (500 Server Error)");
-    }
-
-    // Handle other types of errors
+    // Handle errors
     console.error("Error checking CBRC validity:", e.message);
     return false;
   }
 };
+
 export const dynamic = "force-dynamic";

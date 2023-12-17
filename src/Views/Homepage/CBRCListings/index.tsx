@@ -36,7 +36,6 @@ function CBRCListings() {
         ...(tick && { tick }),
       });
       if (result && result.data) {
-        console.log({ data: result.data }, "cbrc ");
         setData(result.data.inscriptions);
         setTotalCount(result.data.pagination.total);
         setLoading(false);

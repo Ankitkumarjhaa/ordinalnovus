@@ -79,7 +79,7 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
         featured: featuredCollections,
         verified: verifiedCollections,
       };
-      // await setCache(cacheKey, data, 2 * 60 * 60);
+      await setCache(cacheKey, data, 2 * 60 * 60);
     }
 
     data = {

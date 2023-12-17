@@ -36,7 +36,6 @@ function OrderbookPage() {
         listed: true,
       });
 
-      console.log({ result }, "ORDEREPAGE");
 
       // Mixpanel Tracking
       mixpanel.track("Orderbook Fetch Data", {
