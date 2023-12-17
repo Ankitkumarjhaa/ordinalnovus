@@ -197,12 +197,23 @@ function processWhereParam(
     }
   } else if (key === "tick") {
     console.log("setting TICK for CBRC-20");
-    // Handle attribute search based on value
-    finalQuery.find["parsed_metaprotocol"] = {
-      $elemMatch: {
-        $regex: new RegExp("^" + value + "=", "i"),
+    finalQuery.find["$and"] = [
+      {
+        "parsed_metaprotocol.0": "cbrc-20", // Ensure the first element is "cbrc-20"
       },
-    }; // 'i' for case-insensitive
+      {
+        parsed_metaprotocol: {
+          $elemMatch: {
+            $regex: new RegExp("^" + escapeRegExp(value) + "=", "i"),
+          },
+        },
+      },
+      {
+        parsed_metaprotocol: { $nin: ["mint", "deploy"] },
+      },
+    ];
+    finalQuery.find.token = true;
+    finalQuery.find.tags = "cbrc";
   } else if (schemaKeys.includes(key)) {
     const isObjectId = schema.path(key) instanceof Types.ObjectId;
     if (isObjectId) {
@@ -227,7 +238,10 @@ function processWhereParam(
     `Updated finalQuery.find with key: ${key}, value: ${finalQuery.find[key]}`
   ); // Log the outcome of the where parameter process
 }
-
+function escapeRegExp(string: string) {
+  // Escaping special characters for use in a regular expression
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 /**
  * Processes numerical range parameters (min and max) and adds them to the query.
  * @param finalQuery The final query object being constructed.

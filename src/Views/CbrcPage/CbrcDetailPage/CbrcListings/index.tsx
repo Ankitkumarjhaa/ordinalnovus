@@ -2,6 +2,7 @@ import { RootState } from "@/stores";
 import { IInscription } from "@/types";
 import { Icbrc } from "@/types/CBRC";
 import {
+  CircularProgress,
   Paper,
   Table,
   TableBody,
@@ -18,8 +19,9 @@ import { IoIosWarning } from "react-icons/io";
 import { useDispatch, useSelector } from "react-redux";
 type HeroProps = {
   listings: IInscription[];
+  loading: boolean;
 };
-function CbrcListings({ listings }: HeroProps) {
+function CbrcListings({ listings, loading }: HeroProps) {
   const router = useRouter();
   const btcPrice = useSelector(
     (state: RootState) => state.general.btc_price_in_dollar
@@ -33,7 +35,7 @@ function CbrcListings({ listings }: HeroProps) {
   };
 
   return (
-    <div className="py-16">
+    <div className="py-2">
       <TableContainer
         component={Paper}
         sx={{
@@ -73,8 +75,13 @@ function CbrcListings({ listings }: HeroProps) {
             {listings && listings.length ? (
               <TableBody sx={{ bgcolor: "#3d0263", color: "white" }}>
                 {listings?.map((item: IInscription) => {
-                  if (!item.parsed_metaprotocol || !item.listed_price)
+                  if (!item.parsed_metaprotocol || !item.listed_price) {
+                    console.log({
+                      item,
+                      msg: " NOT SHOWING THIS because parsed_metaprotocol or listed_price are missing",
+                    });
                     return <></>;
+                  }
                   const op = item.parsed_metaprotocol[1];
                   const tokenAmt = item.parsed_metaprotocol[2];
                   const token = tokenAmt?.includes("=")
@@ -172,7 +179,25 @@ function CbrcListings({ listings }: HeroProps) {
                         </TableCell>
                       </TableRow>
                     );
+                  else {
+                    console.log({
+                      item,
+                      msg: " NOT SHOWING THIS because parsed_metaprotocol[0] is not cbrc-20",
+                    });
+                    return <></>;
+                  }
                 })}
+              </TableBody>
+            ) : loading ? (
+              <TableBody>
+                <TableRow>
+                  <TableCell
+                    colSpan={4}
+                    style={{ textAlign: "center", color: "white" }}
+                  >
+                    <CircularProgress color="inherit" size={40} />
+                  </TableCell>
+                </TableRow>
               </TableBody>
             ) : (
               <TableBody>

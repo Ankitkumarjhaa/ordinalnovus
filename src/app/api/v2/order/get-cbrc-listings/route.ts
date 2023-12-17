@@ -11,10 +11,19 @@ import { checkCbrcValidity } from "../../search/inscription/route";
 const fetchInscriptions = async (query: any) => {
   query.find["listed"] = true;
 
-  if (query.find.listed && !query.find?.parsed_metaprotocol) {
-    query.find["parsed_metaprotocol"] = { $nin: ["mint", "deploy"] };
-  } else if (query.find.listed && query.find?.parsed_metaprotocol?.$elemMatch) {
-    query.find["parsed_metaprotocol"].$nin = ["mint", "deploy"];
+  if (
+    query.find.listed &&
+    !query.find?.parsed_metaprotocol &&
+    !query.find?.$and
+  ) {
+    query.find["$and"] = [
+      {
+        "parsed_metaprotocol.0": "cbrc-20", // Ensure the first element is "cbrc-20"
+      },
+      {
+        parsed_metaprotocol: { $nin: ["mint", "deploy"] },
+      },
+    ];
   }
   console.log("QUERY>>>");
 
