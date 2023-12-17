@@ -229,7 +229,7 @@ export const checkCbrcValidity = async (id: string) => {
 
     if (data) {
       console.dir(data, { depth: null });
-      const isValid = !data.transfer.transferred;
+      const isValid = !data.transfer.transfered;
 
       // If invalid, store 'false' in the cache
       if (!isValid) {
