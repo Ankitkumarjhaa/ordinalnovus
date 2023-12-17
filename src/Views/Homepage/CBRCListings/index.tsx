@@ -7,6 +7,7 @@ import { IInscription } from "@/types";
 import mixpanel from "mixpanel-browser";
 import { addNotification } from "@/stores/reducers/notificationReducer";
 import CbrcListings from "../../CbrcPage/CbrcDetailPage/CbrcListings";
+import { CircularProgress } from "@mui/material";
 
 type CbrcDetailPageProps = {
   cbrc?: Icbrc;
@@ -44,7 +45,15 @@ function CBRCListings({ cbrc }: CbrcDetailPageProps) {
       {data && data?.length ? (
         <CbrcListings listings={data} />
       ) : (
-        <p className="min-h-[20vh] center"> No CBRC Listings Found</p>
+        <>
+          {loading ? (
+            <div className="text-white center py-16">
+              <CircularProgress size={20} color="inherit" />
+            </div>
+          ) : (
+            <p className="min-h-[20vh] center"> No CBRC Listings Found</p>
+          )}
+        </>
       )}
     </div>
   );

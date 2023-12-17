@@ -72,7 +72,7 @@ function CBRCSales() {
     <section className="pt-16 w-full">
       {txs && txs?.length ? (
         <div className="pt-16">
-          <h3 className="text-center py-2 text-3xl font-bold text-white">
+          <h3 className=" py-2 text-3xl font-bold text-white">
             Cyborg BRC-20 Protocol Sales
           </h3>
           <TableContainer

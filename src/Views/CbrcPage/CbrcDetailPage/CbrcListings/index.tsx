@@ -13,7 +13,8 @@ import {
 import moment from "moment";
 import { useRouter } from "next/navigation";
 import React from "react";
-import { FaBitcoin, FaDollarSign } from "react-icons/fa";
+import { FaBitcoin, FaCheckCircle, FaDollarSign } from "react-icons/fa";
+import { IoIosWarning } from "react-icons/io";
 import { useDispatch, useSelector } from "react-redux";
 type HeroProps = {
   listings: IInscription[];
@@ -109,7 +110,16 @@ function CbrcListings({ listings }: HeroProps) {
                           {token}
                         </TableCell>
                         <TableCell sx={{ color: "white" }}>
-                          #{item.inscription_number}
+                          <div className="center ">
+                            <p>#{item.inscription_number}</p>
+                            <div className="ml-3">
+                              {item.cbrc_valid ? (
+                                <FaCheckCircle className="text-green-400" />
+                              ) : (
+                                <IoIosWarning className="text-red-400" />
+                              )}
+                            </div>
+                          </div>
                         </TableCell>{" "}
                         <TableCell sx={{ color: "white" }}>
                           <div>
