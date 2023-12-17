@@ -8,6 +8,7 @@ import { IInscription } from "@/types";
 import mixpanel from "mixpanel-browser";
 import { addNotification } from "@/stores/reducers/notificationReducer";
 import CbrcListings from "./CbrcListings";
+import { fetchCBRCListings } from "@/apiHelper/fetchCBRCListings";
 
 type CbrcDetailPageProps = {
   cbrc: Icbrc;
@@ -24,11 +25,11 @@ function CbrcDetailPage({ cbrc }: CbrcDetailPageProps) {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      const result = await fetchInscriptions({
+      const result = await fetchCBRCListings({
         page,
         page_size: pageSize,
         sort,
-        listed: true,
+        tick: cbrc.tick.toLowerCase(),
       });
       if (result && result.data) {
         setData(result.data.inscriptions);

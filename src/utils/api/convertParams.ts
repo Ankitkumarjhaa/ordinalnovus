@@ -195,6 +195,14 @@ function processWhereParam(
         ];
         break;
     }
+  } else if (key === "tick") {
+    console.log("setting TICK for CBRC-20");
+    // Handle attribute search based on value
+    finalQuery.find["parsed_metaprotocol"] = {
+      $elemMatch: {
+        $regex: new RegExp("^" + value + "=", "i"),
+      },
+    }; // 'i' for case-insensitive
   } else if (schemaKeys.includes(key)) {
     const isObjectId = schema.path(key) instanceof Types.ObjectId;
     if (isObjectId) {
