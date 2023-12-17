@@ -10,6 +10,7 @@ export interface FetchTxParams {
   tag?: string;
   parsed?: boolean;
   metaprotocol?: string;
+  tick?: string;
 }
 
 export interface TXResponse {
@@ -24,7 +25,15 @@ export interface TXResponse {
 export async function fetchTxes(
   params: FetchTxParams
 ): Promise<{ data: TXResponse; error: string | null } | undefined> {
-  const { sort, page_size, page, tag, parsed = 15, metaprotocol } = params;
+  const {
+    sort,
+    page_size,
+    page,
+    tag,
+    parsed = 10,
+    tick,
+    metaprotocol,
+  } = params;
   try {
     const response = await axios.get(
       `${process.env.NEXT_PUBLIC_URL}/api/v2/txes`,
@@ -35,6 +44,7 @@ export async function fetchTxes(
           tag,
           parsed,
           metaprotocol,
+          tick,
           apikey: process.env.API_KEY,
         },
       }

@@ -27,54 +27,118 @@ import { RootState } from "@/stores";
 
 import { FaBitcoin, FaDollarSign } from "react-icons/fa";
 import { shortenString } from "@/utils";
+import CustomSelector from "@/components/elements/CustomSelector";
+
+const options = [
+  { value: "timestamp:-1", label: "Latest Sales" },
+  { value: "price:1", label: "Low Price" },
+  { value: "inscription_number:1", label: "Low Number" },
+];
+
 function CBRCSales() {
   const btcPrice = useSelector(
     (state: RootState) => state.general.btc_price_in_dollar
   );
   const dispatch = useDispatch();
   const [data, setData] = useState<Icbrc[] | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [search, setSearch] = useState("");
-  const [page_size, setPage_size] = useState(500);
+  const [page_size, setPage_size] = useState(10);
   const router = useRouter();
 
-  const [sort, setSort] = useState<string>("creation:1");
+  const [tick, setTick] = useState("");
+
+  const [sort, setSort] = useState<string>("timestamp:-1");
   const [txs, setTxs] = useState<ITransaction[] | null>(null);
 
   const fetchTxData = useCallback(async () => {
-    const result = await fetchTxes({
+    setLoading(true);
+    setTxs(null);
+    const q = {
       parsed: true,
-      metaprotocol: "transfer",
-      sort: "timestamp:-1",
-      page_size: 500,
-      page: 1,
+      sort,
+      page_size,
+      page,
       tag: "sale",
-    });
+      ...(tick ? { tick } : { metaprotocol: "transfer" }),
+    };
+    const result = await fetchTxes(q);
 
-    if (!result) {
-    } else if (result && result.data) {
+    if (result && result.data) {
       setTxs(result.data.txes);
-      // setTotalCount(result.data.pagination.total);
+      setTotalCount(result.data.pagination.total);
     }
-  }, []);
+    setLoading(false);
+  }, [sort, page_size, page, tick]);
 
   useEffect(() => {
     fetchTxData();
-  }, []);
+  }, [sort, page_size, page]);
 
   const handleTxClick = (txid: string) => {
     window.open(`https://mempool.space/tx/${txid}`, "_blank");
   };
 
+  const handleSearchChange = (value: string) => {
+    setTick(value);
+  };
+  const handlePageChange = (
+    event: React.ChangeEvent<unknown>,
+    value: number
+  ) => {
+    setPage(value);
+  };
+
   return (
     <section className="pt-16 w-full">
-      {txs && txs?.length ? (
-        <div className="pt-16">
-          <h3 className=" py-2 text-3xl font-bold text-white">
-            Cyborg BRC-20 Protocol Sales
-          </h3>
+      <h3 className=" py-2 text-3xl font-bold text-white">
+        Cyborg BRC-20 Protocol Sales
+      </h3>
+      <div className="SortSearchPages py-6 flex flex-wrap justify-between">
+        <div className="w-full lg:w-auto flex justify-start items-center flex-wrap">
+          <div className="w-full center pb-4 lg:pb-0 lg:w-auto">
+            <CustomSelector
+              label="Sort"
+              value={sort}
+              options={options}
+              onChange={setSort}
+            />
+          </div>
+          <div className="w-full center pb-4 lg:pb-0 md:pl-4 lg:w-auto">
+            <CustomSearch
+              placeholder="Ticker"
+              value={tick}
+              onChange={handleSearchChange}
+              icon={FaSearch}
+              end={true}
+              onIconClick={fetchTxData}
+            />
+          </div>
+        </div>
+        {txs && txs?.length > 0 && (
+          <div className="w-full lg:w-auto center">
+            <CustomPaginationComponent
+              count={Math.ceil(totalCount / page_size)}
+              onChange={handlePageChange}
+              page={page}
+            />
+          </div>
+        )}
+      </div>
+      {!txs || !txs?.length ? (
+        <>
+          {loading ? (
+            <div className="text-white center py-16">
+              <CircularProgress size={20} color="inherit" />
+            </div>
+          ) : (
+            <p className="min-h-[20vh] center"> No CBRC Sales Found</p>
+          )}
+        </>
+      ) : (
+        <div className="pt-3">
           <TableContainer
             component={Paper}
             sx={{
@@ -225,8 +289,6 @@ function CBRCSales() {
             </Table>
           </TableContainer>
         </div>
-      ) : (
-        <></>
       )}
     </section>
   );

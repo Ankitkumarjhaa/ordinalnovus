@@ -212,8 +212,6 @@ function processWhereParam(
         parsed_metaprotocol: { $nin: ["mint", "deploy"] },
       },
     ];
-    finalQuery.find.token = true;
-    finalQuery.find.tags = "cbrc";
   } else if (schemaKeys.includes(key)) {
     const isObjectId = schema.path(key) instanceof Types.ObjectId;
     if (isObjectId) {

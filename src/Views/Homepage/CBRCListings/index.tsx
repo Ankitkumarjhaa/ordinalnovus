@@ -29,6 +29,7 @@ function CBRCListings() {
   const fetchData = useCallback(async () => {
     {
       setLoading(true);
+      setData([]);
       const result = await fetchCBRCListings({
         page,
         page_size: pageSize,
@@ -71,7 +72,7 @@ function CBRCListings() {
           </div>
           <div className="w-full center pb-4 lg:pb-0 md:pl-4 lg:w-auto">
             <CustomSearch
-              placeholder="Ticker: try uppercase / lowercase etc"
+              placeholder="Ticker"
               value={tick}
               onChange={handleSearchChange}
               icon={FaSearch}
