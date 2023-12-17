@@ -70,7 +70,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
       time_taken_to_process: moment.duration(Date.now() - startTime).humanize(),
       processing_time: Date.now() - startTime,
     };
-    await setCache(cacheKey, JSON.stringify(responseData), 1 * 60 * 60);
+    await setCache(cacheKey, JSON.stringify(responseData), 30 * 60);
 
     return NextResponse.json(responseData);
   } catch (error: any) {
