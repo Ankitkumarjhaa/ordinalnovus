@@ -242,7 +242,9 @@ async function generateUnsignedCreateDummyUtxoPSBTBase64(
 
   // We must have enough value to create a dummy utxo and pay for tx fees
   if (changeValue < 0) {
-    throw new Error(`You might have pending transactions or not enough fund`);
+    throw new Error(
+      `You might have pending transactions or not enough fund to complete tx at the provided FeeRate`
+    );
   }
 
   psbt.addOutput({
