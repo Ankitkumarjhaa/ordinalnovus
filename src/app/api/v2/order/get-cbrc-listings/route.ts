@@ -10,26 +10,6 @@ import { checkCbrcValidity } from "../../search/inscription/route";
 import { getCache, setCache } from "@/lib/cache";
 
 const fetchInscriptions = async (query: any) => {
-  query.find["listed"] = true;
-
-  if (
-    query.find.listed &&
-    !query.find?.parsed_metaprotocol &&
-    !query.find?.$and
-  ) {
-    query.find["$and"] = [
-      {
-        "parsed_metaprotocol.0": "cbrc-20", // Ensure the first element is "cbrc-20"
-      },
-      {
-        parsed_metaprotocol: { $nin: ["mint", "deploy"] },
-      },
-    ];
-  }
-  console.log("QUERY>>>");
-
-  console.dir(query, { depth: null });
-
   return await Inscription.find(query.find)
     .select("-signed_psbt -unsigned_psbt")
     .where(query.where)
@@ -90,6 +70,26 @@ export async function GET(req: NextRequest, res: NextResponse) {
       return middlewareResponse;
     }
     const query = convertParams(Inscription, req.nextUrl);
+    console.dir(query, { depth: null });
+
+    query.find["listed"] = true;
+
+    if (
+      query.find.listed &&
+      !query.find?.parsed_metaprotocol &&
+      !query.find?.$and
+    ) {
+      query.find["$and"] = [
+        {
+          "parsed_metaprotocol.0": "cbrc-20", // Ensure the first element is "cbrc-20"
+        },
+        {
+          parsed_metaprotocol: { $nin: ["mint", "deploy"] },
+        },
+      ];
+    }
+    console.log("QUERY>>>");
+
     console.dir(query, { depth: null });
 
     // Generate a unique cache key based on the query
