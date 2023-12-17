@@ -9,6 +9,7 @@ interface bal {
   acc: string;
   tick: string;
   amt: number;
+  lock: number;
   deleted: boolean;
   mint: number;
 }

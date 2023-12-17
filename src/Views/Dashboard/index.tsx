@@ -192,14 +192,27 @@ function AccountPage() {
                   key={item.tick}
                   className="w-full md:w-6/12 lg:w-4/12 2xl:w-3/12 p-2"
                 >
-                  <p className="p-2 rounded border border-accent w-full min-h-[200px] center flex-col">
-                    <p className="uppercase text-center text-sm text-gray-300 ">
-                      {item.tick}
-                    </p>
-                    <p className="text-center text-2xl text-white">
-                      {item.amt}
-                    </p>
-                  </p>
+                  <Link href={`/cbrc-20/${item.tick}`}>
+                    <div className="rounded border border-accent w-full min-h-[200px] flex justify-between flex-col">
+                      <p className="uppercase text-center text-sm text-gray-300 mb-2 bg-accent_dark font-bold tracking-widest w-full py-2">
+                        {item.tick}
+                      </p>
+                      <div className="w-full flex-1 p-3 tracking-wider uppercase">
+                        <div className="text-center text-sm text-white flex justify-between w-full">
+                          <span> Available:</span> <p>{item.amt}</p>
+                        </div>
+                        <div className="text-center text-sm text-white flex justify-between w-full">
+                          <span>Transferrable: </span>
+                          <span>{item.lock}</span>
+                        </div>
+                        <hr className="my-2 bg-white border-2 border-white" />
+                        <div className="text-center text-sm text-white flex justify-between w-full">
+                          <span>Total:</span>{" "}
+                          <span>{item.amt + item.lock}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
                 </div>
               ))}
             </div>

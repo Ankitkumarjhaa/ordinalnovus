@@ -28,7 +28,7 @@ function Items({ collection }: ItemProps) {
   const [page, setPage] = useState<number>(1);
   const [data, setData] = useState<IInscription[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
-  const [pageSize, setPageSize] = useState<number>(100);
+  const [pageSize, setPageSize] = useState<number>(20);
   const [sort, setSort] = useState<string>(
     collection.listed ? "listed_price:1" : "collection_item_number:1"
   );

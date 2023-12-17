@@ -37,7 +37,7 @@ function CBRCSales() {
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [search, setSearch] = useState("");
-  const [page_size, setPage_size] = useState(21);
+  const [page_size, setPage_size] = useState(500);
   const router = useRouter();
 
   const [sort, setSort] = useState<string>("creation:1");
