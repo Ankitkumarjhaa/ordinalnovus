@@ -45,7 +45,7 @@ function CbrcDetailPage({ cbrc }: CbrcDetailPageProps) {
     <div>
       <Hero data={cbrc} listings={data} />
       {data && data?.length ? (
-        <CbrcListings listings={data} />
+        <CbrcListings listings={data} loading={loading} />
       ) : (
         <p className="min-h-[20vh] center"> No Listings Found</p>
       )}
