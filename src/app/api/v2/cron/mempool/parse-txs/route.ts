@@ -6,6 +6,7 @@ import { Tx, Sale, Inscription } from "@/models";
 import { IVIN, IVOUT } from "@/types/Tx";
 import { ITXDATA, constructTxData } from "@/utils/api/constructTxData";
 import { IInscription } from "@/types";
+import discordWebhookCBRCSaleAlert from "@/utils/discord_webhook";
 
 interface IInscriptionDetails {
   inscription_id: string;
@@ -142,6 +143,7 @@ async function parseTxData(sort: 1 | -1, skip: number) {
           filter: { _id },
           update: {
             $set: {
+              txid,
               ...(inscriptionIds.length && { inscriptions: inscriptionIds }),
               ...(inscriptionIds.length > 0
                 ? {
@@ -215,6 +217,10 @@ async function parseTxData(sort: 1 | -1, skip: number) {
       await Inscription.bulkWrite(inscriptionBulkOps);
     }
 
+    if (txBulkOps.length > 0 && inscriptionBulkOps.length > 0) {
+      await discordWebhookCBRCSaleAlert(txBulkOps);
+    }
+
     return {
       modifiedTxIds: modifiedTxIds.length,
       modifiedInscriptionIds: modifiedInscriptionIds.length,
@@ -245,7 +251,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
 
     await Tx.deleteMany({ ...query });
 
-    // const result = await parseTxData(1, 0);
+    // const result = await parseTxData(-1, 0);
     const result = await Promise.allSettled([
       parseTxData(1, 0),
       parseTxData(1, LIMIT),
