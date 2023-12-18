@@ -105,7 +105,7 @@ const discordWebhookCBRCSaleAlert = async (txBulkOps: any[]) => {
                     inline: false,
                   },
                   {
-                    name: "Price (BTC)",
+                    name: "Price",
                     value: `${price} sats ($${(
                       (price / 100_000_000) *
                       btcPrice
