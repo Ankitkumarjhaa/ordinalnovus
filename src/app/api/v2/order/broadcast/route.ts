@@ -36,7 +36,7 @@ export async function POST(
     let doc: any = null;
 
     if (
-      parsedPsbt.data.inputs.length === 4 &&
+      parsedPsbt.data.inputs.length >= 4 &&
       parsedPsbt.data.inputs[2].nonWitnessUtxo
     ) {
       let sellerPublicKey: string | null = null;
