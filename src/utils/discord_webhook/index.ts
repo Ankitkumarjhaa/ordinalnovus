@@ -132,7 +132,7 @@ const discordWebhookCBRCSaleAlert = async (txBulkOps: any[]) => {
                   },
                   {
                     name: "Seller",
-                    value: shortenString(to),
+                    value: shortenString(from),
                     inline: true,
                   },
                 ],
