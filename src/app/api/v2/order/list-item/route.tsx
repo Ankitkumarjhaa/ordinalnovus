@@ -5,9 +5,6 @@ import apiKeyMiddleware from "@/middlewares/apikeyMiddleware";
 import { IInscription } from "@/types";
 import {
   addFinalScriptWitness,
-  verifyAddress,
-  verifyInputCount,
-  verifyInscription,
   verifySignature,
 } from "@/utils/Marketplace/Listing";
 import { Inscription } from "@/models";
@@ -82,22 +79,25 @@ export async function POST(req: NextRequest) {
       console.log("adding final script witness");
 
       const psbt = addFinalScriptWitness(orderInput.signed_listing_psbt_base64);
-      const validSig = verifySignature(psbt);
-      if (!validSig) {
-        return NextResponse.json(
-          {
-            ok: false,
-            inscription_id: orderInput.inscription_id,
-            price: orderInput.price,
-            message: "Invalid signature",
-          },
-          { status: 500 }
-        );
+      if (ordItem.address.startsWith("bc1p")) {
+        const validSig = verifySignature(psbt);
+        if (!validSig) {
+          return NextResponse.json(
+            {
+              ok: false,
+              inscription_id: orderInput.inscription_id,
+              price: orderInput.price,
+              message: "Invalid signature",
+            },
+            { status: 500 }
+          );
+        }
       }
 
       const inscription = await Inscription.findOne({
         inscription_id: ordItem.inscription_id,
       });
+
       if (inscription) {
         valueChecks(inscription, ordItem);
         // If the document already exists, update it with the new fields

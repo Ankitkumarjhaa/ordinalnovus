@@ -48,10 +48,10 @@ function Hero({ data, listings }: HeroProps) {
                 {((data.supply / data.max) * 100).toFixed(3)}%
               </span>
             </div>
-            <div className="supply bg-primary-dark px-3 py-1 rounded-lg my-3 md:m-3 text-sm md:ml-0 w-full flex justify-between items-center">
+            {/* <div className="supply bg-primary-dark px-3 py-1 rounded-lg my-3 md:m-3 text-sm md:ml-0 w-full flex justify-between items-center">
               <span>Holders</span>
               <span className="text-white"> {data.op.h}</span>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

@@ -331,13 +331,6 @@ function BuyInscription({ data }: InscriptionProps) {
           newTab={true}
           onClick={buy} // Add this line to make the button functional
         />
-        {!data?.address?.startsWith("bc1p") && (
-          <p className="text-xs pt-2 text-center ">
-            This Transaction will fail. Only Taproot assets can be bought right
-            now. <br /> We will be adding support for segwit and nested-segwit
-            asset soon. <br />
-          </p>
-        )}
       </div>
     </>
   );

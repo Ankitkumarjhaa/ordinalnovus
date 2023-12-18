@@ -60,6 +60,13 @@ function CBRCListings() {
 
   return (
     <div>
+      <div>
+        <p>
+          All NON - TAPROOT Listings that have been posted prior to latest
+          update are invalid and cannot be bought. Sellers are requested to
+          Relist them. Simply cancel the listings and relist.
+        </p>
+      </div>
       <div className="SortSearchPages py-6 flex flex-wrap justify-between">
         <div className="w-full lg:w-auto flex justify-start items-center flex-wrap">
           <div className="w-full center pb-4 lg:pb-0 lg:w-auto">
@@ -81,16 +88,9 @@ function CBRCListings() {
             />
           </div>
           <div className="w-full md:w-auto p-2 px-6">
-            <p className="capitalize pb-1">Buy Items with two checks</p>
-            <div className="flex items-center justify-between">
-              <div className="text-xs text-center flex flex-col justify-center items-center">
-                <p>Taproot Asset</p>
-                <FaCheckCircle className="text-green-400 mx-2" />
-              </div>
-              <div className="ml-3 text-xs text-center  flex flex-col justify-center items-center">
-                <p>Validity Check</p>
-                <FaCheckCircle className="text-green-400 mx-2" />
-              </div>
+            <div className="capitalize pb-1 text-xs flex items-center justify-evenly">
+              <p> Buy Items with checkmark </p>
+              <FaCheckCircle className="text-green-400 mx-2" />
             </div>
           </div>
         </div>

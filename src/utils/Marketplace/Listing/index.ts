@@ -67,6 +67,8 @@ function addFinalScriptWitness(signedListingPSBT: string): any {
             ]),
           });
         }
+      } else {
+        psbt.finalizeInput(idx);
       }
     });
     newPSBT = psbt.toBase64();
