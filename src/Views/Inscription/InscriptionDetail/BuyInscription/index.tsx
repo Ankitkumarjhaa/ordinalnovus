@@ -328,8 +328,16 @@ function BuyInscription({ data }: InscriptionProps) {
           className="transition-all w-full rounded-xl"
           link={data.in_mempool}
           href={`https://mempool.space/tx/${data.txid}`}
+          newTab={true}
           onClick={buy} // Add this line to make the button functional
         />
+        {!data?.address?.startsWith("bc1p") && (
+          <p className="text-xs pt-2 text-center ">
+            This Transaction will fail. Only Taproot assets can be bought right
+            now. <br /> We will be adding support for segwit and nested-segwit
+            asset soon. <br />
+          </p>
+        )}
       </div>
     </>
   );

@@ -335,6 +335,13 @@ function ListInscription({ data }: InscriptionProps) {
   return (
     <div className="border-b-2   py-6 border-accent">
       {" "}
+      {!data?.address?.startsWith("bc1p") && (
+        <p className="text-xs py-2 text-center">
+          This Transaction will fail. Only Taproot assets can be bought/sold
+          right now. <br /> We will be adding support for segwit and
+          nested-segwit asset soon. <br /> Do Not list it.
+        </p>
+      )}
       <div className="center   pb-6">
         <div className="flex-1 mr-3 border border-white rounded-xl">
           <div className="flex items-center">

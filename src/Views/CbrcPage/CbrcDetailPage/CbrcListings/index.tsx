@@ -114,7 +114,16 @@ function CbrcListings({ listings, loading }: HeroProps) {
                             textTransform: "uppercase",
                           }}
                         >
-                          {token}
+                          <div className="center ">
+                            <p>{token}</p>
+                            <div className="ml-3">
+                              {item.address?.startsWith("bc1p") ? (
+                                <FaCheckCircle className="text-green-400" />
+                              ) : (
+                                <IoIosWarning className="text-red-400" />
+                              )}
+                            </div>
+                          </div>
                         </TableCell>
                         <TableCell sx={{ color: "white" }}>
                           <div className="center ">

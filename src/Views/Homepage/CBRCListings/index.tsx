@@ -7,7 +7,7 @@ import { CircularProgress } from "@mui/material";
 import { fetchCBRCListings } from "@/apiHelper/fetchCBRCListings";
 import CustomSelector from "@/components/elements/CustomSelector";
 import CustomSearch from "@/components/elements/CustomSearch";
-import { FaSearch } from "react-icons/fa";
+import { FaCheckCircle, FaSearch } from "react-icons/fa";
 import CustomPaginationComponent from "@/components/elements/CustomPagination";
 
 const options = [
@@ -79,6 +79,19 @@ function CBRCListings() {
               end={true}
               onIconClick={fetchData}
             />
+          </div>
+          <div className="w-full md:w-auto p-2 px-6">
+            <p className="capitalize pb-1">Buy Items with two checks</p>
+            <div className="flex items-center justify-between">
+              <div className="text-xs text-center flex flex-col justify-center items-center">
+                <p>Taproot Asset</p>
+                <FaCheckCircle className="text-green-400 mx-2" />
+              </div>
+              <div className="ml-3 text-xs text-center  flex flex-col justify-center items-center">
+                <p>Validity Check</p>
+                <FaCheckCircle className="text-green-400 mx-2" />
+              </div>
+            </div>
           </div>
         </div>
         {data?.length > 0 && (
