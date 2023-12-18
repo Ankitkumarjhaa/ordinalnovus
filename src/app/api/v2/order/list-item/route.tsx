@@ -100,10 +100,26 @@ export async function POST(req: NextRequest) {
 
       if (inscription) {
         valueChecks(inscription, ordItem);
+        const metaprotocol = inscription.metaprotocol;
+        let listed_price_per_token = 0;
+        let listed_amount = 0;
+        let listed_token = "";
+        if (metaprotocol && metaprotocol.includes("cbrc-20:transfer")) {
+          const [tag, mode, tokenAmt] = inscription.metaprotocol.split(":");
+          const [token, amt] = tokenAmt.split("=");
+
+          if (token) listed_token = token.trim().toLowerCase();
+          if (!isNaN(Number(amt))) listed_amount = Number(amt);
+          if (token && amt)
+            listed_price_per_token = orderInput.price / Number(amt);
+        }
         // If the document already exists, update it with the new fields
         inscription.listed = true;
         inscription.listed_at = new Date();
         inscription.listed_price = orderInput.price;
+        inscription.listed_price_per_token = listed_price_per_token;
+        inscription.listed_token = listed_token;
+        inscription.listed_amount = listed_amount;
         inscription.listed_seller_receive_address =
           orderInput.seller_receive_address;
         inscription.signed_psbt = psbt;

@@ -439,7 +439,7 @@ const CardContent: React.FC<CardContentProps> = ({
             {inscription?.cbrc_valid
               ? "Valid Transfer Note"
               : inscription?.cbrc_valid === false
-              ? "Invalid Transfer Note"
+              ? "Used Transfer Note"
               : "Cyborg Down !! Can't Validate!"}
           </span>
         </div>

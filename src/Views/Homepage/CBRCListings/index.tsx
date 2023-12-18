@@ -60,8 +60,8 @@ function CBRCListings() {
 
   return (
     <div>
-      <div>
-        <p>
+      <div className="my-2">
+        <p className="py-2 px-2 bg-gray-300 text-black text-sm tracking-wide">
           All NON - TAPROOT Listings that have been posted prior to latest
           update are invalid and cannot be bought. Sellers are requested to
           Relist them. Simply cancel the listings and relist.

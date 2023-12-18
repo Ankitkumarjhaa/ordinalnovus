@@ -162,7 +162,7 @@ export const inscriptionSchema = new mongoose.Schema(
     listed_price: { type: Number }, // in sats
     listed_price_per_token: { type: Number }, //in sats
     listed_token: { type: String },
-    listed_amount: { type: String },
+    listed_amount: { type: Number },
     listed_maker_fee_bp: { type: Number },
     tap_internal_key: { type: String, set: (v: string) => v.trim() },
     listed_seller_receive_address: { type: String },
@@ -245,5 +245,10 @@ inscriptionSchema.index(
 );
 inscriptionSchema.index(
   { inscription_number: 1, metaprotocol: 1 },
+  { sparse: true }
+);
+
+inscriptionSchema.index(
+  { listed_token: 1, listed_amount: 1, listed_price_per_token: 1 },
   { sparse: true }
 );

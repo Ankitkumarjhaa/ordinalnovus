@@ -98,9 +98,9 @@ function InscriptionDetail({ data }: InscriptionProps) {
       <div className="relative">
         {/* TODO: Add BUY/ SELL/ ADD PADDING */}
         {WalletDetail?.connected &&
-          WalletDetail.ordinal_address === data.address && (
-            <ListInscription data={data} />
-          )}
+          WalletDetail.ordinal_address === data.address &&
+          data.parsed_metaprotocol?.includes("cbrc-20") &&
+          data?.cbrc_valid && <ListInscription data={data} />}
         {((WalletDetail && WalletDetail.ordinal_address !== data.address) ||
           !WalletDetail) &&
           data.listed && <BuyInscription data={data} />}

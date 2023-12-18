@@ -60,6 +60,9 @@ export async function POST(req: NextRequest) {
       if (inscription) {
         valueChecks(inscription, ordItem);
         // If the document already exists, update it with the new fields
+        inscription.listed_price_per_token = 0;
+        inscription.listed_token = "";
+        inscription.listed_amount = 0;
         inscription.listed = false;
         inscription.listed_at = new Date();
         inscription.listed_price = 0;
