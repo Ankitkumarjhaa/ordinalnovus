@@ -26,6 +26,7 @@ interface IInscriptionDetails {
     unsigned_psbt: string;
   };
 }
+const LIMIT = 200;
 
 async function fetchInscriptionsFromOutput(
   output: string,
@@ -69,7 +70,6 @@ async function fetchInscriptionsFromOutput(
   }
 }
 
-const LIMIT = 200;
 async function parseTxData(sort: 1 | -1, skip: number) {
   try {
     const modifiedTxIds: string[] = [];
@@ -256,9 +256,8 @@ export async function GET(req: NextRequest, res: NextResponse) {
 
     const results = [];
     for (let i = 0; i < numberOfCalls; i++) {
-      // Determine the parameters based on the iteration
-      let sortOrder: 1 | -1 = i % 2 === 0 ? 1 : -1; // Alternates between 1 and -1 for each call
-      let offset = i < 2 ? 0 : LIMIT; // Uses 0 for the first two calls, then LIMIT for the others
+      let sortOrder: 1 | -1 = i % 2 === 0 ? 1 : -1;
+      let offset = i * LIMIT; // Adjust offset to fetch distinct batches
 
       results.push(parseTxData(sortOrder, offset));
     }
