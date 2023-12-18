@@ -23,10 +23,10 @@ export function constructTxData(
   outputs: IVOUT[]
 ): ITXDATA | null {
   if (!inscription_id) {
-    console.debug("Inscriptions not present");
+    // console.debug("Inscriptions not present");
     return null;
   }
-  console.debug("Constructing transaction data...");
+  // console.debug("Constructing transaction data...");
 
   const inputArray: InputType[] = inputs.map((input) => ({
     address: input.prevout?.scriptpubkey_address,
@@ -40,7 +40,7 @@ export function constructTxData(
     type: output.scriptpubkey_type,
   }));
 
-  console.debug("Input and Output arrays constructed.");
+  // console.debug("Input and Output arrays constructed.");
 
   let tag: string | null = null;
   let to: string | null = null;
@@ -51,8 +51,7 @@ export function constructTxData(
     const saleInfo = checkFor4InputSale(inputArray, outputArray);
 
     if (saleInfo) {
-      console.debug("Valid sale detected.");
-      console.log({ saleInfo });
+      // console.debug("Valid sale detected.");
       return {
         tag: saleInfo.tag,
         to: saleInfo.to,
@@ -76,17 +75,17 @@ export function constructTxData(
     }
   }
 
-  console.log(
-    {
-      from,
-      to,
-      price,
-      tag: tag && inscription_id ? tag : "other",
-      inscription_id,
-    },
-    "RETURNING THIS"
-  );
-  console.debug("Transaction data construction completed.");
+  // console.log(
+  //   {
+  //     from,
+  //     to,
+  //     price,
+  //     tag: tag && inscription_id ? tag : "other",
+  //     inscription_id,
+  //   },
+  //   "RETURNING THIS"
+  // );
+  // console.debug("Transaction data construction completed.");
   return {
     from: from || "",
     to: to || "",
@@ -227,7 +226,7 @@ const checkForInscribed = (
       to = inscribedOutput ? inscribedOutput.address : null;
     }
   } catch (e) {
-    console.log("No inscription found in input");
+    // console.log("No inscription found in input");
   }
 
   return {
