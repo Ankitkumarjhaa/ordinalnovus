@@ -434,7 +434,7 @@ const CardContent: React.FC<CardContentProps> = ({
               inscription?.cbrc_valid
                 ? "bg-green-400 text-green-900 "
                 : "bg-red-400 text-red-900 "
-            } rounded font-bold  capitalize text-sm py-3 z-10 bottom-0 right-0 left-0 `}
+            } rounded font-bold  capitalize text-sm py-1 z-10 bottom-0 right-0 left-0 `}
           >
             {inscription?.cbrc_valid
               ? "Valid Transfer Note"

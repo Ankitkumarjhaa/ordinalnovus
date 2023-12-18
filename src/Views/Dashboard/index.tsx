@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { IInscription } from "@/types";
-import CustomCard from "@/components/elements/CustomCardSmall";
 import { useRouter } from "next/navigation";
 import CardContent from "@/components/elements/CustomCardSmall/CardContent";
 import { shortenString } from "@/utils";
@@ -13,13 +12,21 @@ import InscriptionDisplay from "@/components/elements/InscriptionDisplay";
 import copy from "copy-to-clipboard";
 import { addNotification } from "@/stores/reducers/notificationReducer";
 import { useDispatch } from "react-redux";
+import { FetchCBRCBalance } from "@/apiHelper/getCBRCWalletBalance";
+import CustomSearch from "@/components/elements/CustomSearch";
+import { FaSearch } from "react-icons/fa";
+import CustomPaginationComponent from "@/components/elements/CustomPagination";
 
 function AccountPage() {
   const [inscriptions, setInscriptions] = useState<IInscription[] | null>(null);
   const [total, setTotal] = useState<number>(0);
   const [profile, setProfile] = useState<IInscription | null>(null);
   const [loading, setLoading] = useState(true);
+  const [cbrcs, setCbrcs] = useState<any>(null);
   const router = useRouter();
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [page_size, setPage_size] = useState(10);
 
   const walletDetails = useWalletAddress();
 
@@ -27,8 +34,9 @@ function AccountPage() {
     try {
       const params = {
         wallet: walletDetails?.ordinal_address,
-        page_size: 100,
-        page: 1,
+        page_size: page_size,
+        page,
+        inscription_number: Number(search),
       };
 
       const result = await fetchInscriptions(params);
@@ -46,18 +54,33 @@ function AccountPage() {
     } catch (e: any) {
       setLoading(false);
     }
+  }, [walletDetails, page, search]);
+
+  const fetchCbrcBrc20 = useCallback(async () => {
+    try {
+      if (!walletDetails?.ordinal_address) return;
+      const params = {
+        address: walletDetails.ordinal_address,
+      };
+
+      const result = await FetchCBRCBalance(params);
+      if (result && result.data) {
+        setCbrcs(result.data);
+      }
+    } catch (e: any) {}
   }, [walletDetails]);
 
   useEffect(() => {
-    if (
-      walletDetails?.connected &&
-      walletDetails.ordinal_address &&
-      !inscriptions &&
-      loading
-    ) {
+    if (walletDetails?.connected && walletDetails.ordinal_address) {
       fetchData();
     }
-  }, [walletDetails, inscriptions, loading]);
+  }, [walletDetails, page]);
+
+  useEffect(() => {
+    if (walletDetails?.connected && walletDetails.ordinal_address) {
+      fetchCbrcBrc20();
+    }
+  }, [walletDetails]);
 
   useEffect(() => {
     if (!walletDetails?.connected && !loading) {
@@ -66,6 +89,16 @@ function AccountPage() {
   }, [walletDetails, loading]);
 
   const dispatch = useDispatch();
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+  };
+  const handlePageChange = (
+    event: React.ChangeEvent<unknown>,
+    value: number
+  ) => {
+    setPage(value);
+  };
 
   return (
     <div className="pt-16 text-white">
@@ -163,12 +196,74 @@ function AccountPage() {
           </Link>
         </div>
       </div>
+      <div className="">
+        {cbrcs && cbrcs.length ? (
+          <div className="py-16">
+            <h2 className="text-xl ">Your Valid CBRC-20 Balance</h2>
+            <div className="flex justify-start items-center flex-wrap">
+              {cbrcs.map((item: any) => (
+                <div
+                  key={item.tick}
+                  className="w-full md:w-6/12 lg:w-4/12 2xl:w-3/12 p-2"
+                >
+                  <Link href={`/cbrc-20/${item.tick}`}>
+                    <div className="rounded border border-accent w-full min-h-[200px] flex justify-between flex-col">
+                      <p className="uppercase text-center text-sm text-gray-300 mb-2 bg-accent_dark font-bold tracking-widest w-full py-2">
+                        {item.tick}
+                      </p>
+                      <div className="w-full flex-1 p-3 tracking-wider uppercase">
+                        <div className="text-center text-sm text-white flex justify-between w-full">
+                          <span> Available:</span> <p>{item.amt}</p>
+                        </div>
+                        <div className="text-center text-sm text-white flex justify-between w-full">
+                          <span>Transferrable: </span>
+                          <span>{item.lock}</span>
+                        </div>
+                        <hr className="my-2 bg-white border-2 border-white" />
+                        <div className="text-center text-sm text-white flex justify-between w-full">
+                          <span>Total:</span>{" "}
+                          <span>{item.amt + item.lock}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <></>
+        )}
+      </div>
+      <div className="SortSearchPages py-6 flex flex-wrap justify-between">
+        <div className="w-full lg:w-auto flex justify-start items-center flex-wrap">
+          <div className="w-full center pb-4 lg:pb-0 md:pl-4 lg:w-auto">
+            <CustomSearch
+              placeholder="Inscription Number #"
+              value={search}
+              onChange={handleSearchChange}
+              icon={FaSearch}
+              end={true}
+              onIconClick={fetchData}
+            />
+          </div>
+        </div>
+        {inscriptions && inscriptions?.length > 0 && (
+          <div className="w-full lg:w-auto center">
+            <CustomPaginationComponent
+              count={Math.ceil(total / page_size)}
+              onChange={handlePageChange}
+              page={page}
+            />
+          </div>
+        )}
+      </div>
       <div className="py-6">
         {inscriptions?.length ? (
           <InscriptionDisplay
             data={inscriptions}
             loading={loading}
-            pageSize={100}
+            pageSize={10}
           />
         ) : (
           <>

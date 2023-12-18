@@ -266,7 +266,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
           insertOne: {
             document: {
               content_type: contentType,
-              ...(token ||
+              ...((token && !tags.includes("cbrc")) ||
               !contentResponse ||
               !sha ||
               /image|audio|zip|video/.test(contentType)

@@ -1,8 +1,8 @@
 import { RootState } from "@/stores";
 import { IInscription } from "@/types";
 import { Icbrc } from "@/types/CBRC";
-import { shortenString } from "@/utils";
 import {
+  CircularProgress,
   Paper,
   Table,
   TableBody,
@@ -14,13 +14,14 @@ import {
 import moment from "moment";
 import { useRouter } from "next/navigation";
 import React from "react";
-import { FaBitcoin, FaDollarSign } from "react-icons/fa";
+import { FaBitcoin, FaCheckCircle, FaDollarSign } from "react-icons/fa";
+import { IoIosWarning } from "react-icons/io";
 import { useDispatch, useSelector } from "react-redux";
 type HeroProps = {
-  data: Icbrc;
   listings: IInscription[];
+  loading: boolean;
 };
-function CbrcListings({ data, listings }: HeroProps) {
+function CbrcListings({ listings, loading }: HeroProps) {
   const router = useRouter();
   const btcPrice = useSelector(
     (state: RootState) => state.general.btc_price_in_dollar
@@ -29,9 +30,12 @@ function CbrcListings({ data, listings }: HeroProps) {
   const handleListingClick = (id: string) => {
     router.push(`/inscription/${id}`);
   };
+  const handleMempoolClick = (txid: string) => {
+    window.open(`https://mempool.space/tx/${txid}`);
+  };
 
   return (
-    <div className="py-16">
+    <div className="py-2">
       <TableContainer
         component={Paper}
         sx={{
@@ -62,14 +66,22 @@ function CbrcListings({ data, listings }: HeroProps) {
               <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
                 TIMESTAMP
               </TableCell>
+              <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+                STATUS
+              </TableCell>
             </TableRow>
           </TableHead>
           <>
             {listings && listings.length ? (
               <TableBody sx={{ bgcolor: "#3d0263", color: "white" }}>
                 {listings?.map((item: IInscription) => {
-                  if (!item.parsed_metaprotocol || !item.listed_price)
+                  if (!item.parsed_metaprotocol || !item.listed_price) {
+                    console.log({
+                      item,
+                      msg: " NOT SHOWING THIS because parsed_metaprotocol or listed_price are missing",
+                    });
                     return <></>;
+                  }
                   const op = item.parsed_metaprotocol[1];
                   const tokenAmt = item.parsed_metaprotocol[2];
                   const token = tokenAmt?.includes("=")
@@ -81,7 +93,11 @@ function CbrcListings({ data, listings }: HeroProps) {
                   if (item.parsed_metaprotocol[0] === "cbrc-20")
                     return (
                       <TableRow
-                        onClick={() => handleListingClick(item.inscription_id)}
+                        onClick={() =>
+                          item.in_mempool
+                            ? handleMempoolClick(item.txid)
+                            : handleListingClick(item.inscription_id)
+                        }
                         key={item.txid}
                         sx={{
                           "&:last-child td, &:last-child th": { border: 0 },
@@ -101,7 +117,16 @@ function CbrcListings({ data, listings }: HeroProps) {
                           {token}
                         </TableCell>
                         <TableCell sx={{ color: "white" }}>
-                          #{item.inscription_number}
+                          <div className="center ">
+                            <p>#{item.inscription_number}</p>
+                            <div className="ml-3">
+                              {item.cbrc_valid ? (
+                                <FaCheckCircle className="text-green-400" />
+                              ) : (
+                                <IoIosWarning className="text-red-400" />
+                              )}
+                            </div>
+                          </div>
                         </TableCell>{" "}
                         <TableCell sx={{ color: "white" }}>
                           <div>
@@ -149,9 +174,30 @@ function CbrcListings({ data, listings }: HeroProps) {
                         <TableCell sx={{ color: "white" }}>
                           {moment(item.listed_at).fromNow()}{" "}
                         </TableCell>
+                        <TableCell sx={{ color: "white" }}>
+                          {item.in_mempool ? "In Mempool" : "Buy Now"}
+                        </TableCell>
                       </TableRow>
                     );
+                  else {
+                    console.log({
+                      item,
+                      msg: " NOT SHOWING THIS because parsed_metaprotocol[0] is not cbrc-20",
+                    });
+                    return <></>;
+                  }
                 })}
+              </TableBody>
+            ) : loading ? (
+              <TableBody>
+                <TableRow>
+                  <TableCell
+                    colSpan={4}
+                    style={{ textAlign: "center", color: "white" }}
+                  >
+                    <CircularProgress color="inherit" size={40} />
+                  </TableCell>
+                </TableRow>
               </TableBody>
             ) : (
               <TableBody>

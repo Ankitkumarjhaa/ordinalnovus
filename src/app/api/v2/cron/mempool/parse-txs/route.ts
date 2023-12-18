@@ -6,6 +6,7 @@ import { Tx, Sale, Inscription } from "@/models";
 import { IVIN, IVOUT } from "@/types/Tx";
 import { ITXDATA, constructTxData } from "@/utils/api/constructTxData";
 import { IInscription } from "@/types";
+import discordWebhookCBRCSaleAlert from "@/utils/discord_webhook";
 
 interface IInscriptionDetails {
   inscription_id: string;
@@ -25,6 +26,7 @@ interface IInscriptionDetails {
     unsigned_psbt: string;
   };
 }
+const LIMIT = 200;
 
 async function fetchInscriptionsFromOutput(
   output: string,
@@ -68,7 +70,6 @@ async function fetchInscriptionsFromOutput(
   }
 }
 
-const LIMIT = 200;
 async function parseTxData(sort: 1 | -1, skip: number) {
   try {
     const modifiedTxIds: string[] = [];
@@ -142,6 +143,7 @@ async function parseTxData(sort: 1 | -1, skip: number) {
           filter: { _id },
           update: {
             $set: {
+              txid,
               ...(inscriptionIds.length && { inscriptions: inscriptionIds }),
               ...(inscriptionIds.length > 0
                 ? {
@@ -203,6 +205,9 @@ async function parseTxData(sort: 1 | -1, skip: number) {
       }
     }
 
+    if (txBulkOps.length > 0 && inscriptionBulkOps.length > 0) {
+      await discordWebhookCBRCSaleAlert(txBulkOps);
+    }
     if (txBulkOps.length > 0) {
       await Tx.bulkWrite(txBulkOps);
     }
@@ -244,14 +249,20 @@ export async function GET(req: NextRequest, res: NextResponse) {
     };
 
     await Tx.deleteMany({ ...query });
+    const MAX_CALLS = 4;
 
-    // const result = await parseTxData(1, 0);
-    const result = await Promise.allSettled([
-      parseTxData(1, 0),
-      parseTxData(1, LIMIT),
-      parseTxData(-1, 0),
-      parseTxData(-1, LIMIT),
-    ]);
+    const nonParsedTxs = await Tx.countDocuments({ parsed: false });
+    const numberOfCalls = Math.min(Math.ceil(nonParsedTxs / LIMIT), MAX_CALLS);
+
+    const results = [];
+    for (let i = 0; i < numberOfCalls; i++) {
+      let sortOrder: 1 | -1 = i % 2 === 0 ? 1 : -1;
+      let offset = i * LIMIT; // Adjust offset to fetch distinct batches
+
+      results.push(parseTxData(sortOrder, offset));
+    }
+
+    const result = await Promise.allSettled(results);
 
     return NextResponse.json({
       message: "Processing completed, check logs for details",

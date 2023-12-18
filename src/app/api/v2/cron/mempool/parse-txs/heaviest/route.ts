@@ -233,13 +233,13 @@ export async function GET(req: NextRequest, res: NextResponse) {
     console.log(`***** Parse Txs [CRONJOB] Called *****`);
     await dbConnect();
     const nonParsedTxs = await Tx.countDocuments({ parsed: false });
-    if (nonParsedTxs < 3000)
+    if (nonParsedTxs < 7000)
       return NextResponse.json({ message: "Not enough Txs" });
 
     const MAX_CALLS = 4;
 
     const numberOfCalls = Math.min(
-      Math.ceil((nonParsedTxs - 3000) / LIMIT),
+      Math.ceil((nonParsedTxs - 7000) / LIMIT),
       MAX_CALLS
     );
 

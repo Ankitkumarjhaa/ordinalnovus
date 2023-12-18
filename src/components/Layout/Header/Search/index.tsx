@@ -92,6 +92,8 @@ function Search() {
 
   const determineUrl = (item: string, id: string) => {
     switch (true) {
+      case item.includes("CBRC-20"):
+        return `/cbrc-20/${id}`;
       case item.includes("sat name"):
         return `/sat/${id}`;
       case item.includes("inscription number"):

@@ -8,6 +8,7 @@ import { IInscription } from "@/types";
 import mixpanel from "mixpanel-browser";
 import { addNotification } from "@/stores/reducers/notificationReducer";
 import CbrcListings from "./CbrcListings";
+import { fetchCBRCListings } from "@/apiHelper/fetchCBRCListings";
 
 type CbrcDetailPageProps = {
   cbrc: Icbrc;
@@ -18,17 +19,17 @@ function CbrcDetailPage({ cbrc }: CbrcDetailPageProps) {
   const [page, setPage] = useState<number>(1);
   const [data, setData] = useState<IInscription[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
-  const [pageSize, setPageSize] = useState<number>(100);
+  const [pageSize, setPageSize] = useState<number>(20);
   const [sort, setSort] = useState<string>("updated_at:-1");
   const [loading, setLoading] = useState<boolean>(true);
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      const result = await fetchInscriptions({
+      const result = await fetchCBRCListings({
         page,
         page_size: pageSize,
         sort,
-        listed: true,
+        tick: cbrc.tick.toLowerCase(),
       });
       if (result && result.data) {
         setData(result.data.inscriptions);
@@ -44,7 +45,7 @@ function CbrcDetailPage({ cbrc }: CbrcDetailPageProps) {
     <div>
       <Hero data={cbrc} listings={data} />
       {data && data?.length ? (
-        <CbrcListings data={cbrc} listings={data} />
+        <CbrcListings listings={data} loading={loading} />
       ) : (
         <p className="min-h-[20vh] center"> No Listings Found</p>
       )}

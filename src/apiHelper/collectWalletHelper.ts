@@ -5,6 +5,8 @@ import axios from "axios";
 export interface CollectWalletParams {
   ordinal_address: string;
   cardinal_address: string;
+  ordinal_pubkey: string;
+  cardinal_pubkey: string;
   wallet: string;
 }
 

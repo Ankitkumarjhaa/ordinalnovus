@@ -55,6 +55,7 @@ function BuyInscription({ data }: InscriptionProps) {
     }
 
     try {
+      console.log({ feeRate }, "in BUY Function");
       setLoading(true);
       const result = await getUnsignedBuyPsbt({
         inscription_id: data.inscription_id,
@@ -125,7 +126,7 @@ function BuyInscription({ data }: InscriptionProps) {
         })
       );
     }
-  }, [walletDetails, data]);
+  }, [walletDetails, data, feeRate]);
 
   const broadcast = async (signedPsbt: string) => {
     const inscription = { ...data };
@@ -286,6 +287,7 @@ function BuyInscription({ data }: InscriptionProps) {
       signTx();
     }
   }, [unsignedPsbtBase64]);
+
   return (
     <>
       <div className="w-full  py-6 border-b-2 border-accent">

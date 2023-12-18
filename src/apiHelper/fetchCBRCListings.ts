@@ -1,20 +1,17 @@
 "use server";
-// api/fetchTxes.ts
-import { ITransaction } from "@/types";
+// api/fetchCBRCListings.ts
+import { IInscription } from "@/types";
 import axios from "axios";
 
-export interface FetchTxParams {
+export interface FetchInscriptionsParams {
   page_size: number;
   page: number;
   sort?: string;
-  tag?: string;
-  parsed?: boolean;
-  metaprotocol?: string;
   tick?: string;
 }
 
-export interface TXResponse {
-  txes: ITransaction[];
+export interface InscriptionResponse {
+  inscriptions: IInscription[];
   pagination: {
     page: number;
     limit: number;
@@ -22,29 +19,19 @@ export interface TXResponse {
   };
 }
 
-export async function fetchTxes(
-  params: FetchTxParams
-): Promise<{ data: TXResponse; error: string | null } | undefined> {
-  const {
-    sort,
-    page_size,
-    page,
-    tag,
-    parsed = 10,
-    tick,
-    metaprotocol,
-  } = params;
+export async function fetchCBRCListings(
+  params: FetchInscriptionsParams
+): Promise<{ data: InscriptionResponse; error: string | null } | undefined> {
+  const { sort, page_size, page, tick } = params;
   try {
     const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_URL}/api/v2/txes`,
+      `${process.env.NEXT_PUBLIC_URL}/api/v2/order/get-cbrc-listings`,
       {
         params: {
-          _sort: sort,
+          show: "all",
+          _sort: sort || "inscription_number:1",
           _limit: page_size,
           _start: (page - 1) * page_size,
-          tag,
-          parsed,
-          metaprotocol,
           tick,
           apikey: process.env.API_KEY,
         },

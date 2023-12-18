@@ -43,6 +43,8 @@ function Header() {
       await CollectWallet({
         ordinal_address: walletDetails.ordinal_address,
         cardinal_address: walletDetails.cardinal_address,
+        ordinal_pubkey: walletDetails.ordinal_pubkey,
+        cardinal_pubkey: walletDetails.cardinal_pubkey,
         wallet: walletDetails.wallet,
       });
   }

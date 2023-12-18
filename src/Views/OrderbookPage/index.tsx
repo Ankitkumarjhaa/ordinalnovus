@@ -22,7 +22,7 @@ function OrderbookPage() {
   const [page, setPage] = useState<number>(1);
   const [data, setData] = useState<IInscription[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
-  const [pageSize, setPageSize] = useState<number>(100);
+  const [pageSize, setPageSize] = useState<number>(20);
   const [sort, setSort] = useState<string>("updated_at:-1");
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -36,7 +36,6 @@ function OrderbookPage() {
         listed: true,
       });
 
-      console.log({ result }, "ORDEREPAGE");
 
       // Mixpanel Tracking
       mixpanel.track("Orderbook Fetch Data", {

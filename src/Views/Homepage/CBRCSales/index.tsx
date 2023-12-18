@@ -27,103 +27,98 @@ import { RootState } from "@/stores";
 
 import { FaBitcoin, FaDollarSign } from "react-icons/fa";
 import { shortenString } from "@/utils";
-function CBRC() {
+import CustomSelector from "@/components/elements/CustomSelector";
+
+const options = [
+  { value: "timestamp:-1", label: "Latest Sales" },
+  { value: "price:1", label: "Low Price" },
+  { value: "inscription_number:1", label: "Low Number" },
+];
+
+function CBRCSales() {
   const btcPrice = useSelector(
     (state: RootState) => state.general.btc_price_in_dollar
   );
   const dispatch = useDispatch();
   const [data, setData] = useState<Icbrc[] | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [search, setSearch] = useState("");
-  const [page_size, setPage_size] = useState(21);
+  const [page_size, setPage_size] = useState(10);
   const router = useRouter();
 
-  const [sort, setSort] = useState<string>("creation:1");
-  const [txs, setTxs] = useState<ITransaction[] | null>(null);
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    const result = await FetchCBRC({
-      offset: (page - 1) * page_size,
-      mode: "deploy",
-      sort,
-      search,
-    });
+  const [tick, setTick] = useState("");
 
-    if (!result) {
-      dispatch(
-        addNotification({
-          id: new Date().valueOf(),
-          severity: "error",
-          message: "Cyborg API Down!!",
-          open: true,
-        })
-      );
-      setLoading(false);
-    } else if (result && result.data) {
-      setData(result.data.items);
-      setTotalCount(result.data.count);
-      setLoading(false);
-      mixpanel.track("CBRC Search Performed", {
-        search_query: search,
-        sort_option: sort,
-        page_number: page,
-      });
-    }
-  }, [page, search, sort]);
+  const [sort, setSort] = useState<string>("timestamp:-1");
+  const [txs, setTxs] = useState<ITransaction[] | null>(null);
 
   const fetchTxData = useCallback(async () => {
-    const result = await fetchTxes({
+    setLoading(true);
+    setTxs(null);
+    const q = {
       parsed: true,
-      metaprotocol: "transfer",
-      sort: "timestamp:-1",
-      page_size: 500,
-      page: 1,
+      sort,
+      page_size,
+      page,
       tag: "sale",
-    });
+      ...(tick ? { tick } : { metaprotocol: "transfer" }),
+    };
+    const result = await fetchTxes(q);
 
-    if (!result) {
-    } else if (result && result.data) {
+    if (result && result.data) {
       setTxs(result.data.txes);
-      // setTotalCount(result.data.pagination.total);
+      setTotalCount(result.data.pagination.total);
     }
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-  }, [sort, page, dispatch]);
+    setLoading(false);
+  }, [sort, page_size, page, tick]);
 
   useEffect(() => {
     fetchTxData();
-  }, []);
-
-  const handlePageChange = (
-    event: React.ChangeEvent<unknown>,
-    value: number
-  ) => {
-    setPage(value);
-  };
-  const handleRowClick = (tick: string) => {
-    //@ts-ignore
-    router.push(`/cbrc-20/${tick}`);
-  };
+  }, [sort, page_size, page]);
 
   const handleTxClick = (txid: string) => {
     window.open(`https://mempool.space/tx/${txid}`, "_blank");
   };
 
   const handleSearchChange = (value: string) => {
-    setSearch(value);
+    setTick(value);
+  };
+  
+  const handlePageChange = (
+    event: React.ChangeEvent<unknown>,
+    value: number
+  ) => {
+    setPage(value);
   };
 
   return (
     <section className="pt-16 w-full">
-      <div className="flex justify-between items-center flex-wrap">
-        <h2 className="font-bold text-2xl lg:text-4xl text-white pb-6 w-full lg:w-auto ">
-          Cyborg BRC-20 Protocol
-        </h2>
-        {data && data.length > 0 && (
+      <h3 className=" py-2 text-3xl font-bold text-white">
+        Cyborg BRC-20 Protocol Sales
+      </h3>
+      <div className="SortSearchPages py-6 flex flex-wrap justify-between">
+        <div className="w-full lg:w-auto flex justify-start items-center flex-wrap">
+          <div className="w-full center pb-4 lg:pb-0 lg:w-auto">
+            <CustomSelector
+              label="Sort"
+              value={sort}
+              options={options}
+              onChange={setSort}
+            />
+          </div>
+          <div className="w-full center pb-4 lg:pb-0 md:pl-4 lg:w-auto">
+            <CustomSearch
+              placeholder="Ticker"
+              value={tick}
+              onChange={handleSearchChange}
+              icon={FaSearch}
+              end={true}
+              onIconClick={fetchTxData}
+            />
+          </div>
+        </div>
+        {txs && txs?.length > 0 && (
           <div className="w-full lg:w-auto center">
             <CustomPaginationComponent
               count={Math.ceil(totalCount / page_size)}
@@ -133,116 +128,18 @@ function CBRC() {
           </div>
         )}
       </div>
-      <div className="w-full center lg:w-auto my-2">
-        <CustomSearch
-          placeholder="CBRC Token..."
-          value={search}
-          onChange={handleSearchChange}
-          icon={FaSearch}
-          end={true}
-          onIconClick={fetchData}
-          fullWidth
-        />
-      </div>
-      <div className="">
-        <TableContainer
-          component={Paper}
-          sx={{
-            bgcolor: "#3d0263",
-            color: "white",
-            border: "3px",
-            borderColor: "#3d0263",
-          }}
-        >
-          <Table
-            size={"small"}
-            sx={{ minWidth: 650 }}
-            aria-label="cbrc-20 table"
-          >
-            <TableHead sx={{ bgcolor: "#84848a", color: "white" }}>
-              <TableRow>
-                <TableCell sx={{ fontWeight: "bold", fontSize: "1.25rem" }}>
-                  TICK
-                </TableCell>
-                <TableCell sx={{ fontWeight: "bold", fontSize: "1.25rem" }}>
-                  Max
-                </TableCell>
-                <TableCell sx={{ fontWeight: "bold", fontSize: "1.25rem" }}>
-                  Limit
-                </TableCell>
-                <TableCell sx={{ fontWeight: "bold", fontSize: "1.25rem" }}>
-                  Minted
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            {loading ? (
-              <TableBody>
-                <TableRow>
-                  <TableCell
-                    colSpan={4}
-                    style={{ textAlign: "center", color: "white" }}
-                  >
-                    <CircularProgress color="inherit" size={40} />
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            ) : (
-              <>
-                {data && data.length ? (
-                  <TableBody sx={{ bgcolor: "#3d0263", color: "white" }}>
-                    {data?.map((item: Icbrc) => (
-                      <TableRow
-                        onClick={() => handleRowClick(item.tick)}
-                        key={item.op.id}
-                        sx={{
-                          "&:last-child td, &:last-child th": { border: 0 },
-                          "&:hover": { bgcolor: "#1f1d3e" },
-                          color: "white",
-                          cursor: "pointer",
-                        }}
-                      >
-                        <TableCell
-                          component="th"
-                          scope="row"
-                          sx={{ color: "white" }}
-                        >
-                          {item.tick}
-                        </TableCell>
-                        <TableCell sx={{ color: "white" }}>
-                          {item.max}
-                        </TableCell>
-                        <TableCell sx={{ color: "white" }}>
-                          {item.lim}
-                        </TableCell>
-                        <TableCell sx={{ color: "white" }}>
-                          {((item.supply / item.max) * 100).toFixed(3)}%
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                ) : (
-                  <TableBody>
-                    <TableRow>
-                      <TableCell
-                        colSpan={4}
-                        style={{ textAlign: "center", color: "white" }}
-                      >
-                        No DATA Found
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                )}
-              </>
-            )}
-          </Table>
-        </TableContainer>
-      </div>
-
-      {txs && txs?.length ? (
-        <div className="pt-16">
-          <h3 className="text-center py-2 text-3xl font-bold text-white">
-            Recent Sales
-          </h3>
+      {!txs || !txs?.length ? (
+        <>
+          {loading ? (
+            <div className="text-white center py-16">
+              <CircularProgress size={20} color="inherit" />
+            </div>
+          ) : (
+            <p className="min-h-[20vh] center"> No CBRC Sales Found</p>
+          )}
+        </>
+      ) : (
+        <div className="pt-3">
           <TableContainer
             component={Paper}
             sx={{
@@ -393,11 +290,9 @@ function CBRC() {
             </Table>
           </TableContainer>
         </div>
-      ) : (
-        <></>
       )}
     </section>
   );
 }
 
-export default CBRC;
+export default CBRCSales;
