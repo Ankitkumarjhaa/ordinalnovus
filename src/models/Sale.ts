@@ -10,7 +10,6 @@ export const salesSchema = new mongoose.Schema(
     },
     inscription_id: {
       type: String,
-      unique: true,
       required: true,
       validate: {
         validator: (value: string) => /^[a-f0-9]+i\d+$/.test(value),
