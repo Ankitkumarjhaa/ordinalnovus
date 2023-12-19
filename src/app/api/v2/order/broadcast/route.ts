@@ -89,7 +89,7 @@ export async function POST(
 
     // return;
     // Broadcast the finalized transaction
-    const broadcastRes = await fetch(`https://mempool.space/api/tx`, {
+    const broadcastRes = await fetch(`https://blockstream.info/tx`, {
       method: "post",
       body: txHex,
     });

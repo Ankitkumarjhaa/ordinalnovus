@@ -9,7 +9,7 @@ import { getCache, setCache } from "@/lib/cache";
 async function fetchBlockhashFromHeight(height: number): Promise<string> {
   try {
     const tipResponse = await axios.get(
-      `https://mempool.space/api/block-height/${height}`
+      `https://blockstream.info/api/block-height/${height}`
     );
     return tipResponse.data;
   } catch (error: any) {
@@ -24,7 +24,6 @@ async function fetchBlockhashFromHeight(height: number): Promise<string> {
         "Block not found. Latest data already in DB. Processing halted for 5 minutes."
       );
     } else {
-      // Handle other errors or rethrow
       throw error;
     }
   }
@@ -32,7 +31,7 @@ async function fetchBlockhashFromHeight(height: number): Promise<string> {
 
 async function fetchBlockDetails(latestBlockhash: string): Promise<any> {
   const blockDetailsResponse = await axios.get(
-    `https://mempool.space/api/block/${latestBlockhash}`
+    `https://blockstream.info/api/block/${latestBlockhash}`
   );
   return blockDetailsResponse.data;
 }
@@ -96,7 +95,7 @@ const fetchTransactions = async (index: number, blockhash: string) => {
   try {
     console.debug({ index });
     const response = await axios.get(
-      `https://mempool.space/api/block/${blockhash}/txs/${index}`
+      `https://blockstream.info/api/block/${blockhash}/txs/${index}`
     );
     return response.data;
   } catch (error: any) {
@@ -213,7 +212,7 @@ async function addBlockTxToDB(blockhash: string) {
 
 async function getLatestBlockHeight(): Promise<number> {
   const response = await axios.get(
-    "https://mempool.space/api/blocks/tip/height"
+    "https://blockstream.info/api/blocks/tip/height"
   );
   return response.data;
 }
@@ -279,7 +278,10 @@ export async function GET(req: NextRequest, res: NextResponse) {
       }
     } catch (e: any) {
       console.error("Failed to get block information:", e);
-      return NextResponse.json({ message: e.message || e }, { status: 500 });
+      return NextResponse.json(
+        { message: e.response.error.message || e },
+        { status: 500 }
+      );
     }
   } catch (error) {
     console.error(error);
