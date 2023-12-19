@@ -488,7 +488,7 @@ async function generateUnsignedBuyingPSBTBase64(
   // Create a platform fee output
   let platformFeeValue = Math.floor((listing.seller.price * (0 + 100)) / 10000);
   // Assuming listing.seller.price is in satoshis
-  platformFeeValue = 580 || Math.max(listing.seller.price * 0.01, 580);
+  platformFeeValue = Math.max(listing.seller.price * 0.01, 580);
 
   // platformFeeValue > DUMMY_UTXO_MIN_VALUE ? platformFeeValue : 580;
 

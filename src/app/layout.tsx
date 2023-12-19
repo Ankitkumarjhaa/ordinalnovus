@@ -54,11 +54,11 @@ export default function RootLayout({
               {/* <main className=" py-52 lg:py-24 px-6 lg:px-24 max-w-7xl mx-auto relative"> */}
               <Header />
               <div className="w-full my-2 text-xs py-2 uppercase font-bold text-white text-center">
-                {/* <p
+                <p
                   className={`text-bitcoin bg-secondary  py-2 w-full border-accent border rounded tracking-widest font-bold`}
                 >
                   1% Fee applied on all sales
-                </p> */}
+                </p>
               </div>
               {children}
             </main>

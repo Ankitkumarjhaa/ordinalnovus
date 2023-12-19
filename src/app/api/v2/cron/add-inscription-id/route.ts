@@ -80,7 +80,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       ? highestInscription.inscription_number + 1
       : -1;
 
-    const BATCH = 40;
+    const BATCH = 400;
 
     // Initialize the array with undefined values, then map each element to its incremented value.
     const inscriptionArray = Array.from(
