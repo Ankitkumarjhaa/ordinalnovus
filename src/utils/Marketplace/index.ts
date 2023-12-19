@@ -84,7 +84,7 @@ const txHexByIdCache: Record<TxId, string> = {};
 async function getTxHexById(txId: TxId): Promise<string> {
   if (!txHexByIdCache[txId]) {
     txHexByIdCache[txId] = await fetch(
-      `${baseMempoolApiUrl}/tx/${txId}/hex`
+      `https://blockstream.info/api/tx/${txId}/hex`
     ).then((response) => response.text());
   }
 
@@ -95,7 +95,10 @@ const toXOnly = (pubKey: string | any[]) =>
   pubKey.length === 32 ? pubKey : pubKey.slice(1, 33);
 
 async function getUtxosByAddress(address: string) {
-  return await mempoolBitcoin.addresses.getAddressTxsUtxo({ address });
+  const { data } = await axios.get(
+    `https://blockstream.info/api/address/${address}/utxo`
+  );
+  return data;
 }
 const recommendedFeeRate = async (fee_rate?: FeeRateTier) =>
   fetch(`${baseMempoolApiUrl}/v1/fees/recommended`)
