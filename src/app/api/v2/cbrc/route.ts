@@ -54,17 +54,15 @@ export async function GET(req: NextRequest) {
         .select("listed_price_per_token");
 
       // Building the match query
-      const matchQuery: any = {
+      const matchQuery = {
         parsed_metaprotocol: {
-          $elemMatch: {
-            pattern: `^${item.tick.trim().toLowerCase()}=`,
-            options: "i",
-          },
+          $regex: `^${item.tick.trim().toLowerCase()}=`,
+          $options: "i",
         },
       };
-      if (timeFrame !== "total") {
-        matchQuery.timestamp = dateRange;
-      }
+      // if (timeFrame !== "total") {
+      //   matchQuery.timestamp = dateRange;
+      // }
 
       const pipeline = [
         { $match: matchQuery },

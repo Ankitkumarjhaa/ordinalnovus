@@ -113,7 +113,7 @@ function CbrcListings({ listings, loading }: HeroProps) {
                           color: "white",
                           cursor: "pointer",
                           bgcolor: !allowed_cbrcs?.includes(
-                            stringToHex(token.toLowerCase())
+                            stringToHex(token.toLowerCase().trim())
                           )
                             ? "red"
                             : "",
