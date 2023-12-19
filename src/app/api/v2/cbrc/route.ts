@@ -1,15 +1,32 @@
 import dbConnect from "@/lib/dbConnect";
 import { Inscription, Tx } from "@/models";
 import { Icbrc } from "@/types/CBRC";
+import convertParams from "@/utils/api/convertParams";
 import axios from "axios";
 import moment from "moment";
 import { NextRequest, NextResponse } from "next/server";
 
+// Function to remove special characters from a string
+function sanitizeString(str: string) {
+  return str.replace(/[^a-zA-Z0-9]/g, "");
+}
+
 export async function GET(req: NextRequest) {
   try {
-    const url = `https://api.cybord.org/deploy`;
+    const query = convertParams(Inscription, req.nextUrl);
+
+    console.log({ finalQueryCbrc: query });
+    let url = `https://api.cybord.org/deploy`;
+    if (query.ticker) url = `https://api.cybord.org/tokens`;
+
+    let sanitizedTicker = query.ticker ? sanitizeString(query.ticker) : null;
+
     const { data } = await axios.get(url, {
-      params: { order: "creation", offset: 0 },
+      params: {
+        order: "creation",
+        offset: query.start,
+        ...(sanitizedTicker && { q: sanitizedTicker }),
+      },
     });
 
     if (!data?.items || data.items.length === 0) {
@@ -43,6 +60,7 @@ export async function GET(req: NextRequest) {
         // Default to total if no valid time frame is provided
         break;
     }
+
     await dbConnect();
     const itemPromises = data.items.map(async (item: Icbrc) => {
       const q = {
@@ -54,15 +72,13 @@ export async function GET(req: NextRequest) {
         .select("listed_price_per_token");
 
       // Building the match query
-      const matchQuery = {
+      const matchQuery: any = {
         parsed_metaprotocol: {
           $regex: `^${item.tick.trim().toLowerCase()}=`,
           $options: "i",
         },
+        ...(timeFrame && { timestamp: dateRange }),
       };
-      // if (timeFrame !== "total") {
-      //   matchQuery.timestamp = dateRange;
-      // }
 
       const pipeline = [
         { $match: matchQuery },
@@ -82,6 +98,9 @@ export async function GET(req: NextRequest) {
         ...item,
         fp: inscription?.listed_price_per_token,
         totalVolume: salesVolume[0]?.totalVolume || 0,
+        totalVolumeBTC: salesVolume[0]?.totalVolume
+          ? salesVolume[0]?.totalVolume / 100_000_000
+          : 0,
       };
     });
 

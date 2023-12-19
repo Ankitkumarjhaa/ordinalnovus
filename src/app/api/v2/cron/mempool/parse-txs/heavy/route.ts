@@ -147,7 +147,7 @@ async function parseTxData(sort: 1 | -1, skip: number) {
 
         cbrcInfo = {
           metaprotocol: "cbrc-20",
-          token: token.split().toLowerCase(),
+          token: token.trim().toLowerCase(),
           amount: Number(amt),
           price_per_token: txData.price / Number(amt),
         };
@@ -255,7 +255,7 @@ async function parseTxData(sort: 1 | -1, skip: number) {
 // API Handler
 export async function GET(req: NextRequest, res: NextResponse) {
   try {
-    console.log(`***** Parse Txs [CRONJOB] Called *****`);
+    console.log(`***** Parse Txs HEAVY [CRONJOB] Called *****`);
     await dbConnect();
     const nonParsedTxs = await Tx.countDocuments({ parsed: false });
     if (nonParsedTxs < 3000)
@@ -270,12 +270,14 @@ export async function GET(req: NextRequest, res: NextResponse) {
 
     const results = [];
     for (let i = 0; i < numberOfCalls; i++) {
+      console.log({ i });
       let sortOrder: 1 | -1 = i % 2 === 0 ? 1 : -1;
       let offset = i * LIMIT; // Adjust offset to fetch distinct batches
 
-      results.push(parseTxData(sortOrder, offset));
-    }
+      console.log({ sortOrder, offset });
 
+      results.push(parseTxData(sortOrder, offset + 3000));
+    }
     const result = await Promise.allSettled(results);
 
     return NextResponse.json({

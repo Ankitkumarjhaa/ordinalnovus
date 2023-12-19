@@ -151,7 +151,7 @@ async function parseTxData(sort: 1 | -1, skip: number) {
 
         cbrcInfo = {
           metaprotocol: "cbrc-20",
-          token: token.split().toLowerCase(),
+          token: token.trim().toLowerCase(),
           amount: Number(amt),
           price_per_token: txData.price / Number(amt),
         };
@@ -281,8 +281,11 @@ export async function GET(req: NextRequest, res: NextResponse) {
 
     const results = [];
     for (let i = 0; i < numberOfCalls; i++) {
+      console.log({ i });
       let sortOrder: 1 | -1 = i % 2 === 0 ? 1 : -1;
       let offset = i * LIMIT; // Adjust offset to fetch distinct batches
+
+      console.log({ sortOrder, offset });
 
       results.push(parseTxData(sortOrder, offset));
     }
