@@ -17,6 +17,7 @@ import ListInscription from "./ListInscription";
 import BuyInscription from "./BuyInscription";
 import DisplayAttributes from "./DisplayAttributes";
 import { RootState } from "@/stores";
+import { stringToHex } from "@/utils";
 type InscriptionProps = {
   data: IInscription;
 };
@@ -29,6 +30,21 @@ function InscriptionDetail({ data }: InscriptionProps) {
   const allowed_cbrcs = useSelector(
     (state: RootState) => state.general.allowed_cbrcs
   );
+
+  function generateChecksum() {
+    // Check if 'parsed_metaprotocol' exists and has the necessary structure
+    if (data?.parsed_metaprotocol && data.parsed_metaprotocol.length > 2) {
+      const targetString = data.parsed_metaprotocol[2]
+        .split("=")[0]
+        .toLowerCase()
+        .trim();
+      return stringToHex(targetString);
+    } else {
+      return null; // or any default value you deem appropriate
+    }
+  }
+
+  const checksum = generateChecksum();
 
   return (
     <div className="p-6 md:pt-0 pb-6 flex-1">
@@ -43,6 +59,8 @@ function InscriptionDetail({ data }: InscriptionProps) {
             )}
           </h3>
           {data?.parsed_metaprotocol &&
+            checksum &&
+            allowed_cbrcs?.includes(checksum) &&
             data?.parsed_metaprotocol.length === 3 && (
               <Link
                 href={`/cbrc-20/${data.parsed_metaprotocol[2].split("=")[0]}`}
@@ -103,11 +121,23 @@ function InscriptionDetail({ data }: InscriptionProps) {
         {WalletDetail?.connected &&
           WalletDetail.ordinal_address === data.address &&
           data.parsed_metaprotocol?.includes("cbrc-20") &&
-          data?.cbrc_valid && <ListInscription data={data} />}
+          (!checksum ||
+            (data?.cbrc_valid && allowed_cbrcs?.includes(checksum))) && (
+            <ListInscription data={data} />
+          )}
+
         {((WalletDetail && WalletDetail.ordinal_address !== data.address) ||
           !WalletDetail) &&
-          data.listed && <BuyInscription data={data} />}
+          data.listed &&
+          (!checksum || allowed_cbrcs?.includes(checksum)) && (
+            <BuyInscription data={data} />
+          )}
       </div>
+      {checksum && !allowed_cbrcs?.includes(checksum) && (
+        <p className="text-sm text-center pt-2">
+          Token hasnt been added to allowlist yet. Buying / Selling Disabled.
+        </p>
+      )}
       <div className="pt-2">
         <DisplayProperties data={data} />
       </div>

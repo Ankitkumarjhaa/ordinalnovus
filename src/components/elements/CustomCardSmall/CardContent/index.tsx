@@ -54,9 +54,6 @@ const CardContent: React.FC<CardContentProps> = ({
   const allowed_cbrcs = useSelector(
     (state: RootState) => state.general.allowed_cbrcs
   );
-
-  console.log({ allowed_cbrcs });
-
   useEffect(() => {
     if (!cbrc) {
       setIsLoading(true); // Set isLoading to true when starting the fetch
@@ -116,15 +113,17 @@ const CardContent: React.FC<CardContentProps> = ({
       const checksum = stringToHex(token.toLowerCase());
       return (
         <div
-          className={`w-full h-full flex flex-col justify-center items-center text-sm tracking-widest  py-12 font-sourcecode ${
-            !allowed_cbrcs?.includes(checksum) && " bg-red-600 "
-          }`}
+          className={`w-full h-full flex flex-col justify-center items-center text-sm tracking-widest  py-12 font-sourcecode `}
         >
           <p className="uppercase">{mode}</p>
           <p className="text-3xl">{amt}</p>
           <hr />
           <p className="uppercase font-sourcecode">{token}</p>
-          <div className="text-center py-2 font-sourcecode font-semibold">
+          <div
+            className={`text-center py-2 font-sourcecode font-semibold ${
+              !allowed_cbrcs?.includes(checksum) && " bg-red-600 text-white "
+            }`}
+          >
             <p>Checksum</p>
             <p>{checksum}</p>
           </div>
