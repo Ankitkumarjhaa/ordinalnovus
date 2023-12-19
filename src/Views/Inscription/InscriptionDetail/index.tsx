@@ -120,12 +120,11 @@ function InscriptionDetail({ data }: InscriptionProps) {
         {/* TODO: Add BUY/ SELL/ ADD PADDING */}
         {WalletDetail?.connected &&
           WalletDetail.ordinal_address === data.address &&
-          data.parsed_metaprotocol?.includes("cbrc-20") &&
-          (!checksum ||
-            (data?.cbrc_valid && allowed_cbrcs?.includes(checksum))) && (
-            <ListInscription data={data} />
-          )}
-
+          (!data.parsed_metaprotocol?.includes("cbrc-20") ||
+            ((!checksum ||
+              (data?.cbrc_valid && allowed_cbrcs?.includes(checksum))) && (
+              <ListInscription data={data} />
+            )))}
         {((WalletDetail && WalletDetail.ordinal_address !== data.address) ||
           !WalletDetail) &&
           data.listed &&

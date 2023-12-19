@@ -54,6 +54,10 @@ export const TXCacheSchema = new mongoose.Schema(
     status: { confirmed: { type: Boolean } },
     marketplace: { type: String },
     timestamp: { type: Date, required: true },
+    token: { type: String },
+    amount: { type: Number },
+    metaprotocol: { type: String },
+    price_per_token: { type: Number },
     parsed_metaprotocol: {
       type: [String],
       set: function (value: string) {
@@ -79,7 +83,4 @@ TXCacheSchema.index({ from: 1, to: 1, price: 1, marketplace: 1 });
 TXCacheSchema.index({ inscription: 1 });
 TXCacheSchema.index({ blockhash: 1 });
 TXCacheSchema.index({ timestamp: 1 });
-TXCacheSchema.index(
-  { parsed_metaprotocol: 1 },
-  { sparse: true }
-);
+TXCacheSchema.index({ parsed_metaprotocol: 1 }, { sparse: true });

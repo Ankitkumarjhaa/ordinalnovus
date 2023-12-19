@@ -110,7 +110,7 @@ const CardContent: React.FC<CardContentProps> = ({
     ) {
       const [tag, mode, tokenAmt] = inscription.metaprotocol.split(":");
       const [token, amt] = tokenAmt.split("=");
-      const checksum = stringToHex(token.toLowerCase());
+      const checksum = stringToHex(token.toLowerCase().trim());
       return (
         <div
           className={`w-full h-full flex flex-col justify-center items-center text-sm tracking-widest  py-12 font-sourcecode `}
@@ -121,7 +121,9 @@ const CardContent: React.FC<CardContentProps> = ({
           <p className="uppercase font-sourcecode">{token}</p>
           <div
             className={`text-center py-2 font-sourcecode font-semibold ${
-              !allowed_cbrcs?.includes(checksum) && " bg-red-600 text-white "
+              !allowed_cbrcs?.includes(checksum)
+                ? " bg-red-600 text-white w-full p-2 my-2"
+                : "bg-green-600 text-white w-full p-2 my-2"
             }`}
           >
             <p>Checksum</p>
