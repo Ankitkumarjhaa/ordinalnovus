@@ -12,7 +12,7 @@ import CustomPaginationComponent from "@/components/elements/CustomPagination";
 
 const options = [
   { value: "listed_at:-1", label: "Latest Listings" },
-  { value: "listed_price:1", label: "Low Price" },
+  { value: "listed_price_per_token:1", label: "Low Price" },
   { value: "inscription_number:1", label: "Low Number" },
 ];
 
