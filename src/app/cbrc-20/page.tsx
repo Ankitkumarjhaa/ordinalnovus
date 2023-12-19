@@ -31,7 +31,7 @@ export async function generateMetadata(
       "NFT Trading",
       "NFT Collecting",
       "CBRC",
-      "Cyborg BRC",
+      "Cybord BRC",
     ],
     openGraph: {
       title: "CBRC-20 | Ordinal Novus",

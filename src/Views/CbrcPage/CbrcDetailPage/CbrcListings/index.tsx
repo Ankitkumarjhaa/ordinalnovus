@@ -1,6 +1,7 @@
 import { RootState } from "@/stores";
 import { IInscription } from "@/types";
 import { Icbrc } from "@/types/CBRC";
+import { stringToHex } from "@/utils";
 import {
   CircularProgress,
   Paper,
@@ -23,6 +24,10 @@ type HeroProps = {
 };
 function CbrcListings({ listings, loading }: HeroProps) {
   const router = useRouter();
+
+  const allowed_cbrcs = useSelector(
+    (state: RootState) => state.general.allowed_cbrcs
+  );
   const btcPrice = useSelector(
     (state: RootState) => state.general.btc_price_in_dollar
   );
@@ -50,6 +55,9 @@ function CbrcListings({ listings, loading }: HeroProps) {
             <TableRow>
               <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
                 TOKEN
+              </TableCell>
+              <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+                CHECKSUM
               </TableCell>
               <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
                 INSCRIPTION #
@@ -104,6 +112,11 @@ function CbrcListings({ listings, loading }: HeroProps) {
                           "&:hover": { bgcolor: "#1f1d3e" },
                           color: "white",
                           cursor: "pointer",
+                          bgcolor: !allowed_cbrcs?.includes(
+                            stringToHex(token.toLowerCase())
+                          )
+                            ? "red"
+                            : "",
                         }}
                       >
                         <TableCell
@@ -116,6 +129,18 @@ function CbrcListings({ listings, loading }: HeroProps) {
                         >
                           <div className="center ">
                             <p>{token}</p>
+                          </div>
+                        </TableCell>
+                        <TableCell
+                          component="th"
+                          scope="row"
+                          sx={{
+                            color: "white",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          <div className="center ">
+                            <p>{stringToHex(token.toLowerCase())}</p>
                           </div>
                         </TableCell>
                         <TableCell sx={{ color: "white" }}>

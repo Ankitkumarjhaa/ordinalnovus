@@ -9,6 +9,8 @@ import { salesSchema } from "./Sale";
 import { WalletSchema } from "./Wallets";
 import { APIUsageLogSchema } from "./APIUsageLog";
 
+import { AllowedTokensSchema } from "./AllowedTokens";
+
 const Inscription =
   models.Inscription || model("Inscription", inscriptionSchema);
 
@@ -19,6 +21,8 @@ const Block = models.Block || model("Block", BlocksSchema);
 const Inscribe = models.Inscribe || model("Inscribe", InscribeSchema);
 const Sale = models.Sale || model("Sale", salesSchema);
 const Wallet = models.Wallet || model("Wallet", WalletSchema);
+const AllowedCbrcs =
+  models.AllowedCbrcs || model("AllowedCbrcs", AllowedTokensSchema);
 const APIKeyUsage =
   models.APIKeyUsage || model("APIKeyUsage", APIUsageLogSchema);
 
@@ -32,4 +36,5 @@ export {
   Sale,
   Wallet,
   APIKeyUsage,
+  AllowedCbrcs,
 };

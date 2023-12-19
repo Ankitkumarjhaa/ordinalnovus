@@ -62,9 +62,8 @@ function CBRCListings() {
     <div>
       <div className="my-2">
         <p className="py-2 px-2 bg-gray-300 text-black text-sm tracking-wide">
-          All NON - TAPROOT Listings that have been posted prior to latest
-          update are invalid and cannot be bought. Sellers are requested to
-          Relist them. Simply cancel the listings and relist.
+          Listings in RED arent in our allowed tokens list. Create a ticket in
+          discord to be listed.
         </p>
       </div>
       <div className="SortSearchPages py-6 flex flex-wrap justify-between">

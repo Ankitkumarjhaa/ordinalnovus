@@ -1,7 +1,7 @@
 "use client";
 
 import copy from "copy-to-clipboard";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addNotification } from "@/stores/reducers/notificationReducer";
 import { IInscription } from "@/types";
 import React, { useState } from "react";
@@ -16,6 +16,7 @@ import { useWalletAddress } from "bitcoin-wallet-adapter";
 import ListInscription from "./ListInscription";
 import BuyInscription from "./BuyInscription";
 import DisplayAttributes from "./DisplayAttributes";
+import { RootState } from "@/stores";
 type InscriptionProps = {
   data: IInscription;
 };
@@ -24,6 +25,10 @@ function InscriptionDetail({ data }: InscriptionProps) {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const WalletDetail = useWalletAddress();
+
+  const allowed_cbrcs = useSelector(
+    (state: RootState) => state.general.allowed_cbrcs
+  );
 
   return (
     <div className="p-6 md:pt-0 pb-6 flex-1">
@@ -45,9 +50,7 @@ function InscriptionDetail({ data }: InscriptionProps) {
                 <div className="hidden md:block md:absolute top-0 right-0 ml-2">
                   <div className="bg-bitcoin text-yellow-900 px-4 py-1 text-xs font-bold uppercase rounded-lg center">
                     {/* <FaFlag className="text-white " /> */}
-                    {data.parsed_metaprotocol[2].split("=")[0] === "B0RD"
-                      ? "FAKE BORD"
-                      : data.parsed_metaprotocol[2].split("=")[0]}
+                    {data.parsed_metaprotocol[2].split("=")[0]}
                   </div>
                 </div>
               </Link>
