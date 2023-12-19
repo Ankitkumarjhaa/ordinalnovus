@@ -5,9 +5,6 @@ import apiKeyMiddleware from "@/middlewares/apikeyMiddleware";
 import { IInscription } from "@/types";
 import {
   addFinalScriptWitness,
-  verifyAddress,
-  verifyInputCount,
-  verifyInscription,
   verifySignature,
 } from "@/utils/Marketplace/Listing";
 import { Inscription } from "@/models";
@@ -82,28 +79,47 @@ export async function POST(req: NextRequest) {
       console.log("adding final script witness");
 
       const psbt = addFinalScriptWitness(orderInput.signed_listing_psbt_base64);
-      const validSig = verifySignature(psbt);
-      if (!validSig) {
-        return NextResponse.json(
-          {
-            ok: false,
-            inscription_id: orderInput.inscription_id,
-            price: orderInput.price,
-            message: "Invalid signature",
-          },
-          { status: 500 }
-        );
+      if (ordItem.address.startsWith("bc1p")) {
+        const validSig = verifySignature(psbt);
+        if (!validSig) {
+          return NextResponse.json(
+            {
+              ok: false,
+              inscription_id: orderInput.inscription_id,
+              price: orderInput.price,
+              message: "Invalid signature",
+            },
+            { status: 500 }
+          );
+        }
       }
 
       const inscription = await Inscription.findOne({
         inscription_id: ordItem.inscription_id,
       });
+
       if (inscription) {
         valueChecks(inscription, ordItem);
+        const metaprotocol = inscription.metaprotocol;
+        let listed_price_per_token = 0;
+        let listed_amount = 0;
+        let listed_token = "";
+        if (metaprotocol && metaprotocol.includes("cbrc-20:transfer")) {
+          const [tag, mode, tokenAmt] = inscription.metaprotocol.split(":");
+          const [token, amt] = tokenAmt.split("=");
+
+          if (token) listed_token = token.trim().toLowerCase();
+          if (!isNaN(Number(amt))) listed_amount = Number(amt);
+          if (token && amt)
+            listed_price_per_token = orderInput.price / Number(amt);
+        }
         // If the document already exists, update it with the new fields
         inscription.listed = true;
         inscription.listed_at = new Date();
         inscription.listed_price = orderInput.price;
+        inscription.listed_price_per_token = listed_price_per_token;
+        inscription.listed_token = listed_token;
+        inscription.listed_amount = listed_amount;
         inscription.listed_seller_receive_address =
           orderInput.seller_receive_address;
         inscription.signed_psbt = psbt;

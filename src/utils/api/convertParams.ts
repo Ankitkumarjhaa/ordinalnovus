@@ -8,6 +8,7 @@ interface FinalQuery {
   limit: number;
   show: string;
   match: string;
+  [x: string]: any;
 }
 
 /**
@@ -231,6 +232,7 @@ function processWhereParam(
   } else {
     // Handle the keys with special query options like '_ne', '_lt', etc.
     processWhereParamWithOptions(finalQuery, key, value);
+    finalQuery[key] = value;
   }
   console.debug(
     `Updated finalQuery.find with key: ${key}, value: ${finalQuery.find[key]}`

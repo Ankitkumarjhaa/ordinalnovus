@@ -51,29 +51,57 @@ async function processOrdItem(
   const publickey = hex.decode(key);
 
   let p2tr = null;
+  let p2wpkh = null;
+  let p2sh = null;
 
   if (wallet === "Leather" || wallet === "Unisat") {
     p2tr = btc.p2tr(ecdsaPublicKeyToSchnorr(publickey), undefined, btc.NETWORK);
   } else {
     p2tr = btc.p2tr(publickey, undefined, btc.NETWORK);
   }
+
+  if (!ordItem.address?.startsWith("bc1p")) {
+    p2tr = null;
+    p2wpkh = btc.p2wpkh(publickey, btc.NETWORK);
+    p2sh = btc.p2sh(p2wpkh, btc.NETWORK);
+  }
+
   const tx = new btc.Transaction({});
 
-  if (ordItem.address && ordItem.output && ordItem.output_value && p2tr) {
+  if (
+    ordItem.address &&
+    ordItem.output &&
+    ordItem.output_value &&
+    (p2tr || p2wpkh)
+  ) {
     const [ordinalUtxoTxId, ordinalUtxoVout] = ordItem.output.split(":");
 
     // Define the input for the PSBT
-    tx.addInput({
-      txid: ordinalUtxoTxId,
-      index: parseInt(ordinalUtxoVout),
-      //   nonWitnessUtxo: tx.toBuffer(),
-      witnessUtxo: {
-        script: p2tr.script,
-        amount: BigInt(ordItem.output_value),
-      },
-      tapInternalKey: p2tr.tapInternalKey,
-      sighashType: btc.SigHash.SINGLE | btc.SigHash.DEFAULT_ANYONECANPAY,
-    });
+
+    if (p2tr) {
+      tx.addInput({
+        txid: ordinalUtxoTxId,
+        index: parseInt(ordinalUtxoVout),
+        witnessUtxo: {
+          script: p2tr.script,
+          amount: BigInt(ordItem.output_value),
+        },
+        tapInternalKey: p2tr.tapInternalKey,
+        sighashType: btc.SigHash.SINGLE | btc.SigHash.DEFAULT_ANYONECANPAY,
+      });
+    } else if (p2wpkh && p2sh) {
+      tx.addInput({
+        txid: ordinalUtxoTxId,
+        index: parseInt(ordinalUtxoVout),
+        redeemScript: p2sh.redeemScript ? p2sh.redeemScript : Buffer.alloc(0),
+        witnessScript: p2sh.witnessScript,
+        witnessUtxo: {
+          script: p2sh.script ? p2sh.script : Buffer.alloc(0),
+          amount: BigInt(ordItem.output_value),
+        },
+        sighashType: btc.SigHash.SINGLE | btc.SigHash.DEFAULT_ANYONECANPAY,
+      });
+    }
 
     // Add input and output to the PSBT
     tx.addOutputAddress(
@@ -84,7 +112,7 @@ async function processOrdItem(
     const unsignedPsbtBase64 = base64.encode(tx.toPSBT(0));
     return {
       unsignedPsbtBase64,
-      tap_internal_key: p2tr.tapInternalKey.toString(),
+      tap_internal_key: p2tr ? p2tr.tapInternalKey.toString() : "",
     };
   } else {
     console.debug({
@@ -92,6 +120,7 @@ async function processOrdItem(
       output: ordItem.output,
       output_value: ordItem.output_value,
       p2tr,
+      p2wpkh,
     });
     throw new Error("Ord Provider Unavailable");
   }

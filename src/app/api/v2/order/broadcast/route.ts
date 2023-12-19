@@ -36,7 +36,7 @@ export async function POST(
     let doc: any = null;
 
     if (
-      parsedPsbt.data.inputs.length === 4 &&
+      parsedPsbt.data.inputs.length >= 4 &&
       parsedPsbt.data.inputs[2].nonWitnessUtxo
     ) {
       let sellerPublicKey: string | null = null;
@@ -89,7 +89,7 @@ export async function POST(
 
     // return;
     // Broadcast the finalized transaction
-    const broadcastRes = await fetch(`https://mempool.space/api/tx`, {
+    const broadcastRes = await fetch(`https://mempool.space/tx`, {
       method: "post",
       body: txHex,
     });

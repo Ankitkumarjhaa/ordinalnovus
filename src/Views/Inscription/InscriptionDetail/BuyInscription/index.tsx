@@ -328,6 +328,7 @@ function BuyInscription({ data }: InscriptionProps) {
           className="transition-all w-full rounded-xl"
           link={data.in_mempool}
           href={`https://mempool.space/tx/${data.txid}`}
+          newTab={true}
           onClick={buy} // Add this line to make the button functional
         />
       </div>

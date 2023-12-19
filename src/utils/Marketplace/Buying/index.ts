@@ -47,7 +47,7 @@ export async function buyOrdinalPSBT(
   try {
     payerUtxos = await getUtxosByAddress(payerAddress);
   } catch (e) {
-    // console.error(e);
+    console.error(e);
     return Promise.reject("Mempool error");
   }
 
@@ -523,7 +523,7 @@ async function generateUnsignedBuyingPSBTBase64(
   const changeValue =
     totalInput -
     totalOutput -
-    Math.floor(listing.buyer.fee_rate < 150 ? fee / 1.5 : fee / 1.3);
+    Math.floor(listing.buyer.fee_rate < 150 ? fee / 1.7 : fee / 1.5);
 
   if (changeValue < 0) {
     throw `Your wallet needs ${Number(

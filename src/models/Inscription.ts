@@ -160,6 +160,9 @@ export const inscriptionSchema = new mongoose.Schema(
     },
     listed_at: { type: Date },
     listed_price: { type: Number }, // in sats
+    listed_price_per_token: { type: Number }, //in sats
+    listed_token: { type: String },
+    listed_amount: { type: Number },
     listed_maker_fee_bp: { type: Number },
     tap_internal_key: { type: String, set: (v: string) => v.trim() },
     listed_seller_receive_address: { type: String },
@@ -177,6 +180,7 @@ export const inscriptionSchema = new mongoose.Schema(
 
     // new fields (metadata + metaprotocols)
     charms: { type: Number },
+    transfer_valid: { type: Boolean },
     metaprotocol: { type: String },
     parsed_metaprotocol: {
       type: [String],
@@ -241,5 +245,10 @@ inscriptionSchema.index(
 );
 inscriptionSchema.index(
   { inscription_number: 1, metaprotocol: 1 },
+  { sparse: true }
+);
+
+inscriptionSchema.index(
+  { listed_token: 1, listed_amount: 1, listed_price_per_token: 1 },
   { sparse: true }
 );

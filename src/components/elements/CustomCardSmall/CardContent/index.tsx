@@ -11,10 +11,16 @@ import GLTF from "../../GLTFViewer";
 import JSZip from "jszip";
 import AudioPlayer from "../../AudioPlayer";
 import mixpanel from "mixpanel-browser";
-import { bitmap_format_validator, domain_format_validator } from "@/utils";
+import {
+  bitmap_format_validator,
+  domain_format_validator,
+  stringToHex,
+} from "@/utils";
 import { IInscription } from "@/types";
 import { Icbrc } from "@/types/CBRC";
 import { Tooltip } from "@mui/material";
+import { useSelector } from "react-redux";
+import { RootState } from "@/stores";
 
 type CardContentProps = {
   inscriptionId: string;
@@ -45,6 +51,9 @@ const CardContent: React.FC<CardContentProps> = ({
     string | undefined
   >(content_type);
 
+  const allowed_cbrcs = useSelector(
+    (state: RootState) => state.general.allowed_cbrcs
+  );
   useEffect(() => {
     if (!cbrc) {
       setIsLoading(true); // Set isLoading to true when starting the fetch
@@ -101,12 +110,25 @@ const CardContent: React.FC<CardContentProps> = ({
     ) {
       const [tag, mode, tokenAmt] = inscription.metaprotocol.split(":");
       const [token, amt] = tokenAmt.split("=");
+      const checksum = stringToHex(token.toLowerCase().trim());
       return (
-        <div className="w-full h-full flex flex-col justify-center items-center text-sm tracking-widest  py-12">
+        <div
+          className={`w-full h-full flex flex-col justify-center items-center text-sm tracking-widest  py-12 font-sourcecode `}
+        >
           <p className="uppercase">{mode}</p>
           <p className="text-3xl">{amt}</p>
           <hr />
-          <p className="uppercase font-bold">{token}</p>
+          <p className="uppercase font-sourcecode">{token}</p>
+          <div
+            className={`text-center py-2 font-sourcecode font-semibold ${
+              !allowed_cbrcs?.includes(checksum)
+                ? " bg-red-600 text-white w-full p-2 my-2"
+                : "bg-green-600 text-white w-full p-2 my-2"
+            }`}
+          >
+            <p>Checksum</p>
+            <p>{checksum}</p>
+          </div>
         </div>
       );
     }
@@ -439,8 +461,8 @@ const CardContent: React.FC<CardContentProps> = ({
             {inscription?.cbrc_valid
               ? "Valid Transfer Note"
               : inscription?.cbrc_valid === false
-              ? "Invalid Transfer Note"
-              : "Cyborg Down !! Can't Validate!"}
+              ? "Used Transfer Note"
+              : "Cybord Down !! Can't Validate!"}
           </span>
         </div>
       )}{" "}

@@ -67,7 +67,7 @@ function ListInscription({ data }: InscriptionProps) {
         });
 
         console.debug(result, "RESULT");
-        if (result.ok && result.unsigned_psbt_base64) {
+        if (result.ok && result?.unsigned_psbt_base64) {
           mixpanel.track("Listing Completed", {
             inscription_id: data.inscription_id,
             price: convertBtcToSat(Number(price)),

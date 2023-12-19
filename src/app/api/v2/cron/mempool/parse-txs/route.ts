@@ -138,11 +138,36 @@ async function parseTxData(sort: 1 | -1, skip: number) {
           ? inscriptions[0].body.metaprotocol
           : null;
 
+      let cbrcInfo = null;
+      if (
+        metaprotocol &&
+        metaprotocol.includes("cbrc-20") &&
+        metaprotocol.includes("=") &&
+        txData &&
+        txData.price
+      ) {
+        const [_, __, tokenAmt] = metaprotocol.split(":");
+        const [token, amt] = tokenAmt.split("=");
+
+        cbrcInfo = {
+          metaprotocol: "cbrc-20",
+          token: token.trim().toLowerCase(),
+          amount: Number(amt),
+          price_per_token: txData.price / Number(amt),
+        };
+      }
+
       txBulkOps.push({
         updateOne: {
           filter: { _id },
           update: {
             $set: {
+              ...(cbrcInfo && {
+                metaprotocol: cbrcInfo?.metaprotocol,
+                token: cbrcInfo?.token,
+                amount: cbrcInfo?.amount,
+                price_per_token: cbrcInfo?.price_per_token,
+              }),
               txid,
               ...(inscriptionIds.length && { inscriptions: inscriptionIds }),
               ...(inscriptionIds.length > 0
@@ -256,10 +281,12 @@ export async function GET(req: NextRequest, res: NextResponse) {
 
     const results = [];
     for (let i = 0; i < numberOfCalls; i++) {
-      let sortOrder: 1 | -1 = i % 2 === 0 ? 1 : -1;
+      console.log({ i });
       let offset = i * LIMIT; // Adjust offset to fetch distinct batches
 
-      results.push(parseTxData(sortOrder, offset));
+      console.log({ offset });
+
+      results.push(parseTxData(1, offset));
     }
 
     const result = await Promise.allSettled(results);

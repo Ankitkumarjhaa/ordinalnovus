@@ -27,6 +27,7 @@ function AccountPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [page_size, setPage_size] = useState(10);
+  const [tab, setTab] = useState<"cbrc" | "inscriptions">("cbrc");
 
   const walletDetails = useWalletAddress();
 
@@ -37,6 +38,7 @@ function AccountPage() {
         page_size: page_size,
         page,
         inscription_number: Number(search),
+        sort: "inscription_number:-1",
       };
 
       const result = await fetchInscriptions(params);
@@ -189,9 +191,9 @@ function AccountPage() {
           </div>
         </div>
         <div className="flex-1 flex justify-center lg:justify-end">
-          <Link href="/dashboard/add-collection">
+          <Link href="https://www.cybord.org/thecraft.html" target="_blank">
             <p className="px-4 py-1 bg-bitcoin text-yellow-900">
-              Add Collection
+              Create Transfer Inscription
             </p>
           </Link>
         </div>
@@ -199,12 +201,13 @@ function AccountPage() {
       <div className="">
         {cbrcs && cbrcs.length ? (
           <div className="py-16">
-            <h2 className="text-xl ">Your Valid CBRC-20 Balance</h2>
+            <h2 className="font-bold text-2xl pb-6">Balance</h2>
+            <p className="text-sm py-2">Your Valid CBRC-20 Balance</p>
             <div className="flex justify-start items-center flex-wrap">
               {cbrcs.map((item: any) => (
                 <div
                   key={item.tick}
-                  className="w-full md:w-6/12 lg:w-4/12 2xl:w-3/12 p-2"
+                  className="w-full md:w-2/12 lg:w-3/12 2xl:w-2/12 p-2"
                 >
                   <Link href={`/cbrc-20/${item.tick}`}>
                     <div className="rounded border border-accent w-full min-h-[200px] flex justify-between flex-col">
@@ -212,18 +215,25 @@ function AccountPage() {
                         {item.tick}
                       </p>
                       <div className="w-full flex-1 p-3 tracking-wider uppercase">
-                        <div className="text-center text-sm text-white flex justify-between w-full">
+                        <div className="text-center text-sm text-white flex justify-between w-full py-2">
                           <span> Available:</span> <p>{item.amt}</p>
                         </div>
-                        <div className="text-center text-sm text-white flex justify-between w-full">
-                          <span>Transferrable: </span>
+                        <div className="text-center text-sm text-white flex justify-between w-ful py-2l">
+                          <span>Transferable: </span>
                           <span>{item.lock}</span>
                         </div>
                         <hr className="my-2 bg-white border-2 border-white" />
-                        <div className="text-center text-sm text-white flex justify-between w-full">
+                        <div className="text-center text-sm text-white flex justify-between w-full py-2">
                           <span>Total:</span>{" "}
                           <span>{item.amt + item.lock}</span>
                         </div>
+                        {item.lock === 0 ? (
+                          <div className=" bg-accent hover:bg-accent_dark text-center text-xs text-white flex justify-between w-full p-2">
+                            Create Transfer Inscription
+                          </div>
+                        ) : (
+                          <></>
+                        )}
                       </div>
                     </div>
                   </Link>

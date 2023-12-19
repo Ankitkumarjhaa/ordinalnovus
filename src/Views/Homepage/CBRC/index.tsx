@@ -8,7 +8,6 @@ import Slider from "react-slick";
 import CBRCCard from "@/components/elements/CBRCCard";
 import CustomButton from "@/components/elements/CustomButton";
 import { FetchCBRC } from "@/apiHelper/getCBRC";
-import { addNotification } from "@/stores/reducers/notificationReducer";
 import { useDispatch } from "react-redux";
 import { Icbrc } from "@/types/CBRC";
 import { CircularProgress } from "@mui/material";
@@ -24,7 +23,7 @@ function CBRC() {
 
   const settings = {
     dots: false,
-    infinite: false,
+    infinite: true,
     arrows: true,
     speed: 500,
     slidesToShow: 6,

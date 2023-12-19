@@ -56,7 +56,7 @@ function CBRC() {
         addNotification({
           id: new Date().valueOf(),
           severity: "error",
-          message: "Cyborg API Down!!",
+          message: "Cybord API Down!!",
           open: true,
         })
       );
@@ -121,7 +121,7 @@ function CBRC() {
     <section className="pt-16 w-full">
       <div className="flex justify-between items-center flex-wrap">
         <h2 className="font-bold text-2xl lg:text-4xl text-white pb-6 w-full lg:w-auto ">
-          Cyborg BRC-20 Protocol
+          Cybord BRC-20 Protocol
         </h2>
         {data && data.length > 0 && (
           <div className="w-full lg:w-auto center">

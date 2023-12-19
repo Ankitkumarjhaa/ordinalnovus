@@ -1,4 +1,5 @@
 import { saveAs } from "file-saver";
+import SHA256 from "crypto-js/sha256";
 export function shortenString(str: string, length?: number): string {
   if (str.length <= (length || 8)) {
     return str;
@@ -11,6 +12,10 @@ export function wait(seconds = 10) {
   return new Promise((resolve) => {
     setTimeout(resolve, seconds * 1000);
   });
+}
+
+export function stringToHex(str: string) {
+  return Buffer.from(str.toLowerCase(), "utf-8").toString("hex");
 }
 
 export const copyToClipboard = (text: string) => {

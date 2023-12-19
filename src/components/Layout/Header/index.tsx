@@ -12,10 +12,11 @@ import Link from "next/link";
 import { MdDashboard } from "react-icons/md";
 import { usePathname } from "next/navigation";
 import { fetchFees, getBTCPriceInDollars } from "@/utils";
-import { setBTCPrice } from "@/stores/reducers/generalReducer";
+import { setAllowedCbrcs, setBTCPrice } from "@/stores/reducers/generalReducer";
 import { useDispatch } from "react-redux";
 import mixpanel from "mixpanel-browser";
 import { CollectWallet } from "@/apiHelper/collectWalletHelper";
+import { fetchAllowed } from "@/apiHelper/fetchAllowed";
 const additionalItems = [
   <Link key={"dashboard"} href="/dashboard" shallow>
     <div className="flex items-center">
@@ -33,9 +34,15 @@ function Header() {
     dispatch(setBTCPrice(price));
   }, [dispatch]);
 
+  const fetchAllowedTokensChecksum = useCallback(async () => {
+    const allowed = await fetchAllowed();
+    dispatch(setAllowedCbrcs(allowed));
+  }, [dispatch]);
+
   useEffect(() => {
     getBTCPrice();
     fetchFees(dispatch);
+    fetchAllowedTokensChecksum();
   }, [dispatch, getBTCPrice]);
 
   async function collectWalletDetails() {

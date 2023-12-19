@@ -134,13 +134,40 @@ async function parseTxData(sort: 1 | -1, skip: number) {
           ? inscriptions[0].body.metaprotocol
           : null;
 
+      let cbrcInfo = null;
+      if (
+        metaprotocol &&
+        metaprotocol.includes("cbrc-20") &&
+        metaprotocol.includes("=") &&
+        txData &&
+        txData.price
+      ) {
+        const [_, __, tokenAmt] = metaprotocol.split(":");
+        const [token, amt] = tokenAmt.split("=");
+
+        cbrcInfo = {
+          metaprotocol: "cbrc-20",
+          token: token.trim().toLowerCase(),
+          amount: Number(amt),
+          price_per_token: txData.price / Number(amt),
+        };
+      }
+
       txBulkOps.push({
         updateOne: {
           filter: { _id },
           update: {
             $set: {
+              ...(cbrcInfo && {
+                metaprotocol: cbrcInfo?.metaprotocol,
+                token: cbrcInfo?.token,
+                amount: cbrcInfo?.amount,
+                price_per_token: cbrcInfo?.price_per_token,
+              }),
               txid,
-              ...(inscriptionIds.length && { inscriptions: inscriptionIds }),
+              ...(inscriptionIds.length && {
+                inscriptions: inscriptionIds,
+              }),
               ...(inscriptionIds.length > 0
                 ? {
                     tag: isInscribed
@@ -230,7 +257,7 @@ async function parseTxData(sort: 1 | -1, skip: number) {
 // API Handler
 export async function GET(req: NextRequest, res: NextResponse) {
   try {
-    console.log(`***** Parse Txs [CRONJOB] Called *****`);
+    console.log(`***** Parse Txs Heaviest[CRONJOB] Called *****`);
     await dbConnect();
     const nonParsedTxs = await Tx.countDocuments({ parsed: false });
     if (nonParsedTxs < 7000)
@@ -245,12 +272,12 @@ export async function GET(req: NextRequest, res: NextResponse) {
 
     const results = [];
     for (let i = 0; i < numberOfCalls; i++) {
-      let sortOrder: 1 | -1 = i % 2 === 0 ? 1 : -1;
       let offset = i * LIMIT; // Adjust offset to fetch distinct batches
 
-      results.push(parseTxData(sortOrder, offset));
-    }
+      console.log({ offset: offset + 7000 });
 
+      results.push(parseTxData(1, offset + 7000));
+    }
     const result = await Promise.allSettled(results);
 
     return NextResponse.json({
