@@ -282,12 +282,11 @@ export async function GET(req: NextRequest, res: NextResponse) {
     const results = [];
     for (let i = 0; i < numberOfCalls; i++) {
       console.log({ i });
-      let sortOrder: 1 | -1 = i % 2 === 0 ? 1 : -1;
       let offset = i * LIMIT; // Adjust offset to fetch distinct batches
 
-      console.log({ sortOrder, offset });
+      console.log({ offset });
 
-      results.push(parseTxData(sortOrder, offset));
+      results.push(parseTxData(1, offset));
     }
 
     const result = await Promise.allSettled(results);
