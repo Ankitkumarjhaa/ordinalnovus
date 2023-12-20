@@ -7,6 +7,7 @@ import { FaBitcoin, FaDollarSign } from "react-icons/fa6";
 import { useSelector } from "react-redux";
 import { RootState } from "@/stores";
 import { calculateBTCCostInDollars, convertSatToBtc } from "@/utils";
+import { useWalletAddress } from "bitcoin-wallet-adapter";
 interface CollectionCardProps {
   inscription: IInscription;
 }
@@ -15,6 +16,8 @@ const ItemCard: React.FC<CollectionCardProps> = ({ inscription }) => {
   const btcPrice = useSelector(
     (state: RootState) => state.general.btc_price_in_dollar
   );
+
+  const walletDetails = useWalletAddress();
   return (
     <div className="relative p-3 md:w-6/12 lg:w-3/12  2xl:w-2/12 w-full cursor-pointer">
       <Link href={`/inscription/${inscription.inscription_id}`}>
@@ -81,6 +84,11 @@ const ItemCard: React.FC<CollectionCardProps> = ({ inscription }) => {
             {inscription && inscription?.collection_item_name && (
               <span className="bg-yellow-500 rounded-md text-center text-xs py-1 px-3 font-bold text-yellow-900">
                 {inscription.collection_item_name}
+              </span>
+            )}
+            {inscription.address === walletDetails?.ordinal_address && (
+              <span className="bg-yellow-500 rounded-md text-center text-xs py-1 px-3 font-bold text-yellow-900">
+                {"List Now"}
               </span>
             )}
           </div>
