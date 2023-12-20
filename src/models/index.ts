@@ -10,6 +10,7 @@ import { WalletSchema } from "./Wallets";
 import { APIUsageLogSchema } from "./APIUsageLog";
 
 import { AllowedTokensSchema } from "./AllowedTokens";
+import { CBRCTokenSchema } from "./CBRCTokens";
 
 const Inscription =
   models.Inscription || model("Inscription", inscriptionSchema);
@@ -26,6 +27,7 @@ const AllowedCbrcs =
 const APIKeyUsage =
   models.APIKeyUsage || model("APIKeyUsage", APIUsageLogSchema);
 
+const CBRCToken = models.CBRCToken || model("CBRCToken", CBRCTokenSchema);
 export {
   Inscribe,
   Inscription,
@@ -37,4 +39,5 @@ export {
   Wallet,
   APIKeyUsage,
   AllowedCbrcs,
+  CBRCToken,
 };
