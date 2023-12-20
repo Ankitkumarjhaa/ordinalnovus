@@ -1,6 +1,6 @@
 // app/api/v2/collection/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { Inscription, Collection } from "@/models";
+import { Inscription, Collection, CBRCToken } from "@/models";
 import dbConnect from "@/lib/dbConnect";
 import convertParams from "@/utils/api/convertParams";
 import { getCache, setCache } from "@/lib/cache";
@@ -8,6 +8,7 @@ import apiKeyMiddleware from "@/middlewares/apikeyMiddleware";
 import { CustomError } from "@/utils";
 import { ICollection } from "@/types";
 import moment from "moment";
+import axios from "axios";
 
 async function calculateHoldersData(collectionId: string) {
   const aggregationPipeline = [
@@ -41,7 +42,7 @@ async function updateHoldersData(collection: ICollection) {
     }
 
     collection.holders_check = new Date();
-    console.debug({ holders: collection.holders }, "UPDATED COLL");
+    // console.debug({ holders: collection.holders }, "UPDATED COLL");
 
     try {
       // Assuming collection is a Mongoose document and not just a plain object
@@ -128,6 +129,30 @@ async function getInscriptionsRange(collection: ICollection) {
   }
 }
 
+async function updateTokenList() {
+  const offset = await CBRCToken.countDocuments();
+  const { data } = await axios.get(`https://api.cybord.org/deploy`, {
+    params: { offset },
+  });
+
+  if (data && data.items) {
+    for (const token of data.items) {
+      const doc = {
+        inscription_id: token.op.id,
+        inscription_number: token.op.n,
+        address: token.op.acc,
+        tick: token.tick,
+        slug: token.tick.trim().toLowerCase(),
+        supply: token.supply,
+        max: token.max,
+        lim: token.lim,
+        dec: token.dec,
+      };
+
+      // console.log({ doc });
+    }
+  }
+}
 export async function GET(req: NextRequest, res: NextResponse) {
   try {
     console.log("***** UPDATE COLLECTION HOLDERS LIST API CALLED *****");
@@ -160,6 +185,8 @@ export async function GET(req: NextRequest, res: NextResponse) {
         ],
       },
     ];
+
+    // await updateTokenList();
 
     // If the result doesn't exist in the cache, query the database
     const collections: any = await getCollections(query);

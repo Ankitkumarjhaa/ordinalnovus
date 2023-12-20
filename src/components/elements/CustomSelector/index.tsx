@@ -43,6 +43,13 @@ const StyledSelect = styled(Select)({
   },
 });
 
+const StyledMenuItem = styled(MenuItem)({
+  backgroundColor: "white", // Set the background color to white
+  "&:hover": {
+    backgroundColor: "#f5f5f5", // Optionally, change the color on hover
+  },
+});
+
 interface CustomSelectorProps {
   label: string;
   value?: string;
@@ -74,9 +81,9 @@ const CustomSelector: React.FC<CustomSelectorProps> = ({
         }}
       >
         {options.map((option) => (
-          <MenuItem key={option.value} value={option.value}>
+          <StyledMenuItem key={option.value} value={option.value}>
             {option.label}
-          </MenuItem>
+          </StyledMenuItem>
         ))}
       </StyledSelect>
     </StyledFormControl>

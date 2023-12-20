@@ -43,10 +43,32 @@ async function fetchInscriptionDetails(
       sat_timestamp: moment.unix(data.sat_timestamp),
     };
   } catch (error: any) {
+    if (error.response && error.response.status === 404) {
+      // Check if the error message matches the pattern
+      if (error.response.data === `${inscriptionId} not found`) {
+        // Set cache to pause processing for 5 minutes
+        await setCache(`pauseProcess`, "true", 300); // 300 seconds = 5 minutes
+        return { error: true, error_tag: "not found", error_retry: 1 };
+      }
+    }
     if (
       error.response &&
       (error.response.status === 500 || error.response.status === 502)
     ) {
+      const cacheKey = "addInscriptionAlert";
+      const cache = await getCache(cacheKey);
+      if (!cache) {
+        try {
+          await sendEmailAlert({
+            subject: "Inscriptions Processing Stopped",
+            html: `<h1>Ordinalnovus Email Alert</h1><br/>
+              <p>Inscriptions Processing Stopped<p><br/>
+              <p>Inscription Number: ${inscriptionId}</p><br/>`,
+          });
+
+          setCache(cacheKey, { emailSent: true }, 2 * 60 * 60);
+        } catch {}
+      }
       return { error: true, error_tag: "server error", error_retry: 1 };
     }
     throw error;
@@ -70,6 +92,12 @@ async function checkDomainValid(domain: string) {
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const bulkOps: any[] = [];
   const savedInscriptions: number[] = [];
+  const cachedValue = await getCache(`pauseProcess`);
+  if (cachedValue) {
+    return NextResponse.json({
+      message: "Processing paused for 5 minutes. All inscriptions processed",
+    });
+  }
 
   try {
     await dbConnect();
@@ -80,7 +108,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       ? highestInscription.inscription_number + 1
       : -1;
 
-    const BATCH = 40;
+    const BATCH = 50;
 
     // Initialize the array with undefined values, then map each element to its incremented value.
     const inscriptionArray = Array.from(
@@ -227,34 +255,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
           token = true;
           tags.push("token");
           tags.push("cbrc");
-
-          // // Check if a 'halt processing' cache entry exists
-          // const haltProcessing = await getCache("haltInscriptionsProcessing");
-          // const cacheKey = "addInscriptionAlert";
-          // const cache = await getCache(cacheKey);
-          // if (!cache) {
-          //   try {
-          //     await sendEmailAlert({
-          //       subject: "Inscriptions Processing Stopped",
-          //       html: `<h1>Ordinalnovus Email Alert</h1><br/>
-          //     <p>Inscriptions Processing Stopped<p><br/>
-          //     <p>Inscription Number: ${inscription_number}</p><br/>
-          //     <p>Metaprotocol: ${inscriptionDetails.metaprotocol}</p></br/>`,
-          //     });
-
-          //     setCache(cacheKey, { emailSent: true }, 2 * 60 * 60);
-          //   } catch {}
-          // }
-          // if (haltProcessing) {
-          //   return NextResponse.json({
-          //     message: "Received  a CBRC Token",
-          //   });
-          // } else {
-          //   setCache("haltInscriptionsProcessing", true, 2 * 60 * 60);
-          //   return NextResponse.json({
-          //     message: "Received  a CBRC Token",
-          //   });
-          // }
         }
         if (inscriptionDetails.metaprotocol)
           inscriptionDetails.parsed_metaprotocol =

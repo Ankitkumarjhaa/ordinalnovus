@@ -57,7 +57,7 @@ export default function RootLayout({
                 <p
                   className={`text-bitcoin bg-secondary  py-2 w-full border-accent border rounded tracking-widest font-bold`}
                 >
-                  Zero Fee Trading*
+                  1% Fee applied on all sales
                 </p>
               </div>
               {children}

@@ -146,13 +146,13 @@ function Footer() {
           </div>
         </div>
       </div>
-      <div className="w-full my-2 text-xs py-2 uppercase font-bold text-white text-center">
+      {/* <div className="w-full my-2 text-xs py-2 uppercase font-bold text-white text-center">
         <p
           className={`text-bitcoin bg-secondary  py-2 w-full tracking-widest font-bold`}
         >
           *only {`<600`} sats for identifying tx is charged
         </p>
-      </div>
+      </div> */}
     </footer>
   );
 }

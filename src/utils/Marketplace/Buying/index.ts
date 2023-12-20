@@ -237,7 +237,7 @@ async function generateUnsignedCreateDummyUtxoPSBTBase64(
   const changeValue =
     totalValue -
     DUMMY_UTXO_VALUE * 2 -
-    Math.floor(fee_rate < 150 ? finalFees / 1.8 : finalFees / 1.3);
+    Math.floor(fee_rate < 150 ? finalFees / 1.5 : finalFees / 1.3);
   console.log({ changeValue });
 
   // We must have enough value to create a dummy utxo and pay for tx fees
@@ -487,7 +487,9 @@ async function generateUnsignedBuyingPSBTBase64(
 
   // Create a platform fee output
   let platformFeeValue = Math.floor((listing.seller.price * (0 + 100)) / 10000);
-  platformFeeValue = 580; // TODO: Discount Till We get some traction
+  // Assuming listing.seller.price is in satoshis
+  platformFeeValue = Math.max(Math.round(listing.seller.price * 0.01), 580);
+
   // platformFeeValue > DUMMY_UTXO_MIN_VALUE ? platformFeeValue : 580;
 
   console.log(platformFeeValue, "PLATFORM_FEE");
@@ -523,7 +525,7 @@ async function generateUnsignedBuyingPSBTBase64(
   const changeValue =
     totalInput -
     totalOutput -
-    Math.floor(listing.buyer.fee_rate < 150 ? fee / 1.7 : fee / 1.5);
+    Math.floor(listing.buyer.fee_rate < 150 ? fee / 1.5 : fee / 1.5);
 
   if (changeValue < 0) {
     throw `Your wallet needs ${Number(
