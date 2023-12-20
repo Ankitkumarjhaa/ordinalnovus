@@ -343,9 +343,21 @@ function AccountPage() {
               </div>
             ) : (
               <div className="text-center py-16">
-                {tab === "cbrc-20"
-                  ? "No Valid Transferable Inscription Found"
-                  : "No Inscriptions Found"}
+                {tab === "cbrc-20" ? (
+                  <div className="text-xs ">
+                    <p className="pb-2">
+                      If Your Transferable Balance is 0 -{">"} Inscribe a
+                      Transfer Inscription{" "}
+                    </p>
+                    <p>
+                      If Your Transferable Balance is greater than 0 and
+                      Inscription is not present, Please wait, your Inscription
+                      will appear.
+                    </p>
+                  </div>
+                ) : (
+                  "No Inscriptions Found"
+                )}
               </div>
             )}
           </>
