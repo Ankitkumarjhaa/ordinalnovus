@@ -94,6 +94,7 @@ const CardContent: React.FC<CardContentProps> = ({
 
   const renderContent = (showFull: boolean) => {
     if (cbrc) {
+      console.log({ cbrc });
       return (
         <div className="w-full h-full flex flex-col justify-center items-center text-xs tracking-widest  py-12">
           <p className="text-3xl uppercase">{cbrc.tick}</p>
@@ -102,6 +103,7 @@ const CardContent: React.FC<CardContentProps> = ({
           <p className=" font-bold">Limit: {cbrc.lim}</p>
           <hr className="mt-2" />
           <p>Minted: {((cbrc.supply / cbrc.max) * 100).toFixed(3)}%</p>
+          {cbrc.fp ? <p>FP: {cbrc?.fp} USD</p> : <></>}
         </div>
       );
     } else if (
