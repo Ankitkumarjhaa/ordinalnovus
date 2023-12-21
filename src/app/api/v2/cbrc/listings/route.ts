@@ -10,7 +10,7 @@ import { checkCbrcValidity } from "../../search/inscription/route";
 import { getCache, setCache } from "@/lib/cache";
 
 const fetchInscriptions = async (query: any) => {
-  return await Inscription.find(query.find)
+  return await Inscription.find({ ...query.find, in_mempool: false })
     .select("-signed_psbt -unsigned_psbt")
     .where(query.where)
     .sort(query.sort)

@@ -84,7 +84,7 @@ const txHexByIdCache: Record<TxId, string> = {};
 async function getTxHexById(txId: TxId): Promise<string> {
   if (!txHexByIdCache[txId]) {
     txHexByIdCache[txId] = await fetch(
-      `https://blockstream.info/api/tx/${txId}/hex`
+      `https://mempool.space/api/tx/${txId}/hex`
     ).then((response) => response.text());
   }
 

@@ -22,7 +22,7 @@ function CBRCListings() {
   const [data, setData] = useState<IInscription[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
-  const [sort, setSort] = useState<string>("listed_at:-1");
+  const [sort, setSort] = useState<string>("listed_price_per_token:1");
   const [loading, setLoading] = useState<boolean>(true);
   const [tick, setTick] = useState("");
 
