@@ -156,7 +156,7 @@ export function calculateBTCCostInDollars(btcAmount: number, btcPrice: number) {
 export const fetchFees = async (dispatch: AppDispatch) => {
   try {
     const response = await axios.get(
-      "https://ordinalnovus.mempool.space/api/v1/fees/recommended"
+      "https://mempool.space/api/v1/fees/recommended"
     );
     const data = response.data;
     data.lastChecked = moment();

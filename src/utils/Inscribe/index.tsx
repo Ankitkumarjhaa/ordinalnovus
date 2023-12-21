@@ -48,7 +48,7 @@ const mempoolNetwork = (network: string) =>
 export const getMaxFeeRate = async () => {
   try {
     const { data } = await axios.get(
-      `https://ordinalnovus.mempool.space/${mempoolNetwork(
+      `https://blockstream.info/${mempoolNetwork(
         "mainnet"
       )}api/v1/fees/recommended`
     );
@@ -64,7 +64,7 @@ export const getMaxFeeRate = async () => {
 
 export const getMinFeeRate = async () => {
   let fees = await axios.get(
-    `https://ordinalnovus.mempool.space/${mempoolNetwork(
+    `https://blockstream.info/${mempoolNetwork(
       "mainnet"
     )}api/v1/fees/recommended`
   );
@@ -80,7 +80,7 @@ export const addressReceivedMoneyInThisTx = async (
 ) => {
   let txid, vout, amt, input_address, vsize;
   let { data } = await axios.get(
-    `https://ordinalnovus.mempool.space/${mempoolNetwork(
+    `https://blockstream.info/${mempoolNetwork(
       network
     )}api/address/${address}/txs`
   );
@@ -153,9 +153,7 @@ export async function addressOnceHadMoney(
   min_balance: number
 ) {
   var url =
-    `https://ordinalnovus.mempool.space/${mempoolNetwork(
-      network
-    )}api/address/` + address;
+    `https://blockstream.info/${mempoolNetwork(network)}api/address/` + address;
   var { data } = await axios.get(url);
   var json = data;
   if (
@@ -174,9 +172,7 @@ export async function addressOnceHadMoney(
 }
 
 export async function pushBTCpmt(rawtx: string, network: string) {
-  const url = `https://ordinalnovus.mempool.space/${mempoolNetwork(
-    network
-  )}api/tx`;
+  const url = `https://blockstream.info/${mempoolNetwork(network)}api/tx`;
   try {
     const response = await axios.post(url, rawtx);
     return response.data; // or response.data.txid if the txid is in the data object

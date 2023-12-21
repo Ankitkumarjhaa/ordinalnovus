@@ -78,7 +78,7 @@ function CBRCSales() {
   }, [sort, page_size, page]);
 
   const handleTxClick = (txid: string) => {
-    window.open(`https://ordinalnovus.mempool.space/tx/${txid}`, "_blank");
+    window.open(`https://blockstream.info/tx/${txid}`, "_blank");
   };
 
   const handleSearchChange = (value: string) => {

@@ -36,7 +36,7 @@ function CbrcListings({ listings, loading }: HeroProps) {
     router.push(`/inscription/${id}`);
   };
   const handleMempoolClick = (txid: string) => {
-    window.open(`https://ordinalnovus.mempool.space/tx/${txid}`);
+    window.open(`https://blockstream.info/tx/${txid}`);
   };
 
   return (

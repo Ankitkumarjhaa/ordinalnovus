@@ -110,7 +110,7 @@ const discordWebhookCBRCSaleAlert = async (txBulkOps: any[]) => {
               {
                 title: `${amt} ${token} Sold!`,
                 description: `ID:  ${inscriptions[0]}\n\n`,
-                url: `https://ordinalnovus.mempool.space/tx/${txid}`,
+                url: `https://blockstream.info/tx/${txid}`,
                 color: 9503472,
                 fields: [
                   {
