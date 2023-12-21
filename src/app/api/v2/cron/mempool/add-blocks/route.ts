@@ -9,7 +9,7 @@ import { getCache, setCache } from "@/lib/cache";
 async function fetchBlockhashFromHeight(height: number): Promise<string> {
   try {
     const tipResponse = await axios.get(
-      `https://blockstream.info/api/block-height/${height}`
+      `https://ordinalnovus.mempool.space/api/block-height/${height}`
     );
     return tipResponse.data;
   } catch (error: any) {
@@ -31,7 +31,7 @@ async function fetchBlockhashFromHeight(height: number): Promise<string> {
 
 async function fetchBlockDetails(latestBlockhash: string): Promise<any> {
   const blockDetailsResponse = await axios.get(
-    `https://blockstream.info/api/block/${latestBlockhash}`
+    `https://ordinalnovus.mempool.space/api/block/${latestBlockhash}`
   );
   return blockDetailsResponse.data;
 }
@@ -95,7 +95,7 @@ const fetchTransactions = async (index: number, blockhash: string) => {
   try {
     console.debug({ index });
     const response = await axios.get(
-      `https://blockstream.info/api/block/${blockhash}/txs/${index}`
+      `https://ordinalnovus.mempool.space/api/block/${blockhash}/txs/${index}`
     );
     return response.data;
   } catch (error: any) {
@@ -212,7 +212,7 @@ async function addBlockTxToDB(blockhash: string) {
 
 async function getLatestBlockHeight(): Promise<number> {
   const response = await axios.get(
-    "https://blockstream.info/api/blocks/tip/height"
+    "https://ordinalnovus.mempool.space/api/blocks/tip/height"
   );
   return response.data;
 }

@@ -89,10 +89,13 @@ export async function POST(
 
     // return;
     // Broadcast the finalized transaction
-    const broadcastRes = await fetch(`https://blockstream.info/api/tx`, {
-      method: "post",
-      body: txHex,
-    });
+    const broadcastRes = await fetch(
+      `https://ordinalnovus.mempool.space/api/tx`,
+      {
+        method: "post",
+        body: txHex,
+      }
+    );
 
     if (broadcastRes.status != 200) {
       return NextResponse.json(

@@ -11,7 +11,7 @@ import { AddressTxsUtxo, FeeRateTier, UTXO } from "@/types";
 import axios from "axios";
 import { IInscription } from "@/types";
 
-export const baseMempoolApiUrl = `https://mempool.space/api`;
+export const baseMempoolApiUrl = `https://ordinalnovus.mempool.space/api`;
 const feeLevel: FeeRateTier = "halfHourFee";
 
 // TODO: This function fetches the latest inscription data for the provided tokenId
@@ -84,7 +84,7 @@ const txHexByIdCache: Record<TxId, string> = {};
 async function getTxHexById(txId: TxId): Promise<string> {
   if (!txHexByIdCache[txId]) {
     txHexByIdCache[txId] = await fetch(
-      `https://mempool.space/api/tx/${txId}/hex`
+      `https://ordinalnovus.mempool.space/api/tx/${txId}/hex`
     ).then((response) => response.text());
   }
 
@@ -96,7 +96,7 @@ const toXOnly = (pubKey: string | any[]) =>
 
 async function getUtxosByAddress(address: string) {
   const { data } = await axios.get(
-    `https://blockstream.info/api/address/${address}/utxo`
+    `https://ordinalnovus.mempool.space/api/address/${address}/utxo`
   );
   return data;
 }
