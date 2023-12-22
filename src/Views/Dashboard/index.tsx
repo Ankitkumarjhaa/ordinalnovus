@@ -93,7 +93,6 @@ function AccountPage() {
 
   const fetchCbrcBrc20 = useCallback(async () => {
     try {
-      let cbrc_bal: any[] = [];
       if (!walletDetails?.ordinal_address) return;
       const params = {
         address: walletDetails.ordinal_address,
@@ -101,12 +100,7 @@ function AccountPage() {
 
       const result = await FetchCBRCBalance(params);
       if (result && result.data) {
-        cbrc_bal = [...result.data];
-      }
-
-      const result_2 = await FetchCBRCBalance(params);
-      if (result_2 && result_2.data) {
-        cbrc_bal = [...cbrc_bal, ...result_2.data];
+        setCbrcs(result.data);
       }
     } catch (e: any) {}
   }, [walletDetails]);

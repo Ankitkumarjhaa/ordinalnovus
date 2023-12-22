@@ -114,6 +114,7 @@ function checkFor4InputSale(
     bc1qhg8828sk4yq6ac08rxd0rh7dzfjvgdch3vfsm4: "ordinalnovus",
     bc1p6yd49679azsaxqgtr52ff6jjvj2wv5dlaqwhaxarkamevgle2jaqs8vlnr:
       "ordinalswallet",
+    bc1ppq8dyvkj4le0v0v4v4mdkw20ga7l0u9fhd8wtd67cdh36x6rchtsudyat9: "satsx",
   };
 
   let marketplace = "";
