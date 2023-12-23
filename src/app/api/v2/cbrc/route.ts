@@ -16,8 +16,8 @@ export async function GET(req: NextRequest) {
     const query = convertParams(Inscription, req.nextUrl);
 
     console.log({ finalQueryCbrc: query });
-    let url = `https://api.cybord.org/deploy`;
-    if (query.ticker) url = `https://api.cybord.org/tokens`;
+    let url = `https://api-prod.cybord.org/deploy`;
+    if (query.ticker) url = `https://api-prod.cybord.org/tokens`;
 
     let sanitizedTicker = query.ticker ? sanitizeString(query.ticker) : null;
 
