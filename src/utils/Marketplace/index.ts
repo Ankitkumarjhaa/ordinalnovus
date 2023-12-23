@@ -106,11 +106,11 @@ const recommendedFeeRate = async (fee_rate?: FeeRateTier) =>
     .then((data) => data[fee_rate || feeLevel]);
 
 async function doesUtxoContainInscription(utxo: { txid: any; vout: any }) {
-  const html = await fetch(
-    `${process.env.NEXT_PUBLIC_PROVIDER}/output/${utxo.txid}:${utxo.vout}`
-  ).then((response) => response.text());
+  const { data } = await axios.get(
+    `${process.env.NEXT_PUBLIC_PROVIDER}/api/output/${utxo.txid}:${utxo.vout}`
+  );
 
-  return html.match(/class=thumbnails/) !== null;
+  return data.inscriptions.length > 0;
 }
 async function mapUtxos(utxosFromMempool: AddressTxsUtxo[]): Promise<UTXO[]> {
   const ret: UTXO[] = [];
