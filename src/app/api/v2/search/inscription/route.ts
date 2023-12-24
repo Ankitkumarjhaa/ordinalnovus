@@ -225,7 +225,9 @@ export const checkCbrcValidity = async (id: string) => {
       return cachedData; // cachedData is expected to be a boolean
     }
 
-    const { data } = await axios.get(`https://api.cybord.org/transfer?q=${id}`);
+    const { data } = await axios.get(
+      `https://api-prod.cybord.org/transfer?q=${id}`
+    );
 
     if (data) {
       // console.dir(data, { depth: null });

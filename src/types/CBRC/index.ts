@@ -13,6 +13,7 @@ interface IOP {
   k: string;
 }
 export interface Icbrc {
+  fp: ReactNode;
   op: IOP;
   tick: string;
   supply: number;

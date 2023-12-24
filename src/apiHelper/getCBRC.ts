@@ -21,8 +21,8 @@ export async function FetchCBRC(
   const { mode, sort, offset, search } = params;
   console.debug({ params });
   try {
-    let url = `https://api.cybord.org/${mode}`;
-    if (search) url = `https://api.cybord.org/tokens`;
+    let url = `https://api-prod.cybord.org/${mode}`;
+    if (search) url = `https://api-prod.cybord.org/tokens`;
     const response = await axios.get(url, {
       params: {
         order: sort,

@@ -160,7 +160,7 @@ function BuyInscription({ data }: InscriptionProps) {
           severity: "success",
         })
       );
-      window.open(`https://mempool.space/tx/${data.data.txid}`, "_blank");
+      window.open(`https://blockstream.info/tx/${data.data.txid}`, "_blank");
     } catch (err: any) {
       // Track error in broadcasting
       mixpanel.track("Error", {
@@ -327,7 +327,7 @@ function BuyInscription({ data }: InscriptionProps) {
           textColor="text-white"
           className="transition-all w-full rounded-xl"
           link={data.in_mempool}
-          href={`https://mempool.space/tx/${data.txid}`}
+          href={`https://blockstream.info/tx/${data.txid}`}
           newTab={true}
           onClick={buy} // Add this line to make the button functional
         />

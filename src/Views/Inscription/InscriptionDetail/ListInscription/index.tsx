@@ -341,7 +341,7 @@ function ListInscription({ data }: InscriptionProps) {
             <input
               type="text"
               value={price}
-              placeholder="List Price"
+              placeholder="Total List Price in BTC"
               onChange={(e) => {
                 const inputVal = e.target.value;
                 const isValidInput = /^[0-9]*\.?[0-9]*$/.test(inputVal); // Regex to validate decimal or numeric input
@@ -359,8 +359,14 @@ function ListInscription({ data }: InscriptionProps) {
         </div>
         <div className="flex-1">
           <CustomButton
-            loading={loading || signLoading}
-            text={data.listed_price ? "Update Price" : `List Now`}
+            loading={loading || signLoading || data.in_mempool}
+            text={
+              data.listed_price
+                ? data.in_mempool
+                  ? `In Mempool`
+                  : "Update Price"
+                : `List Now`
+            }
             hoverBgColor="hover:bg-accent_dark"
             hoverTextColor="text-white"
             bgColor="bg-accent"

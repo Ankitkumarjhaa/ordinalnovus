@@ -60,7 +60,10 @@ async function processOrdItem(
     throw Error("Item not listed in db");
   }
 
-  if (ordItem.address !== dbItem.address || dbItem.output !== ordItem.output) {
+  if (
+    (ordItem && ordItem.address && ordItem.address !== dbItem.address) ||
+    dbItem.output !== ordItem.output
+  ) {
     dbItem.listed = false;
     dbItem.listed_price = 0;
     dbItem.address = ordItem.address;

@@ -11,7 +11,7 @@ import { AddressTxsUtxo, FeeRateTier, UTXO } from "@/types";
 import axios from "axios";
 import { IInscription } from "@/types";
 
-export const baseMempoolApiUrl = `https://mempool.space/api`;
+export const baseMempoolApiUrl = `https://blockstream.info/api`;
 const feeLevel: FeeRateTier = "halfHourFee";
 
 // TODO: This function fetches the latest inscription data for the provided tokenId
@@ -105,13 +105,35 @@ const recommendedFeeRate = async (fee_rate?: FeeRateTier) =>
     .then((response) => response.json())
     .then((data) => data[fee_rate || feeLevel]);
 
-async function doesUtxoContainInscription(utxo: { txid: any; vout: any }) {
-  const html = await fetch(
-    `${process.env.NEXT_PUBLIC_PROVIDER}/output/${utxo.txid}:${utxo.vout}`
-  ).then((response) => response.text());
+async function doesUtxoContainInscription(
+  utxo: AddressTxsUtxo
+): Promise<boolean> {
+  const apiUrl = process.env.NEXT_PUBLIC_PROVIDER;
+  if (!apiUrl) {
+    // If the API URL is not set, return true as per your requirement
+    console.warn("API provider URL is not defined in environment variables");
+    return true;
+  }
 
-  return html.match(/class=thumbnails/) !== null;
+  try {
+    const response = await axios.get(
+      `${apiUrl}/api/output/${utxo.txid}:${utxo.vout}`
+    );
+
+    if (response.data && Array.isArray(response.data.inscriptions)) {
+      return response.data.inscriptions.length > 0;
+    } else {
+      // If the data is not in the expected format, return true
+      console.warn("Invalid data structure received from API");
+      return true;
+    }
+  } catch (error) {
+    // In case of any API error, return true
+    console.error("Error in doesUtxoContainInscription:", error);
+    return true;
+  }
 }
+
 async function mapUtxos(utxosFromMempool: AddressTxsUtxo[]): Promise<UTXO[]> {
   const ret: UTXO[] = [];
   for (const utxoFromMempool of utxosFromMempool) {
