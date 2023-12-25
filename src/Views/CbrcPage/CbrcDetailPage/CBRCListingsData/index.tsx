@@ -1,30 +1,34 @@
 "use client";
+import { IToken, Icbrc } from "@/types/CBRC";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { IInscription } from "@/types";
-import CbrcListings from "../../CbrcPage/CbrcDetailPage/CbrcListings";
-import { CircularProgress } from "@mui/material";
+import CbrcListings from "./CbrcListings";
 import { fetchCBRCListings } from "@/apiHelper/fetchCBRCListings";
-import CustomSelector from "@/components/elements/CustomSelector";
-import CustomSearch from "@/components/elements/CustomSearch";
-import { FaCheckCircle, FaSearch } from "react-icons/fa";
+import { CircularProgress } from "@mui/material";
 import CustomPaginationComponent from "@/components/elements/CustomPagination";
+import { FaCheckCircle } from "react-icons/fa";
+import CustomSelector from "@/components/elements/CustomSelector";
+import CustomTab from "@/components/elements/CustomTab";
+
+type CbrcDetailPageProps = {
+  cbrc: IToken;
+};
 
 const options = [
   { value: "listed_at:-1", label: "Latest Listings" },
-  { value: "listed_price_per_token:1", label: "Low Price" },
-  { value: "inscription_number:1", label: "Low Number" },
+  { value: "listed_price_per_token:1", label: "Low Price (Token)" },
+  { value: "listed_price:1", label: "Low Price (Total)" },
 ];
 
-function CBRCListings() {
+function CBRCListingsData({ cbrc }: CbrcDetailPageProps) {
   const dispatch = useDispatch();
   const [page, setPage] = useState<number>(1);
   const [data, setData] = useState<IInscription[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
-  const [pageSize, setPageSize] = useState<number>(10);
-  const [sort, setSort] = useState<string>("listed_at:-1");
+  const [pageSize, setPageSize] = useState<number>(20);
+  const [sort, setSort] = useState<string>("listed_price_per_token:1");
   const [loading, setLoading] = useState<boolean>(true);
-  const [tick, setTick] = useState("");
 
   const fetchData = useCallback(async () => {
     {
@@ -34,7 +38,7 @@ function CBRCListings() {
         page,
         page_size: pageSize,
         sort,
-        ...(tick && { tick }),
+        tick: cbrc.tick.toLowerCase(),
       });
       if (result && result.data) {
         setData(result.data.inscriptions);
@@ -42,15 +46,12 @@ function CBRCListings() {
         setLoading(false);
       }
     }
-  }, [sort, page, pageSize, tick]);
+  }, [sort, page, pageSize]);
 
   useEffect(() => {
     fetchData();
   }, [sort, page, dispatch, pageSize]);
 
-  const handleSearchChange = (value: string) => {
-    setTick(value);
-  };
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
     value: number
@@ -60,12 +61,6 @@ function CBRCListings() {
 
   return (
     <div>
-      <div className="my-2">
-        <p className="py-2 px-2 bg-gray-300 text-black text-sm tracking-wide">
-          Listings in RED arent in our allowed tokens list. Create a ticket in
-          discord to be listed.
-        </p>
-      </div>
       <div className="SortSearchPages py-6 flex flex-wrap justify-between">
         <div className="w-full lg:w-auto flex justify-start items-center flex-wrap">
           <div className="w-full center pb-4 lg:pb-0 lg:w-auto">
@@ -76,18 +71,8 @@ function CBRCListings() {
               onChange={setSort}
             />
           </div>
-          <div className="w-full center pb-4 lg:pb-0 md:pl-4 lg:w-auto">
-            <CustomSearch
-              placeholder="Ticker"
-              value={tick}
-              onChange={handleSearchChange}
-              icon={FaSearch}
-              end={true}
-              onIconClick={fetchData}
-            />
-          </div>
-          <div className="w-full md:w-auto p-2 px-6">
-            <div className="capitalize pb-1 text-xs flex items-center justify-evenly">
+          <div className="w-full lg:w-auto p-2 px-6">
+            <div className="capitalize pb-1 text-xs flex items-center justify-center lg:justify-evenly w-full">
               <p> Buy Items with checkmark </p>
               <FaCheckCircle className="text-green-400 mx-2" />
             </div>
@@ -120,4 +105,4 @@ function CBRCListings() {
   );
 }
 
-export default CBRCListings;
+export default CBRCListingsData;

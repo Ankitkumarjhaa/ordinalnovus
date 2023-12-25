@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Inscription, Collection } from "@/models";
 import dbConnect from "@/lib/dbConnect";
 import convertParams from "@/utils/api/convertParams";
-import { getCache, getCacheExpiry, setCache } from "@/lib/cache";
+import { getCache,  setCache } from "@/lib/cache";
 import apiKeyMiddleware from "@/middlewares/apikeyMiddleware";
 import { CustomError } from "@/utils";
 import { ICollection } from "@/types";

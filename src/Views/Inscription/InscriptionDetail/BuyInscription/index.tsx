@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useWalletAddress, useSignTx } from "bitcoin-wallet-adapter";
 import mixpanel from "mixpanel-browser";
+import updateTokenPrice from "@/apiHelper/updatePrice";
 type InscriptionProps = {
   data: IInscription;
 };
@@ -142,8 +143,18 @@ function BuyInscription({ data }: InscriptionProps) {
         txid: data.data.txid,
         inscription_id: inscription.inscription_id,
         collection: inscription?.official_collection?.name,
+        pay_address: walletDetails?.cardinal_address,
+        receive_address: walletDetails?.ordinal_address,
+        publickey: walletDetails?.cardinal_pubkey,
+        wallet: walletDetails?.wallet,
+        fee_rate: feeRate,
         // Additional properties if needed
       });
+      if (data?.listed_price_per_token && data?.listed_token)
+        await updateTokenPrice(
+          data?.listed_token,
+          data?.listed_price_per_token
+        );
       dispatch(
         addNotification({
           id: new Date().valueOf(),

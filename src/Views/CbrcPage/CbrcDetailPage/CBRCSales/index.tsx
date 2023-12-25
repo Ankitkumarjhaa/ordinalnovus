@@ -1,9 +1,6 @@
 "use client";
 import React, { useCallback, useEffect, useState } from "react";
-import { FetchCBRC } from "@/apiHelper/getCBRC";
-import { addNotification } from "@/stores/reducers/notificationReducer";
 import { useDispatch, useSelector } from "react-redux";
-import { Icbrc } from "@/types/CBRC";
 import {
   CircularProgress,
   Table,
@@ -16,11 +13,9 @@ import {
 } from "@mui/material";
 import CustomPaginationComponent from "@/components/elements/CustomPagination";
 import { useRouter } from "next/navigation";
-import CustomSearch from "@/components/elements/CustomSearch";
 
-import { FaHome, FaSearch } from "react-icons/fa";
-import mixpanel from "mixpanel-browser";
-import { ITransaction } from "@/types";
+import { FaHome } from "react-icons/fa";
+import { IInscription, ITransaction } from "@/types";
 import { fetchTxes } from "@/apiHelper/fetchTxes";
 import moment from "moment";
 import { RootState } from "@/stores";
@@ -35,20 +30,17 @@ const options = [
   { value: "inscription_number:1", label: "Low Number" },
 ];
 
-function CBRCSales() {
+function CBRCSales({ tick }: { tick: string }) {
   const btcPrice = useSelector(
     (state: RootState) => state.general.btc_price_in_dollar
   );
   const dispatch = useDispatch();
-  const [data, setData] = useState<Icbrc[] | null>(null);
+  const [data, setData] = useState<IInscription[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState<number>(0);
-  const [search, setSearch] = useState("");
   const [page_size, setPage_size] = useState(10);
   const router = useRouter();
-
-  const [tick, setTick] = useState("");
 
   const [sort, setSort] = useState<string>("timestamp:-1");
   const [txs, setTxs] = useState<ITransaction[] | null>(null);
@@ -81,10 +73,6 @@ function CBRCSales() {
     window.open(`https://blockstream.info/tx/${txid}`, "_blank");
   };
 
-  const handleSearchChange = (value: string) => {
-    setTick(value);
-  };
-
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
     value: number
@@ -93,11 +81,8 @@ function CBRCSales() {
   };
 
   return (
-    <section className="pt-16 w-full">
-      <h3 className=" py-2 text-3xl font-bold text-white">
-        Cybord BRC-20 Protocol Sales
-      </h3>
-      <div className="SortSearchPages py-6 flex flex-wrap justify-between">
+    <section className="pt-6 w-full">
+      <div className="SortSearchPages flex flex-wrap justify-between">
         <div className="w-full lg:w-auto flex justify-start items-center flex-wrap">
           <div className="w-full center pb-4 lg:pb-0 lg:w-auto">
             <CustomSelector
@@ -105,16 +90,6 @@ function CBRCSales() {
               value={sort}
               options={options}
               onChange={setSort}
-            />
-          </div>
-          <div className="w-full center pb-4 lg:pb-0 md:pl-4 lg:w-auto">
-            <CustomSearch
-              placeholder="Ticker"
-              value={tick}
-              onChange={handleSearchChange}
-              icon={FaSearch}
-              end={true}
-              onIconClick={fetchTxData}
             />
           </div>
         </div>
@@ -149,16 +124,9 @@ function CBRCSales() {
               borderColor: "#3d0263",
             }}
           >
-            <Table
-              size={"small"}
-              sx={{ minWidth: 650 }}
-              aria-label="cbrc-20 table"
-            >
+            <Table sx={{ minWidth: 650 }} aria-label="cbrc-20 table">
               <TableHead sx={{ bgcolor: "#84848a", color: "white" }}>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
-                    TICK
-                  </TableCell>
                   <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
                     FROM
                   </TableCell>
@@ -203,16 +171,6 @@ function CBRCSales() {
                               cursor: "pointer",
                             }}
                           >
-                            <TableCell
-                              component="th"
-                              scope="row"
-                              sx={{
-                                color: "white",
-                                textTransform: "uppercase",
-                              }}
-                            >
-                              {token}
-                            </TableCell>
                             <TableCell sx={{ color: "white" }}>
                               {shortenString(item.from)}
                             </TableCell>{" "}
@@ -244,9 +202,9 @@ function CBRCSales() {
                                   <div className="mr-2 text-bitcoin">
                                     <FaBitcoin className="" />
                                   </div>
-                                  {(item.price / amount / 100_000_000).toFixed(
-                                    5
-                                  )}{" "}
+                                  {(item.price / amount).toFixed(0)}{" "}
+                                  {` sats /  `}
+                                  <span className="uppercase ml-1">{tick}</span>
                                 </div>
                                 <div className="flex items-center ">
                                   <div className="mr-2 text-green-500">

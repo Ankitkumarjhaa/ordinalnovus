@@ -17,25 +17,39 @@ const CustomTab = ({ tabsData, currentTab, onTabChange }: CustomTabProps) => {
     <Tabs
       value={currentTab}
       onChange={onTabChange}
-      sx={{ backgroundColor: "transparent", borderBottom: 0 }}
+      sx={{
+        backgroundColor: "transparent",
+        borderBottom: 0,
+        ".MuiTabs-indicator": {
+          // Hide the underline indicator
+          display: "none",
+        },
+      }}
     >
       {tabsData.map((tab, index) => {
         const isActive = currentTab === tab.value;
-        console.log({ isActive });
         return (
           <Tab
             key={index}
             label={tab.label}
             value={tab.value}
-            disabled={tab.disabled}
+            disabled={tab.disabled || isActive}
             sx={{
+              "&.Mui-selected": {
+                color: "#fff",
+              },
               padding: "8px 16px",
-              backgroundColor: isActive ? "#9102F0" : "#a8a4a4",
-              color: "#fff",
+              margin: "0 4px",
+              borderRadius: "4px",
+              backgroundColor: isActive ? "#9102F0" : "#4d4d4d",
+              color: isActive ? "#fff" : "#fff", // White text for active and inactive tabs
+              boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+              textTransform: "uppercase",
+              // fontWeight: "bold",
               opacity: tab.disabled ? 0.5 : 1,
               cursor: tab.disabled ? "not-allowed" : "pointer",
               "&:hover": {
-                backgroundColor: isActive ? "" : "#3d0263",
+                backgroundColor: isActive ? "" : "#8e8e8e",
               },
             }}
           />

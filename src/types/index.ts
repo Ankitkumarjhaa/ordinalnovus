@@ -173,6 +173,9 @@ export interface IInscription {
   parsed_metaprotocol?: string[];
   charms?: number;
   cbrc_valid?: boolean;
+  listed_token?: string;
+  listed_price_per_token?: number;
+  listed_amount?: number;
 }
 
 export interface Holder {

@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 interface IOP {
   _id: string;
   id: string;
@@ -12,6 +14,16 @@ interface IOP {
   ctype: string;
   k: string;
 }
+
+export interface IHistoricalData {
+  marketCap: number;
+  date: Date;
+  price: number;
+  volume: number;
+  volume_sats: number;
+  on_volume: number;
+  on_volume_sats: number;
+}
 export interface Icbrc {
   fp: ReactNode;
   op: IOP;
@@ -22,4 +34,23 @@ export interface Icbrc {
   dec: number;
   mint: boolean;
   mintops: string[];
+}
+
+export interface IToken {
+  listed: ReactNode;
+  in_mempool: ReactNode;
+  tick: string;
+  checksum: string;
+  supply: number;
+  max: number;
+  lim: number;
+  dec: number;
+  number: number;
+  mint: boolean;
+  price: number;
+  volume: number;
+  volume_in_sats: number;
+  on_volume: number;
+  on_volume_in_sats: number;
+  historicalData: IHistoricalData[];
 }

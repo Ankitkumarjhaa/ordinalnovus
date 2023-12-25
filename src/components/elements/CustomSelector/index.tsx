@@ -32,14 +32,14 @@ const StyledFormControl = styled(FormControl)(({ theme }) => ({
   },
 }));
 
-const StyledInputLabel = styled(InputLabel)({
-  color: "white",
-});
-
 const StyledSelect = styled(Select)({
   color: "white",
   "&:focus": {
     backgroundColor: "transparent",
+  },
+  "& .MuiSvgIcon-root": {
+    // Target the SVG Icon
+    color: "white", // Set the color to white
   },
 });
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Inscription, Collection } from "@/models";
+import { Inscription } from "@/models";
 import dbConnect from "@/lib/dbConnect";
 import convertParams from "@/utils/api/convertParams";
 
@@ -96,7 +96,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
 
     console.dir(query, { depth: null });
     // Generate a unique cache key based on the query
-    cacheKey = `cbrcListings:${req.nextUrl.toString()}`;
+    cacheKey = `cbrc_listings:${req.nextUrl.toString()}`;
 
     // Try to get cached data
     let cachedData = await getCache(cacheKey);

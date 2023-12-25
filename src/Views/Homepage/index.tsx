@@ -2,17 +2,13 @@
 import { RecentInscription } from "@/types";
 import { Order } from "@/types/Ordinals/Orders";
 import React from "react";
-// import Collections from "./Collections";
 import Hero from "./Hero";
-// import OrderbookSection from "./Orderbook";
 import Recent from "./RecentlyInscribed";
 import Collections from "./Collections";
 import { ICollection, IInscription } from "@/types";
-import Listed from "./Listed";
 import CBRC from "./CBRC";
-import CBRCListings from "./CBRCListings";
-import CBRCSales from "./CBRCSales";
-// import CustomCard from "@/components/elements/CustomCardSmall";
+import CBRCListings from "../CBRCHomepage/CBRCListings";
+import CBRCSales from "../CbrcPage/CbrcDetailPage/CBRCSales";
 type Data = {
   height: number;
   percentParsed: number;

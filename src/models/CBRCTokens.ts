@@ -1,57 +1,47 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
-export const CBRCTokenSchema = new mongoose.Schema(
+export const CBRCTokenSchema = new Schema(
   {
-    inscription_id: {
-      type: String,
-      unique: true,
-      required: true,
-      validate: {
-        validator: (value: string) => /^[a-f0-9]+i\d+$/.test(value),
-        message: () =>
-          "inscription_id should be in the format: c17dd02a7f216f4b438ab1a303f518abfc4d4d01dcff8f023cf87c4403cb54cai0",
-      },
-    },
-    inscription_number: {
-      type: Number,
-      required: true,
-      min: [0, "Inscription number must be positive"],
-    },
-    address: { type: String, required: true },
-    tick: { type: String },
-    slug: { type: String, required: true, index: true },
-    supply: {
-      type: Number,
-      required: true,
-      min: [0, "Supply must be positive"],
-    },
-    max: {
-      type: Number,
-      required: true,
-      min: [0, "Max must be positive"],
-    },
-    lim: {
-      type: Number,
-      required: true,
-      min: [0, "Limit must be positive"],
-    },
-    dec: { type: Number, min: [0, "Decimal places must be positive"] },
-    fp: { type: Number, index: true },
+    tick: { type: String, index: true, unique: true },
+    // tick in UPPERCASE
+    checksum: { type: String, index: true },
+    supply: { type: Number, default: 0 },
+    max: Number,
+    lim: Number,
+    dec: Number,
+    number: Number,
+    mint: { type: Boolean, default: false },
+    mintops: [
+      { type: Number, default: 0 },
+      { type: Number, default: 0 },
+    ],
+    deleted: { type: Boolean, default: false },
+    price: { type: Number, index: true },
+    marketcap: { type: Number, index: true },
+    in_mempool: { type: Number, index: true },
     volume: { type: Number, index: true },
-    sales: { type: Number, index: true },
+    volume_in_sats: { type: Number },
+    on_volume: { type: Number, index: true },
+    on_volume_in_sats: { type: Number },
     last_updated: { type: Date, index: true },
     historicalData: [
       {
         date: Date,
-        fp: Number,
+        price: Number,
         volume: Number,
+        volume_sats: Number,
+        on_volume: Number,
+        on_volume_sats: Number,
+        marketCap: Number,
+        supply: Number,
       },
     ],
   },
   {
-    timestamps: true,
+    timestamps: true, // Enable timestamps
   }
 );
 
 // Compound index for sorting by multiple fields
-CBRCTokenSchema.index({ fp: 1, volume: 1, sales: 1, last_updated: 1 });
+CBRCTokenSchema.index({ price: 1, volume: 1, on_volume: 1, last_updated: 1 });
+CBRCTokenSchema.index({ tick: "text" });
