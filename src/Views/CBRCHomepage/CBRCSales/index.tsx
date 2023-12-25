@@ -12,7 +12,7 @@ import {
   Paper,
 } from "@mui/material";
 import CustomPaginationComponent from "@/components/elements/CustomPagination";
-import { useRouter } from "next/navigation";
+
 import CustomSearch from "@/components/elements/CustomSearch";
 
 import { FaHome, FaSearch } from "react-icons/fa";
