@@ -213,3 +213,5 @@ async function fetchMarketDataForDate(
     date: endOfDay,
   };
 }
+
+export const dynamic = "force-dynamic";
