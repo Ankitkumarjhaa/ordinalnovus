@@ -87,22 +87,9 @@ function CBRCSales() {
   };
 
   return (
-    <section className="pt-16 w-full">
-      <h3 className=" py-2 text-3xl font-bold text-white">
-        Cybord BRC-20 Protocol Sales
-      </h3>
+    <section className=" w-full">
       <div className="SortSearchPages py-6 flex flex-wrap justify-between">
         <div className="w-full lg:w-auto flex justify-start items-center flex-wrap">
-          {/* <div className="py-16">
-        <CustomTab
-          tabsData={[
-            { label: "CBRC-20", value: "cbrc-20" },
-            { label: "All Inscriptions", value: "inscriptions" },
-          ]}
-          currentTab={tab}
-          onTabChange={() => setTab(tab)}
-        />
-      </div> */}
           <div className="w-full center pb-4 lg:pb-0 lg:w-auto">
             <CustomSelector
               label="Sort"

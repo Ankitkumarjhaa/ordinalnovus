@@ -125,7 +125,13 @@ function TokenList({ tokens, loading }: HeroProps) {
                     >
                       <p className="text-center">
                         {" "}
-                        {item?.price ? `$${item?.price.toFixed(6)}` : " - "}
+                        {item?.price
+                          ? `$${
+                              item?.price < 1
+                                ? item?.price.toFixed(6)
+                                : item?.price.toFixed(2)
+                            }`
+                          : " - "}
                       </p>
                     </TableCell>
                     <TableCell sx={{ color: "white", textAlign: "center" }}>

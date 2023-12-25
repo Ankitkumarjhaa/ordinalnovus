@@ -53,13 +53,6 @@ function CBRCTokensList({ defaultData }: { defaultData: IToken[] }) {
 
   return (
     <div>
-      <div className="w-full my-2 text-xs py-2 uppercase font-bold text-white text-center">
-        <p
-          className={`text-gray-700 bg-gray-100  py-2 w-full border-accent border rounded tracking-widest font-bold`}
-        >
-          Market data provided below might have inaccuracies.
-        </p>
-      </div>
       <div className="SortSearchPages py-6 flex flex-wrap justify-between">
         <div className="w-full lg:w-auto flex justify-start items-center flex-wrap">
           <div className="w-full center pb-4 lg:pb-0 lg:w-auto">
