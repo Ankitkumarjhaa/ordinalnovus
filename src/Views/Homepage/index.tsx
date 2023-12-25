@@ -10,8 +10,8 @@ import Collections from "./Collections";
 import { ICollection, IInscription } from "@/types";
 import Listed from "./Listed";
 import CBRC from "./CBRC";
-import CBRCListings from "./CBRCListings";
-import CBRCSales from "./CBRCSales";
+import CBRCListings from "../CBRCHomepage/CBRCListings";
+import CBRCSales from "../CBRCHomepage/CBRCSales";
 // import CustomCard from "@/components/elements/CustomCardSmall";
 type Data = {
   height: number;

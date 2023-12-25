@@ -17,6 +17,11 @@ module.exports = {
         destination: "/developer",
         permanent: false,
       },
+      {
+        source: "/cbrc-20",
+        destination: "/",
+        permanent: false,
+      },
 
       {
         source: "/collection",

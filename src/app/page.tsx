@@ -1,12 +1,20 @@
-import Homepage from "@/Views/Homepage";
-import getHomepage from "@/apiHelper/fetchHomepage";
+import CBRCHomepage from "@/Views/CBRCHomepage";
+import { FetchCBRC } from "@/apiHelper/getCBRC";
 import { Metadata, ResolvingMetadata } from "next";
+import { notFound } from "next/navigation";
 export default async function Home() {
-  const data = await getHomepage();
+  const data = await FetchCBRC({
+    page_size: 20,
+    page: 1,
+  });
+
+  if (!data?.data) {
+    notFound();
+  }
 
   return (
     <div className="">
-      <Homepage data={data.data} />
+      <CBRCHomepage tokens={data.data.tokens} />
     </div>
   );
 }

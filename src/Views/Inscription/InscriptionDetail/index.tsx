@@ -117,7 +117,6 @@ function InscriptionDetail({ data }: InscriptionProps) {
         </div>
       </div>
       <div className="relative">
-        {/* TODO: Add BUY/ SELL/ ADD PADDING */}
         {WalletDetail?.connected &&
           WalletDetail.ordinal_address === data.address &&
           (!data.parsed_metaprotocol?.includes("cbrc-20") ||
@@ -128,6 +127,7 @@ function InscriptionDetail({ data }: InscriptionProps) {
         {((WalletDetail && WalletDetail.ordinal_address !== data.address) ||
           !WalletDetail) &&
           data.listed &&
+          data?.cbrc_valid &&
           (!checksum || allowed_cbrcs?.includes(checksum)) && (
             <BuyInscription data={data} />
           )}

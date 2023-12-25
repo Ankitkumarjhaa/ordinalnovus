@@ -7,10 +7,20 @@ type SearchDetailProps = {
 };
 function SearchDetailPage({ data }: SearchDetailProps) {
   return (
-    <div className="min-h-[40vh] py-16 flex justify-center flex-wrap">
-      <Content data={data} />
-      <InscriptionDetail data={data} />
-    </div>
+    <>
+      {" "}
+      <div className="w-full my-2 text-xs py-2 uppercase font-bold text-white text-center">
+        <p
+          className={`text-red-400 bg-red-100  py-2 w-full border-accent border rounded tracking-widest font-bold`}
+        >
+          Users are responsible for their transactions.
+        </p>
+      </div>
+      <div className="min-h-[40vh] py-16 flex justify-center flex-wrap">
+        <Content data={data} />
+        <InscriptionDetail data={data} />
+      </div>
+    </>
   );
 }
 

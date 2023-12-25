@@ -94,7 +94,6 @@ const CardContent: React.FC<CardContentProps> = ({
 
   const renderContent = (showFull: boolean) => {
     if (cbrc) {
-      console.log({ cbrc });
       return (
         <div className="w-full h-full flex flex-col justify-center items-center text-xs tracking-widest  py-12">
           <p className="text-3xl uppercase">{cbrc.tick}</p>
@@ -124,12 +123,35 @@ const CardContent: React.FC<CardContentProps> = ({
           <div
             className={`text-center py-2 font-sourcecode font-semibold ${
               !allowed_cbrcs?.includes(checksum)
-                ? " bg-red-600 text-white w-full p-2 my-2"
+                ? " bg-gray-900 text-white w-full p-2 my-2"
                 : "bg-green-600 text-white w-full p-2 my-2"
             }`}
           >
             <p>Checksum</p>
             <p>{checksum}</p>
+          </div>
+          <div>
+            <span
+              className={`absolute text-center ${
+                inscription?.cbrc_valid
+                  ? allowed_cbrcs?.includes(checksum)
+                    ? "bg-green-400 text-green-900 " // Condition 1
+                    : "bg-gray-400 text-gray-900 " // Condition 2
+                  : inscription?.cbrc_valid === false
+                  ? allowed_cbrcs?.includes(checksum)
+                    ? "bg-red-400 text-red-900 " // Condition 3
+                    : "bg-gray-400 text-gray-900 " // Condition 4
+                  : "bg-red-400 text-red-900 " // Condition 5
+              } rounded font-bold capitalize text-sm py-1 z-10 bottom-0 right-0 left-0`}
+            >
+              {inscription?.cbrc_valid !== undefined
+                ? inscription?.cbrc_valid
+                  ? allowed_cbrcs?.includes(checksum)
+                    ? "Valid Transfer Note"
+                    : "Token not listed"
+                  : "Token Used"
+                : "API down. Can't check validity."}
+            </span>
           </div>
         </div>
       );
@@ -451,23 +473,6 @@ const CardContent: React.FC<CardContentProps> = ({
             </Tooltip>
           </div>
         )}
-      {inscription?.metaprotocol?.includes("cbrc-20:transfer") && (
-        <div>
-          <span
-            className={`absolute text-center ${
-              inscription?.cbrc_valid
-                ? "bg-green-400 text-green-900 "
-                : "bg-red-400 text-red-900 "
-            } rounded font-bold  capitalize text-sm py-1 z-10 bottom-0 right-0 left-0 `}
-          >
-            {inscription?.cbrc_valid
-              ? "Valid Transfer Note"
-              : inscription?.cbrc_valid === false
-              ? "Used Transfer Note"
-              : "Cybord Down !! Can't Validate!"}
-          </span>
-        </div>
-      )}{" "}
       {inscription?.parsed_metaprotocol &&
         inscription?.parsed_metaprotocol?.length > 2 && (
           <div>

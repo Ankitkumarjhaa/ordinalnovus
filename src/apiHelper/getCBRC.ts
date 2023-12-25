@@ -1,33 +1,36 @@
 "use server";
-import { Icbrc } from "@/types/CBRC";
+import { IToken } from "@/types/CBRC";
 import axios from "axios";
 
 export interface FetchCBRCParams {
-  mode: "deploy" | "mint" | "transfer";
-  sort: string;
-  offset: number;
+  sort?: string;
   search?: string;
+  page_size: number;
+  page: number;
 }
 
-export interface InscriptionResponse {
-  items: Icbrc[];
-  count: number;
-  limit: number;
+export interface CBRCTokenResponse {
+  tokens: IToken[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+  };
 }
 
 export async function FetchCBRC(
   params: FetchCBRCParams
-): Promise<{ data: InscriptionResponse; error: string | null } | undefined> {
-  const { mode, sort, offset, search } = params;
+): Promise<{ data: CBRCTokenResponse; error: string | null } | undefined> {
   console.debug({ params });
+  const { sort, search, page, page_size } = params;
   try {
-    let url = `https://api-prod.cybord.org/${mode}`;
-    if (search) url = `https://api-prod.cybord.org/tokens`;
+    let url = `${process.env.NEXT_PUBLIC_URL}/api/v2/cbrc`;
     const response = await axios.get(url, {
       params: {
-        order: sort,
-        offset,
-        ...(search && { q: search }),
+        _sort: sort,
+        _limit: page_size,
+        _start: (page - 1) * page_size,
+        search,
       },
     });
 

@@ -161,7 +161,7 @@ function CbrcListings({ listings, loading }: HeroProps) {
                               <div className="mr-2 text-bitcoin">
                                 <FaBitcoin className="" />
                               </div>
-                              {(item.listed_price / 100_000_000).toFixed(5)}{" "}
+                              {(item.listed_price / 100_000_000).toFixed(6)}{" "}
                             </div>
                             <div className="flex items-center ">
                               <div className="mr-2 text-green-500">
@@ -184,7 +184,7 @@ function CbrcListings({ listings, loading }: HeroProps) {
                                 item.listed_price /
                                 amount /
                                 100_000_000
-                              ).toFixed(5)}{" "}
+                              ).toFixed(6)}{" "}
                             </div>
                             <div className="flex items-center ">
                               <div className="mr-2 text-green-500">

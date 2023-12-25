@@ -1,59 +1,49 @@
 "use client";
-import { IToken, Icbrc } from "@/types/CBRC";
 import React, { useCallback, useEffect, useState } from "react";
-import Hero from "./CbrcHero";
 import { useDispatch } from "react-redux";
-import { IInscription } from "@/types";
-import CbrcListings from "./CbrcListings";
-import { fetchCBRCListings } from "@/apiHelper/fetchCBRCListings";
 import { CircularProgress } from "@mui/material";
+import CustomSearch from "@/components/elements/CustomSearch";
+import { FaSearch } from "react-icons/fa";
 import CustomPaginationComponent from "@/components/elements/CustomPagination";
-import { FaCheckCircle } from "react-icons/fa";
-import CustomSelector from "@/components/elements/CustomSelector";
+import { IToken } from "@/types/CBRC";
+import { FetchCBRC } from "@/apiHelper/getCBRC";
+import TokenList from "./TokenList";
 
-type CbrcDetailPageProps = {
-  cbrc: IToken;
-};
-
-const options = [
-  { value: "listed_at:-1", label: "Latest Listings" },
-  { value: "listed_price_per_token:1", label: "Low Price (Token)" },
-  { value: "listed_price:1", label: "Low Price (Total)" },
-];
-
-function CbrcDetailPage({ cbrc }: CbrcDetailPageProps) {
+function CBRCTokensList({ defaultData }: { defaultData: IToken[] }) {
   const dispatch = useDispatch();
   const [page, setPage] = useState<number>(1);
-  const [data, setData] = useState<IInscription[]>([]);
+  const [data, setData] = useState<IToken[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
-  const [pageSize, setPageSize] = useState<number>(20);
-  const [sort, setSort] = useState<string>("listed_price_per_token:1");
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [sort, setSort] = useState<string>("marketcap:-1");
   const [loading, setLoading] = useState<boolean>(true);
-
-  console.log({ cbrc });
+  const [tick, setTick] = useState("");
 
   const fetchData = useCallback(async () => {
     {
       setLoading(true);
       setData([]);
-      const result = await fetchCBRCListings({
+      const result = await FetchCBRC({
         page,
         page_size: pageSize,
         sort,
-        tick: cbrc.tick.toLowerCase(),
+        ...(tick && { search: tick }),
       });
       if (result && result.data) {
-        setData(result.data.inscriptions);
+        setData(result.data.tokens);
         setTotalCount(result.data.pagination.total);
         setLoading(false);
       }
     }
-  }, [sort, page, pageSize]);
+  }, [sort, page, pageSize, tick]);
 
   useEffect(() => {
     fetchData();
   }, [sort, page, dispatch, pageSize]);
 
+  const handleSearchChange = (value: string) => {
+    setTick(value);
+  };
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
     value: number
@@ -63,24 +53,31 @@ function CbrcDetailPage({ cbrc }: CbrcDetailPageProps) {
 
   return (
     <div>
-      <Hero data={cbrc} listings={data} />
+      <div className="w-full my-2 text-xs py-2 uppercase font-bold text-white text-center">
+        <p
+          className={`text-gray-700 bg-gray-100  py-2 w-full border-accent border rounded tracking-widest font-bold`}
+        >
+          Market data provided below might have inaccuracies.
+        </p>
+      </div>
       <div className="SortSearchPages py-6 flex flex-wrap justify-between">
         <div className="w-full lg:w-auto flex justify-start items-center flex-wrap">
           <div className="w-full center pb-4 lg:pb-0 lg:w-auto">
-            <CustomSelector
-              label="Sort"
-              value={sort}
-              options={options}
-              onChange={setSort}
+            <CustomSearch
+              placeholder="Ticker"
+              value={tick}
+              onChange={handleSearchChange}
+              icon={FaSearch}
+              end={true}
+              onIconClick={fetchData}
             />
           </div>
-
-          <div className="w-full md:w-auto p-2 px-6">
+          {/* <div className="w-full md:w-auto p-2 px-6">
             <div className="capitalize pb-1 text-xs flex items-center justify-evenly">
               <p> Buy Items with checkmark </p>
               <FaCheckCircle className="text-green-400 mx-2" />
             </div>
-          </div>
+          </div> */}
         </div>
         {data?.length > 0 && (
           <div className="w-full lg:w-auto center">
@@ -92,21 +89,21 @@ function CbrcDetailPage({ cbrc }: CbrcDetailPageProps) {
           </div>
         )}
       </div>
-      {!data || !data?.length ? (
+      {!data || !defaultData ? (
         <>
           {loading ? (
             <div className="text-white center py-16">
               <CircularProgress size={20} color="inherit" />
             </div>
           ) : (
-            <p className="min-h-[20vh] center"> No CBRC Listings Found</p>
+            <p className="min-h-[20vh] center"> No CBRC Token Found</p>
           )}
         </>
       ) : (
-        <CbrcListings listings={data} loading={loading} />
+        <TokenList tokens={data || defaultData} loading={loading} />
       )}
     </div>
   );
 }
 
-export default CbrcDetailPage;
+export default CBRCTokensList;

@@ -149,6 +149,8 @@ function processWhereParam(
   const schema = model.schema;
   const schemaKeys = Object.keys(schema.obj);
 
+  // console.log({ key, model: model.collection.name });
+
   if (key === "content" || key === "search") {
     if (finalQuery.find["domain_name"] && finalQuery.find["version"] == 1) {
       console.debug(
@@ -198,21 +200,24 @@ function processWhereParam(
     }
   } else if (key === "tick") {
     console.log("setting TICK for CBRC-20");
-    finalQuery.find["$and"] = [
-      {
-        "parsed_metaprotocol.0": "cbrc-20", // Ensure the first element is "cbrc-20"
-      },
-      {
-        parsed_metaprotocol: {
-          $elemMatch: {
-            $regex: new RegExp("^" + escapeRegExp(value) + "=", "i"),
+    if (model.collection.name === "cbrctokens")
+      finalQuery.find.$text = { $search: `\"${value}\"` };
+    else
+      finalQuery.find["$and"] = [
+        {
+          "parsed_metaprotocol.0": "cbrc-20", // Ensure the first element is "cbrc-20"
+        },
+        {
+          parsed_metaprotocol: {
+            $elemMatch: {
+              $regex: new RegExp("^" + escapeRegExp(value) + "=", "i"),
+            },
           },
         },
-      },
-      {
-        parsed_metaprotocol: { $nin: ["mint", "deploy"] },
-      },
-    ];
+        {
+          parsed_metaprotocol: { $nin: ["mint", "deploy"] },
+        },
+      ];
   } else if (schemaKeys.includes(key)) {
     const isObjectId = schema.path(key) instanceof Types.ObjectId;
     if (isObjectId) {

@@ -1,13 +1,8 @@
-import CBRC from "@/Views/CbrcPage";
 import { Metadata, ResolvingMetadata } from "next";
 import React from "react";
 
 function Cbrc() {
-  return (
-    <div>
-      <CBRC />
-    </div>
-  );
+  return <div></div>;
 }
 
 export async function generateMetadata(

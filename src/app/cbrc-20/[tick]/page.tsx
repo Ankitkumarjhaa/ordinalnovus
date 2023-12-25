@@ -1,6 +1,6 @@
 import CbrcDetailPage from "@/Views/CbrcPage/CbrcDetailPage";
 import { FetchCBRC } from "@/apiHelper/getCBRC";
-import { Icbrc } from "@/types/CBRC";
+import { IToken, Icbrc } from "@/types/CBRC";
 import { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 type Props = {
@@ -14,16 +14,15 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   try {
     const cbrcs = await FetchCBRC({
-      mode: "deploy",
       search: params.tick,
-      offset: 0,
-      sort: "creation:1",
+      page: 1,
+      page_size: 10,
     });
 
     if (!cbrcs) {
       notFound();
     }
-    const cbrc: Icbrc = cbrcs.data.items[0];
+    const cbrc: IToken = cbrcs.data.tokens[0];
     return {
       title: `${params.tick} | Ordinalnovus`,
       description: `${params.tick} is a CBRC-20 Token on BTC Blockchain with a supply of ${cbrc.max}`,
@@ -114,20 +113,16 @@ export default async function Page({
   params: { tick: string };
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
-  console.log({ params });
   const cbrcs = await FetchCBRC({
-    mode: "deploy",
-    search: params.tick,
-    offset: 0,
-    sort: "creation:1",
+    search: decodeURIComponent(params.tick),
+    page: 1,
+    page_size: 10,
   });
-
-  console.log({ cbrcs });
 
   if (!cbrcs) {
     notFound();
   }
-  const cbrc: Icbrc = cbrcs.data.items[0];
+  const cbrc: IToken = cbrcs.data.tokens[0];
   if (!cbrc) {
     notFound();
   }
