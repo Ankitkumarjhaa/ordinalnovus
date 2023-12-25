@@ -50,17 +50,14 @@ function CbrcListings({ listings, loading }: HeroProps) {
           borderColor: "#3d0263",
         }}
       >
-        <Table size={"small"} sx={{ minWidth: 650 }} aria-label="cbrc-20 table">
+        <Table sx={{ minWidth: 650 }} aria-label="cbrc-20 table">
           <TableHead sx={{ bgcolor: "#84848a", color: "white" }}>
             <TableRow>
-              <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
-                TOKEN
-              </TableCell>
               <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
                 CHECKSUM
               </TableCell>
               <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
-                INSCRIPTION #
+                #
               </TableCell>
               <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
                 PRICE (TOTAL)
@@ -128,18 +125,6 @@ function CbrcListings({ listings, loading }: HeroProps) {
                           }}
                         >
                           <div className="center ">
-                            <p>{token}</p>
-                          </div>
-                        </TableCell>
-                        <TableCell
-                          component="th"
-                          scope="row"
-                          sx={{
-                            color: "white",
-                            textTransform: "uppercase",
-                          }}
-                        >
-                          <div className="center ">
                             <p>{stringToHex(token.toLowerCase())}</p>
                           </div>
                         </TableCell>
@@ -180,11 +165,11 @@ function CbrcListings({ listings, loading }: HeroProps) {
                               <div className="mr-2 text-bitcoin">
                                 <FaBitcoin className="" />
                               </div>
-                              {(
-                                item.listed_price /
-                                amount /
-                                100_000_000
-                              ).toFixed(6)}{" "}
+                              {(item.listed_price / amount).toFixed(0)}
+                              {` sats / `}
+                              <span className="uppercase ml-1">
+                                {item.listed_token}
+                              </span>
                             </div>
                             <div className="flex items-center ">
                               <div className="mr-2 text-green-500">

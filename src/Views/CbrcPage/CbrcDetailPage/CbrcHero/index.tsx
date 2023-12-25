@@ -1,14 +1,11 @@
 "use client";
 import React from "react";
-import CardContent from "@/components/elements/CustomCardSmall/CardContent";
-import { IToken, Icbrc } from "@/types/CBRC";
-import { IInscription } from "@/types";
+import { IToken } from "@/types/CBRC";
 import { formatNumber } from "@/utils";
 type HeroProps = {
   data: IToken;
-  listings: IInscription[];
 };
-function Hero({ data, listings }: HeroProps) {
+function Hero({ data }: HeroProps) {
   return (
     <div className="relative h-auto lg:h-[50vh] 2xl:max-h-96 rounded-xl overflow-hidden border xl:border-2 border-accent bg-secondary">
       <div className="flex justify-between items-start flex-wrap h-full w-full p-6">
@@ -22,6 +19,10 @@ function Hero({ data, listings }: HeroProps) {
             </p>
           </div>
           <div className="w-full md:w-4/12">
+            <div className="supply bg-primary-dark px-3 py-1 rounded-lg my-3 md:m-3 text-sm md:ml-0 w-full flex justify-between items-center">
+              <span>Checksum</span>
+              <span className="text-white">{data.checksum}</span>
+            </div>
             <div className="supply bg-primary-dark px-3 py-1 rounded-lg my-3 md:m-3 text-sm md:ml-0 w-full flex justify-between items-center">
               <span>Max</span>
               <span className="text-white">{formatNumber(data.max)}</span>
