@@ -3,7 +3,6 @@ import { IInscription } from "@/types";
 import React from "react";
 import ItemCard from "./ItemCard";
 import SkeletonCard from "./SkeletonItemCard";
-import { useWalletAddress } from "bitcoin-wallet-adapter";
 
 type ItemProps = {
   data?: IInscription[] | null;
@@ -12,7 +11,6 @@ type ItemProps = {
 };
 
 function InscriptionDisplay({ data, loading, pageSize }: ItemProps) {
-  const walletDetails = useWalletAddress();
   return (
     <section>
       <div className="flex items-center flex-wrap">
