@@ -21,7 +21,7 @@ const DUMMY_UTXO_VALUE = 1000;
 const ORDINALS_POSTAGE_VALUE = Number(1000);
 const PLATFORM_FEE_ADDRESS =
   process.env.PLATFORM_FEE_ADDRESS ||
-  "bc1qhg8828sk4yq6ac08rxd0rh7dzfjvgdch3vfsm4";
+  "bc1qz9fuxrcrta2ut0ad76zlse09e98x9wrr7su7u6";
 const BUYING_PSBT_SELLER_SIGNATURE_INDEX = 2;
 
 interface Result {
