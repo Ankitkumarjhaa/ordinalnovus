@@ -165,11 +165,12 @@ function CbrcListings({ listings, loading }: HeroProps) {
                               <div className="mr-2 text-bitcoin">
                                 <FaBitcoin className="" />
                               </div>
-                              {(item.listed_price / amount).toFixed(0)}
-                              {` sats / `}
-                              <span className="uppercase ml-1">
+                              {(item.listed_price / amount).toFixed(0) +
+                                " sats"}
+                              {/* {` sats  `} */}
+                              {/* <span className="uppercase ml-1">
                                 {item.listed_token}
-                              </span>
+                              </span> */}
                             </div>
                             <div className="flex items-center ">
                               <div className="mr-2 text-green-500">

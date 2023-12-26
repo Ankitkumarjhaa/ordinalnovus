@@ -29,43 +29,43 @@ function Hero({ data }: HeroProps) {
           </div>
 
           <div className="flex flex-wrap w-full items-center justify-start py-3">
-            <div className="w-4/12 p-2">
+            <div className="w-full md:w-6/12 lg:w-4/12 p-2">
               <div className=" p-2 rounded border border-gray-300 flex justify-between">
                 <span>Supply</span>
                 <span>{formatNumber(data.supply)}</span>
               </div>
             </div>
-            <div className="w-4/12 p-2">
+            <div className="w-full md:w-6/12 lg:w-4/12 p-2">
               <div className="p-2 rounded border border-gray-300 flex justify-between">
                 <span>Price</span>
                 <span>{"$ " + data.price.toFixed(3)}</span>
               </div>
             </div>
-            <div className="w-4/12 p-2">
+            <div className="w-full md:w-6/12 lg:w-4/12 p-2">
               <div className="p-2 rounded border border-gray-300 flex justify-between">
                 <span>Marketcap</span>
                 <span>{"$ " + formatNumber(data.price * data.supply)}</span>
               </div>
             </div>
-            <div className="w-4/12 p-2">
+            <div className="w-full md:w-6/12 lg:w-4/12 p-2">
               <div className="p-2 rounded border border-gray-300 flex justify-between">
                 <span>Pending</span>
                 <span>{data.in_mempool}</span>
               </div>
             </div>
-            <div className="w-4/12 p-2">
+            <div className="w-full md:w-6/12 lg:w-4/12 p-2">
               <div className="p-2 rounded border border-gray-300 flex justify-between">
                 <span>Listings</span>
                 <span>{data.listed}</span>
               </div>
             </div>
-            <div className="w-4/12 p-2">
+            <div className="w-full md:w-6/12 lg:w-4/12 p-2">
               <div className="p-2 rounded border border-gray-300 flex justify-between">
                 <span>Volume</span>
                 <span>{formatNumber(data.volume)}</span>
               </div>
             </div>
-            <div className="w-4/12 p-2">
+            <div className="w-full md:w-6/12 lg:w-4/12 p-2">
               <div className="p-2 rounded border border-gray-300 flex justify-between">
                 <span>Checksum</span>
                 <span>{data.checksum}</span>
