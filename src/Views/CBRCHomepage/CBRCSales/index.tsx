@@ -216,7 +216,8 @@ function CBRCSales() {
                                   <div className="mr-2 text-bitcoin">
                                     <FaBitcoin className="" />
                                   </div>
-                                  {(item.price / 100_000_000).toFixed(5)}{" "}
+                                  {(item.price / 100_000_000).toFixed(5)}
+                                  {" BTC"}
                                 </div>
                                 <div className="flex items-center ">
                                   <div className="mr-2 text-green-500">
@@ -235,9 +236,8 @@ function CBRCSales() {
                                   <div className="mr-2 text-bitcoin">
                                     <FaBitcoin className="" />
                                   </div>
-                                  {(item.price / amount / 100_000_000).toFixed(
-                                    5
-                                  )}{" "}
+                                  {(item.price / amount).toFixed(0)}
+                                  {" sats"}
                                 </div>
                                 <div className="flex items-center ">
                                   <div className="mr-2 text-green-500">

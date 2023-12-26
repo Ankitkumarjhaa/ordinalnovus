@@ -11,9 +11,13 @@ import { useWalletAddress } from "bitcoin-wallet-adapter";
 import ListInscriptionCardButton from "../../ListInscriptionCardButton";
 interface CollectionCardProps {
   inscription: IInscription;
+  refreshData?: any;
 }
 
-const ItemCard: React.FC<CollectionCardProps> = ({ inscription }) => {
+const ItemCard: React.FC<CollectionCardProps> = ({
+  inscription,
+  refreshData,
+}) => {
   const btcPrice = useSelector(
     (state: RootState) => state.general.btc_price_in_dollar
   );
@@ -38,7 +42,7 @@ const ItemCard: React.FC<CollectionCardProps> = ({ inscription }) => {
         </Link>
 
         <div className={`h-[40%] flex flex-col justify-end `}>
-          <div className="p-5 mb-2 center">
+          <div className="py-2 mb-2 center">
             <div className="flex-1">
               <h5 className=" text-sm font-bold tracking-tight text-white">
                 #{inscription.inscription_number}
@@ -90,7 +94,10 @@ const ItemCard: React.FC<CollectionCardProps> = ({ inscription }) => {
             </span>
           )}
           {inscription.address === walletDetails?.ordinal_address && (
-            <ListInscriptionCardButton data={inscription} />
+            <ListInscriptionCardButton
+              data={inscription}
+              refreshData={refreshData}
+            />
           )}
         </div>
       </div>

@@ -21,9 +21,10 @@ import { FaDollarSign } from "react-icons/fa";
 import { Inscription } from "@/models";
 type InscriptionProps = {
   data: IInscription;
+  refreshData?: any;
 };
 
-function ListInscriptionCardButton({ data }: InscriptionProps) {
+function ListInscriptionCardButton({ data, refreshData }: InscriptionProps) {
   const dispatch = useDispatch();
   const router = useRouter();
   const walletDetails = useWalletAddress();
@@ -190,6 +191,7 @@ function ListInscriptionCardButton({ data }: InscriptionProps) {
         );
         router.refresh();
         setLoading(false);
+        refreshData && refreshData();
       } else {
         setUnsignedPsbtBase64("");
         throw Error(result.message);
@@ -254,6 +256,7 @@ function ListInscriptionCardButton({ data }: InscriptionProps) {
         router.refresh();
         setUnsignedPsbtBase64("");
         setLoading(false);
+        refreshData && refreshData();
       } else {
         setUnsignedPsbtBase64("");
         throw Error(result.message);
@@ -337,6 +340,19 @@ function ListInscriptionCardButton({ data }: InscriptionProps) {
   return (
     <div className="">
       {" "}
+      {data.tags?.includes("cbrc") &&
+        data.cbrc_valid &&
+        Number(price) > 0 &&
+        data.parsed_metaprotocol &&
+        data.parsed_metaprotocol.length === 3 && (
+          <p className="text-xs text-gray-300 text-center py-1">
+            {(
+              (Number(price) * 100_000_000) /
+              Number(data.parsed_metaprotocol[2].split("=")[1])
+            ).toFixed(0)}{" "}
+            sats / {data.parsed_metaprotocol[2].split("=")[0]}
+          </p>
+        )}
       <div className="center flex-wrap mb-2">
         <div className="w-full mb-2 border border-white rounded-xl">
           <div className="flex items-center">

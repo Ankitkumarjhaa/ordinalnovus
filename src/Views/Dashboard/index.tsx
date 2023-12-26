@@ -146,6 +146,7 @@ function AccountPage() {
 
   const handleTabChange = (event: any, newValue: "cbrc-20" | "all") => {
     setTab(newValue);
+    setInscriptions(null);
   };
 
   return (
@@ -184,23 +185,27 @@ function AccountPage() {
               <span>{walletDetails?.ordinal_address}</span>
               <FaCopy className="ml-2" />
             </div>
-            <div
-              className="flex justify-start items-center bg-slate-700 tracking-widest px-4 py-2 rounded cursor-pointer mb-2"
-              onClick={() => {
-                copy(walletDetails?.cardinal_address + "");
-                dispatch(
-                  addNotification({
-                    id: new Date().valueOf(),
-                    message: "Address Copied",
-                    open: true,
-                    severity: "success",
-                  })
-                );
-              }}
-            >
-              <span>{walletDetails?.cardinal_address}</span>
-              <FaCopy className="ml-2" />
-            </div>
+            {walletDetails &&
+              walletDetails.ordinal_address !==
+                walletDetails.cardinal_address && (
+                <div
+                  className="flex justify-start items-center bg-slate-700 tracking-widest px-4 py-2 rounded cursor-pointer mb-2"
+                  onClick={() => {
+                    copy(walletDetails?.cardinal_address + "");
+                    dispatch(
+                      addNotification({
+                        id: new Date().valueOf(),
+                        message: "Address Copied",
+                        open: true,
+                        severity: "success",
+                      })
+                    );
+                  }}
+                >
+                  <span>{walletDetails?.cardinal_address}</span>
+                  <FaCopy className="ml-2" />
+                </div>
+              )}
           </div>
           <div className="text-gray-400 text-xs lg:hidden w-full">
             <div
@@ -220,25 +225,29 @@ function AccountPage() {
               <span>{shortenString(walletDetails?.ordinal_address || "")}</span>
               <FaCopy className="ml-2" />
             </div>
-            <div
-              className="flex justify-start items-center bg-slate-700 tracking-widest px-4 py-2 rounded cursor-pointer mb-2"
-              onClick={() => {
-                copy(walletDetails?.cardinal_address + "");
-                dispatch(
-                  addNotification({
-                    id: new Date().valueOf(),
-                    message: "Address Copied",
-                    open: true,
-                    severity: "success",
-                  })
-                );
-              }}
-            >
-              <span>
-                {shortenString(walletDetails?.cardinal_address || "")}
-              </span>
-              <FaCopy className="ml-2" />
-            </div>
+            {walletDetails &&
+              walletDetails.cardinal_address !==
+                walletDetails.ordinal_address && (
+                <div
+                  className="flex justify-start items-center bg-slate-700 tracking-widest px-4 py-2 rounded cursor-pointer mb-2"
+                  onClick={() => {
+                    copy(walletDetails?.cardinal_address + "");
+                    dispatch(
+                      addNotification({
+                        id: new Date().valueOf(),
+                        message: "Address Copied",
+                        open: true,
+                        severity: "success",
+                      })
+                    );
+                  }}
+                >
+                  <span>
+                    {shortenString(walletDetails?.cardinal_address || "")}
+                  </span>
+                  <FaCopy className="ml-2" />
+                </div>
+              )}
           </div>
         </div>
         <div className="py-4 md:py-0 flex-1 md:flex md:justify-center lg:justify-end">
@@ -313,7 +322,7 @@ function AccountPage() {
             />
           </div>
         </div>
-        {inscriptions && inscriptions?.length > 0 && (
+        {inscriptions && inscriptions?.length > 0 && total / page_size > 1 && (
           <div className="w-full lg:w-auto center">
             <CustomPaginationComponent
               count={Math.ceil(total / page_size)}
@@ -329,6 +338,7 @@ function AccountPage() {
             data={inscriptions}
             loading={loading}
             pageSize={10}
+            refreshData={fetchValidCbrcInscriptions}
           />
         ) : (
           <>

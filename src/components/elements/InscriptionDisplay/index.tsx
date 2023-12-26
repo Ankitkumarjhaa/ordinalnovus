@@ -8,9 +8,15 @@ type ItemProps = {
   data?: IInscription[] | null;
   loading: boolean;
   pageSize: number;
+  refreshData?: any;
 };
 
-function InscriptionDisplay({ data, loading, pageSize }: ItemProps) {
+function InscriptionDisplay({
+  data,
+  loading,
+  pageSize,
+  refreshData,
+}: ItemProps) {
   return (
     <section>
       <div className="flex items-center flex-wrap">
@@ -18,7 +24,11 @@ function InscriptionDisplay({ data, loading, pageSize }: ItemProps) {
           Array.from(Array(pageSize)).map((_, i) => <SkeletonCard key={i} />)
         ) : data && data?.length > 0 ? (
           data?.map((item) => (
-            <ItemCard key={item.inscription_id} inscription={item} />
+            <ItemCard
+              refreshData={refreshData}
+              key={item.inscription_id}
+              inscription={item}
+            />
           ))
         ) : (
           <div className="center w-full py-16">
