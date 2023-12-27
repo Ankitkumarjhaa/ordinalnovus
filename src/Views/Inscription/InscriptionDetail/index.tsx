@@ -18,6 +18,12 @@ import BuyInscription from "./BuyInscription";
 import DisplayAttributes from "./DisplayAttributes";
 import { RootState } from "@/stores";
 import { stringToHex } from "@/utils";
+import {
+  cbrcListed,
+  cbrcNotListed,
+  cbrcValid,
+  myInscription,
+} from "@/utils/validate";
 type InscriptionProps = {
   data: IInscription;
 };
@@ -117,18 +123,12 @@ function InscriptionDetail({ data }: InscriptionProps) {
         </div>
       </div>
       <div className="relative">
-        {WalletDetail?.connected &&
-          WalletDetail.ordinal_address === data.address &&
-          (!data.parsed_metaprotocol?.includes("cbrc-20") ||
-            ((!checksum ||
-              (data?.cbrc_valid && allowed_cbrcs?.includes(checksum))) && (
-              <ListInscription data={data} />
-            )))}
-        {((WalletDetail && WalletDetail.ordinal_address !== data.address) ||
-          !WalletDetail) &&
-          data.listed &&
-          data?.cbrc_valid &&
-          (!checksum || allowed_cbrcs?.includes(checksum)) && (
+        {cbrcValid(data, allowed_cbrcs || []) &&
+          myInscription(data, WalletDetail?.ordinal_address || "") && (
+            <ListInscription data={data} />
+          )}
+        {cbrcListed(data, allowed_cbrcs || []) &&
+          !myInscription(data, WalletDetail?.ordinal_address || "") && (
             <BuyInscription data={data} />
           )}
       </div>

@@ -71,7 +71,7 @@ function ListInscriptionCardButton({ data, refreshData }: InscriptionProps) {
 
         console.debug(result, "RESULT");
         if (result.ok && result?.unsigned_psbt_base64) {
-          mixpanel.track("Listing PSBT Generated", {
+          mixpanel.track("Listing PSBT Generated Dashboard", {
             wallet: walletDetails.ordinal_address,
             inscription: data.inscription_id,
             price: convertBtcToSat(Number(price)),
@@ -84,7 +84,7 @@ function ListInscriptionCardButton({ data, refreshData }: InscriptionProps) {
           mixpanel.track("Error", {
             inscription_id: data.inscription_id,
             message: result.message || "Error creating listing psbt",
-            tag: "listing psbt error",
+            tag: "listing psbt error dashboard",
             wallet: walletDetails.ordinal_address,
             inscription: data.inscription_id,
             price: convertBtcToSat(Number(price)),
@@ -103,7 +103,7 @@ function ListInscriptionCardButton({ data, refreshData }: InscriptionProps) {
             e.message ||
             e ||
             "Error creating listing psbt",
-          tag: "listing psbt error catch",
+          tag: "listing psbt error catch Dashboard",
           wallet: walletDetails.ordinal_address,
           inscription: data.inscription_id,
           price: convertBtcToSat(Number(price)),
@@ -175,7 +175,7 @@ function ListInscriptionCardButton({ data, refreshData }: InscriptionProps) {
         signed_listing_psbt_base64: signedPsbt,
       });
       if (result.ok) {
-        mixpanel.track("Listing Completed", {
+        mixpanel.track("Listing Completed Dashboard", {
           inscription_id: data.inscription_id,
           price: convertBtcToSat(Number(price)),
           collection: data?.official_collection?.name,
@@ -203,7 +203,7 @@ function ListInscriptionCardButton({ data, refreshData }: InscriptionProps) {
       mixpanel.track("Error", {
         inscription_id: data.inscription_id,
         message: e.response.data.message || e.message || e || "Listing failed",
-        tag: "Listing Error",
+        tag: "Listing Error Dashboard",
         wallet: walletDetails?.ordinal_address,
         // Additional properties if needed
       });
@@ -239,7 +239,7 @@ function ListInscriptionCardButton({ data, refreshData }: InscriptionProps) {
         tap_internal_key: walletDetails.ordinal_pubkey || "",
       });
       if (result.ok) {
-        mixpanel.track("Listing Removed", {
+        mixpanel.track("Listing Removed Dashboard", {
           inscription_id: data.inscription_id,
           price: convertBtcToSat(Number(price)),
           collection: data?.official_collection?.name,
@@ -272,7 +272,7 @@ function ListInscriptionCardButton({ data, refreshData }: InscriptionProps) {
           e.message ||
           e ||
           "Error in removing listing",
-        tag: "Remove Listing Error",
+        tag: "Remove Listing Error Dashboard",
         wallet: walletDetails?.ordinal_address,
         // Additional properties if needed
       });

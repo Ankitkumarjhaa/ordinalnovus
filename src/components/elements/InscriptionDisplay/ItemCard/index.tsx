@@ -9,6 +9,7 @@ import { RootState } from "@/stores";
 import { calculateBTCCostInDollars, convertSatToBtc } from "@/utils";
 import { useWalletAddress } from "bitcoin-wallet-adapter";
 import ListInscriptionCardButton from "../../ListInscriptionCardButton";
+import { cbrcValid, myInscription } from "@/utils/validate";
 interface CollectionCardProps {
   inscription: IInscription;
   refreshData?: any;
@@ -20,6 +21,10 @@ const ItemCard: React.FC<CollectionCardProps> = ({
 }) => {
   const btcPrice = useSelector(
     (state: RootState) => state.general.btc_price_in_dollar
+  );
+
+  const allowed_cbrcs = useSelector(
+    (state: RootState) => state.general.allowed_cbrcs
   );
 
   const walletDetails = useWalletAddress();
@@ -94,7 +99,11 @@ const ItemCard: React.FC<CollectionCardProps> = ({
             </span>
           )}
           {inscription.address === walletDetails?.ordinal_address &&
-            (!inscription.tags?.includes("cbrc") || inscription.cbrc_valid) && (
+            cbrcValid(inscription, allowed_cbrcs || []) &&
+            myInscription(
+              inscription,
+              walletDetails?.ordinal_address || ""
+            ) && (
               <ListInscriptionCardButton
                 data={inscription}
                 refreshData={refreshData}

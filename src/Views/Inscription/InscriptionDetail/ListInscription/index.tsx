@@ -68,10 +68,14 @@ function ListInscription({ data }: InscriptionProps) {
 
         console.debug(result, "RESULT");
         if (result.ok && result?.unsigned_psbt_base64) {
-          mixpanel.track("Listing Completed", {
+          mixpanel.track("Listing PSBT Generated", {
             inscription_id: data.inscription_id,
+            wallet: walletDetails.ordinal_address,
+            inscription: data.inscription_id,
             price: convertBtcToSat(Number(price)),
-            // Additional properties if needed
+            receive_address: walletDetails.cardinal_address,
+            wallet_name: walletDetails.wallet,
+            publickey: walletDetails.ordinal_pubkey,
           });
           setUnsignedPsbtBase64(result.unsigned_psbt_base64);
         } else {

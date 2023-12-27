@@ -266,24 +266,27 @@ function AccountPage() {
                   key={item.tick}
                   className="w-full md:w-2/12 lg:w-3/12 2xl:w-2/12 p-2"
                 >
-                  <div className="rounded border border-accent w-full min-h-[200px] flex justify-between flex-col">
-                    <p className="uppercase text-center text-sm text-gray-300 mb-2 bg-accent_dark font-bold tracking-widest w-full py-2">
-                      {item.tick}
-                    </p>
-                    <div className="w-full flex-1 p-3 tracking-wider uppercase">
-                      <div className="text-center text-sm text-white flex justify-between w-full py-2">
-                        <span> Available:</span> <p>{item.amt}</p>
-                      </div>
-                      <div className="text-center text-sm text-white flex justify-between w-ful py-2l">
-                        <span>Transferable: </span>
-                        <span>{item.lock}</span>
-                      </div>
-                      <hr className="my-2 bg-white border-2 border-white" />
-                      <div className="text-center text-sm text-white flex justify-between w-full py-2">
-                        <span>Total:</span> <span>{item.amt + item.lock}</span>
+                  <Link href={`/cbrc-20/${item.tick}`}>
+                    <div className="rounded border border-accent w-full min-h-[200px] flex justify-between flex-col">
+                      <p className="uppercase text-center text-sm text-gray-300 mb-2 bg-accent_dark font-bold tracking-widest w-full py-2">
+                        {item.tick}
+                      </p>
+                      <div className="w-full flex-1 p-3 tracking-wider uppercase">
+                        <div className="text-center text-sm text-white flex justify-between w-full py-2">
+                          <span> Available:</span> <p>{item.amt}</p>
+                        </div>
+                        <div className="text-center text-sm text-white flex justify-between w-ful py-2l">
+                          <span>Transferable: </span>
+                          <span>{item.lock}</span>
+                        </div>
+                        <hr className="my-2 bg-white border-2 border-white" />
+                        <div className="text-center text-sm text-white flex justify-between w-full py-2">
+                          <span>Total:</span>{" "}
+                          <span>{item.amt + item.lock}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 </div>
               ))}
             </div>

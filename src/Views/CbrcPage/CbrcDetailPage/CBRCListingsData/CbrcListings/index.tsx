@@ -1,7 +1,8 @@
+import BuyInscriptionCardButton from "@/components/elements/BuyInscriptionCardButton";
 import { RootState } from "@/stores";
 import { IInscription } from "@/types";
-import { Icbrc } from "@/types/CBRC";
-import { stringToHex } from "@/utils";
+import { formatNumber, stringToHex } from "@/utils";
+import { cbrcListed, myInscription } from "@/utils/validate";
 import {
   CircularProgress,
   Paper,
@@ -12,6 +13,7 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
+import { useWalletAddress } from "bitcoin-wallet-adapter";
 import moment from "moment";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -24,6 +26,9 @@ type HeroProps = {
 };
 function CbrcListings({ listings, loading }: HeroProps) {
   const router = useRouter();
+
+  //wallet
+  const walletDetails = useWalletAddress();
 
   const allowed_cbrcs = useSelector(
     (state: RootState) => state.general.allowed_cbrcs
@@ -40,193 +45,106 @@ function CbrcListings({ listings, loading }: HeroProps) {
   };
 
   return (
-    <div className="py-2">
-      <TableContainer
-        component={Paper}
-        sx={{
-          bgcolor: "#3d0263",
-          color: "white",
-          border: "3px",
-          borderColor: "#3d0263",
-        }}
-      >
-        <Table sx={{ minWidth: 650 }} aria-label="cbrc-20 table">
-          <TableHead sx={{ bgcolor: "#84848a", color: "white" }}>
-            <TableRow>
-              <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
-                CHECKSUM
-              </TableCell>
-              <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
-                #
-              </TableCell>
-              <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
-                PRICE (TOTAL)
-              </TableCell>
-              <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
-                PRICE (PER TOKEN)
-              </TableCell>
-              <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
-                AMOUNT
-              </TableCell>
-              <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
-                TIMESTAMP
-              </TableCell>
-              <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
-                STATUS
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <>
-            {listings && listings.length ? (
-              <TableBody sx={{ bgcolor: "#3d0263", color: "white" }}>
-                {listings?.map((item: IInscription) => {
-                  if (!item.parsed_metaprotocol || !item.listed_price) {
-                    console.log({
-                      item,
-                      msg: " NOT SHOWING THIS because parsed_metaprotocol or listed_price are missing",
-                    });
-                    return <></>;
-                  }
-                  const op = item.parsed_metaprotocol[1];
-                  const tokenAmt = item.parsed_metaprotocol[2];
-                  const token = tokenAmt?.includes("=")
-                    ? tokenAmt.split("=")[0]
-                    : "";
-                  const amount = tokenAmt?.includes("=")
-                    ? Number(tokenAmt.split("=")[1])
-                    : 0;
-                  if (item.parsed_metaprotocol[0] === "cbrc-20")
-                    return (
-                      <TableRow
-                        onClick={() =>
-                          item.in_mempool
-                            ? handleMempoolClick(item.txid)
-                            : handleListingClick(item.inscription_id)
-                        }
-                        key={item.txid}
-                        sx={{
-                          "&:last-child td, &:last-child th": { border: 0 },
-                          "&:hover": { bgcolor: "#1f1d3e" },
-                          color: "white",
-                          cursor: "pointer",
-                          bgcolor: !allowed_cbrcs?.includes(
-                            stringToHex(token.toLowerCase().trim())
-                          )
-                            ? "red"
-                            : "",
-                        }}
-                      >
-                        <TableCell
-                          component="th"
-                          scope="row"
-                          sx={{
-                            color: "white",
-                            textTransform: "uppercase",
-                          }}
-                        >
-                          <div className="center ">
-                            <p>{stringToHex(token.toLowerCase())}</p>
+    <div className="py-2 w-full">
+      {!loading && listings && listings.length > 0 ? (
+        <div className="flex justify-start items-center w-full flex-wrap">
+          {listings.map((item: IInscription) => (
+            <div className="w-full md:w-6/12 lg:w-3/12  p-2">
+              <div className="border-2 overflow-hidden border-gray-700 rounded-lg bg-slate-900">
+                <div className="TokenDetail p-2">
+                  <div className="flex justify-between items-center p-2">
+                    <p className="px-2 py-1 rounded tracking-wider bg-black text-white font-bold uppercase">
+                      {item.listed_token}
+                    </p>
+                    <p className="px-2 py-1 rounded tracking-wider bg-accent_dark text-white">
+                      Transfer
+                    </p>
+                  </div>
+                  <p className="text-center font-bold text-2xl py-6 text-white">
+                    {formatNumber(item.listed_amount || 0)}
+                  </p>
+
+                  {item.listed_amount &&
+                    item.listed_token &&
+                    item.listed_price &&
+                    item.listed_price_per_token && (
+                      <>
+                        <div className="px-2 text-center">
+                          <span className="text-yellow-500 text-xl">
+                            {" "}
+                            {item.listed_price_per_token.toFixed(0)}{" "}
+                          </span>
+                          <span>
+                            {" sats / "}{" "}
+                            <span className="uppercase">
+                              {" "}
+                              {item.listed_token}
+                            </span>
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-center py-2">
+                          <div className="mr-2 text-green-500">
+                            <FaDollarSign className="" />
                           </div>
-                        </TableCell>
-                        <TableCell sx={{ color: "white" }}>
-                          <div className="center ">
-                            <p>#{item.inscription_number}</p>
-                            <div className="ml-3">
-                              {item.cbrc_valid ? (
-                                <FaCheckCircle className="text-green-400" />
-                              ) : (
-                                <IoIosWarning className="text-red-400" />
-                              )}
-                            </div>
-                          </div>
-                        </TableCell>{" "}
-                        <TableCell sx={{ color: "white" }}>
-                          <div>
+                          {(
+                            (item.listed_price_per_token / 100_000_000) *
+                            btcPrice
+                          ).toFixed(2)}{" "}
+                        </div>
+                      </>
+                    )}
+                </div>
+                <div className="ListingDetail bg-primary p-2">
+                  <div className="text-white pb-2 border-b border-gray-300 w-full flex justify-between items-center">
+                    <p className="">#{item.inscription_number}</p>
+                    <div className="ml-3">
+                      {item.cbrc_valid ? (
+                        <FaCheckCircle className="text-green-400" />
+                      ) : (
+                        <IoIosWarning className="text-red-400" />
+                      )}
+                    </div>
+                  </div>
+                  {cbrcListed(item, allowed_cbrcs || []) &&
+                    // !myInscription(
+                    //   item,
+                    //   walletDetails?.ordinal_address || ""
+                    // )
+                    //  &&
+                    item.listed_price && (
+                      <>
+                        <div className="flex justify-between items-center">
+                          <div className="pt-2 flex justify-between items-center">
                             <div className="flex items-center pb-1">
                               <div className="mr-2 text-bitcoin">
                                 <FaBitcoin className="" />
                               </div>
-                              {(item.listed_price / 100_000_000).toFixed(6)}{" "}
-                            </div>
-                            <div className="flex items-center ">
-                              <div className="mr-2 text-green-500">
-                                <FaDollarSign className="" />
-                              </div>
-                              {(
-                                (item.listed_price / 100_000_000) *
-                                btcPrice
-                              ).toFixed(2)}{" "}
+                              {(item?.listed_price / 100_000_000).toFixed(6)}{" "}
                             </div>
                           </div>
-                        </TableCell>
-                        <TableCell sx={{ color: "white" }}>
-                          <div>
-                            <div className="flex items-center pb-1">
-                              <div className="mr-2 text-bitcoin">
-                                <FaBitcoin className="" />
-                              </div>
-                              {(item.listed_price / amount).toFixed(0) +
-                                " sats"}
-                              {/* {` sats  `} */}
-                              {/* <span className="uppercase ml-1">
-                                {item.listed_token}
-                              </span> */}
+                          <div className="flex items-center ">
+                            <div className="mr-2 text-green-500">
+                              <FaDollarSign className="" />
                             </div>
-                            <div className="flex items-center ">
-                              <div className="mr-2 text-green-500">
-                                <FaDollarSign className="" />
-                              </div>
-                              {(
-                                (item.listed_price / amount / 100_000_000) *
-                                btcPrice
-                              ).toFixed(2)}{" "}
-                            </div>
+                            {(
+                              (item.listed_price / 100_000_000) *
+                              btcPrice
+                            ).toFixed(2)}{" "}
                           </div>
-                        </TableCell>
-                        <TableCell sx={{ color: "white" }}>{amount}</TableCell>
-                        <TableCell sx={{ color: "white" }}>
-                          {moment(item.listed_at).fromNow()}{" "}
-                        </TableCell>
-                        <TableCell sx={{ color: "white" }}>
-                          {item.in_mempool ? "In Mempool" : "Buy Now"}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  else {
-                    console.log({
-                      item,
-                      msg: " NOT SHOWING THIS because parsed_metaprotocol[0] is not cbrc-20",
-                    });
-                    return <></>;
-                  }
-                })}
-              </TableBody>
-            ) : loading ? (
-              <TableBody>
-                <TableRow>
-                  <TableCell
-                    colSpan={4}
-                    style={{ textAlign: "center", color: "white" }}
-                  >
-                    <CircularProgress color="inherit" size={40} />
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            ) : (
-              <TableBody>
-                <TableRow>
-                  <TableCell
-                    colSpan={4}
-                    style={{ textAlign: "center", color: "white" }}
-                  >
-                    No DATA Found
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            )}
-          </>
-        </Table>
-      </TableContainer>
+                        </div>
+                        <BuyInscriptionCardButton data={item} />
+                      </>
+                    )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : !loading ? (
+        <div>No Data Found</div>
+      ) : (
+        <>Loading...</>
+      )}
     </div>
   );
 }
