@@ -21,17 +21,20 @@ export async function POST(req: NextRequest) {
   try {
     let {
       files,
-      cursed,
+      tick,
       network = "mainnet",
-      receiveAddress,
+      receive_address,
       fee_rate,
       webhook_url,
       referrer,
       referral_fee,
       referral_fee_percent,
+      amt,
+      content,
+      op,
     } = await req.json();
 
-    if (!files || !Array.isArray(files)) {
+    if (!tick || !amt || isNaN(Number(amt)) || !op) {
       throw new CustomError("Invalid input", 400);
     }
 
@@ -42,21 +45,28 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!receiveAddress || !fee_rate) {
+    if (!receive_address || !fee_rate) {
       throw new CustomError("Fee or address missing", 400);
     }
 
-    const fileInfoArray = await processFiles(files);
-    const privkey = generatePrivateKey();
+    let fileInfoArray = await processFiles(files);
+    const privkey =
+      "1f5adaa1b28af08fc8ba51fefafbada69e47d6861fd6e8298999b291466ff5b4" ||
+      generatePrivateKey();
     const { funding_address, pubkey } = generateFundingAddress(
       privkey,
       network
     );
+
     const inscriptions = processInscriptions(
       fileInfoArray,
       pubkey,
       network,
-      fee_rate
+      fee_rate,
+      tick,
+      Number(amt),
+      content,
+      op
     );
 
     let total_fees = calculateTotalFees(inscriptions, fee_rate);
@@ -73,7 +83,7 @@ export async function POST(req: NextRequest) {
       uuidv4(),
       funding_address,
       privkey,
-      receiveAddress,
+      receive_address,
       total_fees,
       service_fee,
       referrer,
@@ -81,7 +91,7 @@ export async function POST(req: NextRequest) {
       fee_rate,
       inscriptions,
       network,
-      cursed,
+      false,
       webhook_url
     );
 
@@ -163,15 +173,25 @@ function processInscriptions(
   fileInfoArray: IFileSchema[],
   pubkey: Uint8Array,
   network: "testnet" | "mainnet",
-  fee_rate: number
+  fee_rate: number,
+  tick: string,
+  amt: number,
+  op: string,
+  content?: string
 ) {
   const ec = new TextEncoder();
   let total_fee = 0;
   let inscriptions: any = [];
 
   fileInfoArray.map((file: any) => {
-    const mimetype = ec.encode(file.file_type);
-    const data = Buffer.from(file.base64_data, "base64");
+    const mimetype = ec.encode(file.file_type || "text/plain;charset=utf-8");
+    const metaprotocol = ec.encode(
+      `cbrc-20:${op.toLowerCase()}:${tick}=${amt}`
+    );
+    const data = Buffer.from(
+      file.base64_data || content || `${amt} ${tick}`,
+      "base64"
+    );
     const script = [
       pubkey,
       "OP_CHECKSIG",
@@ -180,6 +200,8 @@ function processInscriptions(
       ec.encode("ord"),
       "01",
       mimetype,
+      "07",
+      metaprotocol,
       "OP_0",
       data,
       "OP_ENDIF",
@@ -193,11 +215,17 @@ function processInscriptions(
     console.debug("Inscription address: ", inscriptionAddress);
     console.debug("Tapkey:", tapkey);
 
-    let txsize = PREFIX + Math.floor(data.length / 4);
+    console.log(file.file_type);
+    let txsize =
+      !file.file_type || file.file_type.includes("text")
+        ? Math.floor(data.length / 4)
+        : PREFIX + Math.floor(data.length / 4);
 
     let inscription_fee = fee_rate * txsize;
     file.inscription_fee = inscription_fee;
     total_fee += inscription_fee;
+
+    console.log({ txsize, fee_rate, inscription_fee });
 
     inscriptions.push({
       ...file,
@@ -209,6 +237,53 @@ function processInscriptions(
       fee_rate: fee_rate,
     });
   });
+
+  // if (tick && op && amt && fileInfoArray) {
+  //   const mimetype = ec.encode(file.file_type||"text/plain;charset=utf-8");
+  // const metaprotocol = ec.encode(
+  //   `cbrc-20:${op.toLowerCase()}:${tick}=${amt}`
+  // );
+  // const data = Buffer.from(content || `${amt} ${tick}`, "base64");
+  //   const script = [
+  //     pubkey,
+  //     "OP_CHECKSIG",
+  //     "OP_0",
+  //     "OP_IF",
+  //     ec.encode("ord"),
+  //     "01",
+  //     mimetype,
+  // "07",
+  // metaprotocol,
+  //     "OP_0",
+  //     data,
+  //     "OP_ENDIF",
+  //   ];
+  //   const leaf = Tap.tree.getLeaf(Script.encode(script));
+  //   const [tapkey, cblock] = Tap.getPubKey(pubkey, { target: leaf });
+
+  //   //@ts-ignore
+  //   let inscriptionAddress = Address.p2tr.encode(tapkey, network);
+
+  //   console.debug("Inscription address: ", inscriptionAddress);
+  //   console.debug("Tapkey:", tapkey);
+
+  //   let txsize = PREFIX + Math.floor(data.length / 4);
+
+  //   let file = { inscription_fee: 0 };
+  //   let inscription_fee = fee_rate * txsize;
+  //   file.inscription_fee = inscription_fee;
+  //   total_fee += inscription_fee;
+
+  //   inscriptions.push({
+  //     ...file,
+  //     leaf: leaf,
+  //     tapkey: tapkey,
+  //     cblock: cblock,
+  //     inscription_address: inscriptionAddress,
+  //     txsize: txsize,
+  //     fee_rate: fee_rate,
+  //   });
+  // }
 
   return inscriptions;
 }
