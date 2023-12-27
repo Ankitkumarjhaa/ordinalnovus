@@ -124,7 +124,9 @@ const CardContent: React.FC<CardContentProps> = ({
             className={`text-center py-2 font-sourcecode font-semibold ${
               !allowed_cbrcs?.includes(checksum)
                 ? " bg-gray-900 text-white w-full p-2 my-2"
-                : "bg-green-600 text-white w-full p-2 my-2"
+                : inscription.cbrc_valid
+                ? "bg-green-600 text-white w-full p-2 my-2"
+                : "bg-red-400 text-red-800 w-full p-2 my-2"
             }`}
           >
             <p>Checksum</p>

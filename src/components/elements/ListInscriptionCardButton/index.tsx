@@ -71,10 +71,13 @@ function ListInscriptionCardButton({ data, refreshData }: InscriptionProps) {
 
         console.debug(result, "RESULT");
         if (result.ok && result?.unsigned_psbt_base64) {
-          mixpanel.track("Listing Completed", {
-            inscription_id: data.inscription_id,
+          mixpanel.track("Listing PSBT Generated", {
+            wallet: walletDetails.ordinal_address,
+            inscription: data.inscription_id,
             price: convertBtcToSat(Number(price)),
-            // Additional properties if needed
+            receive_address: walletDetails.cardinal_address,
+            wallet_name: walletDetails.wallet,
+            publickey: walletDetails.ordinal_pubkey,
           });
           setUnsignedPsbtBase64(result.unsigned_psbt_base64);
         } else {
@@ -345,13 +348,15 @@ function ListInscriptionCardButton({ data, refreshData }: InscriptionProps) {
         Number(price) > 0 &&
         data.parsed_metaprotocol &&
         data.parsed_metaprotocol.length === 3 && (
-          <p className="text-xs text-gray-300 text-center py-1">
+          <div className="text-xs text-gray-300 text-center py-1 center">
+            <FaDollarSign className="mr-1 text-green-400 " />{" "}
             {(
-              (Number(price) * 100_000_000) /
-              Number(data.parsed_metaprotocol[2].split("=")[1])
-            ).toFixed(0)}{" "}
-            sats / {data.parsed_metaprotocol[2].split("=")[0]}
-          </p>
+              (Number(price) /
+                Number(data.parsed_metaprotocol[2].split("=")[1])) *
+              btcPrice
+            ).toFixed(3)}{" "}
+            / {data.parsed_metaprotocol[2].split("=")[0]}
+          </div>
         )}
       <div className="center flex-wrap mb-2">
         <div className="w-full mb-2 border border-white rounded-xl">

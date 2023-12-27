@@ -19,7 +19,7 @@ function InscriptionDisplay({
 }: ItemProps) {
   return (
     <section>
-      <div className="flex items-center flex-wrap">
+      <div className="flex items-end flex-wrap">
         {loading ? (
           Array.from(Array(pageSize)).map((_, i) => <SkeletonCard key={i} />)
         ) : data && data?.length > 0 ? (

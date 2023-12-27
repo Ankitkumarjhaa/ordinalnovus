@@ -258,7 +258,7 @@ function AccountPage() {
           </Link>
         </div>
       </div>
-      {/* <div className="pb-6 py-16 flex justify-center lg:justify-start ">
+      <div className="pb-6 py-16 flex justify-center lg:justify-start ">
         <CustomTab
           tabsData={[
             { label: "CBRC-20", value: "cbrc-20" },
@@ -267,9 +267,9 @@ function AccountPage() {
           currentTab={tab}
           onTabChange={(_, newTab) => setTab(newTab)}
         />
-      </div>{" "} */}
+      </div>{" "}
       <div className="">
-        {cbrcs && cbrcs.length ? (
+        {tab === "cbrc-20" && cbrcs && cbrcs.length ? (
           <div className="py-16">
             <h2 className="font-bold text-2xl pb-6">Balance</h2>
             <p className="text-sm py-2">Your Valid CBRC-20 Balance</p>

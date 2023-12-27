@@ -93,12 +93,13 @@ const ItemCard: React.FC<CollectionCardProps> = ({
               {inscription.collection_item_name}
             </span>
           )}
-          {inscription.address === walletDetails?.ordinal_address && (
-            <ListInscriptionCardButton
-              data={inscription}
-              refreshData={refreshData}
-            />
-          )}
+          {inscription.address === walletDetails?.ordinal_address &&
+            (!inscription.tags?.includes("cbrc") || inscription.cbrc_valid) && (
+              <ListInscriptionCardButton
+                data={inscription}
+                refreshData={refreshData}
+              />
+            )}
         </div>
       </div>
     </div>
