@@ -36,6 +36,7 @@ export async function GET(req: NextRequest) {
       .exec();
 
     if (tokens.length === 1) {
+      const tempTokenInfo = tokens[0];
       const tokenLower = tokens[0].tick.trim().toLowerCase();
       // Get InMempool Transactions Count
       const inMempoolCount = await Inscription.countDocuments({
@@ -43,14 +44,14 @@ export async function GET(req: NextRequest) {
         in_mempool: true,
       });
 
-      tokens[0].in_mempool = inMempoolCount;
+      tempTokenInfo.in_mempool = inMempoolCount;
 
       // Get Listed Count
       const listedCount = await Inscription.countDocuments({
         listed_token: tokenLower,
         listed: true,
       });
-      tokens[0].listed = listedCount;
+      tempTokenInfo.listed = listedCount;
 
       // Get Today's Sales
       const startOfDay = new Date();
@@ -77,8 +78,10 @@ export async function GET(req: NextRequest) {
       const volumeInSats =
         todaysVolume.length > 0 ? todaysVolume[0].totalVolume : 0;
 
-      tokens[0].volume =
+      tempTokenInfo.volume =
         (volumeInSats / 100_000_000) * (await getBTCPriceInDollars());
+
+      tokens[0] = tempTokenInfo;
     }
 
     const totalCount = await countTokens(query);
@@ -91,8 +94,8 @@ export async function GET(req: NextRequest) {
       },
     };
 
-    // 5 Minute Cache
-    await setCache(cacheKey, result, 5 * 120);
+    // 1 Minute Cache
+    await setCache(cacheKey, result, 1 * 120);
     return NextResponse.json(result);
   } catch (err) {
     console.error(err); // or use a more advanced error logging mechanism
