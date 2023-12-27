@@ -9,7 +9,6 @@ import { CircularProgress } from "@mui/material";
 import CustomPaginationComponent from "@/components/elements/CustomPagination";
 import { FaCheckCircle } from "react-icons/fa";
 import CustomSelector from "@/components/elements/CustomSelector";
-import CustomTab from "@/components/elements/CustomTab";
 
 type CbrcDetailPageProps = {
   cbrc: IToken;
@@ -60,7 +59,7 @@ function CBRCListingsData({ cbrc }: CbrcDetailPageProps) {
   };
 
   return (
-    <div>
+    <div className="w-full">
       <div className="SortSearchPages py-6 flex flex-wrap justify-between">
         <div className="w-full lg:w-auto flex justify-start items-center flex-wrap">
           <div className="w-full center pb-4 lg:pb-0 lg:w-auto">

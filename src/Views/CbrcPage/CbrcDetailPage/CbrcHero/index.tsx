@@ -9,35 +9,67 @@ function Hero({ data }: HeroProps) {
   return (
     <div className="relative h-auto lg:h-[50vh] 2xl:max-h-96 rounded-xl overflow-hidden border xl:border-2 border-accent bg-secondary">
       <div className="flex justify-between items-start flex-wrap h-full w-full p-6">
-        <div className=" w-full p-6 flex flex-wrap justify-center relative h-full">
-          <div className="detailPanel w-full md:w-8/12 md:pr-6">
+        <div className="w-full md:w-4/12">
+          <div className="bg-gray-700 rounded-lg text-secondary center h-[300px] uppercase text-3xl font-bold w-[300px] ">
+            <span>{data.tick}</span>
+          </div>
+        </div>
+        <div className=" w-full md:w-8/12 p-6 h-full">
+          <div className="detailPanel w-full">
             <h1 className="text-white text-xl md:text-3xl font-bold uppercase flex items-start">
               {data.tick}
             </h1>
             <p className="text-light_gray mt-2 text-sm">
-              {`${data.tick} is a CBRC-20 Token on BTC Blockchain with a supply of ${data.max}`}
+              {`${
+                data.tick
+              } is a CBRC-20 Token on BTC Blockchain with a supply of ${formatNumber(
+                data.max
+              )}`}
             </p>
           </div>
-          <div className="w-full md:w-4/12">
-            <div className="supply bg-primary-dark px-3 py-1 rounded-lg my-3 md:m-3 text-sm md:ml-0 w-full flex justify-between items-center">
-              <span>Checksum</span>
-              <span className="text-white">{data.checksum}</span>
+
+          <div className="flex flex-wrap w-full items-center justify-start py-3">
+            <div className="w-full md:w-6/12 lg:w-4/12 p-2">
+              <div className=" p-2 rounded border border-gray-300 flex justify-between">
+                <span>Supply</span>
+                <span>{formatNumber(data.supply)}</span>
+              </div>
             </div>
-            <div className="supply bg-primary-dark px-3 py-1 rounded-lg my-3 md:m-3 text-sm md:ml-0 w-full flex justify-between items-center">
-              <span>Max</span>
-              <span className="text-white">{formatNumber(data.max)}</span>
+            <div className="w-full md:w-6/12 lg:w-4/12 p-2">
+              <div className="p-2 rounded border border-gray-300 flex justify-between">
+                <span>Price</span>
+                <span>{"$ " + data.price.toFixed(3)}</span>
+              </div>
             </div>
-            <div className="supply bg-primary-dark px-3 py-1 rounded-lg my-3 md:m-3 text-sm md:ml-0 w-full flex justify-between items-center">
-              <span>Volume</span>
-              <span className="text-white">{data.volume || 0}</span>
+            <div className="w-full md:w-6/12 lg:w-4/12 p-2">
+              <div className="p-2 rounded border border-gray-300 flex justify-between">
+                <span>Marketcap</span>
+                <span>{"$ " + formatNumber(data.price * data.supply)}</span>
+              </div>
             </div>
-            <div className="supply bg-primary-dark px-3 py-1 rounded-lg my-3 md:m-3 text-sm md:ml-0 w-full flex justify-between items-center">
-              <span>Buy Pending Tx</span>
-              <span className="text-white">{data.in_mempool || 0}</span>
+            <div className="w-full md:w-6/12 lg:w-4/12 p-2">
+              <div className="p-2 rounded border border-gray-300 flex justify-between">
+                <span>Pending</span>
+                <span>{data.in_mempool}</span>
+              </div>
             </div>
-            <div className="supply bg-primary-dark px-3 py-1 rounded-lg my-3 md:m-3 text-sm md:ml-0 w-full flex justify-between items-center">
-              <span>Listed</span>
-              <span className="text-white">{data.listed || 0}</span>
+            <div className="w-full md:w-6/12 lg:w-4/12 p-2">
+              <div className="p-2 rounded border border-gray-300 flex justify-between">
+                <span>Listings</span>
+                <span>{data.listed}</span>
+              </div>
+            </div>
+            <div className="w-full md:w-6/12 lg:w-4/12 p-2">
+              <div className="p-2 rounded border border-gray-300 flex justify-between">
+                <span>Volume</span>
+                <span>{formatNumber(data.volume)}</span>
+              </div>
+            </div>
+            <div className="w-full md:w-6/12 lg:w-4/12 p-2">
+              <div className="p-2 rounded border border-gray-300 flex justify-between">
+                <span>Checksum</span>
+                <span>{data.checksum}</span>
+              </div>
             </div>
           </div>
         </div>

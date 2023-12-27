@@ -172,7 +172,7 @@ function TokenList({ tokens, loading }: HeroProps) {
                         (item.price - item.historicalData[6].price) /
                           item.historicalData[6].price >=
                         0 ? (
-                          <div className="flex justify-center items-center bg-green-400">
+                          <div className="flex justify-center items-center text-green-400">
                             <FaChevronCircleUp className="mr-2" />{" "}
                             {item.historicalData?.length >= 7
                               ? `${(
@@ -183,7 +183,7 @@ function TokenList({ tokens, loading }: HeroProps) {
                               : "-"}
                           </div>
                         ) : (
-                          <div className="flex justify-center items-center bg-red-400">
+                          <div className="flex justify-center items-center text-red-400">
                             <FaChevronCircleDown className="mr-2" />{" "}
                             {item.historicalData?.length >= 7
                               ? `${(

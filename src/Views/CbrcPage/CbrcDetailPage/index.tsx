@@ -14,7 +14,7 @@ function CbrcDetailPage({ cbrc }: CbrcDetailPageProps) {
   const [tab, setTab] = useState("listings");
 
   return (
-    <div>
+    <div className="w-full">
       <Hero data={cbrc} />
       <div className="pb-6 py-16 flex justify-center lg:justify-start ">
         <CustomTab

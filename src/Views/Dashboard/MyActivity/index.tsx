@@ -12,10 +12,9 @@ import {
   Paper,
 } from "@mui/material";
 import CustomPaginationComponent from "@/components/elements/CustomPagination";
+import { useRouter } from "next/navigation";
 
-import CustomSearch from "@/components/elements/CustomSearch";
-
-import { FaHome, FaSearch } from "react-icons/fa";
+import { FaHome } from "react-icons/fa";
 import { IInscription, ITransaction } from "@/types";
 import { fetchTxes } from "@/apiHelper/fetchTxes";
 import moment from "moment";
@@ -31,17 +30,15 @@ const options = [
   { value: "inscription_number:1", label: "Low Number" },
 ];
 
-function CBRCSales() {
+function MySales({ address }: { address: string }) {
   const btcPrice = useSelector(
     (state: RootState) => state.general.btc_price_in_dollar
   );
   const dispatch = useDispatch();
-  const [data, setData] = useState<IInscription[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [page_size, setPage_size] = useState(10);
-
   const [tick, setTick] = useState("");
 
   const [sort, setSort] = useState<string>("timestamp:-1");
@@ -56,6 +53,7 @@ function CBRCSales() {
       page_size,
       page,
       tag: "sale",
+      wallet: address,
       ...(tick ? { tick } : { metaprotocol: "transfer" }),
     };
     const result = await fetchTxes(q);
@@ -75,10 +73,6 @@ function CBRCSales() {
     window.open(`https://blockstream.info/tx/${txid}`, "_blank");
   };
 
-  const handleSearchChange = (value: string) => {
-    setTick(value);
-  };
-
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
     value: number
@@ -87,8 +81,8 @@ function CBRCSales() {
   };
 
   return (
-    <section className=" w-full">
-      <div className="SortSearchPages py-6 flex flex-wrap justify-between">
+    <section className="pt-3 w-full">
+      <div className="SortSearchPages flex flex-wrap justify-between">
         <div className="w-full lg:w-auto flex justify-start items-center flex-wrap">
           <div className="w-full center pb-4 lg:pb-0 lg:w-auto">
             <CustomSelector
@@ -98,18 +92,8 @@ function CBRCSales() {
               onChange={setSort}
             />
           </div>
-          <div className="w-full center pb-4 lg:pb-0 md:pl-4 lg:w-auto">
-            <CustomSearch
-              placeholder="Ticker"
-              value={tick}
-              onChange={handleSearchChange}
-              icon={FaSearch}
-              end={true}
-              onIconClick={fetchTxData}
-            />
-          </div>
         </div>
-        {txs && txs?.length > 0 && (
+        {txs && txs?.length > 0 && Math.ceil(totalCount / page_size) > 1 && (
           <div className="w-full lg:w-auto center">
             <CustomPaginationComponent
               count={Math.ceil(totalCount / page_size)}
@@ -140,16 +124,9 @@ function CBRCSales() {
               borderColor: "#3d0263",
             }}
           >
-            <Table
-              size={"small"}
-              sx={{ minWidth: 650 }}
-              aria-label="cbrc-20 table"
-            >
+            <Table sx={{ minWidth: 650 }} aria-label="cbrc-20 table">
               <TableHead sx={{ bgcolor: "#84848a", color: "white" }}>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
-                    TICK
-                  </TableCell>
                   <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
                     FROM
                   </TableCell>
@@ -194,16 +171,6 @@ function CBRCSales() {
                               cursor: "pointer",
                             }}
                           >
-                            <TableCell
-                              component="th"
-                              scope="row"
-                              sx={{
-                                color: "white",
-                                textTransform: "uppercase",
-                              }}
-                            >
-                              {token}
-                            </TableCell>
                             <TableCell sx={{ color: "white" }}>
                               {shortenString(item.from)}
                             </TableCell>{" "}
@@ -216,8 +183,7 @@ function CBRCSales() {
                                   <div className="mr-2 text-bitcoin">
                                     <FaBitcoin className="" />
                                   </div>
-                                  {(item.price / 100_000_000).toFixed(5)}
-                                  {" BTC"}
+                                  {(item.price / 100_000_000).toFixed(5)}{" "}
                                 </div>
                                 <div className="flex items-center ">
                                   <div className="mr-2 text-green-500">
@@ -236,8 +202,9 @@ function CBRCSales() {
                                   <div className="mr-2 text-bitcoin">
                                     <FaBitcoin className="" />
                                   </div>
-                                  {(item.price / amount).toFixed(0)}
-                                  {" sats"}
+                                  {(item.price / amount).toFixed(0)}{" "}
+                                  {` sats   `}
+                                  <span className="uppercase ml-1">{tick}</span>
                                 </div>
                                 <div className="flex items-center ">
                                   <div className="mr-2 text-green-500">
@@ -286,4 +253,4 @@ function CBRCSales() {
   );
 }
 
-export default CBRCSales;
+export default MySales;

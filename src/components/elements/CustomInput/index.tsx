@@ -43,6 +43,9 @@ interface CustomInputProps {
   helperText?: string; // For validation message
   error?: boolean; // To indicate an error state
   onBlur?: (value: string) => void;
+  startAdornmentText?: string;
+  endAdornmentText?: string;
+  adornmentStyle?: string;
 }
 
 const CustomInput: React.FC<CustomInputProps> = ({
@@ -56,24 +59,47 @@ const CustomInput: React.FC<CustomInputProps> = ({
   helperText,
   error,
   onBlur,
+  startAdornmentText,
+  endAdornmentText,
+  adornmentStyle = " text-white text-xs 2xl:text-sm",
 }) => {
   const handleBlur = (event: React.FocusEvent<HTMLInputElement>) => {
     if (onBlur) {
       onBlur(event.target.value);
     }
   };
-  const adornment = Icon ? (
-    <InputAdornment position={end ? "end" : "start"}>
-      <button style={{ background: "none", border: "none", cursor: "pointer" }}>
-        <Icon style={{ color: "white" }} />
-      </button>
+
+  const startAdornment = (
+    <InputAdornment position="start">
+      {Icon && !end && (
+        <button
+          style={{ background: "none", border: "none", cursor: "pointer" }}
+        >
+          <Icon style={{ color: "white" }} />
+        </button>
+      )}
+      <span className={adornmentStyle}>{startAdornmentText}</span>
     </InputAdornment>
-  ) : null;
+  );
+
+  const endAdornment = (
+    <InputAdornment position="end">
+      {Icon && end && (
+        <button
+          style={{ background: "none", border: "none", cursor: "pointer" }}
+        >
+          <Icon style={{ color: "white" }} />
+        </button>
+      )}
+      <span className={adornmentStyle}>{endAdornmentText}</span>
+    </InputAdornment>
+  );
 
   return (
     <CustomTextField
       InputProps={{
-        ...(end ? { endAdornment: adornment } : { startAdornment: adornment }),
+        startAdornment: startAdornment,
+        endAdornment: endAdornment,
       }}
       size="small"
       value={value}

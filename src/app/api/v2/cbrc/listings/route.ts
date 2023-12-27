@@ -129,7 +129,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
       processing_time: timeTaken,
     };
     // Cache the result
-    await setCache(cacheKey, JSON.stringify(responseData), 3 * 60);
+    await setCache(cacheKey, JSON.stringify(responseData), 1 * 60);
 
     return NextResponse.json(responseData);
   } catch (error: any) {

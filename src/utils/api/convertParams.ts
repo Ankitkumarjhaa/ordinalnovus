@@ -218,6 +218,19 @@ function processWhereParam(
           parsed_metaprotocol: { $nin: ["mint", "deploy"] },
         },
       ];
+  } else if (key === "wallet") {
+    console.log("setting Wallet key");
+    finalQuery.find["$or"] = [
+      {
+        to: value,
+      },
+      {
+        from: value,
+      },
+      {
+        address: value,
+      },
+    ];
   } else if (schemaKeys.includes(key)) {
     const isObjectId = schema.path(key) instanceof Types.ObjectId;
     if (isObjectId) {

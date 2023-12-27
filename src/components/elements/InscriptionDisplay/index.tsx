@@ -3,24 +3,32 @@ import { IInscription } from "@/types";
 import React from "react";
 import ItemCard from "./ItemCard";
 import SkeletonCard from "./SkeletonItemCard";
-import { useWalletAddress } from "bitcoin-wallet-adapter";
 
 type ItemProps = {
   data?: IInscription[] | null;
   loading: boolean;
   pageSize: number;
+  refreshData?: any;
 };
 
-function InscriptionDisplay({ data, loading, pageSize }: ItemProps) {
-  const walletDetails = useWalletAddress();
+function InscriptionDisplay({
+  data,
+  loading,
+  pageSize,
+  refreshData,
+}: ItemProps) {
   return (
     <section>
-      <div className="flex items-center flex-wrap">
+      <div className="flex items-end flex-wrap">
         {loading ? (
           Array.from(Array(pageSize)).map((_, i) => <SkeletonCard key={i} />)
         ) : data && data?.length > 0 ? (
           data?.map((item) => (
-            <ItemCard key={item.inscription_id} inscription={item} />
+            <ItemCard
+              refreshData={refreshData}
+              key={item.inscription_id}
+              inscription={item}
+            />
           ))
         ) : (
           <div className="center w-full py-16">

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { IInscription } from "@/types";
+import { IInscription, ITransaction } from "@/types";
 import { useRouter } from "next/navigation";
 import CardContent from "@/components/elements/CustomCardSmall/CardContent";
 import { shortenString } from "@/utils";
@@ -14,12 +14,15 @@ import { addNotification } from "@/stores/reducers/notificationReducer";
 import { useDispatch } from "react-redux";
 import { FetchCBRCBalance } from "@/apiHelper/getCBRCWalletBalance";
 import CustomSearch from "@/components/elements/CustomSearch";
-import { FaSearch } from "react-icons/fa";
+import { FaCopy, FaSearch } from "react-icons/fa";
 import CustomPaginationComponent from "@/components/elements/CustomPagination";
 import CustomTab from "@/components/elements/CustomTab";
+import { fetchTxes } from "@/apiHelper/fetchTxes";
+import MySales from "./MyActivity";
 
 function AccountPage() {
   const [inscriptions, setInscriptions] = useState<IInscription[] | null>(null);
+  const [sales, setSales] = useState<ITransaction[] | null>(null);
   const [total, setTotal] = useState<number>(0);
   const [profile, setProfile] = useState<IInscription | null>(null);
   const [loading, setLoading] = useState(true);
@@ -27,13 +30,12 @@ function AccountPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [page_size, setPage_size] = useState(10);
-  const [tab, setTab] = useState<"cbrc-20" | "inscriptions">("cbrc-20");
+  const [page_size, setPage_size] = useState(20);
+  const [tab, setTab] = useState<"cbrc-20" | "all" | "activity">("cbrc-20");
 
   const walletDetails = useWalletAddress();
-
-  const fetchAllInscriptions = useCallback(async () => {
-    if (tab === "inscriptions") {
+  const fetchWalletInscriptions = useCallback(async () => {
+    if (tab !== "activity") {
       try {
         const params = {
           wallet: walletDetails?.ordinal_address,
@@ -41,6 +43,7 @@ function AccountPage() {
           page,
           inscription_number: Number(search),
           sort: "inscription_number:-1",
+          ...(tab === "cbrc-20" && { metaprotocol: "transfer" }),
         };
 
         const result = await fetchInscriptions(params);
@@ -51,7 +54,11 @@ function AccountPage() {
               (a) => a?.content_type && a?.content_type.includes("image")
             )[0]
           );
-          setInscriptions(result.data.inscriptions);
+          if (tab === "cbrc-20")
+            setInscriptions(
+              result.data.inscriptions.filter((a) => a.cbrc_valid)
+            );
+          else setInscriptions(result.data.inscriptions);
           setTotal(result.data.pagination.total);
         }
         setLoading(false);
@@ -61,27 +68,19 @@ function AccountPage() {
     }
   }, [walletDetails, page, search, tab]);
 
-  const fetchValidCbrcInscriptions = useCallback(async () => {
-    if (tab === "cbrc-20") {
+  const fetchSales = useCallback(async () => {
+    if (tab === "activity") {
       try {
         const params = {
           wallet: walletDetails?.ordinal_address,
           page_size: page_size,
           page,
-          inscription_number: Number(search),
-          sort: "inscription_number:-1",
-          metaprotocol: "transfer",
+          sort: "timestamp:-1",
         };
 
-        const result = await fetchInscriptions(params);
+        const result = await fetchTxes(params);
         if (result && result.data) {
-          // Do something with the fetched data
-          setProfile(
-            result.data.inscriptions.filter(
-              (a) => a?.content_type && a?.content_type.includes("image")
-            )[0]
-          );
-          setInscriptions(result.data.inscriptions.filter((a) => a.cbrc_valid));
+          setSales(result.data.txes);
           setTotal(result.data.pagination.total);
         }
         setLoading(false);
@@ -106,25 +105,17 @@ function AccountPage() {
   }, [walletDetails]);
 
   useEffect(() => {
-    if (
-      walletDetails?.connected &&
-      walletDetails.ordinal_address &&
-      tab === "inscriptions"
-    ) {
-      fetchAllInscriptions();
+    if (walletDetails?.connected && walletDetails.ordinal_address) {
+      if (tab === "activity") fetchSales();
+      else fetchWalletInscriptions();
     }
-  }, [walletDetails, page, tab]);
+  }, [walletDetails, tab]);
 
   useEffect(() => {
-    if (
-      walletDetails?.connected &&
-      walletDetails.ordinal_address &&
-      tab === "cbrc-20"
-    ) {
+    if (walletDetails?.connected && walletDetails.ordinal_address) {
       fetchCbrcBrc20();
-      fetchValidCbrcInscriptions();
     }
-  }, [walletDetails, page, tab]);
+  }, [walletDetails]);
 
   useEffect(() => {
     if (!walletDetails?.connected && !loading) {
@@ -144,16 +135,9 @@ function AccountPage() {
     setPage(value);
   };
 
-  const handleTabChange = (
-    event: any,
-    newValue: "cbrc-20" | "inscriptions"
-  ) => {
-    setTab(newValue);
-  };
-
   return (
     <div className="pt-16 text-white">
-      <div className="profile w-full flex flex-wrap items-start border-b-2 py-6 border-accent">
+      <div className="profile w-full flex flex-wrap items-start border-2 rounded-xl p-6 py-16 border-accent">
         <div className="w-[100px]">
           {inscriptions?.length && profile?.inscription_id ? (
             <CardContent
@@ -170,7 +154,8 @@ function AccountPage() {
         </div>
         <div className="pl-4">
           <div className="text-white text-sm hidden lg:block">
-            <p
+            <div
+              className="flex justify-start items-center bg-slate-700 tracking-widest px-4 py-2 rounded cursor-pointer mb-2"
               onClick={() => {
                 copy(walletDetails?.ordinal_address + "");
                 dispatch(
@@ -182,30 +167,35 @@ function AccountPage() {
                   })
                 );
               }}
-              className="bg-secondary border-accent border rounded my-2 py-1 px-2 text-xs cursor-pointer hover:text-yellow-900 hover:bg-bitcoin"
             >
-              {walletDetails?.ordinal_address}
-            </p>
-            <p
-              onClick={() => {
-                copy(walletDetails?.cardinal_address + "");
-                dispatch(
-                  addNotification({
-                    id: new Date().valueOf(),
-                    message: "Address Copied",
-                    open: true,
-                    severity: "success",
-                  })
-                );
-              }}
-              className="bg-secondary border-accent border rounded my-2 py-1 px-2 text-xs cursor-pointer hover:text-yellow-900 hover:bg-bitcoin"
-            >
-              {" "}
-              {walletDetails?.cardinal_address}
-            </p>
+              <span>{walletDetails?.ordinal_address}</span>
+              <FaCopy className="ml-2" />
+            </div>
+            {walletDetails &&
+              walletDetails.ordinal_address !==
+                walletDetails.cardinal_address && (
+                <div
+                  className="flex justify-start items-center bg-slate-700 tracking-widest px-4 py-2 rounded cursor-pointer mb-2"
+                  onClick={() => {
+                    copy(walletDetails?.cardinal_address + "");
+                    dispatch(
+                      addNotification({
+                        id: new Date().valueOf(),
+                        message: "Address Copied",
+                        open: true,
+                        severity: "success",
+                      })
+                    );
+                  }}
+                >
+                  <span>{walletDetails?.cardinal_address}</span>
+                  <FaCopy className="ml-2" />
+                </div>
+              )}
           </div>
-          <div className="text-gray-400 text-xs lg:hidden">
-            <p
+          <div className="text-gray-400 text-xs lg:hidden w-full">
+            <div
+              className="flex justify-start items-center bg-slate-700 tracking-widest px-4 py-2 rounded cursor-pointer mb-2"
               onClick={() => {
                 copy(walletDetails?.ordinal_address + "");
                 dispatch(
@@ -217,48 +207,56 @@ function AccountPage() {
                   })
                 );
               }}
-              className="bg-secondary border-accent border rounded my-2 py-1 px-2 text-xs cursor-pointer hover:text-yellow-900 hover:bg-bitcoin"
             >
-              {shortenString(walletDetails?.ordinal_address || "")}
-            </p>
-            <p
-              onClick={() => {
-                copy(walletDetails?.cardinal_address + "");
-                dispatch(
-                  addNotification({
-                    id: new Date().valueOf(),
-                    message: "Address Copied",
-                    open: true,
-                    severity: "success",
-                  })
-                );
-              }}
-              className="bg-secondary border-accent border rounded my-2 py-1 px-2 text-xs cursor-pointer hover:text-yellow-900 hover:bg-bitcoin"
-            >
-              {shortenString(walletDetails?.ordinal_address || "")}
-            </p>
+              <span>{shortenString(walletDetails?.ordinal_address || "")}</span>
+              <FaCopy className="ml-2" />
+            </div>
+            {walletDetails &&
+              walletDetails.cardinal_address !==
+                walletDetails.ordinal_address && (
+                <div
+                  className="flex justify-start items-center bg-slate-700 tracking-widest px-4 py-2 rounded cursor-pointer mb-2"
+                  onClick={() => {
+                    copy(walletDetails?.cardinal_address + "");
+                    dispatch(
+                      addNotification({
+                        id: new Date().valueOf(),
+                        message: "Address Copied",
+                        open: true,
+                        severity: "success",
+                      })
+                    );
+                  }}
+                >
+                  <span>
+                    {shortenString(walletDetails?.cardinal_address || "")}
+                  </span>
+                  <FaCopy className="ml-2" />
+                </div>
+              )}
           </div>
         </div>
-        <div className="flex-1 flex justify-center lg:justify-end">
+        <div className="py-4 md:py-0 flex-1 md:flex md:justify-center lg:justify-end">
           <Link href="https://www.cybord.org/thecraft.html" target="_blank">
-            <p className="px-4 py-1 bg-bitcoin text-yellow-900">
+            <p className="w-full md:w-auto px-4 py-1 bg-bitcoin text-yellow-900">
               Create Transfer Inscription
             </p>
           </Link>
         </div>
       </div>
-      {/* <div className="py-16">
+      <div className="pb-6 py-16 flex justify-center lg:justify-start ">
         <CustomTab
           tabsData={[
             { label: "CBRC-20", value: "cbrc-20" },
-            { label: "All Inscriptions", value: "inscriptions" },
+            { label: "All", value: "all" },
+            { label: "My Activity", value: "activity" },
           ]}
           currentTab={tab}
-          onTabChange={() => setTab(tab)}
+          onTabChange={(_, newTab) => setTab(newTab)}
         />
-      </div> */}
+      </div>{" "}
       <div className="">
-        {cbrcs && cbrcs.length ? (
+        {tab === "cbrc-20" && cbrcs && cbrcs.length ? (
           <div className="py-16">
             <h2 className="font-bold text-2xl pb-6">Balance</h2>
             <p className="text-sm py-2">Your Valid CBRC-20 Balance</p>
@@ -268,31 +266,27 @@ function AccountPage() {
                   key={item.tick}
                   className="w-full md:w-2/12 lg:w-3/12 2xl:w-2/12 p-2"
                 >
-                  <div className="rounded border border-accent w-full min-h-[200px] flex justify-between flex-col">
-                    <p className="uppercase text-center text-sm text-gray-300 mb-2 bg-accent_dark font-bold tracking-widest w-full py-2">
-                      {item.tick}
-                    </p>
-                    <div className="w-full flex-1 p-3 tracking-wider uppercase">
-                      <div className="text-center text-sm text-white flex justify-between w-full py-2">
-                        <span> Available:</span> <p>{item.amt}</p>
+                  <Link href={`/cbrc-20/${item.tick}`}>
+                    <div className="rounded border border-accent w-full min-h-[200px] flex justify-between flex-col">
+                      <p className="uppercase text-center text-sm text-gray-300 mb-2 bg-accent_dark font-bold tracking-widest w-full py-2">
+                        {item.tick}
+                      </p>
+                      <div className="w-full flex-1 p-3 tracking-wider uppercase">
+                        <div className="text-center text-sm text-white flex justify-between w-full py-2">
+                          <span> Available:</span> <p>{item.amt}</p>
+                        </div>
+                        <div className="text-center text-sm text-white flex justify-between w-ful py-2l">
+                          <span>Transferable: </span>
+                          <span>{item.lock}</span>
+                        </div>
+                        <hr className="my-2 bg-white border-2 border-white" />
+                        <div className="text-center text-sm text-white flex justify-between w-full py-2">
+                          <span>Total:</span>{" "}
+                          <span>{item.amt + item.lock}</span>
+                        </div>
                       </div>
-                      <div className="text-center text-sm text-white flex justify-between w-ful py-2l">
-                        <span>Transferable: </span>
-                        <span>{item.lock}</span>
-                      </div>
-                      <hr className="my-2 bg-white border-2 border-white" />
-                      <div className="text-center text-sm text-white flex justify-between w-full py-2">
-                        <span>Total:</span> <span>{item.amt + item.lock}</span>
-                      </div>
-                      {/* {item.lock === 0 ? (
-                          <div className=" bg-accent hover:bg-accent_dark text-center text-xs text-white flex justify-between w-full p-2">
-                            Create Transfer Inscription
-                          </div>
-                        ) : (
-                          <></>
-                        )} */}
                     </div>
-                  </div>
+                  </Link>
                 </div>
               ))}
             </div>
@@ -302,23 +296,21 @@ function AccountPage() {
         )}
       </div>
       <div className="SortSearchPages py-6 flex flex-wrap justify-between">
-        <div className="w-full lg:w-auto flex justify-start items-center flex-wrap">
-          <div className="w-full center pb-4 lg:pb-0 md:pl-4 lg:w-auto">
-            <CustomSearch
-              placeholder="Inscription Number #"
-              value={search}
-              onChange={handleSearchChange}
-              icon={FaSearch}
-              end={true}
-              onIconClick={() =>
-                tab === "cbrc-20"
-                  ? fetchValidCbrcInscriptions()
-                  : fetchAllInscriptions()
-              }
-            />
+        {tab !== "activity" && (
+          <div className="w-full lg:w-auto flex justify-start items-center flex-wrap">
+            <div className="w-full center pb-4 lg:pb-0 md:pl-4 lg:w-auto">
+              <CustomSearch
+                placeholder="Inscription Number #"
+                value={search}
+                onChange={handleSearchChange}
+                icon={FaSearch}
+                end={true}
+                onIconClick={() => fetchWalletInscriptions()}
+              />
+            </div>
           </div>
-        </div>
-        {inscriptions && inscriptions?.length > 0 && (
+        )}
+        {inscriptions && inscriptions?.length > 0 && total / page_size > 1 && (
           <div className="w-full lg:w-auto center">
             <CustomPaginationComponent
               count={Math.ceil(total / page_size)}
@@ -328,41 +320,46 @@ function AccountPage() {
           </div>
         )}
       </div>
-      <div className="py-6">
-        {inscriptions?.length ? (
-          <InscriptionDisplay
-            data={inscriptions}
-            loading={loading}
-            pageSize={10}
-          />
-        ) : (
-          <>
-            {loading ? (
-              <div className="flex items-center justify-center h-screen">
-                <CircularProgress size={60} />
-              </div>
-            ) : (
-              <div className="text-center py-16">
-                {tab === "cbrc-20" ? (
-                  <div className="text-xs ">
-                    <p className="pb-2">
-                      If Your Transferable Balance is 0 -{">"} Inscribe a
-                      Transfer Inscription{" "}
-                    </p>
-                    <p>
-                      If Your Transferable Balance is greater than 0 and
-                      Inscription is not present, Please wait, your Inscription
-                      will appear.
-                    </p>
-                  </div>
-                ) : (
-                  "No Inscriptions Found"
-                )}
-              </div>
-            )}
-          </>
-        )}
-      </div>
+      {tab === "activity" ? (
+        <MySales address={walletDetails?.ordinal_address || ""} />
+      ) : (
+        <div className="py-6">
+          {inscriptions?.length ? (
+            <InscriptionDisplay
+              data={inscriptions}
+              loading={loading}
+              pageSize={10}
+              refreshData={fetchWalletInscriptions}
+            />
+          ) : (
+            <>
+              {loading ? (
+                <div className="text-white center py-16">
+                  <CircularProgress size={20} color="inherit" />
+                </div>
+              ) : (
+                <div className="text-center py-16">
+                  {tab === "cbrc-20" ? (
+                    <div className="text-xs ">
+                      <p className="pb-2">
+                        If Your Transferable Balance is 0 -{">"} Inscribe a
+                        Transfer Inscription{" "}
+                      </p>
+                      <p>
+                        If Your Transferable Balance is greater than 0 and
+                        Inscription is not present, Please wait, your
+                        Inscription will appear.
+                      </p>
+                    </div>
+                  ) : (
+                    "No Inscriptions Found"
+                  )}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }

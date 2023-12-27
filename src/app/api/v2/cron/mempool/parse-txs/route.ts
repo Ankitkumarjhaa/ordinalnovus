@@ -74,7 +74,12 @@ async function parseTxData(sort: 1 | -1, skip: number) {
   try {
     const modifiedTxIds: string[] = [];
     const modifiedInscriptionIds: string[] = [];
-    const nonParsedTxs = await Tx.find({ parsed: false })
+    const tenMinutesAgo = moment().subtract(10, "minutes").toDate();
+
+    const nonParsedTxs = await Tx.find({
+      parsed: false,
+      updated_at: { $lte: tenMinutesAgo },
+    })
       .limit(LIMIT)
       .sort({ createdAt: sort })
       .skip(skip);

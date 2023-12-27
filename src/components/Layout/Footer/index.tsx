@@ -89,7 +89,7 @@ function Footer() {
           </ul>
         </div>
       </div>
-      <div className="w-full bg-primary-dark ">
+      {/* <div className="w-full bg-primary-dark ">
         <div className=" py-12 lg:py-3 px-6 lg:px-24 max-w-7xl mx-auto relative center flex flex-wrap justify-center items-center">
           <p className="w-full md:w-auto text-center">Donate with ❤️ on </p>
           <div
@@ -145,7 +145,7 @@ function Footer() {
             </p>
           </div>
         </div>
-      </div>
+      </div> */}
       {/* <div className="w-full my-2 text-xs py-2 uppercase font-bold text-white text-center">
         <p
           className={`text-bitcoin bg-secondary  py-2 w-full tracking-widest font-bold`}

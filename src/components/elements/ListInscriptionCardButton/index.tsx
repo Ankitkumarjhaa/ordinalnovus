@@ -17,11 +17,14 @@ import listInscription from "@/apiHelper/listInscription";
 import { useRouter } from "next/navigation";
 import mixpanel from "mixpanel-browser";
 import deleteListing from "@/apiHelper/deleteListing";
+import { FaDollarSign } from "react-icons/fa";
+import { Inscription } from "@/models";
 type InscriptionProps = {
   data: IInscription;
+  refreshData?: any;
 };
 
-function ListInscription({ data }: InscriptionProps) {
+function ListInscriptionCardButton({ data, refreshData }: InscriptionProps) {
   const dispatch = useDispatch();
   const router = useRouter();
   const walletDetails = useWalletAddress();
@@ -35,7 +38,7 @@ function ListInscription({ data }: InscriptionProps) {
     (state: RootState) => state.general.btc_price_in_dollar
   );
   const [price, setPrice] = useState(
-    data?.listed_price ? convertSatToBtc(data?.listed_price) : "0"
+    data?.listed_price ? convertSatToBtc(data?.listed_price) : ""
   );
 
   const list = useCallback(async () => {
@@ -68,8 +71,7 @@ function ListInscription({ data }: InscriptionProps) {
 
         console.debug(result, "RESULT");
         if (result.ok && result?.unsigned_psbt_base64) {
-          mixpanel.track("Listing PSBT Generated", {
-            inscription_id: data.inscription_id,
+          mixpanel.track("Listing PSBT Generated Dashboard", {
             wallet: walletDetails.ordinal_address,
             inscription: data.inscription_id,
             price: convertBtcToSat(Number(price)),
@@ -82,7 +84,7 @@ function ListInscription({ data }: InscriptionProps) {
           mixpanel.track("Error", {
             inscription_id: data.inscription_id,
             message: result.message || "Error creating listing psbt",
-            tag: "listing psbt error",
+            tag: "listing psbt error dashboard",
             wallet: walletDetails.ordinal_address,
             inscription: data.inscription_id,
             price: convertBtcToSat(Number(price)),
@@ -101,7 +103,7 @@ function ListInscription({ data }: InscriptionProps) {
             e.message ||
             e ||
             "Error creating listing psbt",
-          tag: "listing psbt error catch",
+          tag: "listing psbt error catch Dashboard",
           wallet: walletDetails.ordinal_address,
           inscription: data.inscription_id,
           price: convertBtcToSat(Number(price)),
@@ -173,7 +175,7 @@ function ListInscription({ data }: InscriptionProps) {
         signed_listing_psbt_base64: signedPsbt,
       });
       if (result.ok) {
-        mixpanel.track("Listing Completed", {
+        mixpanel.track("Listing Completed Dashboard", {
           inscription_id: data.inscription_id,
           price: convertBtcToSat(Number(price)),
           collection: data?.official_collection?.name,
@@ -192,6 +194,7 @@ function ListInscription({ data }: InscriptionProps) {
         );
         router.refresh();
         setLoading(false);
+        refreshData && refreshData();
       } else {
         setUnsignedPsbtBase64("");
         throw Error(result.message);
@@ -200,7 +203,7 @@ function ListInscription({ data }: InscriptionProps) {
       mixpanel.track("Error", {
         inscription_id: data.inscription_id,
         message: e.response.data.message || e.message || e || "Listing failed",
-        tag: "Listing Error",
+        tag: "Listing Error Dashboard",
         wallet: walletDetails?.ordinal_address,
         // Additional properties if needed
       });
@@ -236,7 +239,7 @@ function ListInscription({ data }: InscriptionProps) {
         tap_internal_key: walletDetails.ordinal_pubkey || "",
       });
       if (result.ok) {
-        mixpanel.track("Listing Removed", {
+        mixpanel.track("Listing Removed Dashboard", {
           inscription_id: data.inscription_id,
           price: convertBtcToSat(Number(price)),
           collection: data?.official_collection?.name,
@@ -256,6 +259,7 @@ function ListInscription({ data }: InscriptionProps) {
         router.refresh();
         setUnsignedPsbtBase64("");
         setLoading(false);
+        refreshData && refreshData();
       } else {
         setUnsignedPsbtBase64("");
         throw Error(result.message);
@@ -268,7 +272,7 @@ function ListInscription({ data }: InscriptionProps) {
           e.message ||
           e ||
           "Error in removing listing",
-        tag: "Remove Listing Error",
+        tag: "Remove Listing Error Dashboard",
         wallet: walletDetails?.ordinal_address,
         // Additional properties if needed
       });
@@ -337,15 +341,38 @@ function ListInscription({ data }: InscriptionProps) {
   }, [unsignedPsbtBase64]);
 
   return (
-    <div className="border-b-2   py-6 border-accent">
+    <div className="">
       {" "}
-      <div className="center   pb-6">
-        <div className="flex-1 mr-3 border border-white rounded-xl">
+      {data.tags?.includes("cbrc") &&
+        data.cbrc_valid &&
+        Number(price) > 0 &&
+        data.parsed_metaprotocol &&
+        data.parsed_metaprotocol.length === 3 && (
+          <div className="text-xs text-gray-300 text-center py-1 center">
+            <FaDollarSign className="mr-1 text-green-400 " />{" "}
+            {(
+              (Number(price) /
+                Number(data.parsed_metaprotocol[2].split("=")[1])) *
+              btcPrice
+            ).toFixed(3)}{" "}
+            / {data.parsed_metaprotocol[2].split("=")[0]}
+          </div>
+        )}
+      <div className="center flex-wrap mb-2">
+        <div className="w-full mb-2 border border-white rounded-xl">
           <div className="flex items-center">
             <input
               type="text"
-              value={price}
-              placeholder="Total List Price in BTC"
+              value={
+                price === null || price === undefined ? "Total Price" : price
+              }
+              placeholder={`${
+                data.tags?.includes("cbrc") &&
+                data.parsed_metaprotocol?.includes("transfer") &&
+                data.cbrc_valid
+                  ? "Total Price in BTC"
+                  : "Price in BTC"
+              }`}
               onChange={(e) => {
                 const inputVal = e.target.value;
                 const isValidInput = /^[0-9]*\.?[0-9]*$/.test(inputVal); // Regex to validate decimal or numeric input
@@ -356,12 +383,16 @@ function ListInscription({ data }: InscriptionProps) {
               }}
               className="bg-transparent w-9/12 p-2 focus:outline-none"
             />
-            <span className="pl-2 flex text-xs justify-end">
-              USD {calculateBTCCostInDollars(Number(price), btcPrice)}
-            </span>
+
+            {price && Number(price) > 0 && (
+              <span className="px-2 flex text-xs justify-end items-center">
+                <FaDollarSign className="mr-1 text-green-400" />{" "}
+                {calculateBTCCostInDollars(Number(price), btcPrice)}
+              </span>
+            )}
           </div>
         </div>
-        <div className="flex-1">
+        <div className="w-full">
           <CustomButton
             loading={loading || signLoading || data.in_mempool}
             text={
@@ -385,9 +416,9 @@ function ListInscription({ data }: InscriptionProps) {
           <CustomButton
             loading={deleteLoading}
             text={data.listed_price ? "Cancel Listing" : ``}
-            hoverBgColor="hover:bg-accent_dark"
+            hoverBgColor="hover:bg-red-800"
             hoverTextColor="text-white"
-            bgColor="bg-accent"
+            bgColor="bg-red-500"
             textColor="text-white"
             className="transition-all w-full rounded-xl"
             onClick={() => deListOrdinal()} // Add this line to make the button functional
@@ -398,4 +429,4 @@ function ListInscription({ data }: InscriptionProps) {
   ); // We render the content state variable here
 }
 
-export default ListInscription;
+export default ListInscriptionCardButton;
