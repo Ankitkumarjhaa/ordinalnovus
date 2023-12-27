@@ -55,6 +55,7 @@ interface CustomSelectorProps {
   value?: string;
   options: { value: string; label: string }[];
   onChange: (value: string) => void;
+  widthFull?: boolean;
 }
 
 const CustomSelector: React.FC<CustomSelectorProps> = ({
@@ -62,13 +63,14 @@ const CustomSelector: React.FC<CustomSelectorProps> = ({
   value,
   options,
   onChange,
+  widthFull,
 }) => {
   const handleChange = (event: SelectChangeEvent<string>) => {
     onChange(event.target.value);
   };
 
   return (
-    <StyledFormControl variant="outlined">
+    <StyledFormControl variant="outlined" fullWidth={widthFull}>
       {/* <StyledInputLabel htmlFor={label}>{label}</StyledInputLabel> */}
       <StyledSelect
         value={value || options[0]?.value}

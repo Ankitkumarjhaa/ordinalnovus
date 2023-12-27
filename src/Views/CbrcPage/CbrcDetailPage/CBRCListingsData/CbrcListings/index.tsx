@@ -106,11 +106,10 @@ function CbrcListings({ listings, loading }: HeroProps) {
                     </div>
                   </div>
                   {cbrcListed(item, allowed_cbrcs || []) &&
-                    // !myInscription(
-                    //   item,
-                    //   walletDetails?.ordinal_address || ""
-                    // )
-                    //  &&
+                    !myInscription(
+                      item,
+                      walletDetails?.ordinal_address || ""
+                    ) &&
                     item.listed_price && (
                       <>
                         <div className="flex justify-between items-center">
