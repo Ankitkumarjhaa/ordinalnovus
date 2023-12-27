@@ -150,11 +150,15 @@ function BuyInscription({ data }: InscriptionProps) {
         fee_rate: feeRate,
         // Additional properties if needed
       });
-      if (data?.listed_price_per_token && data?.listed_token)
+      if (inscription?.listed_price_per_token && inscription?.listed_token)
         await updateTokenPrice(
-          data?.listed_token,
-          data?.listed_price_per_token
+          inscription?.listed_token,
+          (inscription?.listed_price_per_token / 100_000_000) * btcPrice
         );
+      window.open(
+        `https://ordinalnovus.mempool.space/tx/${data.data.txid}`,
+        "_blank"
+      );
       dispatch(
         addNotification({
           id: new Date().valueOf(),
@@ -171,7 +175,6 @@ function BuyInscription({ data }: InscriptionProps) {
           severity: "success",
         })
       );
-      window.open(`https://blockstream.info/tx/${data.data.txid}`, "_blank");
     } catch (err: any) {
       // Track error in broadcasting
       mixpanel.track("Error", {

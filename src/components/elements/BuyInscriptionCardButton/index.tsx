@@ -5,9 +5,7 @@ import { IInscription } from "@/types";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/stores";
-import { calculateBTCCostInDollars, convertSatToBtc } from "@/utils";
 import getUnsignedBuyPsbt from "@/apiHelper/getUnsignedBuyPsbt";
-import FeePicker from "@/components/elements/FeePicker";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useWalletAddress, useSignTx } from "bitcoin-wallet-adapter";
@@ -151,7 +149,6 @@ function BuyInscriptionCardButton({ data }: InscriptionProps) {
         signed_psbt: signedPsbt,
       });
       setLoading(false);
-      router.refresh();
       // Track successful broadcast
       mixpanel.track("Broadcast Success", {
         action: action, // Assuming 'action' is defined in your component
@@ -165,11 +162,15 @@ function BuyInscriptionCardButton({ data }: InscriptionProps) {
         fee_rate: feeRate,
         // Additional properties if needed
       });
-      if (data?.listed_price_per_token && data?.listed_token)
+      if (inscription?.listed_price_per_token && inscription?.listed_token)
         await updateTokenPrice(
-          data?.listed_token,
-          data?.listed_price_per_token
+          inscription?.listed_token,
+          (inscription?.listed_price_per_token / 100_000_000) * btcPrice
         );
+      window.open(
+        `https://ordinalnovus.mempool.space/tx/${data.data.txid}`,
+        "_blank"
+      );
       dispatch(
         addNotification({
           id: new Date().valueOf(),
@@ -186,7 +187,8 @@ function BuyInscriptionCardButton({ data }: InscriptionProps) {
           severity: "success",
         })
       );
-      window.open(`https://blockstream.info/tx/${data.data.txid}`, "_blank");
+
+      router.refresh();
     } catch (err: any) {
       // Track error in broadcasting
       mixpanel.track("Error", {
@@ -350,27 +352,14 @@ function BuyInscriptionCardButton({ data }: InscriptionProps) {
         <CustomButton
           loading={loading}
           disabled={!data.listed}
-          text={`${
-            data.in_mempool
-              ? `In Mempool...`
-              : `Buy Now ${
-                  data?.listed_price
-                    ? `for ${convertSatToBtc(
-                        Number(data.listed_price)
-                      )} BTC USD ${calculateBTCCostInDollars(
-                        Number(convertSatToBtc(data.listed_price)),
-                        btcPrice
-                      )}`
-                    : ""
-                }`
-          }`}
+          text={`${data.in_mempool ? `In Mempool...` : `Buy Now `}`}
           hoverBgColor="hover:bg-accent_dark"
           hoverTextColor="text-white"
           bgColor="bg-accent"
           textColor="text-white"
-          className="transition-all w-full rounded-xl"
+          className="transition-all w-full rounded"
           link={data.in_mempool}
-          href={`https://blockstream.info/tx/${data.txid}`}
+          href={`https://ordinalnovus.mempool.space/tx/${data.txid}`}
           newTab={true}
           onClick={buy} // Add this line to make the button functional
         />
