@@ -6,6 +6,7 @@ import { IVIN, IVOUT } from "@/types/Tx";
 import { ITXDATA, constructTxData } from "@/utils/api/constructTxData";
 import { IInscription } from "@/types";
 import discordWebhookCBRCSaleAlert from "@/utils/discord_webhook";
+import moment from "moment";
 
 interface IInscriptionDetails {
   inscription_id: string;
@@ -70,9 +71,13 @@ async function fetchInscriptionsFromOutput(
 const LIMIT = 200;
 async function parseTxData(sort: 1 | -1, skip: number) {
   try {
+    const tenMinutesAgo = moment().subtract(10, "minutes").toDate();
     const modifiedTxIds: string[] = [];
     const modifiedInscriptionIds: string[] = [];
-    const nonParsedTxs = await Tx.find({ parsed: false })
+    const nonParsedTxs = await Tx.find({
+      parsed: false,
+      updated_at: { $lte: tenMinutesAgo },
+    })
       .limit(LIMIT)
       .sort({ createdAt: sort })
       .skip(skip);
