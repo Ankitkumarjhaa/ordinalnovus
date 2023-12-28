@@ -49,7 +49,10 @@ function CbrcListings({ listings, loading }: HeroProps) {
       {!loading && listings && listings.length > 0 ? (
         <div className="flex justify-start items-center w-full flex-wrap">
           {listings.map((item: IInscription) => (
-            <div className="w-full md:w-6/12 lg:w-3/12  p-2">
+            <div
+              className="w-full md:w-6/12 lg:w-3/12  p-2"
+              key={item.inscription_id}
+            >
               <div className="border-2 overflow-hidden border-gray-700 rounded-lg bg-slate-900">
                 <div className="TokenDetail p-2">
                   <div className="flex justify-between items-center p-2">
