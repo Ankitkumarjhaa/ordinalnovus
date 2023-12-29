@@ -63,9 +63,9 @@ function TokenList({ tokens, loading }: HeroProps) {
               <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
                 MARKET CAP
               </TableCell>
-              <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+              {/* <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
                 VOLUME (24h)
-              </TableCell>
+              </TableCell> */}
               <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
                 SUPPLY
               </TableCell>
@@ -210,20 +210,18 @@ function TokenList({ tokens, loading }: HeroProps) {
                           : "-"}
                       </p>
                     </TableCell>
-                    <TableCell
+                    {/* <TableCell
                       sx={{
                         textAlign: "center",
                         color: "white",
                       }}
                     >
                       <p className="text-center">
-                        {item?.historicalData && item.historicalData?.length
-                          ? `$ ${formatNumber(
-                              Number(item.historicalData[0].volume.toFixed(0))
-                            )}`
+                        {item?.volume
+                          ? `$ ${formatNumber(Number(item?.volume.toFixed(0)))}`
                           : "-"}
                       </p>
-                    </TableCell>
+                    </TableCell> */}
                     <TableCell
                       sx={{
                         textAlign: "center",

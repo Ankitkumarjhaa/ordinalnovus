@@ -18,7 +18,7 @@ export async function GET() {
     for (const inscription of inMempoolForMoreThanADayTx) {
       try {
         const response = await axios.get(
-          `https://mempool.space/api/tx/${inscription.txid}/status`
+          `https://mempool-api.ordinalnovus.com/tx/${inscription.txid}/status`
         );
         await Inscription.updateOne(
           { _id: inscription._id },
