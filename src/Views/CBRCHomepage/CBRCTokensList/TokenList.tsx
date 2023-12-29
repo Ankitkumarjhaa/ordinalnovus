@@ -28,6 +28,10 @@ function TokenList({ tokens, loading }: HeroProps) {
     router.push(`/cbrc-20/${id}`);
   };
 
+  const btcPrice = useSelector(
+    (state: RootState) => state.general.btc_price_in_dollar
+  );
+
   const allowed_cbrcs = useSelector(
     (state: RootState) => state.general.allowed_cbrcs
   );
@@ -75,6 +79,7 @@ function TokenList({ tokens, loading }: HeroProps) {
             {tokens && tokens.length ? (
               <TableBody sx={{ color: "white" }}>
                 {tokens?.map((item: IToken) => {
+                  const price = ((item?.price || 0) / 100_000_000) * btcPrice; // in $
                   // if (allowed_cbrcs?.includes(item.checksum))
                   return (
                     <TableRow
@@ -122,30 +127,28 @@ function TokenList({ tokens, loading }: HeroProps) {
                         sx={{
                           textAlign: "center",
                           color: "white",
-                          textTransform: "uppercase",
                         }}
                       >
                         <p className="text-center">
-                          {" "}
-                          {item?.price
+                          soon...
+                          {/* {" "}
+                          {price
                             ? `$${
-                                item?.price < 1
-                                  ? item?.price.toFixed(6)
-                                  : item?.price.toFixed(2)
+                                price < 1 ? price.toFixed(6) : price.toFixed(2)
                               }`
-                            : " - "}
+                            : " - "} */}
                         </p>
                       </TableCell>
                       <TableCell sx={{ color: "white", textAlign: "center" }}>
-                        {item.historicalData?.length ? (
-                          (item.price - item.historicalData[0].price) /
+                        {/* {item.historicalData?.length ? (
+                          (price - item.historicalData[0].price) /
                             item.historicalData[0].price >=
                           0 ? (
                             <div className="flex items-center justify-center text-green-400 ">
                               {" "}
                               <FaChevronCircleUp className="mr-2" />
                               {`${(
-                                ((item.price - item.historicalData[0].price) /
+                                ((price - item.historicalData[0].price) /
                                   item.historicalData[0].price) *
                                 100
                               ).toFixed(2)}%`}
@@ -154,7 +157,7 @@ function TokenList({ tokens, loading }: HeroProps) {
                             <div className="flex items-center justify-center text-red-400">
                               <FaChevronCircleDown className=" mr-2" />
                               {`${(
-                                ((item.price - item.historicalData[0].price) /
+                                ((price - item.historicalData[0].price) /
                                   item.historicalData[0].price) *
                                 100
                               ).toFixed(2)}%`}
@@ -162,7 +165,8 @@ function TokenList({ tokens, loading }: HeroProps) {
                           )
                         ) : (
                           <> - </>
-                        )}
+                        )} */}
+                        soon...
                       </TableCell>
                       <TableCell
                         sx={{
@@ -170,16 +174,15 @@ function TokenList({ tokens, loading }: HeroProps) {
                           color: "white",
                         }}
                       >
-                        {item.historicalData?.length >= 7 ? (
-                          (item.price - item.historicalData[6].price) /
+                        {/* {item.historicalData?.length >= 7 ? (
+                          (price - item.historicalData[6].price) /
                             item.historicalData[6].price >=
                           0 ? (
                             <div className="flex justify-center items-center text-green-400">
                               <FaChevronCircleUp className="mr-2" />{" "}
                               {item.historicalData?.length >= 7
                                 ? `${(
-                                    ((item.price -
-                                      item.historicalData[6].price) /
+                                    ((price - item.historicalData[6].price) /
                                       item.historicalData[6].price) *
                                     100
                                   ).toFixed(2)}%`
@@ -190,8 +193,7 @@ function TokenList({ tokens, loading }: HeroProps) {
                               <FaChevronCircleDown className="mr-2" />{" "}
                               {item.historicalData?.length >= 7
                                 ? `${(
-                                    ((item.price -
-                                      item.historicalData[6].price) /
+                                    ((price - item.historicalData[6].price) /
                                       item.historicalData[6].price) *
                                     100
                                   ).toFixed(2)}%`
@@ -200,7 +202,8 @@ function TokenList({ tokens, loading }: HeroProps) {
                           )
                         ) : (
                           <> - </>
-                        )}
+                        )} */}
+                        soon...
                       </TableCell>
                       <TableCell
                         sx={{
@@ -208,11 +211,12 @@ function TokenList({ tokens, loading }: HeroProps) {
                           color: "white",
                         }}
                       >
-                        <p className="text-center">
+                        {/* <p className="text-center">
                           {item?.historicalData && item.historicalData?.length
-                            ? `$ ${formatNumber(item.supply * item.price)}`
+                            ? `$ ${formatNumber(item.supply * price)}`
                             : "-"}
-                        </p>
+                        </p> */}
+                        soon...
                       </TableCell>
                       {/* <TableCell
                       sx={{

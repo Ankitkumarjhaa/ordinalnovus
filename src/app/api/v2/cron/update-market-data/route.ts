@@ -19,15 +19,15 @@ export async function GET(req: NextRequest) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const twentyMinutesAgo = new Date();
-  twentyMinutesAgo.setMinutes(twentyMinutesAgo.getMinutes() - 20);
+  // const twentyMinutesAgo = new Date();
+  // twentyMinutesAgo.setMinutes(twentyMinutesAgo.getMinutes() - 20);
 
-  // const twentyFourHoursAgo = new Date();
-  // twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24); // Subtract 24 hours from the current time
+  const twentyFourHoursAgo = new Date();
+  twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24); // Subtract 24 hours from the current time
 
   const tokens = await CBRCToken.find({
     $or: [
-      { last_updated: { $lte: twentyMinutesAgo } }, // Tokens updated 24 hours ago or earlier
+      { last_updated: { $lte: twentyFourHoursAgo } }, // Tokens updated 24 hours ago or earlier
       { last_updated: { $exists: false } }, // Tokens without a lastUpdated field
     ],
   })
@@ -106,11 +106,10 @@ export async function GET(req: NextRequest) {
               filter: { _id: token._id },
               update: {
                 last_updated: new Date(),
-                ...(latestSale &&
-                  latestSale.price_per_token && {
-                    price:
-                      (latestSale.price_per_token / 100_000_000) * btcPrice,
-                  }),
+                // ...(latestSale &&
+                //   latestSale.price_per_token && {
+                //     price: latestSale.price_per_token,
+                //   }),
                 $push: {
                   historicalData: {
                     $each: [
@@ -137,11 +136,11 @@ export async function GET(req: NextRequest) {
             updateOne: {
               filter: { _id: token._id },
               update: {
-                ...(latestSale &&
-                  latestSale.price_per_token && {
-                    price:
-                      (latestSale.price_per_token / 100_000_000) * btcPrice,
-                  }),
+                // ...(latestSale &&
+                //   latestSale.price_per_token && {
+                //     price:
+                //       (latestSale.price_per_token / 100_000_000) * btcPrice,
+                //   }),
                 last_updated: new Date(),
               },
             },

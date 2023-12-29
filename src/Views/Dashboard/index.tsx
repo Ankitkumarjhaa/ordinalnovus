@@ -248,7 +248,7 @@ function AccountPage() {
         <CustomTab
           tabsData={[
             { label: "CBRC-20", value: "cbrc-20" },
-            { label: "All", value: "all" },
+            // { label: "All", value: "all" },
             { label: "My Activity", value: "activity" },
           ]}
           currentTab={tab}

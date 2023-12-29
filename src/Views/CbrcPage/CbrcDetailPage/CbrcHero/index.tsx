@@ -2,10 +2,15 @@
 import React from "react";
 import { IToken } from "@/types/CBRC";
 import { formatNumber } from "@/utils";
+import { useSelector } from "react-redux";
+import { RootState } from "@/stores";
 type HeroProps = {
   data: IToken;
 };
 function Hero({ data }: HeroProps) {
+  const btcPrice = useSelector(
+    (state: RootState) => state.general.btc_price_in_dollar
+  );
   return (
     <div className="relative h-auto lg:h-[50vh] 2xl:max-h-96 rounded-xl overflow-hidden border xl:border-2 border-accent bg-secondary">
       <div className="flex justify-between items-start flex-wrap h-full w-full p-6">
@@ -45,7 +50,11 @@ function Hero({ data }: HeroProps) {
             <div className="w-full md:w-6/12 lg:w-4/12 p-2">
               <div className="p-2 rounded border border-gray-300 flex justify-between">
                 <span>Price</span>
-                <span>{data?.price ? "$ " + data?.price?.toFixed(3) : 0}</span>
+                <span>
+                  {data?.price
+                    ? "$ " + ((data?.price / 100_000_000) * btcPrice).toFixed(2)
+                    : 0}
+                </span>
               </div>
             </div>
             <div className="w-full md:w-6/12 lg:w-4/12 p-2">
@@ -53,7 +62,10 @@ function Hero({ data }: HeroProps) {
                 <span>Marketcap</span>
                 <span>
                   {data?.price
-                    ? "$ " + formatNumber(data?.price * data.supply)
+                    ? "$ " +
+                      formatNumber(
+                        (data?.price / 100_000_000) * btcPrice * data.supply
+                      )
                     : 0}
                 </span>
               </div>
