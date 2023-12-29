@@ -2,11 +2,11 @@
 
 import dbConnect from "@/lib/dbConnect";
 import { CBRCToken, Inscription } from "@/models";
-import { stringToHex } from "@/utils";
+import { getBTCPriceInDollars, stringToHex } from "@/utils";
 
 // price in $
-async function updateTokenPrice(tick: string, price: number) {
-  if (!tick || typeof price !== "number") {
+async function updateTokenPrice(tick: string, _price?: number) {
+  if (!tick) {
     throw new Error("Invalid parameters");
   }
 
@@ -15,6 +15,14 @@ async function updateTokenPrice(tick: string, price: number) {
     const tokenLower = tick.trim().toLowerCase();
 
     const token = await CBRCToken.findOne({ tick: tick.trim().toLowerCase() });
+    const btcPrice = await getBTCPriceInDollars();
+    const fp = await Inscription.findOne({
+      listed_token: tick.trim().toLowerCase(),
+      listed: true,
+      in_mempool: false,
+    }).sort({ listed_price_per_token: 1 });
+
+    const price = (fp.listed_price_per_token / 100_000_000) * btcPrice;
     const inMempoolCount = await Inscription.countDocuments({
       listed_token: tokenLower,
       in_mempool: true,
