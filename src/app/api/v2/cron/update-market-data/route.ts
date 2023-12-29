@@ -19,12 +19,15 @@ export async function GET(req: NextRequest) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const twentyFourHoursAgo = new Date();
-  twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24); // Subtract 24 hours from the current time
+  const twentyMinutesAgo = new Date();
+  twentyMinutesAgo.setMinutes(twentyMinutesAgo.getMinutes() - 20);
+
+  // const twentyFourHoursAgo = new Date();
+  // twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24); // Subtract 24 hours from the current time
 
   const tokens = await CBRCToken.find({
     $or: [
-      { last_updated: { $lte: twentyFourHoursAgo } }, // Tokens updated 24 hours ago or earlier
+      { last_updated: { $lte: twentyMinutesAgo } }, // Tokens updated 24 hours ago or earlier
       { last_updated: { $exists: false } }, // Tokens without a lastUpdated field
     ],
   })
