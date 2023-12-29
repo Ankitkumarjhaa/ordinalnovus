@@ -167,10 +167,7 @@ function BuyInscriptionCardButton({ data }: InscriptionProps) {
           inscription?.listed_token,
           (inscription?.listed_price_per_token / 100_000_000) * btcPrice
         );
-      window.open(
-        `https://ordinalnovus.mempool.space/tx/${data.data.txid}`,
-        "_blank"
-      );
+      window.open(`https://mempool.space/tx/${data.data.txid}`, "_blank");
       dispatch(
         addNotification({
           id: new Date().valueOf(),
@@ -359,7 +356,7 @@ function BuyInscriptionCardButton({ data }: InscriptionProps) {
           textColor="text-white"
           className="transition-all w-full rounded"
           link={data.in_mempool}
-          href={`https://ordinalnovus.mempool.space/tx/${data.txid}`}
+          href={`https://mempool.space/tx/${data.txid}`}
           newTab={true}
           onClick={buy} // Add this line to make the button functional
         />

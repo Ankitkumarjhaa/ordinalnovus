@@ -31,7 +31,7 @@ export async function fetchTxes(
     page_size,
     page,
     tag,
-    parsed = 10,
+    parsed = true,
     tick,
     metaprotocol,
     wallet,

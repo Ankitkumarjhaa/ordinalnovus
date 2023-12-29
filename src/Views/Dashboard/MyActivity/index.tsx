@@ -128,6 +128,9 @@ function MySales({ address }: { address: string }) {
               <TableHead sx={{ bgcolor: "#84848a", color: "white" }}>
                 <TableRow>
                   <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+                    TICK
+                  </TableCell>{" "}
+                  <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
                     FROM
                   </TableCell>
                   <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
@@ -171,6 +174,16 @@ function MySales({ address }: { address: string }) {
                               cursor: "pointer",
                             }}
                           >
+                            <TableCell
+                              component="th"
+                              scope="row"
+                              sx={{
+                                color: "white",
+                                textTransform: "uppercase",
+                              }}
+                            >
+                              {token}
+                            </TableCell>
                             <TableCell sx={{ color: "white" }}>
                               {shortenString(item.from)}
                             </TableCell>{" "}

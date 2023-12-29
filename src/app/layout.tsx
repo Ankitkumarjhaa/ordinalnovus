@@ -60,6 +60,13 @@ export default function RootLayout({
                   1% Fee applied on all sales
                 </p>
               </div>
+              <div className="w-full my-2 text-xs py-2 uppercase font-bold text-white text-center">
+                <p
+                  className={`text-bitcoin bg-bitcoin bg-opacity-20  py-2 w-ful rounded tracking-widest font-bold`}
+                >
+                  SITE IN BETA MODE
+                </p>
+              </div>
 
               {children}
             </main>
