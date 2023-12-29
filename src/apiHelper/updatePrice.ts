@@ -27,7 +27,6 @@ async function updateTokenPrice(tick: string, price: number) {
           price: price,
           in_mempool: inMempoolCount + 1,
           marketcap: price * token.supply,
-          volume: token.volume + price * token.listed_amount,
         },
       }
     );
