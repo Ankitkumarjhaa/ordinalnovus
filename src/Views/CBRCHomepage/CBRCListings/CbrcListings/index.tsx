@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import { useWalletAddress } from "bitcoin-wallet-adapter";
 import moment from "moment";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { FaBitcoin, FaCheckCircle, FaDollarSign } from "react-icons/fa";
@@ -99,7 +100,10 @@ function CbrcListings({ listings, loading }: HeroProps) {
                 </div>
                 <div className="ListingDetail bg-primary p-2">
                   <div className="text-white pb-2 border-b border-gray-300 w-full flex justify-between items-center">
-                    <p className="">#{item.inscription_number}</p>
+                    <Link href={`/inscription/${item.inscription_number}`}>
+                      {" "}
+                      <p className="">#{item.inscription_number}</p>
+                    </Link>
                     <div className="ml-3">
                       {item.cbrc_valid ? (
                         <FaCheckCircle className="text-green-400" />
