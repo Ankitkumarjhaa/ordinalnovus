@@ -15,7 +15,7 @@ function CbrcDetailPage({ cbrc }: CbrcDetailPageProps) {
 
   return (
     <div className="w-full">
-      {/* <Hero data={cbrc} /> */}
+      <Hero data={cbrc} />
       <div className="pb-6 py-16 flex justify-center lg:justify-start ">
         <CustomTab
           tabsData={[

@@ -85,7 +85,14 @@ function Hero({ data }: HeroProps) {
             <div className="w-full md:w-6/12 lg:w-4/12 p-2">
               <div className="p-2 rounded border border-gray-300 flex justify-between">
                 <span>Volume</span>
-                <span>$ {formatNumber(Number(data?.volume.toFixed(3)))}</span>
+                <span>
+                  ${" "}
+                  {formatNumber(
+                    Number(
+                      ((data?.volume / 100_000_000) * btcPrice)?.toFixed(3)
+                    )
+                  )}
+                </span>
               </div>
             </div>
             <div className="w-full md:w-6/12 lg:w-4/12 p-2">

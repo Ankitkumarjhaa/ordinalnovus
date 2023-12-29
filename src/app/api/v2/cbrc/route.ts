@@ -38,13 +38,6 @@ export async function GET(req: NextRequest) {
     if (tokens.length === 1) {
       const tempTokenInfo = tokens[0];
       const tokenLower = tokens[0].tick.trim().toLowerCase();
-      // Get InMempool Transactions Count
-      const inMempoolCount = await Inscription.countDocuments({
-        listed_token: tokenLower,
-        in_mempool: true,
-      });
-
-      tempTokenInfo.in_mempool = inMempoolCount;
 
       // Get Listed Count
       const listedCount = await Inscription.countDocuments({
@@ -53,33 +46,8 @@ export async function GET(req: NextRequest) {
       });
       tempTokenInfo.listed = listedCount;
 
-      // Get Today's Sales
-      const startOfDay = new Date();
-      startOfDay.setHours(0, 0, 0, 0);
-      const endOfDay = new Date();
-      endOfDay.setHours(23, 59, 59, 999);
-      const todaysVolume = await Tx.aggregate([
-        {
-          $match: {
-            token: tokenLower,
-            timestamp: { $gte: startOfDay, $lte: endOfDay },
-          },
-        },
-        {
-          $group: {
-            _id: null,
-            totalVolume: {
-              $sum: { $multiply: ["$amount", "$price_per_token"] },
-            },
-          },
-        },
-      ]);
-
-      const volumeInSats =
-        todaysVolume.length > 0 ? todaysVolume[0].totalVolume : 0;
-
-      tempTokenInfo.volume =
-        (volumeInSats / 100_000_000) * (await getBTCPriceInDollars());
+      // tempTokenInfo.volume =
+      //   (volumeInSats / 100_000_000) * (await getBTCPriceInDollars());
 
       tokens[0] = tempTokenInfo;
     }

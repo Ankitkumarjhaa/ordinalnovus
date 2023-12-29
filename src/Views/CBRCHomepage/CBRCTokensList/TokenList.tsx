@@ -127,20 +127,20 @@ function TokenList({ tokens, loading }: HeroProps) {
                         sx={{
                           textAlign: "center",
                           color: "white",
+                          textTransform: "uppercase",
                         }}
                       >
                         <p className="text-center">
-                          soon...
-                          {/* {" "}
+                          {" "}
                           {price
                             ? `$${
                                 price < 1 ? price.toFixed(6) : price.toFixed(2)
                               }`
-                            : " - "} */}
+                            : " - "}
                         </p>
                       </TableCell>
                       <TableCell sx={{ color: "white", textAlign: "center" }}>
-                        {/* {item.historicalData?.length ? (
+                        {item.historicalData?.length ? (
                           (price - item.historicalData[0].price) /
                             item.historicalData[0].price >=
                           0 ? (
@@ -165,8 +165,7 @@ function TokenList({ tokens, loading }: HeroProps) {
                           )
                         ) : (
                           <> - </>
-                        )} */}
-                        soon...
+                        )}
                       </TableCell>
                       <TableCell
                         sx={{
@@ -174,7 +173,7 @@ function TokenList({ tokens, loading }: HeroProps) {
                           color: "white",
                         }}
                       >
-                        {/* {item.historicalData?.length >= 7 ? (
+                        {item.historicalData?.length >= 7 ? (
                           (price - item.historicalData[6].price) /
                             item.historicalData[6].price >=
                           0 ? (
@@ -202,8 +201,7 @@ function TokenList({ tokens, loading }: HeroProps) {
                           )
                         ) : (
                           <> - </>
-                        )} */}
-                        soon...
+                        )}
                       </TableCell>
                       <TableCell
                         sx={{
@@ -211,12 +209,11 @@ function TokenList({ tokens, loading }: HeroProps) {
                           color: "white",
                         }}
                       >
-                        {/* <p className="text-center">
+                        <p className="text-center">
                           {item?.historicalData && item.historicalData?.length
                             ? `$ ${formatNumber(item.supply * price)}`
                             : "-"}
-                        </p> */}
-                        soon...
+                        </p>
                       </TableCell>
                       {/* <TableCell
                       sx={{

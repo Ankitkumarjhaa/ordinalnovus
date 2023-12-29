@@ -18,7 +18,9 @@ import { useRouter } from "next/navigation";
 import mixpanel from "mixpanel-browser";
 import deleteListing from "@/apiHelper/deleteListing";
 import { FaDollarSign } from "react-icons/fa";
-import { Inscription } from "@/models";
+import updateTokenPrice from "@/apiHelper/updatePrice";
+import { cbrcValid } from "@/utils/validate";
+
 type InscriptionProps = {
   data: IInscription;
   refreshData?: any;
@@ -153,6 +155,10 @@ function ListInscriptionCardButton({ data, refreshData }: InscriptionProps) {
     await sign(options);
   };
 
+  const allowed_cbrcs = useSelector(
+    (state: RootState) => state.general.allowed_cbrcs
+  );
+
   const listOrdinal = async (signedPsbt: string) => {
     try {
       if (!walletDetails) {
@@ -175,6 +181,13 @@ function ListInscriptionCardButton({ data, refreshData }: InscriptionProps) {
         signed_listing_psbt_base64: signedPsbt,
       });
       if (result.ok) {
+        if (
+          cbrcValid(data, allowed_cbrcs || []) &&
+          data?.parsed_metaprotocol &&
+          data.parsed_metaprotocol.length >= 3 &&
+          data?.parsed_metaprotocol[2].split("=")[0]
+        )
+          await updateTokenPrice(data?.parsed_metaprotocol[2].split("=")[0]);
         mixpanel.track("Listing Completed Dashboard", {
           inscription_id: data.inscription_id,
           price: convertBtcToSat(Number(price)),
