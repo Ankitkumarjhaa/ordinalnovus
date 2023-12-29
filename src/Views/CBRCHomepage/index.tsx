@@ -4,8 +4,9 @@ import CBRCTokensList from "./CBRCTokensList";
 import { IToken } from "@/types/CBRC";
 import CustomTab from "@/components/elements/CustomTab";
 import CBRCSales from "./CBRCSales";
+import CBRCLatestListings from "./CBRCListings";
 function CBRCHomepage({ tokens }: { tokens: IToken[] }) {
-  const [tab, setTab] = useState("listings");
+  const [tab, setTab] = useState("tokens");
 
   return (
     <div>
@@ -19,6 +20,7 @@ function CBRCHomepage({ tokens }: { tokens: IToken[] }) {
       <div className="pb-6 py-16 flex justify-center lg:justify-start ">
         <CustomTab
           tabsData={[
+            { label: "Tokens", value: "tokens" },
             { label: "Listings", value: "listings" },
             { label: "Sales", value: "sales" },
           ]}
@@ -26,11 +28,9 @@ function CBRCHomepage({ tokens }: { tokens: IToken[] }) {
           onTabChange={(_, newTab) => setTab(newTab)}
         />
       </div>{" "}
-      {tab === "listings" ? (
-        <CBRCTokensList defaultData={tokens} />
-      ) : (
-        <CBRCSales />
-      )}
+      {tab === "tokens" && <CBRCTokensList defaultData={tokens} />}
+      {tab === "sales" && <CBRCSales />}
+      {tab === "listings" && <CBRCLatestListings />}
     </div>
   );
 }
