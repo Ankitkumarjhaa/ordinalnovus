@@ -32,13 +32,13 @@ function Hero({ data }: HeroProps) {
               )}`}
             </p>
           </div>
-          <div className="w-full my-2 text-xs py-2 uppercase font-bold text-white text-center">
+          {/* <div className="w-full my-2 text-xs py-2 uppercase font-bold text-white text-center">
             <p
               className={`text-bitcoin bg-bitcoin bg-opacity-20  py-2 w-ful rounded tracking-widest font-bold`}
             >
               DATA might be inaccurate and lagging
             </p>
-          </div>
+          </div> */}
 
           <div className="flex flex-wrap w-full items-center justify-start py-3">
             <div className="w-full md:w-6/12 lg:w-4/12 p-2">

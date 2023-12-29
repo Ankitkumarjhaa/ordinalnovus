@@ -5,6 +5,7 @@ import axios from "axios";
 export interface FetchCBRCParams {
   sort?: string;
   search?: string;
+  allowed?: boolean;
   page_size: number;
   page: number;
 }
@@ -22,7 +23,7 @@ export async function FetchCBRC(
   params: FetchCBRCParams
 ): Promise<{ data: CBRCTokenResponse; error: string | null } | undefined> {
   console.debug({ params });
-  const { sort, search, page, page_size } = params;
+  const { sort, search, page, page_size, allowed } = params;
   try {
     let url = `${process.env.NEXT_PUBLIC_URL}/api/v2/cbrc`;
     const response = await axios.get(url, {
@@ -31,6 +32,7 @@ export async function FetchCBRC(
         _limit: page_size,
         _start: (page - 1) * page_size,
         search,
+        allowed,
       },
     });
 

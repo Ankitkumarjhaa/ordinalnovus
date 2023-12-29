@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(req: NextRequest) {
   await dbConnect();
 
-  const tokens = await CBRCToken.find({}).limit(500).lean();
+  const tokens = await CBRCToken.find({ allowed: true }).limit(500).lean();
 
   // Find the tokens that match your criteria
 

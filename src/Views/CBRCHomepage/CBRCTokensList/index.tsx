@@ -27,6 +27,7 @@ function CBRCTokensList({ defaultData }: { defaultData: IToken[] }) {
         page,
         page_size: pageSize,
         sort,
+        allowed: true,
         ...(tick && { search: tick }),
       });
       if (result && result.data) {
