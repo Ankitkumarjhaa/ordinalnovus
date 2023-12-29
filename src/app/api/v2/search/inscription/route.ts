@@ -235,7 +235,7 @@ export const checkCbrcValidity = async (id: string) => {
 
       // If invalid, store 'false' in the cache
       if (!isValid) {
-        await setCache(cacheKey, false, 24 * 60 * 60); // Cache for 2 hours
+        await setCache(cacheKey, false, 60 * 60); // Cache for 1 hour
       }
 
       return isValid;

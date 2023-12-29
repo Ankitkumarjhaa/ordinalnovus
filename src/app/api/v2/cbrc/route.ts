@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     const query = convertParams(CBRCToken, req.nextUrl);
 
     // Generate a unique key for this query
-    const cacheKey = `cbrc_tokens:${JSON.stringify(query)}`;
+    const cacheKey = `cbrc_token:${JSON.stringify(query)}`;
 
     console.log({ finalQueryCbrc: query });
     // Try to fetch the result from Redis first

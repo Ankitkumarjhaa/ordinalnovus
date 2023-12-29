@@ -96,7 +96,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
 
     console.dir(query, { depth: null });
     // Generate a unique cache key based on the query
-    cacheKey = `cbrc_listings:${req.nextUrl.toString()}`;
+    cacheKey = `cbrc_listing:${req.nextUrl.toString()}`;
 
     // Try to get cached data
     let cachedData = await getCache(cacheKey);
