@@ -74,143 +74,147 @@ function TokenList({ tokens, loading }: HeroProps) {
           <>
             {tokens && tokens.length ? (
               <TableBody sx={{ color: "white" }}>
-                {tokens?.map((item: IToken) => (
-                  <TableRow
-                    onClick={() => handleListingClick(item.tick)}
-                    key={item.tick}
-                    sx={{
-                      bgcolor: allowed_cbrcs?.includes(item.checksum)
-                        ? ""
-                        : "#4d4d4d",
-                      "&:last-child td, &:last-child th": { border: 0 },
-                      "&:hover": { bgcolor: "#1f1d3e" },
-                      color: "white",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <TableCell
-                      component="th"
-                      scope="row"
+                {tokens?.map((item: IToken) => {
+                  // if (allowed_cbrcs?.includes(item.checksum))
+                  return (
+                    <TableRow
+                      onClick={() => handleListingClick(item.tick)}
+                      key={item.tick}
                       sx={{
-                        textAlign: "left",
+                        bgcolor: allowed_cbrcs?.includes(item.checksum)
+                          ? ""
+                          : "#4d4d4d",
+                        "&:last-child td, &:last-child th": { border: 0 },
+                        "&:hover": { bgcolor: "#1f1d3e" },
                         color: "white",
-                        textTransform: "uppercase",
+                        cursor: "pointer",
                       }}
                     >
-                      <p className="text-left uppercase">{item.tick}</p>
-                    </TableCell>
-                    <TableCell
-                      component="th"
-                      scope="row"
-                      sx={{
-                        textAlign: "left",
-                        color: "white",
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      <p className="text-left uppercase">
-                        {allowed_cbrcs?.includes(item.checksum)
-                          ? "Enabled"
-                          : "Disabled"}
-                      </p>
-                    </TableCell>
-                    <TableCell
-                      component="th"
-                      scope="row"
-                      sx={{
-                        textAlign: "center",
-                        color: "white",
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      <p className="text-center">
-                        {" "}
-                        {item?.price
-                          ? `$${
-                              item?.price < 1
-                                ? item?.price.toFixed(6)
-                                : item?.price.toFixed(2)
-                            }`
-                          : " - "}
-                      </p>
-                    </TableCell>
-                    <TableCell sx={{ color: "white", textAlign: "center" }}>
-                      {item.historicalData?.length ? (
-                        (item.price - item.historicalData[0].price) /
-                          item.historicalData[0].price >=
-                        0 ? (
-                          <div className="flex items-center justify-center text-green-400 ">
-                            {" "}
-                            <FaChevronCircleUp className="mr-2" />
-                            {`${(
-                              ((item.price - item.historicalData[0].price) /
-                                item.historicalData[0].price) *
-                              100
-                            ).toFixed(2)}%`}
-                          </div>
+                      <TableCell
+                        component="th"
+                        scope="row"
+                        sx={{
+                          textAlign: "left",
+                          color: "white",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        <p className="text-left uppercase">{item.tick}</p>
+                      </TableCell>
+                      <TableCell
+                        component="th"
+                        scope="row"
+                        sx={{
+                          textAlign: "left",
+                          color: "white",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        <p className="text-left uppercase">
+                          {allowed_cbrcs?.includes(item.checksum)
+                            ? "Enabled"
+                            : "Disabled"}
+                        </p>
+                      </TableCell>
+                      <TableCell
+                        component="th"
+                        scope="row"
+                        sx={{
+                          textAlign: "center",
+                          color: "white",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        <p className="text-center">
+                          {" "}
+                          {item?.price
+                            ? `$${
+                                item?.price < 1
+                                  ? item?.price.toFixed(6)
+                                  : item?.price.toFixed(2)
+                              }`
+                            : " - "}
+                        </p>
+                      </TableCell>
+                      <TableCell sx={{ color: "white", textAlign: "center" }}>
+                        {item.historicalData?.length ? (
+                          (item.price - item.historicalData[0].price) /
+                            item.historicalData[0].price >=
+                          0 ? (
+                            <div className="flex items-center justify-center text-green-400 ">
+                              {" "}
+                              <FaChevronCircleUp className="mr-2" />
+                              {`${(
+                                ((item.price - item.historicalData[0].price) /
+                                  item.historicalData[0].price) *
+                                100
+                              ).toFixed(2)}%`}
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-center text-red-400">
+                              <FaChevronCircleDown className=" mr-2" />
+                              {`${(
+                                ((item.price - item.historicalData[0].price) /
+                                  item.historicalData[0].price) *
+                                100
+                              ).toFixed(2)}%`}
+                            </div>
+                          )
                         ) : (
-                          <div className="flex items-center justify-center text-red-400">
-                            <FaChevronCircleDown className=" mr-2" />
-                            {`${(
-                              ((item.price - item.historicalData[0].price) /
-                                item.historicalData[0].price) *
-                              100
-                            ).toFixed(2)}%`}
-                          </div>
-                        )
-                      ) : (
-                        <> - </>
-                      )}
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        textAlign: "center",
-                        color: "white",
-                      }}
-                    >
-                      {item.historicalData?.length >= 7 ? (
-                        (item.price - item.historicalData[6].price) /
-                          item.historicalData[6].price >=
-                        0 ? (
-                          <div className="flex justify-center items-center text-green-400">
-                            <FaChevronCircleUp className="mr-2" />{" "}
-                            {item.historicalData?.length >= 7
-                              ? `${(
-                                  ((item.price - item.historicalData[6].price) /
-                                    item.historicalData[6].price) *
-                                  100
-                                ).toFixed(2)}%`
-                              : "-"}
-                          </div>
+                          <> - </>
+                        )}
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          textAlign: "center",
+                          color: "white",
+                        }}
+                      >
+                        {item.historicalData?.length >= 7 ? (
+                          (item.price - item.historicalData[6].price) /
+                            item.historicalData[6].price >=
+                          0 ? (
+                            <div className="flex justify-center items-center text-green-400">
+                              <FaChevronCircleUp className="mr-2" />{" "}
+                              {item.historicalData?.length >= 7
+                                ? `${(
+                                    ((item.price -
+                                      item.historicalData[6].price) /
+                                      item.historicalData[6].price) *
+                                    100
+                                  ).toFixed(2)}%`
+                                : "-"}
+                            </div>
+                          ) : (
+                            <div className="flex justify-center items-center text-red-400">
+                              <FaChevronCircleDown className="mr-2" />{" "}
+                              {item.historicalData?.length >= 7
+                                ? `${(
+                                    ((item.price -
+                                      item.historicalData[6].price) /
+                                      item.historicalData[6].price) *
+                                    100
+                                  ).toFixed(2)}%`
+                                : "-"}
+                            </div>
+                          )
                         ) : (
-                          <div className="flex justify-center items-center text-red-400">
-                            <FaChevronCircleDown className="mr-2" />{" "}
-                            {item.historicalData?.length >= 7
-                              ? `${(
-                                  ((item.price - item.historicalData[6].price) /
-                                    item.historicalData[6].price) *
-                                  100
-                                ).toFixed(2)}%`
-                              : "-"}
-                          </div>
-                        )
-                      ) : (
-                        <> - </>
-                      )}
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        textAlign: "center",
-                        color: "white",
-                      }}
-                    >
-                      <p className="text-center">
-                        {item?.historicalData && item.historicalData?.length
-                          ? `$ ${formatNumber(item.supply * item.price)}`
-                          : "-"}
-                      </p>
-                    </TableCell>
-                    {/* <TableCell
+                          <> - </>
+                        )}
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          textAlign: "center",
+                          color: "white",
+                        }}
+                      >
+                        <p className="text-center">
+                          {item?.historicalData && item.historicalData?.length
+                            ? `$ ${formatNumber(item.supply * item.price)}`
+                            : "-"}
+                        </p>
+                      </TableCell>
+                      {/* <TableCell
                       sx={{
                         textAlign: "center",
                         color: "white",
@@ -222,16 +226,17 @@ function TokenList({ tokens, loading }: HeroProps) {
                           : "-"}
                       </p>
                     </TableCell> */}
-                    <TableCell
-                      sx={{
-                        textAlign: "center",
-                        color: "white",
-                      }}
-                    >
-                      {formatNumber(item.supply)}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      <TableCell
+                        sx={{
+                          textAlign: "center",
+                          color: "white",
+                        }}
+                      >
+                        {formatNumber(item.supply)}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             ) : loading ? (
               <TableBody>
