@@ -15,7 +15,7 @@ function CBRCTokensList({ defaultData }: { defaultData: IToken[] }) {
   const [data, setData] = useState<IToken[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(20);
-  const [sort, setSort] = useState<string>("marketcap:-1");
+  const [sort, setSort] = useState<string>("volume:-1");
   const [loading, setLoading] = useState<boolean>(true);
   const [tick, setTick] = useState("");
 

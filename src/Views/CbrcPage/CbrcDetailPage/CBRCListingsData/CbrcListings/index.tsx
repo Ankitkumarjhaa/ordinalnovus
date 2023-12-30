@@ -3,16 +3,6 @@ import { RootState } from "@/stores";
 import { IInscription } from "@/types";
 import { formatNumber, stringToHex } from "@/utils";
 import { cbrcListed, myInscription } from "@/utils/validate";
-import {
-  CircularProgress,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-} from "@mui/material";
 import { useWalletAddress } from "bitcoin-wallet-adapter";
 import moment from "moment";
 import Link from "next/link";

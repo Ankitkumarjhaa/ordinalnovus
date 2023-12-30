@@ -48,7 +48,13 @@ function CBRCListingsData({ cbrc }: CbrcDetailPageProps) {
   }, [sort, page, pageSize]);
 
   useEffect(() => {
-    fetchData();
+    fetchData(); // Fetch data on mount and when dependencies change
+
+    const interval = setInterval(() => {
+      fetchData(); // Fetch data every 10 seconds
+    }, 30000); // 10000 milliseconds = 10 seconds
+
+    return () => clearInterval(interval); // Clear interval on unmount
   }, [sort, page, dispatch, pageSize]);
 
   const handlePageChange = (
@@ -99,6 +105,15 @@ function CBRCListingsData({ cbrc }: CbrcDetailPageProps) {
         </>
       ) : (
         <CbrcListings listings={data} loading={loading} />
+      )}
+      {data?.length > 0 && (
+        <div className="w-full center lg:justify-end">
+          <CustomPaginationComponent
+            count={Math.ceil(totalCount / pageSize)}
+            onChange={handlePageChange}
+            page={page}
+          />
+        </div>
       )}
     </div>
   );

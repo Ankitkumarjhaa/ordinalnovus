@@ -29,11 +29,11 @@ async function updateTokenPrice(tick: string, _price?: number) {
       listed: true,
     });
 
-    // Get Today's Sales
+    // Get 24 hours Sales volume
+    const endOfDay = new Date(); // Current time
     const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date();
-    endOfDay.setHours(23, 59, 59, 999);
+    startOfDay.setTime(endOfDay.getTime() - 24 * 60 * 60 * 1000); // 24 hours back from now
+
     const todaysVolume = await Tx.aggregate([
       {
         $match: {
@@ -58,10 +58,10 @@ async function updateTokenPrice(tick: string, _price?: number) {
       { checksum: stringToHex(tick) },
       {
         $set: {
-          price: price,
+          price: price, // in sats
           in_mempool: inMempoolCount + 1,
-          marketcap: price * token.supply,
-          volume: volumeInSats,
+          marketcap: price * token.supply, // in sats
+          volume: volumeInSats, // in sats
         },
       }
     );
