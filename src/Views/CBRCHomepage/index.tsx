@@ -5,11 +5,13 @@ import { IToken } from "@/types/CBRC";
 import CustomTab from "@/components/elements/CustomTab";
 import CBRCSales from "./CBRCSales";
 import CBRCLatestListings from "./CBRCListings";
+import CbrcHero from "./CBRCHero";
 function CBRCHomepage({ tokens }: { tokens: IToken[] }) {
   const [tab, setTab] = useState("tokens");
 
   return (
     <div>
+      <CbrcHero />
       <div className="w-full my-2 text-xs py-2 uppercase font-bold text-white text-center">
         <p
           className={`text-gray-700 bg-gray-100  py-2 w-full border-accent border rounded tracking-widest font-bold`}
