@@ -12,6 +12,7 @@ import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addNotification } from "@/stores/reducers/notificationReducer";
+import ShowOrders from "./showOrders";
 const options = [
   // { value: "deploy", label: "DEPLOY" },
   { value: "transfer", label: "TRANSFER" },
@@ -187,7 +188,7 @@ function Crafter() {
   };
 
   return (
-    <div className="center min-h-[70vh]">
+    <div className="center min-h-[70vh] flex-col">
       <div className="bg-secondary p-6 rounded-lg shadow-2xl">
         <h2 className="uppercase font-bold tracking-wider pb-6">
           Inscribe CBRC
@@ -271,7 +272,7 @@ function Crafter() {
             </p>
             <div className="center">
               <PayButton
-                recipient={payDetails.funding_address}
+                receipient={payDetails.funding_address}
                 amount={payDetails.total_fee}
                 buttonClassname="bg-accent text-white px-4 py-2 rounded center "
               />
@@ -291,6 +292,9 @@ function Crafter() {
             />
           </div>
         )}
+      </div>
+      <div>
+        <ShowOrders />
       </div>
     </div>
   );

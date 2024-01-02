@@ -1,5 +1,4 @@
 import { saveAs } from "file-saver";
-import SHA256 from "crypto-js/sha256";
 export function shortenString(str: string, length?: number): string {
   if (str.length <= (length || 8)) {
     return str;

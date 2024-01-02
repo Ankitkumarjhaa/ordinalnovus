@@ -33,6 +33,7 @@ export async function FetchCBRC(
         _start: (page - 1) * page_size,
         search,
         allowed,
+        apikey: process.env.API_KEY,
       },
     });
 

@@ -1,7 +1,7 @@
 import { getCache, setCache } from "@/lib/cache";
 import dbConnect from "@/lib/dbConnect";
-import { CBRCToken, Inscription, Tx } from "@/models";
-import { getBTCPriceInDollars } from "@/utils";
+import apiKeyMiddleware from "@/middlewares/apikeyMiddleware";
+import { CBRCToken, Inscription } from "@/models";
 import convertParams from "@/utils/api/convertParams";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -10,6 +10,15 @@ const countTokens = async (query: any) => {
 };
 export async function GET(req: NextRequest) {
   try {
+    const middlewareResponse = await apiKeyMiddleware(
+      ["inscription"],
+      "read",
+      []
+    )(req);
+
+    if (middlewareResponse) {
+      return middlewareResponse;
+    }
     const query = convertParams(CBRCToken, req.nextUrl);
 
     // Generate a unique key for this query
