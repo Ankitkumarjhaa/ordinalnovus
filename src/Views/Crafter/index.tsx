@@ -161,7 +161,7 @@ function Crafter() {
         `CBRC-20:${op}:${tick}=${amt}.txt`
       );
 
-      const { data } = await axios.post("/api/v2/inscribe/create-cbrc-order", {
+      const BODY = {
         files: files && files.length > 0 ? files : [fallbackData],
         tick,
         amt,
@@ -169,7 +169,12 @@ function Crafter() {
         receive_address: walletDetails?.ordinal_address,
         fee_rate: feeRate,
         op,
-      });
+      };
+
+      const { data } = await axios.post(
+        "/api/v2/inscribe/create-cbrc-order",
+        BODY
+      );
       console.log({ data });
       setPayDetails(data);
       setLoading(false);

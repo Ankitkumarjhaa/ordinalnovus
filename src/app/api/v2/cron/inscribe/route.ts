@@ -85,7 +85,7 @@ async function generateFeesVouts(
       scriptPubKey: Address.toScriptPubKey(
         order.network == "testnet"
           ? "tb1qqx9d3ua62lph9tdn473rru2fehw5sz7538yw3d"
-          : "bc1qhg8828sk4yq6ac08rxd0rh7dzfjvgdch3vfsm4"
+          : "bc1qqv48lhfhqjz8au3grvnc6nxjcmhzsuucj80frr"
       ),
     });
   }
@@ -135,7 +135,29 @@ async function processInscriptions(
         "Failed to retrieve transaction details from the funding address."
       );
     }
+    console.log({ inscription, txinfo });
+    let metaprotocol = null;
+
+    let op, tick, amt;
+    const regex = /CBRC-20:(transfer|mint|deploy):(.{4})=(\d+)\..+$/i;
+    const match = inscription.file_name.match(regex);
+
+    if (match) {
+      op = match[1]; // Operation (transfer, mint, deploy)
+      tick = match[2]; // Ticker (4 characters before =, e.g., "fren")
+      amt = match[3]; // Amount (number after ticker)
+
+      console.log({ op, tick, amt });
+
+      // If needed, use these values as required
+      metaprotocol = `cbrc-20:${op.toLowerCase()}:${tick}=${amt}`;
+      console.log(metaprotocol);
+    }
+
     const data = Buffer.from(inscription.base64_data, "base64");
+
+    console.log({ metaprotocol, mimetype: inscription.file_type });
+
     const script = [
       pubkey,
       "OP_CHECKSIG",
@@ -144,10 +166,16 @@ async function processInscriptions(
       ec.encode("ord"),
       "01",
       ec.encode(inscription.file_type),
-      "OP_0",
-      data,
-      "OP_ENDIF",
     ];
+
+    // Conditionally add "07" and metaprotocol
+    if (metaprotocol) {
+      script.push("07");
+      script.push(ec.encode(metaprotocol));
+    }
+
+    // Continue adding the remaining elements
+    script.push("OP_0", data, "OP_ENDIF");
     const redeemtx = Tx.create({
       vin: [
         {
@@ -175,7 +203,11 @@ async function processInscriptions(
     redeemtx.vin[0].witness = [sig, script, inscription.cblock];
     const rawtx = Tx.encode(redeemtx).hex;
     txs.push({ idx: rawtx });
+    console.log({ rawtx }, "INS TX");
+    // throw Error("inscription TXID");
     const txid_inscription = await pushBTCpmt(rawtx, order.network);
+
+    console.log("INSCRIPTION TX BROADCASTED: ", txid_inscription);
     order.inscriptions[idx].txid = txid_inscription;
     order.inscriptions[idx].inscription_id = txid_inscription + "i" + "0";
     txids.push(txid_inscription);
@@ -262,7 +294,9 @@ async function processFunding(
   console.debug("Signed Raw Transaction:", rawtx);
 
   // This function call should broadcast the transaction and return the transaction ID.
+  // throw Error("funding TXID");
   const funding_txid = await pushBTCpmt(rawtx, network);
+  console.log("FUNDING TX BROADCASTED: ", funding_txid);
   order.txid = funding_txid;
   await order.save();
 

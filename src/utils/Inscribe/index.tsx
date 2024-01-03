@@ -78,7 +78,7 @@ export const addressReceivedMoneyInThisTx = async (
 ) => {
   let txid, vout, amt, input_address, vsize;
   let { data } = await axios.get(
-    `https://mempool.space/${mempoolNetwork(network)}api/address/${address}/txs`
+    `https://mempool-api.ordinalnovus.com/address/${address}/txs`
   );
   let json = data;
   // console.dir(json, { depth: null });
@@ -149,7 +149,9 @@ export async function addressOnceHadMoney(
   min_balance: number
 ) {
   var url =
-    `https://mempool.space/${mempoolNetwork(network)}api/address/` + address;
+    `https://mempool-api.ordinalnovus.com/${mempoolNetwork(network)}address/` +
+    address;
+
   var { data } = await axios.get(url);
   var json = data;
   if (
@@ -160,7 +162,8 @@ export async function addressOnceHadMoney(
       json.chain_stats.funded_txo_sum +
       json.mempool_stats.funded_txo_sum -
       (json.chain_stats.spent_txo_sum + json.mempool_stats.spent_txo_sum);
-    if (bal > min_balance) {
+
+    if (bal >= min_balance) {
       return true;
     } else throw Error("Low Balance");
   }
@@ -168,7 +171,7 @@ export async function addressOnceHadMoney(
 }
 
 export async function pushBTCpmt(rawtx: string, network: string) {
-  const url = `https://mempool.space/${mempoolNetwork(network)}api/tx`;
+  const url = `https://mempool-api.ordinalnovus.com/tx`;
   try {
     const response = await axios.post(url, rawtx);
     return response.data; // or response.data.txid if the txid is in the data object

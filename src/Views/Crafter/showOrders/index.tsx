@@ -37,7 +37,7 @@ function ShowOrders() {
         setLoading(false);
       }
     }
-  }, [sort, page, pageSize, tick]);
+  }, [sort, page, pageSize, tick, walletDetails]);
 
   useEffect(() => {
     fetchData();
@@ -53,6 +53,7 @@ function ShowOrders() {
     setPage(value);
   };
 
+  console.log({ data });
   return (
     <div>
       <div className="SortSearchPages py-6 flex flex-wrap justify-between">

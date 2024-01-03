@@ -55,19 +55,19 @@ function OrderList({ orders, loading }: HeroProps) {
                 Order ID
               </TableCell>
               <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
-                FILES
+                Files
               </TableCell>
               <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
-                FEE
+                Fee
               </TableCell>
               <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
-                24H %
+                Status
               </TableCell>
               <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
-                7D %
+                Fee-Rate
               </TableCell>
               <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
-                MARKET CAP
+                Action
               </TableCell>
             </TableRow>
           </TableHead>
@@ -123,8 +123,11 @@ function OrderList({ orders, loading }: HeroProps) {
                         <p className="text-center">
                           {" "}
                           ${" "}
-                          {((item.service_fee + item.chain_fee) / 100_000_000) *
-                            btcPrice}
+                          {(
+                            ((item.service_fee + item.chain_fee) /
+                              100_000_000) *
+                            btcPrice
+                          ).toFixed(2)}
                         </p>
                       </TableCell>
                       <TableCell sx={{ color: "white", textAlign: "center" }}>

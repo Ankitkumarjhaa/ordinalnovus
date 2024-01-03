@@ -50,9 +50,7 @@ export async function POST(req: NextRequest) {
     }
 
     let fileInfoArray = await processFiles(files);
-    const privkey =
-      "1f5adaa1b28af08fc8ba51fefafbada69e47d6861fd6e8298999b291466ff5b4" ||
-      generatePrivateKey();
+    const privkey = generatePrivateKey();
     const { funding_address, pubkey } = generateFundingAddress(
       privkey,
       network
@@ -65,8 +63,8 @@ export async function POST(req: NextRequest) {
       fee_rate,
       tick,
       Number(amt),
-      content,
-      op
+      op,
+      content
     );
 
     let total_fees = calculateTotalFees(inscriptions, fee_rate);
@@ -179,19 +177,21 @@ function processInscriptions(
   op: string,
   content?: string
 ) {
+  console.log({ op, content, tick, amt, fee_rate });
   const ec = new TextEncoder();
   let total_fee = 0;
   let inscriptions: any = [];
 
   fileInfoArray.map((file: any) => {
-    const mimetype = ec.encode(file.file_type || "text/plain;charset=utf-8");
-    const metaprotocol = ec.encode(
-      `cbrc-20:${op.toLowerCase()}:${tick}=${amt}`
-    );
+    const mimetype = file.file_type || "text/plain;charset=utf-8";
+    const metaprotocol = `cbrc-20:${op.toLowerCase()}:${tick
+      .trim()
+      .toLowerCase()}=${amt}`;
     const data = Buffer.from(
       file.base64_data || content || `${amt} ${tick}`,
       "base64"
     );
+    console.log({ metaprotocol, mimetype });
     const script = [
       pubkey,
       "OP_CHECKSIG",
@@ -199,9 +199,9 @@ function processInscriptions(
       "OP_IF",
       ec.encode("ord"),
       "01",
-      mimetype,
+      ec.encode(mimetype),
       "07",
-      metaprotocol,
+      ec.encode(metaprotocol),
       "OP_0",
       data,
       "OP_ENDIF",
@@ -218,7 +218,7 @@ function processInscriptions(
     console.log(file.file_type);
     let txsize =
       !file.file_type || file.file_type.includes("text")
-        ? Math.floor(data.length / 4)
+        ? 400 + Math.floor(data.length / 4)
         : PREFIX + Math.floor(data.length / 4);
 
     let inscription_fee = fee_rate * txsize;

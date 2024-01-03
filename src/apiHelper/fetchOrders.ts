@@ -35,7 +35,7 @@ export async function fetchOrders(
   const { sort, page_size, page, wallet } = params;
   try {
     const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_URL}/api/v2/inscribe`,
+      `${process.env.NEXT_PUBLIC_URL}/api/v2/inscribe/order`,
       {
         params: {
           address: wallet,
