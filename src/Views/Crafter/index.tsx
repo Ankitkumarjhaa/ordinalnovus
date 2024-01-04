@@ -22,6 +22,7 @@ const options = [
 function Crafter() {
   const [feeRate, setFeeRate] = useState<number>(0);
   const [defaultFeeRate, setDefaultFeerate] = useState(0);
+  const [rep, setRep] = useState(1);
   const walletDetails = useWalletAddress();
   const fees = useSelector((state: RootState) => state.general.fees);
   const dispatch = useDispatch<AppDispatch>();
@@ -155,14 +156,30 @@ function Crafter() {
         );
         return;
       }
+
+      if (rep > 1 && content) {
+        dispatch(
+          addNotification({
+            id: new Date().valueOf(),
+            message: "Leave Content Empty to mint multiple items",
+            open: true,
+            severity: "error",
+          })
+        );
+        return;
+      }
       setLoading(true);
-      const fallbackData = textToFileData(
-        content || `${amt} ${tick}`,
-        `CBRC-20:${op}:${tick}=${amt}.txt`
-      );
+      let fallbackDataArray = [];
+      for (let i = 0; i < rep; i++) {
+        const fallbackData = textToFileData(
+          `${amt} ${tick} ${i >= 1 && i + 1}`,
+          `CBRC-20:${op}:${tick}=${amt}.txt`
+        );
+        fallbackDataArray.push(fallbackData);
+      }
 
       const BODY = {
-        files: files && files.length > 0 ? files : [fallbackData],
+        files: files && files.length > 0 ? files : fallbackDataArray,
         tick,
         amt,
         content,
@@ -241,6 +258,16 @@ function Crafter() {
                 fullWidth
               />
             </div>
+            <div className="center py-2">
+              <CustomInput
+                value={rep.toString()}
+                placeholder="Amount to mint"
+                onChange={(new_content) => setRep(Number(new_content))}
+                fullWidth
+                endAdornmentText=" Inscription"
+                startAdornmentText="Mint "
+              />
+            </div>
           </>
         )}
         <div className="center py-2">
@@ -272,6 +299,7 @@ function Crafter() {
         </div>
         {payDetails ? (
           <div className="pt-3">
+            <p className="text-center pb-3">SAT {payDetails.total_fee}</p>
             <p className="text-center pb-3">
               ${payDetails.total_fees_in_dollars.toFixed(2)}
             </p>

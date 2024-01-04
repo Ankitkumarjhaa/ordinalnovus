@@ -14,8 +14,8 @@ import { bytesToHex, satsToDollars } from "@/utils/Inscribe";
 const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
 const BASE_SIZE = 160;
 const PADDING = 1000;
-const PREFIX = 546;
-const MINIMUM_FEE = 1000;
+const PREFIX = 160;
+const MINIMUM_FEE = 2000;
 
 export async function POST(req: NextRequest) {
   try {
@@ -177,12 +177,19 @@ function processInscriptions(
   op: string,
   content?: string
 ) {
-  console.log({ op, content, tick, amt, fee_rate });
   const ec = new TextEncoder();
   let total_fee = 0;
   let inscriptions: any = [];
 
   fileInfoArray.map((file: any) => {
+    console.log({
+      op,
+      content,
+      tick,
+      amt,
+      fee_rate,
+      data: file.base64_data || content || `${amt} ${tick}`,
+    });
     const mimetype = file.file_type || "text/plain;charset=utf-8";
     const metaprotocol = `cbrc-20:${op.toLowerCase()}:${tick
       .trim()
@@ -216,10 +223,7 @@ function processInscriptions(
     console.debug("Tapkey:", tapkey);
 
     console.log(file.file_type);
-    let txsize =
-      !file.file_type || file.file_type.includes("text")
-        ? 400 + Math.floor(data.length / 4)
-        : PREFIX + Math.floor(data.length / 4);
+    let txsize = PREFIX + Math.floor(data.length / 4);
 
     let inscription_fee = fee_rate * txsize;
     file.inscription_fee = inscription_fee;
@@ -237,53 +241,6 @@ function processInscriptions(
       fee_rate: fee_rate,
     });
   });
-
-  // if (tick && op && amt && fileInfoArray) {
-  //   const mimetype = ec.encode(file.file_type||"text/plain;charset=utf-8");
-  // const metaprotocol = ec.encode(
-  //   `cbrc-20:${op.toLowerCase()}:${tick}=${amt}`
-  // );
-  // const data = Buffer.from(content || `${amt} ${tick}`, "base64");
-  //   const script = [
-  //     pubkey,
-  //     "OP_CHECKSIG",
-  //     "OP_0",
-  //     "OP_IF",
-  //     ec.encode("ord"),
-  //     "01",
-  //     mimetype,
-  // "07",
-  // metaprotocol,
-  //     "OP_0",
-  //     data,
-  //     "OP_ENDIF",
-  //   ];
-  //   const leaf = Tap.tree.getLeaf(Script.encode(script));
-  //   const [tapkey, cblock] = Tap.getPubKey(pubkey, { target: leaf });
-
-  //   //@ts-ignore
-  //   let inscriptionAddress = Address.p2tr.encode(tapkey, network);
-
-  //   console.debug("Inscription address: ", inscriptionAddress);
-  //   console.debug("Tapkey:", tapkey);
-
-  //   let txsize = PREFIX + Math.floor(data.length / 4);
-
-  //   let file = { inscription_fee: 0 };
-  //   let inscription_fee = fee_rate * txsize;
-  //   file.inscription_fee = inscription_fee;
-  //   total_fee += inscription_fee;
-
-  //   inscriptions.push({
-  //     ...file,
-  //     leaf: leaf,
-  //     tapkey: tapkey,
-  //     cblock: cblock,
-  //     inscription_address: inscriptionAddress,
-  //     txsize: txsize,
-  //     fee_rate: fee_rate,
-  //   });
-  // }
 
   return inscriptions;
 }

@@ -27,7 +27,7 @@ function OrderList({ orders, loading }: HeroProps) {
   const router = useRouter();
 
   const handleListingClick = (id: string) => {
-    router.push(`/cbrc-20/${id}`);
+    window.open(`https://mempool.space/tx/${id}`, "_blank");
   };
 
   const btcPrice = useSelector(
@@ -84,6 +84,7 @@ function OrderList({ orders, loading }: HeroProps) {
                         color: "white",
                         cursor: "pointer",
                       }}
+                      onClick={() => item.txid && handleListingClick(item.txid)}
                     >
                       <TableCell
                         component="th"

@@ -50,12 +50,13 @@ function createFundingAddress(order: IInscribeOrder) {
  */
 async function generateInscriptionVouts(
   inscriptions: IFileSchema[],
+  order: IInscribeOrder,
   pubkey: Uint8Array
 ) {
   const inscription_vouts: { value: number; scriptPubKey: string[] }[] = [];
   for (const inscription of inscriptions) {
     inscription_vouts.push({
-      value: 1000 + inscription.inscription_fee,
+      value: Math.floor(order.chain_fee / inscriptions.length),
       //@ts-ignore
       scriptPubKey: Address.toScriptPubKey(inscription.inscription_address),
     });
@@ -204,7 +205,7 @@ async function processInscriptions(
     const rawtx = Tx.encode(redeemtx).hex;
     txs.push({ idx: rawtx });
     console.log({ rawtx }, "INS TX");
-    // throw Error("inscription TXID");
+    // throw Error("INS TEST");
     const txid_inscription = await pushBTCpmt(rawtx, order.network);
 
     console.log("INSCRIPTION TX BROADCASTED: ", txid_inscription);
@@ -267,6 +268,8 @@ async function processFunding(
     );
   }
 
+  console.log({ txid, vout, value });
+
   // Construct the redeem transaction to distribute funds to the inscription outputs.
   const redeemtx = Tx.create({
     vin: [
@@ -294,7 +297,7 @@ async function processFunding(
   console.debug("Signed Raw Transaction:", rawtx);
 
   // This function call should broadcast the transaction and return the transaction ID.
-  // throw Error("funding TXID");
+  throw Error("funding TXID");
   const funding_txid = await pushBTCpmt(rawtx, network);
   console.log("FUNDING TX BROADCASTED: ", funding_txid);
   order.txid = funding_txid;
@@ -324,6 +327,7 @@ export async function GET(req: NextRequest) {
 
     const inscription_vouts = await generateInscriptionVouts(
       order.inscriptions,
+      order,
       pubkey
     );
 
