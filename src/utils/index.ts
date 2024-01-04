@@ -141,10 +141,10 @@ export const determineTypesFromId = (id: string): string[] => {
 export async function getBTCPriceInDollars() {
   try {
     const response = await fetch(
-      "https://api.coindesk.com/v1/bpi/currentprice/BTC.json"
+      "https://api.coinbase.com/v2/prices/BTC-USD/spot"
     );
     const data = await response.json();
-    const priceInDollars = data.bpi.USD.rate_float;
+    const priceInDollars = data["data"]["amount"];
     return priceInDollars;
   } catch (error) {
     console.error("Error fetching BTC price:", error);

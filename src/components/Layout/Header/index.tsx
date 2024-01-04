@@ -13,10 +13,12 @@ import { MdDashboard } from "react-icons/md";
 import { usePathname } from "next/navigation";
 import { fetchFees, getBTCPriceInDollars } from "@/utils";
 import { setAllowedCbrcs, setBTCPrice } from "@/stores/reducers/generalReducer";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import mixpanel from "mixpanel-browser";
 import { CollectWallet } from "@/apiHelper/collectWalletHelper";
 import { fetchAllowed } from "@/apiHelper/fetchAllowed";
+import moment from "moment";
+import { RootState } from "@/stores";
 const additionalItems = [
   <Link key={"dashboard"} href="/dashboard" shallow>
     <div className="flex items-center">
@@ -26,11 +28,14 @@ const additionalItems = [
   </Link>,
 ];
 function Header() {
+  const fees = useSelector((state: RootState) => state.general.fees);
   const walletDetails = useWalletAddress();
   const pathname = usePathname();
   const dispatch = useDispatch();
   const getBTCPrice = useCallback(async () => {
+    console.log("Getting new BTC Price...");
     const price = await getBTCPriceInDollars();
+    console.log({ price: price });
     dispatch(setBTCPrice(price));
   }, [dispatch]);
 
@@ -38,12 +43,6 @@ function Header() {
     const allowed = await fetchAllowed();
     dispatch(setAllowedCbrcs(allowed));
   }, [dispatch]);
-
-  useEffect(() => {
-    getBTCPrice();
-    fetchFees(dispatch);
-    fetchAllowedTokensChecksum();
-  }, [dispatch, getBTCPrice]);
 
   async function collectWalletDetails() {
     if (walletDetails && walletDetails.wallet)
@@ -79,7 +78,18 @@ function Header() {
       });
     }
   }, [walletDetails]);
-
+  useEffect(() => {
+    const shouldFetch =
+      !fees ||
+      !fees.lastChecked ||
+      moment().diff(moment(fees.lastChecked), "minutes") >= 10;
+    console.log({ shouldFetch, fees });
+    if (shouldFetch) {
+      fetchFees(dispatch);
+      getBTCPrice();
+    }
+    fetchAllowedTokensChecksum();
+  }, [dispatch, fees]);
   return (
     <div className="fixed bg-primary w-full left-0 right-0 top-0 z-[999] flex justify-center lg:justify-between items-center flex-wrap py-6 px-6 max-w-screen-2xl mx-auto ">
       <CustomNotification />

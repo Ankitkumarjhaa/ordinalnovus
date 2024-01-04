@@ -258,7 +258,7 @@ function Crafter() {
                 fullWidth
               />
             </div>
-            <div className="center py-2">
+            {/* <div className="center py-2">
               <CustomInput
                 value={rep.toString()}
                 placeholder="Amount to mint"
@@ -267,7 +267,7 @@ function Crafter() {
                 endAdornmentText=" Inscription"
                 startAdornmentText="Mint "
               />
-            </div>
+            </div> */}
           </>
         )}
         <div className="center py-2">

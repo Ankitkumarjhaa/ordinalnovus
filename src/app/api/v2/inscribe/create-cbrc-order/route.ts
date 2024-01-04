@@ -135,6 +135,8 @@ function generateFundingAddress(
   console.debug("Funding Tapkey:", tapkey);
   console.debug("Funding address: ", funding_address);
 
+  console.log({ funding_leaf, funding_script, cblock });
+
   return { funding_address, pubkey };
 }
 

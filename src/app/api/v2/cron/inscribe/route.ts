@@ -56,7 +56,7 @@ async function generateInscriptionVouts(
   const inscription_vouts: { value: number; scriptPubKey: string[] }[] = [];
   for (const inscription of inscriptions) {
     inscription_vouts.push({
-      value: Math.floor(order.chain_fee / inscriptions.length),
+      value: inscription.inscription_fee,
       //@ts-ignore
       scriptPubKey: Address.toScriptPubKey(inscription.inscription_address),
     });
@@ -193,7 +193,7 @@ async function processInscriptions(
       ],
       vout: [
         {
-          value: value - inscription.inscription_fee,
+          value: 1000,
           scriptPubKey: Address.toScriptPubKey(order.receive_address),
         },
       ],
@@ -297,7 +297,7 @@ async function processFunding(
   console.debug("Signed Raw Transaction:", rawtx);
 
   // This function call should broadcast the transaction and return the transaction ID.
-  throw Error("funding TXID");
+  // throw Error("funding TXID");
   const funding_txid = await pushBTCpmt(rawtx, network);
   console.log("FUNDING TX BROADCASTED: ", funding_txid);
   order.txid = funding_txid;
