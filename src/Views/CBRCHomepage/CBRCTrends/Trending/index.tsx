@@ -5,12 +5,12 @@ import { BiSolidUpArrow, BiSolidDownArrow } from "react-icons/bi";
 
 const Trending = ({ data }: { data: IToken[] }) => {
   const calculateVolumeChange = (historicalData: IHistoricalData[]) => {
-    if (historicalData.length < 2) {
+    if (!historicalData || historicalData.length < 2) {
       return { value: "N/A", isPositive: false }; // Not enough data
     }
-
-    const latestVolume = historicalData[0].volume;
-    const previousVolume = historicalData[1].volume;
+  
+    const latestVolume = historicalData[0]?.volume ;
+    const previousVolume = historicalData[1]?.volume ;
 
     if (previousVolume === 0) {
       return {
