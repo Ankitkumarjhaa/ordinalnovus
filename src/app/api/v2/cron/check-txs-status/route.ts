@@ -3,6 +3,7 @@ import { Inscription } from "@/models";
 import moment from "moment";
 import axios from "axios"; // Ensure axios is installed
 import { NextResponse } from "next/server";
+import { fetchLatestInscriptionData } from "@/utils/Marketplace";
 
 export async function GET() {
   try {
@@ -17,13 +18,19 @@ export async function GET() {
 
     for (const inscription of inMempoolForMoreThanADayTx) {
       try {
-        const response = await axios.get(
-          `https://mempool-api.ordinalnovus.com/tx/${inscription.txid}/status`
+        const { data } = await axios.get(
+          `https://mempool-api.ordinalnovus.com/tx/${inscription.txid}`
         );
+
+        const inscriptionDetails = await fetchLatestInscriptionData(
+          inscription.inscription_id
+        );
+
         await Inscription.updateOne(
           { _id: inscription._id },
           {
             $set: {
+              ...inscriptionDetails,
               listed: false,
               listed_price: 0,
               in_mempool: false,
@@ -32,10 +39,12 @@ export async function GET() {
               listed_token: "",
               listed_price_per_token: "",
               listed_amount: "",
+              tap_internal_key: "",
+              listed_seller_receive_address: "",
             },
           }
         );
-      } catch (error) {
+      } catch (error: any) {
         console.error(
           `Error fetching status for txid ${inscription.txid}:`,
           error

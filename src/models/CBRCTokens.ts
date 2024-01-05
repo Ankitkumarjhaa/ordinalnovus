@@ -5,6 +5,7 @@ export const CBRCTokenSchema = new Schema(
     tick: { type: String, index: true, unique: true },
     // tick in UPPERCASE
     checksum: { type: String, index: true },
+    allowed: { type: Boolean, default: false, index: true },
     supply: { type: Number, default: 0 },
     max: Number,
     lim: Number,

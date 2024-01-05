@@ -60,6 +60,10 @@ async function processOrdItem(
     throw Error("Item not listed in db");
   }
 
+  if (dbItem.in_mempool) {
+    throw Error("Item bought by someone else!!");
+  }
+
   if (
     (ordItem && ordItem.address && ordItem.address !== dbItem.address) ||
     dbItem.output !== ordItem.output
@@ -71,6 +75,7 @@ async function processOrdItem(
     dbItem.location = ordItem.location;
     dbItem.offset = ordItem.offset;
     dbItem.output_value = ordItem.output_value;
+    dbItem.in_mempool = false;
     dbItem.signed_psbt = "";
     dbItem.unsigned_psbt = "";
     dbItem.tap_internal_key = "";

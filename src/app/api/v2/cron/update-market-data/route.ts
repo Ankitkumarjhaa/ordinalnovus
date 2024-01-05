@@ -19,6 +19,9 @@ export async function GET(req: NextRequest) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
+  // const twentyMinutesAgo = new Date();
+  // twentyMinutesAgo.setMinutes(twentyMinutesAgo.getMinutes() - 20);
+
   const twentyFourHoursAgo = new Date();
   twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24); // Subtract 24 hours from the current time
 
@@ -103,11 +106,10 @@ export async function GET(req: NextRequest) {
               filter: { _id: token._id },
               update: {
                 last_updated: new Date(),
-                ...(latestSale &&
-                  latestSale.price_per_token && {
-                    price:
-                      (latestSale.price_per_token / 100_000_000) * btcPrice,
-                  }),
+                // ...(latestSale &&
+                //   latestSale.price_per_token && {
+                //     price: latestSale.price_per_token,
+                //   }),
                 $push: {
                   historicalData: {
                     $each: [
@@ -134,11 +136,11 @@ export async function GET(req: NextRequest) {
             updateOne: {
               filter: { _id: token._id },
               update: {
-                ...(latestSale &&
-                  latestSale.price_per_token && {
-                    price:
-                      (latestSale.price_per_token / 100_000_000) * btcPrice,
-                  }),
+                // ...(latestSale &&
+                //   latestSale.price_per_token && {
+                //     price:
+                //       (latestSale.price_per_token / 100_000_000) * btcPrice,
+                //   }),
                 last_updated: new Date(),
               },
             },

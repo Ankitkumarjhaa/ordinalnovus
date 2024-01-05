@@ -69,7 +69,7 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
 
     let query;
 
-    if (/^[0-9A-Fa-f]{64}i\d$/gm.test(id)) {
+    if (/^[0-9A-Fa-f]{64}i\d+$/gm.test(id)) {
       query = { inscription_id: id };
     } else if (!isNaN(Number(id))) {
       query = { inscription_number: Number(id) };
@@ -235,7 +235,7 @@ export const checkCbrcValidity = async (id: string) => {
 
       // If invalid, store 'false' in the cache
       if (!isValid) {
-        await setCache(cacheKey, false, 24 * 60 * 60); // Cache for 2 hours
+        await setCache(cacheKey, false, 60 * 60); // Cache for 1 hour
       }
 
       return isValid;

@@ -21,15 +21,6 @@ export async function POST(req: NextRequest) {
     const wallet = body.wallet;
     const tag = body?.tag;
 
-    const ip = req.headers.get("x-forwarded-for") || req.ip;
-
-    if (!ip) {
-      throw new CustomError("Could not determine IP address", 400);
-    }
-
-    const currentDay = new Date().toISOString().split("T")[0]; // e.g., '2023-10-07'
-    const redisKey = `${ip}:${currentDay}:apikey`;
-
     if (!wallet) {
       throw new CustomError("Please provide a valid wallet address", 400);
     }
@@ -57,14 +48,6 @@ export async function POST(req: NextRequest) {
         expirationDate,
         details: key,
       });
-    }
-
-    const existingEntry = await getCache(redisKey);
-    if (existingEntry) {
-      throw new CustomError(
-        `An API key has already been created from this IP address (${ip}) today`,
-        400
-      );
     }
 
     const apiKey = uuidv4();
@@ -104,7 +87,6 @@ export async function POST(req: NextRequest) {
     //   userType: "gold",
     // });
 
-    await setCache(redisKey, true, 86400); // Cache this entry for 24 hours ( only 1 apikey can be created from an IP address per day )
     return NextResponse.json(
       { message: "API key created successfully.", apiKey },
       { status: 200 }

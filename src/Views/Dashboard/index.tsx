@@ -109,7 +109,7 @@ function AccountPage() {
       if (tab === "activity") fetchSales();
       else fetchWalletInscriptions();
     }
-  }, [walletDetails, tab]);
+  }, [walletDetails, tab, page]);
 
   useEffect(() => {
     if (walletDetails?.connected && walletDetails.ordinal_address) {
@@ -248,7 +248,7 @@ function AccountPage() {
         <CustomTab
           tabsData={[
             { label: "CBRC-20", value: "cbrc-20" },
-            { label: "All", value: "all" },
+            // { label: "All", value: "all" },
             { label: "My Activity", value: "activity" },
           ]}
           currentTab={tab}
@@ -310,7 +310,7 @@ function AccountPage() {
             </div>
           </div>
         )}
-        {inscriptions && inscriptions?.length > 0 && total / page_size > 1 && (
+        {total / page_size > 1 && (
           <div className="w-full lg:w-auto center">
             <CustomPaginationComponent
               count={Math.ceil(total / page_size)}
@@ -328,7 +328,7 @@ function AccountPage() {
             <InscriptionDisplay
               data={inscriptions}
               loading={loading}
-              pageSize={10}
+              pageSize={page_size}
               refreshData={fetchWalletInscriptions}
             />
           ) : (
@@ -340,17 +340,27 @@ function AccountPage() {
               ) : (
                 <div className="text-center py-16">
                   {tab === "cbrc-20" ? (
-                    <div className="text-xs ">
-                      <p className="pb-2">
-                        If Your Transferable Balance is 0 -{">"} Inscribe a
-                        Transfer Inscription{" "}
-                      </p>
-                      <p>
-                        If Your Transferable Balance is greater than 0 and
-                        Inscription is not present, Please wait, your
-                        Inscription will appear.
-                      </p>
-                    </div>
+                    <>
+                      {page > 1 ? (
+                        <div className="text-xs ">
+                          <p className="pb-2">
+                            No valid transferable inscription Found in this page
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="text-xs ">
+                          <p className="pb-2">
+                            If Your Transferable Balance is 0 -{">"} Inscribe a
+                            Transfer Inscription{" "}
+                          </p>
+                          <p>
+                            If Your Transferable Balance is greater than 0 and
+                            Inscription is not present, Please wait, your
+                            Inscription will appear.
+                          </p>
+                        </div>
+                      )}
+                    </>
                   ) : (
                     "No Inscriptions Found"
                   )}

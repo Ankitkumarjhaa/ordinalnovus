@@ -10,23 +10,19 @@ import CustomPaginationComponent from "@/components/elements/CustomPagination";
 import { FaCheckCircle } from "react-icons/fa";
 import CustomSelector from "@/components/elements/CustomSelector";
 
-type CbrcDetailPageProps = {
-  cbrc: IToken;
-};
-
 const options = [
   { value: "listed_at:-1", label: "Latest Listings" },
   { value: "listed_price_per_token:1", label: "Low Price (Token)" },
   { value: "listed_price:1", label: "Low Price (Total)" },
 ];
 
-function CBRCListingsData({ cbrc }: CbrcDetailPageProps) {
+function CBRCLatestListings() {
   const dispatch = useDispatch();
   const [page, setPage] = useState<number>(1);
   const [data, setData] = useState<IInscription[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
-  const [pageSize, setPageSize] = useState<number>(20);
-  const [sort, setSort] = useState<string>("listed_price_per_token:1");
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [sort, setSort] = useState<string>("listed_at:-1");
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchData = useCallback(async () => {
@@ -37,7 +33,6 @@ function CBRCListingsData({ cbrc }: CbrcDetailPageProps) {
         page,
         page_size: pageSize,
         sort,
-        tick: cbrc.tick.toLowerCase(),
       });
       if (result && result.data) {
         setData(result.data.inscriptions);
@@ -119,4 +114,4 @@ function CBRCListingsData({ cbrc }: CbrcDetailPageProps) {
   );
 }
 
-export default CBRCListingsData;
+export default CBRCLatestListings;

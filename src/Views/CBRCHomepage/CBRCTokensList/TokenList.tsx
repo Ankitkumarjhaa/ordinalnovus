@@ -28,6 +28,10 @@ function TokenList({ tokens, loading }: HeroProps) {
     router.push(`/cbrc-20/${id}`);
   };
 
+  const btcPrice = useSelector(
+    (state: RootState) => state.general.btc_price_in_dollar
+  );
+
   const allowed_cbrcs = useSelector(
     (state: RootState) => state.general.allowed_cbrcs
   );
@@ -63,9 +67,9 @@ function TokenList({ tokens, loading }: HeroProps) {
               <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
                 MARKET CAP
               </TableCell>
-              {/* <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+              <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
                 VOLUME (24h)
-              </TableCell> */}
+              </TableCell>
               <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
                 SUPPLY
               </TableCell>
@@ -74,164 +78,166 @@ function TokenList({ tokens, loading }: HeroProps) {
           <>
             {tokens && tokens.length ? (
               <TableBody sx={{ color: "white" }}>
-                {tokens?.map((item: IToken) => (
-                  <TableRow
-                    onClick={() => handleListingClick(item.tick)}
-                    key={item.tick}
-                    sx={{
-                      bgcolor: allowed_cbrcs?.includes(item.checksum)
-                        ? ""
-                        : "#4d4d4d",
-                      "&:last-child td, &:last-child th": { border: 0 },
-                      "&:hover": { bgcolor: "#1f1d3e" },
-                      color: "white",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <TableCell
-                      component="th"
-                      scope="row"
+                {tokens?.map((item: IToken) => {
+                  const price = ((item?.price || 0) / 100_000_000) * btcPrice; // in $
+                  const volume = ((item?.volume || 0) / 100_000_000) * btcPrice;
+                  return (
+                    <TableRow
+                      onClick={() => handleListingClick(item.tick)}
+                      key={item.tick}
                       sx={{
-                        textAlign: "left",
+                        bgcolor: allowed_cbrcs?.includes(item.checksum)
+                          ? ""
+                          : "#4d4d4d",
+                        "&:last-child td, &:last-child th": { border: 0 },
+                        "&:hover": { bgcolor: "#1f1d3e" },
                         color: "white",
-                        textTransform: "uppercase",
+                        cursor: "pointer",
                       }}
                     >
-                      <p className="text-left uppercase">{item.tick}</p>
-                    </TableCell>
-                    <TableCell
-                      component="th"
-                      scope="row"
-                      sx={{
-                        textAlign: "left",
-                        color: "white",
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      <p className="text-left uppercase">
-                        {allowed_cbrcs?.includes(item.checksum)
-                          ? "Enabled"
-                          : "Disabled"}
-                      </p>
-                    </TableCell>
-                    <TableCell
-                      component="th"
-                      scope="row"
-                      sx={{
-                        textAlign: "center",
-                        color: "white",
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      <p className="text-center">
-                        {" "}
-                        {item?.price
-                          ? `$${
-                              item?.price < 1
-                                ? item?.price.toFixed(6)
-                                : item?.price.toFixed(2)
-                            }`
-                          : " - "}
-                      </p>
-                    </TableCell>
-                    <TableCell sx={{ color: "white", textAlign: "center" }}>
-                      {item.historicalData?.length ? (
-                        (item.price - item.historicalData[0].price) /
-                          item.historicalData[0].price >=
-                        0 ? (
-                          <div className="flex items-center justify-center text-green-400 ">
-                            {" "}
-                            <FaChevronCircleUp className="mr-2" />
-                            {`${(
-                              ((item.price - item.historicalData[0].price) /
-                                item.historicalData[0].price) *
-                              100
-                            ).toFixed(2)}%`}
-                          </div>
+                      <TableCell
+                        component="th"
+                        scope="row"
+                        sx={{
+                          textAlign: "left",
+                          color: "white",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        <p className="text-left uppercase">{item.tick}</p>
+                      </TableCell>
+                      <TableCell
+                        component="th"
+                        scope="row"
+                        sx={{
+                          textAlign: "left",
+                          color: "white",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        <p className="text-left uppercase">
+                          {allowed_cbrcs?.includes(item.checksum)
+                            ? "Enabled"
+                            : "Disabled"}
+                        </p>
+                      </TableCell>
+                      <TableCell
+                        component="th"
+                        scope="row"
+                        sx={{
+                          textAlign: "center",
+                          color: "white",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        <p className="text-center">
+                          {" "}
+                          {price
+                            ? `$${
+                                price < 1 ? price.toFixed(6) : price.toFixed(2)
+                              }`
+                            : " - "}
+                        </p>
+                      </TableCell>
+                      <TableCell sx={{ color: "white", textAlign: "center" }}>
+                        {item.historicalData?.length ? (
+                          (price - item.historicalData[0].price) /
+                            item.historicalData[0].price >=
+                          0 ? (
+                            <div className="flex items-center justify-center text-green-400 ">
+                              {" "}
+                              <FaChevronCircleUp className="mr-2" />
+                              {`${(
+                                ((price - item.historicalData[0].price) /
+                                  item.historicalData[0].price) *
+                                100
+                              ).toFixed(2)}%`}
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-center text-red-400">
+                              <FaChevronCircleDown className=" mr-2" />
+                              {`${(
+                                ((price - item.historicalData[0].price) /
+                                  item.historicalData[0].price) *
+                                100
+                              ).toFixed(2)}%`}
+                            </div>
+                          )
                         ) : (
-                          <div className="flex items-center justify-center text-red-400">
-                            <FaChevronCircleDown className=" mr-2" />
-                            {`${(
-                              ((item.price - item.historicalData[0].price) /
-                                item.historicalData[0].price) *
-                              100
-                            ).toFixed(2)}%`}
-                          </div>
-                        )
-                      ) : (
-                        <> - </>
-                      )}
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        textAlign: "center",
-                        color: "white",
-                      }}
-                    >
-                      {item.historicalData?.length >= 7 ? (
-                        (item.price - item.historicalData[6].price) /
-                          item.historicalData[6].price >=
-                        0 ? (
-                          <div className="flex justify-center items-center text-green-400">
-                            <FaChevronCircleUp className="mr-2" />{" "}
-                            {item.historicalData?.length >= 7
-                              ? `${(
-                                  ((item.price - item.historicalData[6].price) /
-                                    item.historicalData[6].price) *
-                                  100
-                                ).toFixed(2)}%`
-                              : "-"}
-                          </div>
+                          <> - </>
+                        )}
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          textAlign: "center",
+                          color: "white",
+                        }}
+                      >
+                        {item.historicalData?.length >= 7 ? (
+                          (price - item.historicalData[6].price) /
+                            item.historicalData[6].price >=
+                          0 ? (
+                            <div className="flex justify-center items-center text-green-400">
+                              <FaChevronCircleUp className="mr-2" />{" "}
+                              {item.historicalData?.length >= 7
+                                ? `${(
+                                    ((price - item.historicalData[6].price) /
+                                      item.historicalData[6].price) *
+                                    100
+                                  ).toFixed(2)}%`
+                                : "-"}
+                            </div>
+                          ) : (
+                            <div className="flex justify-center items-center text-red-400">
+                              <FaChevronCircleDown className="mr-2" />{" "}
+                              {item.historicalData?.length >= 7
+                                ? `${(
+                                    ((price - item.historicalData[6].price) /
+                                      item.historicalData[6].price) *
+                                    100
+                                  ).toFixed(2)}%`
+                                : "-"}
+                            </div>
+                          )
                         ) : (
-                          <div className="flex justify-center items-center text-red-400">
-                            <FaChevronCircleDown className="mr-2" />{" "}
-                            {item.historicalData?.length >= 7
-                              ? `${(
-                                  ((item.price - item.historicalData[6].price) /
-                                    item.historicalData[6].price) *
-                                  100
-                                ).toFixed(2)}%`
-                              : "-"}
-                          </div>
-                        )
-                      ) : (
-                        <> - </>
-                      )}
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        textAlign: "center",
-                        color: "white",
-                      }}
-                    >
-                      <p className="text-center">
-                        {item?.historicalData && item.historicalData?.length
-                          ? `$ ${formatNumber(item.supply * item.price)}`
-                          : "-"}
-                      </p>
-                    </TableCell>
-                    {/* <TableCell
-                      sx={{
-                        textAlign: "center",
-                        color: "white",
-                      }}
-                    >
-                      <p className="text-center">
-                        {item?.volume
-                          ? `$ ${formatNumber(Number(item?.volume.toFixed(0)))}`
-                          : "-"}
-                      </p>
-                    </TableCell> */}
-                    <TableCell
-                      sx={{
-                        textAlign: "center",
-                        color: "white",
-                      }}
-                    >
-                      {formatNumber(item.supply)}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                          <> - </>
+                        )}
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          textAlign: "center",
+                          color: "white",
+                        }}
+                      >
+                        <p className="text-center">
+                          {item?.historicalData && item.historicalData?.length
+                            ? `$ ${formatNumber(item.supply * price)}`
+                            : "-"}
+                        </p>
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          textAlign: "center",
+                          color: "white",
+                        }}
+                      >
+                        <p className="text-center">
+                          {volume
+                            ? `$ ${formatNumber(Number(volume.toFixed(0)))}`
+                            : "-"}
+                        </p>
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          textAlign: "center",
+                          color: "white",
+                        }}
+                      >
+                        {formatNumber(item.supply)}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             ) : loading ? (
               <TableBody>

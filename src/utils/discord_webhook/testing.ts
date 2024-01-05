@@ -66,7 +66,7 @@ const discordWebhookCBRCSaleAlert = async (txBulkOps: any[]) => {
   if (cache) btcPrice = cache;
   else {
     btcPrice = await getBTCPriceInDollars();
-    await setCache(cacheKey, btcPrice, 30 * 60);
+    await setCache(cacheKey, btcPrice, 60);
   }
   console.log({ btcPrice });
 
@@ -110,7 +110,7 @@ const discordWebhookCBRCSaleAlert = async (txBulkOps: any[]) => {
               {
                 title: `${amt} ${token} Sold!`,
                 description: `ID:  ${inscriptions[0]}\n\n`,
-                url: `https://blockstream.info/tx/${txid}`,
+                url: `https://mempool.space/tx/${txid}`,
                 color: 9503472,
                 fields: [
                   {

@@ -2,10 +2,15 @@
 import React from "react";
 import { IToken } from "@/types/CBRC";
 import { formatNumber } from "@/utils";
+import { useSelector } from "react-redux";
+import { RootState } from "@/stores";
 type HeroProps = {
   data: IToken;
 };
 function Hero({ data }: HeroProps) {
+  const btcPrice = useSelector(
+    (state: RootState) => state.general.btc_price_in_dollar
+  );
   return (
     <div className="relative h-auto lg:h-[50vh] 2xl:max-h-96 rounded-xl overflow-hidden border xl:border-2 border-accent bg-secondary">
       <div className="flex justify-between items-start flex-wrap h-full w-full p-6">
@@ -27,13 +32,13 @@ function Hero({ data }: HeroProps) {
               )}`}
             </p>
           </div>
-          <div className="w-full my-2 text-xs py-2 uppercase font-bold text-white text-center">
+          {/* <div className="w-full my-2 text-xs py-2 uppercase font-bold text-white text-center">
             <p
               className={`text-bitcoin bg-bitcoin bg-opacity-20  py-2 w-ful rounded tracking-widest font-bold`}
             >
               DATA might be inaccurate and lagging
             </p>
-          </div>
+          </div> */}
 
           <div className="flex flex-wrap w-full items-center justify-start py-3">
             <div className="w-full md:w-6/12 lg:w-4/12 p-2">
@@ -45,37 +50,55 @@ function Hero({ data }: HeroProps) {
             <div className="w-full md:w-6/12 lg:w-4/12 p-2">
               <div className="p-2 rounded border border-gray-300 flex justify-between">
                 <span>Price</span>
-                <span>{"$ " + data.price.toFixed(3)}</span>
+                <span>
+                  {data?.price
+                    ? "$ " + ((data?.price / 100_000_000) * btcPrice).toFixed(2)
+                    : 0}
+                </span>
               </div>
             </div>
             <div className="w-full md:w-6/12 lg:w-4/12 p-2">
               <div className="p-2 rounded border border-gray-300 flex justify-between">
                 <span>Marketcap</span>
-                <span>{"$ " + formatNumber(data.price * data.supply)}</span>
+                <span>
+                  {data?.price
+                    ? "$ " +
+                      formatNumber(
+                        (data?.price / 100_000_000) * btcPrice * data.supply
+                      )
+                    : 0}
+                </span>
               </div>
             </div>
             <div className="w-full md:w-6/12 lg:w-4/12 p-2">
               <div className="p-2 rounded border border-gray-300 flex justify-between">
                 <span>Pending</span>
-                <span>{data.in_mempool}</span>
+                <span>{data?.in_mempool}</span>
               </div>
             </div>
             <div className="w-full md:w-6/12 lg:w-4/12 p-2">
               <div className="p-2 rounded border border-gray-300 flex justify-between">
                 <span>Listings</span>
-                <span>{data.listed}</span>
+                <span>{data?.listed}</span>
               </div>
             </div>
             <div className="w-full md:w-6/12 lg:w-4/12 p-2">
               <div className="p-2 rounded border border-gray-300 flex justify-between">
                 <span>Volume</span>
-                <span>$ {formatNumber(Number(data.volume.toFixed(3)))}</span>
+                <span>
+                  ${" "}
+                  {formatNumber(
+                    Number(
+                      ((data?.volume / 100_000_000) * btcPrice)?.toFixed(3)
+                    )
+                  )}
+                </span>
               </div>
             </div>
             <div className="w-full md:w-6/12 lg:w-4/12 p-2">
               <div className="p-2 rounded border border-gray-300 flex justify-between">
                 <span>Checksum</span>
-                <span>{data.checksum}</span>
+                <span>{data?.checksum}</span>
               </div>
             </div>
           </div>

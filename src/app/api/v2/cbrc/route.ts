@@ -1,7 +1,7 @@
 import { getCache, setCache } from "@/lib/cache";
 import dbConnect from "@/lib/dbConnect";
-import { CBRCToken, Inscription, Tx } from "@/models";
-import { getBTCPriceInDollars } from "@/utils";
+import apiKeyMiddleware from "@/middlewares/apikeyMiddleware";
+import { CBRCToken, Inscription } from "@/models";
 import convertParams from "@/utils/api/convertParams";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -10,10 +10,19 @@ const countTokens = async (query: any) => {
 };
 export async function GET(req: NextRequest) {
   try {
+    const middlewareResponse = await apiKeyMiddleware(
+      ["inscription"],
+      "read",
+      []
+    )(req);
+
+    if (middlewareResponse) {
+      return middlewareResponse;
+    }
     const query = convertParams(CBRCToken, req.nextUrl);
 
     // Generate a unique key for this query
-    const cacheKey = `cbrc_tokens:${JSON.stringify(query)}`;
+    const cacheKey = `cbrc_token:${JSON.stringify(query)}`;
 
     console.log({ finalQueryCbrc: query });
     // Try to fetch the result from Redis first
@@ -38,13 +47,6 @@ export async function GET(req: NextRequest) {
     if (tokens.length === 1) {
       const tempTokenInfo = tokens[0];
       const tokenLower = tokens[0].tick.trim().toLowerCase();
-      // Get InMempool Transactions Count
-      const inMempoolCount = await Inscription.countDocuments({
-        listed_token: tokenLower,
-        in_mempool: true,
-      });
-
-      tempTokenInfo.in_mempool = inMempoolCount;
 
       // Get Listed Count
       const listedCount = await Inscription.countDocuments({
@@ -53,33 +55,8 @@ export async function GET(req: NextRequest) {
       });
       tempTokenInfo.listed = listedCount;
 
-      // Get Today's Sales
-      const startOfDay = new Date();
-      startOfDay.setHours(0, 0, 0, 0);
-      const endOfDay = new Date();
-      endOfDay.setHours(23, 59, 59, 999);
-      const todaysVolume = await Tx.aggregate([
-        {
-          $match: {
-            token: tokenLower,
-            timestamp: { $gte: startOfDay, $lte: endOfDay },
-          },
-        },
-        {
-          $group: {
-            _id: null,
-            totalVolume: {
-              $sum: { $multiply: ["$amount", "$price_per_token"] },
-            },
-          },
-        },
-      ]);
-
-      const volumeInSats =
-        todaysVolume.length > 0 ? todaysVolume[0].totalVolume : 0;
-
-      tempTokenInfo.volume =
-        (volumeInSats / 100_000_000) * (await getBTCPriceInDollars());
+      // tempTokenInfo.volume =
+      //   (volumeInSats / 100_000_000) * (await getBTCPriceInDollars());
 
       tokens[0] = tempTokenInfo;
     }
@@ -94,7 +71,7 @@ export async function GET(req: NextRequest) {
       },
     };
 
-    await setCache(cacheKey, result, 20 * 60); //20 seconds
+    await setCache(cacheKey, result, 20); //20 seconds
     return NextResponse.json(result);
   } catch (err) {
     console.error(err); // or use a more advanced error logging mechanism

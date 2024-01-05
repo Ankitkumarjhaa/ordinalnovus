@@ -1,12 +1,12 @@
 "use server";
 
 import dbConnect from "@/lib/dbConnect";
-import { CBRCToken, Inscription } from "@/models";
-import { stringToHex } from "@/utils";
+import { CBRCToken, Inscription, Tx } from "@/models";
+import { getBTCPriceInDollars, stringToHex } from "@/utils";
 
 // price in $
-async function updateTokenPrice(tick: string, price: number) {
-  if (!tick || typeof price !== "number") {
+async function updateTokenPrice(tick: string, _price?: number) {
+  if (!tick) {
     throw new Error("Invalid parameters");
   }
 
@@ -15,18 +15,53 @@ async function updateTokenPrice(tick: string, price: number) {
     const tokenLower = tick.trim().toLowerCase();
 
     const token = await CBRCToken.findOne({ tick: tick.trim().toLowerCase() });
+
+    const fp = await Inscription.findOne({
+      listed_token: tick.trim().toLowerCase(),
+      listed: true,
+      in_mempool: false,
+    }).sort({ listed_price_per_token: 1 });
+
+    const price = fp.listed_price_per_token;
     const inMempoolCount = await Inscription.countDocuments({
       listed_token: tokenLower,
       in_mempool: true,
       listed: true,
     });
+
+    // Get 24 hours Sales volume
+    const endOfDay = new Date(); // Current time
+    const startOfDay = new Date();
+    startOfDay.setTime(endOfDay.getTime() - 24 * 60 * 60 * 1000); // 24 hours back from now
+
+    const todaysVolume = await Tx.aggregate([
+      {
+        $match: {
+          token: tokenLower,
+          timestamp: { $gte: startOfDay, $lte: endOfDay },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalVolume: {
+            $sum: { $multiply: ["$amount", "$price_per_token"] },
+          },
+        },
+      },
+    ]);
+
+    const volumeInSats =
+      todaysVolume.length > 0 ? todaysVolume[0].totalVolume : 0;
+
     const result = await CBRCToken.updateOne(
       { checksum: stringToHex(tick) },
       {
         $set: {
-          price: price,
+          price: price, // in sats
           in_mempool: inMempoolCount + 1,
-          marketcap: price * token.supply,
+          marketcap: price * token.supply, // in sats
+          volume: volumeInSats, // in sats
         },
       }
     );
