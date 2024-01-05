@@ -80,13 +80,13 @@ function Crafter() {
 
       const bal_result = await FetchCBRCBalance(params);
       if (bal_result && bal_result.data) {
-        console.log({ data: bal_result.data });
+        // console.log({ data: bal_result.data });
         const tick_options = bal_result.data.map((a) => ({
           value: a.tick,
           label: a.tick,
-          limit: a.amt - a.lock,
+          limit: a.amt,
         }));
-        console.log({ tick_options });
+        // console.log({ tick_options });
 
         setTick(tick_options[0].value);
         setCbrcs(tick_options);
@@ -128,7 +128,7 @@ function Crafter() {
 
     Promise.all(fileDataPromises)
       .then((fileDataArray) => {
-        console.log(fileDataArray, "FSA");
+        // console.log(fileDataArray, "FSA");
         return setFiles(fileDataArray);
       })
       .catch((error) => {
@@ -213,7 +213,7 @@ function Crafter() {
         "/api/v2/inscribe/create-cbrc-order",
         BODY
       );
-      console.log({ data });
+      // console.log({ data });
       setUnsignedPsbtBase64(data.psbt);
       setorderresult(data);
 
@@ -274,7 +274,7 @@ function Crafter() {
       action,
       inputs,
     };
-    console.log(options, "OPTIONS");
+    // console.log(options, "OPTIONS");
 
     await sign(options);
   }, [action, unsignedPsbtBase64]);
@@ -427,7 +427,9 @@ function Crafter() {
                     widthFull={true}
                   />
                 </div>
-                <p>MAX: {cbrcs?.find((a: any) => a.value === tick).limit}</p>
+                <p>
+                  MAX: {cbrcs?.find((a: any) => a.value === tick).limit} {tick}
+                </p>
                 <div className="center py-2">
                   <CustomInput
                     value={amt.toString()}
