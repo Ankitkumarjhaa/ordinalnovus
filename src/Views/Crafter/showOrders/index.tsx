@@ -53,9 +53,8 @@ function ShowOrders() {
     setPage(value);
   };
 
-  console.log({ data });
   return (
-    <div>
+    <div className="w-full overflow-x-auto">
       <div className="SortSearchPages py-6 flex flex-wrap justify-between">
         <div className="w-full lg:w-auto flex justify-start items-center flex-wrap">
           {/* <div className="w-full center pb-4 lg:pb-0 lg:w-auto">
@@ -96,7 +95,7 @@ function ShowOrders() {
           )}
         </>
       ) : (
-        <OrderList orders={data} loading={loading}/>
+        <OrderList orders={data} loading={loading} />
       )}
     </div>
   );

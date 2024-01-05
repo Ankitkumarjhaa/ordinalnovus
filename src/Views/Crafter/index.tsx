@@ -416,7 +416,7 @@ function Crafter() {
               />
             </div>
 
-            {cbrcs && op === "transfer" && (
+            {cbrcs && cbrcs.length && op === "transfer" ? (
               <>
                 <div className="w-full center pb-4">
                   <CustomSelector
@@ -470,6 +470,8 @@ function Crafter() {
                   />
                 </div>
               </>
+            ) : (
+              <></>
             )}
             {/* <div className="center py-2">
           <CustomInput
@@ -532,7 +534,7 @@ function Crafter() {
               </div>
             )}
           </div>
-          <div>{walletDetails && <ShowOrders />}</div>
+          <div className="w-full">{walletDetails && <ShowOrders />}</div>
         </>
       ) : (
         <div className="text-center text-sm">Connect wallet to continue</div>
