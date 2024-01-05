@@ -4,17 +4,37 @@ import dbConnect from "@/lib/dbConnect";
 import convertParams from "@/utils/api/convertParams";
 import { setCache, getCache } from "@/lib/cache";
 import apiKeyMiddleware from "@/middlewares/apikeyMiddleware";
-import moment from "moment";
 
 const fetchOrders = async (query: any) => {
-  return await Inscribe.find(query.find)
-    .select("-privkey")
-    .where(query.where)
-    .sort(query.sort)
-    .skip(query.start)
-    .limit(query.limit)
-    .lean()
-    .exec();
+  return await Inscribe.aggregate([
+    { $match: query.find },
+    {
+      $lookup: {
+        from: "createinscriptions", // The collection name for createInscription documents
+        localField: "order_id",
+        foreignField: "order_id",
+        as: "inscriptions",
+      },
+    },
+    {
+      $project: {
+        // Specify the fields you want to include
+        // Exclude the privkey field as you did before
+        order_id: 1,
+        receive_address: 1,
+        chain_fee: 1,
+        service_fee: 1,
+        txid: 1,
+        createdAt: 1,
+        status: 1,
+        // Add a new field for the count
+        inscriptionCount: { $size: "$inscriptions" },
+      },
+    },
+    { $sort: query.sort },
+    { $skip: query.start },
+    { $limit: query.limit },
+  ]).exec();
 };
 
 const countOrders = async (query: any) => {
@@ -41,6 +61,8 @@ export async function GET(req: NextRequest, res: NextResponse) {
 
     await dbConnect();
     const orders = await fetchOrders(query);
+
+    console.log({ orders });
 
     const totalCount = await countOrders(query);
     // Cache the result

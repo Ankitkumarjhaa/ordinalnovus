@@ -96,7 +96,7 @@ function ShowOrders() {
           )}
         </>
       ) : (
-        <OrderList orders={data} loading={loading} />
+        <OrderList orders={data} />
       )}
     </div>
   );

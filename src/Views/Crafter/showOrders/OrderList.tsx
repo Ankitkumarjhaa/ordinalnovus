@@ -12,20 +12,15 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import { FaChevronCircleDown, FaChevronCircleUp } from "react-icons/fa";
-import { formatNumber, shortenString } from "@/utils";
+import { shortenString } from "@/utils";
 import { useSelector } from "react-redux";
 import { RootState } from "@/stores";
 import { IInscribeOrder } from "@/types";
-import { PayButton } from "bitcoin-wallet-adapter";
-
+import moment from "moment";
 type HeroProps = {
   orders: IInscribeOrder[];
-  loading: boolean;
 };
-function OrderList({ orders, loading }: HeroProps) {
-  const router = useRouter();
-
+function OrderList({ orders }: HeroProps) {
   const handleListingClick = (id: string) => {
     window.open(`https://mempool.space/tx/${id}`, "_blank");
   };
@@ -34,9 +29,6 @@ function OrderList({ orders, loading }: HeroProps) {
     (state: RootState) => state.general.btc_price_in_dollar
   );
 
-  const allowed_cbrcs = useSelector(
-    (state: RootState) => state.general.allowed_cbrcs
-  );
   return (
     <div className="py-2">
       <TableContainer
@@ -64,7 +56,7 @@ function OrderList({ orders, loading }: HeroProps) {
                 Status
               </TableCell>
               <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
-                Fee-Rate
+                Fee (in sats)
               </TableCell>
               <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
                 Action
@@ -109,7 +101,7 @@ function OrderList({ orders, loading }: HeroProps) {
                         }}
                       >
                         <p className="text-left uppercase">
-                          {item.inscriptions.length}
+                          {item.inscriptionCount}
                         </p>
                       </TableCell>
                       <TableCell
@@ -140,7 +132,7 @@ function OrderList({ orders, loading }: HeroProps) {
                           color: "white",
                         }}
                       >
-                        {item.fee_rate} sats/vB
+                        {item.chain_fee + item.service_fee} Sats
                       </TableCell>
                       <TableCell
                         sx={{
@@ -148,32 +140,13 @@ function OrderList({ orders, loading }: HeroProps) {
                           color: "white",
                         }}
                       >
-                        {item.status === "payment pending" ? (
-                          <div className="center">
-                            <PayButton
-                              receipient={item.funding_address}
-                              amount={item.service_fee + item.chain_fee}
-                              buttonClassname="bg-accent text-white px-4 py-2 rounded center "
-                            />
-                          </div>
-                        ) : (
-                          "-"
-                        )}
+                        <div className="center">
+                          {moment(item.createdAt).fromNow()}
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
                 })}
-              </TableBody>
-            ) : loading ? (
-              <TableBody>
-                <TableRow>
-                  <TableCell
-                    colSpan={7}
-                    style={{ textAlign: "center", color: "white" }}
-                  >
-                    <CircularProgress color="inherit" size={40} />
-                  </TableCell>
-                </TableRow>
               </TableBody>
             ) : (
               <TableBody>

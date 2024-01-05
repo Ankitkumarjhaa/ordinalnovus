@@ -5,7 +5,7 @@ import mime from "mime-types";
 import { v4 as uuidv4 } from "uuid";
 import * as cryptoUtils from "@cmdcode/crypto-utils";
 import { Tap, Script, Address } from "@cmdcode/tapscript";
-import { IFileSchema, IInscribeOrder } from "@/types";
+import { IInscribeOrder } from "@/types";
 import { Inscribe } from "@/models";
 import dbConnect from "@/lib/dbConnect";
 import { CustomError } from "@/utils";
@@ -130,7 +130,7 @@ function generateFundingAddress(
   return { funding_address, pubkey };
 }
 
-async function processFiles(files: any[]): Promise<IFileSchema[]> {
+async function processFiles(files: any[]): Promise<any[]> {
   const fileInfoPromises = files.map(async (f, index) => {
     const { file, dataURL } = f;
     const { type, size, name } = file;
@@ -160,7 +160,7 @@ async function processFiles(files: any[]): Promise<IFileSchema[]> {
 }
 
 function processInscriptions(
-  fileInfoArray: IFileSchema[],
+  fileInfoArray: any[],
   pubkey: Uint8Array,
   network: "testnet" | "mainnet",
   fee_rate: number
@@ -262,10 +262,10 @@ function constructOrderData(
   cursed: boolean,
   webhook_url: string | undefined
 ): IInscribeOrder {
-  //@ts-ignore
   return {
     order_id: order_id,
-    funding_address: funding_address,
+    //@ts-ignore
+    funding_address,
     privkey: privkey,
     receive_address: receive_address,
     chain_fee: chain_fee,

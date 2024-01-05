@@ -3,9 +3,9 @@ import { CustomError, wait } from "@/utils";
 import { addressReceivedMoneyInThisTx, pushBTCpmt } from "@/utils/Inscribe";
 import { NextRequest, NextResponse } from "next/server";
 import * as cryptoUtils from "@cmdcode/crypto-utils";
-import { Tap, Script, Signer, Tx, Address } from "@cmdcode/tapscript";
-import { IFileSchema, IInscribeOrder } from "@/types";
-import { Inscribe } from "@/models";
+import { Signer, Tx, Address } from "@cmdcode/tapscript";
+import { ICreateInscription, IInscribeOrder } from "@/types";
+import { CreateInscription, Inscribe } from "@/models";
 import dbConnect from "@/lib/dbConnect";
 
 /**
@@ -14,91 +14,49 @@ import dbConnect from "@/lib/dbConnect";
  */
 async function findOrder() {
   await dbConnect();
-  return Inscribe.findOne({ status: "payment received" }).limit(1);
+  const order = await Inscribe.findOne({ status: "payment received" }).limit(1);
+  const inscriptions = await CreateInscription.find({
+    order_id: order.order_id,
+  });
+  return { order, inscriptions };
 }
 
-/**
- * Creates a funding address for the given order.
- * @param {IInscribeOrder} order - The order for which to create the funding address.
- * @returns {Object} An object containing funding address components.
- */
-function createFundingAddress(order: IInscribeOrder) {
-  const KeyPair = cryptoUtils.KeyPair;
-  const seckey = new KeyPair(order.privkey);
-  const pubkey = seckey.pub.rawX;
-  const funding_script = [pubkey, "OP_CHECKSIG"];
-  const funding_leaf = Tap.tree.getLeaf(Script.encode(funding_script));
-  const [tapkey, cblock] = Tap.getPubKey(pubkey, { target: funding_leaf });
-  //@ts-ignore
-  const funding_address = Address.p2tr.encode(tapkey, order.network);
-  return {
-    funding_address,
-    pubkey,
-    seckey,
-    funding_leaf,
-    tapkey,
-    cblock,
-    funding_script,
-  };
-}
+async function cancelOldPendingPayments() {
+  await dbConnect();
 
-/**
- * Generates inscription vouts for a given set of inscriptions.
- * @param {IFileSchema[]} inscriptions - An array of inscriptions.
- * @param {Uint8Array} pubkey - The public key associated with the inscriptions.
- * @returns {Promise<Object[]>} A promise that resolves to an array of inscription vouts.
- */
-async function generateInscriptionVouts(
-  inscriptions: IFileSchema[],
-  order: IInscribeOrder,
-  pubkey: Uint8Array
-) {
-  const inscription_vouts: { value: number; scriptPubKey: string[] }[] = [];
-  for (const inscription of inscriptions) {
-    inscription_vouts.push({
-      value: inscription.inscription_fee,
-      //@ts-ignore
-      scriptPubKey: Address.toScriptPubKey(inscription.inscription_address),
-    });
+  // Calculate the time one hour ago
+  const oneHourAgo = new Date(Date.now() - 3600000); // 3600000 milliseconds = 1 hour
+
+  // Find orders that are older than one hour and have "payment pending" status
+  const oldPendingOrders = await Inscribe.find({
+    status: "payment pending",
+    createdAt: { $lt: oneHourAgo },
+  });
+
+  // No orders to update
+  if (oldPendingOrders.length === 0) {
+    console.log("No old pending payments to cancel.");
+    return;
   }
 
-  return inscription_vouts;
-}
-/**
- * Constructs output transactions (vouts) for the service and referral fees associated with an order.
- * Each vout includes the fee amount and the corresponding scriptPubKey based on the network type.
- * If service fees are applicable, a vout for the service fee is generated using a predefined address.
- * If referral fees are applicable, a vout for the referral fee is generated using the referrer's address.
- *
- * Note: TypeScript ignores are utilized to bypass type checks on the dynamically generated scriptPubKeys.
- *
- * @param {IInscribeOrder} order - The order containing service and referral fee information.
- * @returns {Promise<{ value: number; scriptPubKey: string[] }[]>} - A promise that resolves to an array of fee vouts.
- */
-async function generateFeesVouts(
-  order: IInscribeOrder
-): Promise<{ value: number; scriptPubKey: string[] }[]> {
-  const fee_vouts: { value: number; scriptPubKey: string[] }[] = [];
-  if (order.service_fee) {
-    fee_vouts.push({
-      value: order.service_fee,
-      //@ts-ignore
-      scriptPubKey: Address.toScriptPubKey(
-        order.network == "testnet"
-          ? "tb1qqx9d3ua62lph9tdn473rru2fehw5sz7538yw3d"
-          : "bc1qqv48lhfhqjz8au3grvnc6nxjcmhzsuucj80frr"
-      ),
-    });
-  }
-  if (order.referral_fee) {
-    fee_vouts.push({
-      value: order.referral_fee,
-      //@ts-ignore
-      scriptPubKey: Address.toScriptPubKey(order.referrer),
-    });
-  }
+  // Extract order IDs
+  const orderIds = oldPendingOrders.map((order) => order._id);
 
-  return fee_vouts;
+  // Update the orders
+  const updateResultOrders = await Inscribe.updateMany(
+    { _id: { $in: orderIds } },
+    { $set: { status: "cancelled" } }
+  );
+
+  // Update related inscriptions
+  const updateResultInscriptions = await CreateInscription.updateMany(
+    { order: { $in: orderIds } },
+    { $set: { status: "cancelled" } }
+  );
+
+  console.log(
+    `Cancelled ${updateResultOrders.modifiedCount} orders and ${updateResultInscriptions.modifiedCount} related inscriptions.`
+  );
 }
 
 /**
@@ -109,153 +67,16 @@ async function generateFeesVouts(
  * @param {Uint8Array} pubkey - The public key associated with the inscriptions.
  * @returns {Promise<Object>} A promise that resolves to an object containing transaction details.
  */
-async function processInscriptions(
-  order: IInscribeOrder,
-  inscriptions: IFileSchema[],
-  seckey: cryptoUtils.KeyPair,
-  pubkey: Uint8Array
-) {
-  const txs: any[] = [];
-  const txids: string[] = [];
-  const ec = new TextEncoder();
-
-  for (const [idx, inscription] of inscriptions.entries()) {
-    const txinfo = await addressReceivedMoneyInThisTx(
-      inscription.inscription_address,
-      order.network
-    );
-    const [txid, vout, value] = txinfo;
-    if (
-      typeof txid !== "string" ||
-      typeof vout !== "number" ||
-      typeof value !== "number"
-    ) {
-      // Handle the case where any of the values are undefined.
-      // You could throw an error or perform some other action based on your application's logic.
-      throw new Error(
-        "Failed to retrieve transaction details from the funding address."
-      );
-    }
-    console.log({ inscription, txinfo });
-    let metaprotocol = null;
-
-    let op, tick, amt;
-    const regex = /CBRC-20:(transfer|mint|deploy):(.{4})=(\d+)\..+$/i;
-    const match = inscription.file_name.match(regex);
-
-    if (match) {
-      op = match[1]; // Operation (transfer, mint, deploy)
-      tick = match[2]; // Ticker (4 characters before =, e.g., "fren")
-      amt = match[3]; // Amount (number after ticker)
-
-      console.log({ op, tick, amt });
-
-      // If needed, use these values as required
-      metaprotocol = `cbrc-20:${op.toLowerCase()}:${tick}=${amt}`;
-      console.log(metaprotocol);
-    }
-
-    const data = Buffer.from(inscription.base64_data, "base64");
-
-    console.log({ metaprotocol, mimetype: inscription.file_type });
-
-    const script = [
-      pubkey,
-      "OP_CHECKSIG",
-      "OP_0",
-      "OP_IF",
-      ec.encode("ord"),
-      "01",
-      ec.encode(inscription.file_type),
-    ];
-
-    // Conditionally add "07" and metaprotocol
-    if (metaprotocol) {
-      script.push("07");
-      script.push(ec.encode(metaprotocol));
-    }
-
-    // Continue adding the remaining elements
-    script.push("OP_0", data, "OP_ENDIF");
-    const redeemtx = Tx.create({
-      vin: [
-        {
-          txid,
-          vout,
-          prevout: {
-            value,
-            scriptPubKey: Address.toScriptPubKey(
-              inscription.inscription_address
-            ),
-          },
-          witness: [],
-        },
-      ],
-      vout: [
-        {
-          value: 1000,
-          scriptPubKey: Address.toScriptPubKey(order.receive_address),
-        },
-      ],
-    });
-    const sig = Signer.taproot.sign(seckey.raw, redeemtx, 0, {
-      extension: inscription.leaf,
-    });
-    redeemtx.vin[0].witness = [sig, script, inscription.cblock];
-    const rawtx = Tx.encode(redeemtx).hex;
-    txs.push({ idx: rawtx });
-    console.log({ rawtx }, "INS TX");
-    // throw Error("INS TEST");
-    const txid_inscription = await pushBTCpmt(rawtx, order.network);
-
-    console.log("INSCRIPTION TX BROADCASTED: ", txid_inscription);
-    order.inscriptions[idx].txid = txid_inscription;
-    order.inscriptions[idx].inscription_id = txid_inscription + "i" + "0";
-    txids.push(txid_inscription);
-  }
-  order.status = "inscribed";
-  await order.save();
-  return { txs, txids };
-}
-
-/**
- * Attempts to fund a given order by distributing the necessary funds from the funding address
- * to each of the inscription outputs. If the order already has a transaction ID associated
- * with it, indicating that the funding step has already been completed, this function will
- * skip the funding process.
- *
- * @param order - The order that needs to be funded.
- * @param seckey - The secret key pair used for signing the transaction.
- * @param funding_leaf - The leaf used in the Taproot funding structure.
- * @param tapkey - The taproot public key.
- * @param cblock - Control block for the taproot script path spend.
- * @param funding_script - The script used for the funding address.
- * @param inscription_vouts - An array of transaction outputs for the inscription process.
- * @param network - The Bitcoin network on which the transaction should be broadcasted.
- * @returns A promise that resolves to the funding transaction ID if successful, or null if skipped.
- * @throws Will throw an error if the transaction creation or broadcasting fails.
- */
-async function processFunding(
-  order: IInscribeOrder,
-  seckey: cryptoUtils.KeyPair,
-  funding_leaf: string,
-  tapkey: string,
-  cblock: string,
-  funding_script: (string | Uint8Array)[],
-  inscription_vouts: { value: number; scriptPubKey: string[] }[],
-  network: string
-): Promise<string | null> {
-  // Check if the order has already been processed.
-  if (order.txid) {
-    return null;
-  }
-
-  // Fetch transaction details where the funding address has received money.
-  const [txid, vout, value] = await addressReceivedMoneyInThisTx(
-    order.funding_address,
-    order.network
+async function processInscription(inscription: ICreateInscription) {
+  const KeyPair = cryptoUtils.KeyPair;
+  const seckey = new KeyPair(inscription.privkey);
+  const pubkey = seckey.pub.rawX;
+  const txinfo = await addressReceivedMoneyInThisTx(
+    inscription.inscription_address,
+    inscription.network
   );
-
+  const ec = new TextEncoder();
+  const [txid, vout, value] = txinfo;
   if (
     typeof txid !== "string" ||
     typeof vout !== "number" ||
@@ -267,10 +88,44 @@ async function processFunding(
       "Failed to retrieve transaction details from the funding address."
     );
   }
+  console.log({ inscription, txinfo });
+  let metaprotocol = null;
 
-  console.log({ txid, vout, value });
+  if (
+    inscription.metaprotocol === "cbrc" &&
+    inscription.tick &&
+    inscription.amt &&
+    inscription.op
+  ) {
+    // If needed, use these values as required
+    metaprotocol = `cbrc-20:${inscription.op.toLowerCase()}:${
+      inscription.tick
+    }=${inscription.amt}`;
+    console.log(metaprotocol);
+  }
 
-  // Construct the redeem transaction to distribute funds to the inscription outputs.
+  const data = Buffer.from(inscription.base64_data, "base64");
+
+  console.log({ metaprotocol, mimetype: inscription.file_type });
+
+  const script = [
+    pubkey,
+    "OP_CHECKSIG",
+    "OP_0",
+    "OP_IF",
+    ec.encode("ord"),
+    "01",
+    ec.encode(inscription.file_type),
+  ];
+
+  // Conditionally add "07" and metaprotocol
+  if (metaprotocol) {
+    script.push("07");
+    script.push(ec.encode(metaprotocol));
+  }
+
+  // Continue adding the remaining elements
+  script.push("OP_0", data, "OP_ENDIF");
   const redeemtx = Tx.create({
     vin: [
       {
@@ -278,33 +133,35 @@ async function processFunding(
         vout,
         prevout: {
           value,
-          scriptPubKey: Address.toScriptPubKey(order.funding_address),
+          scriptPubKey: Address.toScriptPubKey(inscription.inscription_address),
         },
         witness: [],
       },
     ],
-    vout: inscription_vouts,
+    vout: [
+      {
+        value: 1000,
+        scriptPubKey: Address.toScriptPubKey(inscription.receive_address),
+      },
+    ],
   });
-
-  // Sign the transaction using the secret key and the appropriate Taproot structures.
   const sig = Signer.taproot.sign(seckey.raw, redeemtx, 0, {
-    extension: funding_leaf,
+    extension: inscription.leaf,
   });
-  redeemtx.vin[0].witness = [sig, funding_script, cblock];
-
-  // Encode and broadcast the raw transaction to the network.
+  redeemtx.vin[0].witness = [sig, script, inscription.cblock];
   const rawtx = Tx.encode(redeemtx).hex;
-  console.debug("Signed Raw Transaction:", rawtx);
+  console.log({ rawtx }, "INS TX");
+  // throw Error("INS TEST");
+  const txid_inscription = await pushBTCpmt(rawtx, inscription.network);
 
-  // This function call should broadcast the transaction and return the transaction ID.
-  // throw Error("funding TXID");
-  const funding_txid = await pushBTCpmt(rawtx, network);
-  console.log("FUNDING TX BROADCASTED: ", funding_txid);
-  order.txid = funding_txid;
-  await order.save();
+  console.log("INSCRIPTION TX BROADCASTED: ", txid_inscription);
+  inscription.txid = txid_inscription;
+  inscription.inscription_id = txid_inscription + "i" + "0";
 
-  // Return the funding transaction ID.
-  return funding_txid;
+  inscription.status = "inscribed";
+  await (inscription as any).save();
+
+  return inscription;
 }
 
 /**
@@ -315,46 +172,46 @@ async function processFunding(
  */
 export async function GET(req: NextRequest) {
   try {
-    const order = await findOrder();
-    if (!order) {
+    const pendingOrders = await Inscribe.countDocuments({
+      status: "payment pending",
+    });
+
+    if (pendingOrders) {
+      // Call the function
+      await cancelOldPendingPayments().catch(console.error);
+    }
+    const { order, inscriptions } = await findOrder();
+
+    if (!order || !inscriptions) {
       return NextResponse.json({
         message: "No Pending Orders Have received Payment",
       });
     }
 
-    const { pubkey, seckey, funding_leaf, tapkey, cblock, funding_script } =
-      createFundingAddress(order);
+    const txids: string[] = [];
+    // Loop through each inscription and process them
+    for (const inscription of inscriptions) {
+      try {
+        const updatedInscription = await processInscription(inscription);
+        console.log(
+          "Inscription Processed: ",
+          updatedInscription.inscription_id
+        );
+        txids.push(inscription.txid);
+        // Further actions can be taken with updatedInscription if needed
+      } catch (error) {
+        console.error(
+          "Error processing inscription: ",
+          inscription.inscription_address,
+          error
+        );
+        // Handle the error appropriately
+      }
+    }
 
-    const inscription_vouts = await generateInscriptionVouts(
-      order.inscriptions,
-      order,
-      pubkey
-    );
-
-    const fee_vouts = await generateFeesVouts(order);
-
-    // Process funding
-    const fundingTxId = await processFunding(
-      order,
-      seckey,
-      funding_leaf,
-      tapkey,
-      cblock,
-      funding_script,
-      [...inscription_vouts, ...fee_vouts],
-      order.network
-    );
-
-    if (fundingTxId) await wait();
-
-    const { txs, txids } = await processInscriptions(
-      order,
-      order.inscriptions,
-      seckey,
-      pubkey
-    );
-
-    return NextResponse.json({ txs, txids });
+    order.status = "inscribed";
+    await (order as any).save();
+    return NextResponse.json({ txids });
   } catch (error: any) {
     console.error("Catch Error: ", error);
     return NextResponse.json(

@@ -144,7 +144,7 @@ export async function getBTCPriceInDollars() {
       "https://api.coinbase.com/v2/prices/BTC-USD/spot"
     );
     const data = await response.json();
-    const priceInDollars = data["data"]["amount"];
+    const priceInDollars = Number(data["data"]["amount"]);
     return priceInDollars;
   } catch (error) {
     console.error("Error fetching BTC price:", error);
