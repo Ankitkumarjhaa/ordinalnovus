@@ -1,5 +1,7 @@
 import mongoose, { Document, Schema } from "mongoose";
 import * as bitcoin from "bitcoinjs-lib";
+import { Interface } from "readline";
+import { IToken } from "./CBRC";
 
 export interface ITransaction {
   txid: string;
@@ -353,6 +355,19 @@ export interface IListingState {
     mergedSignedBuyingPSBTBase64?: string;
   };
 }
+
+export interface IStats {
+  tokens: number;
+  btcHeight: number;
+  novusBtcHeight: number;
+  mempoolBtcHeight: number;
+  dailyVolume: number;
+  tokensTrend: IToken[];
+  tokensHot: IToken[];
+  monthlyVolume: number;
+  allTimeVolume: number;
+}
+
 
 export type FeeRateTier =
   | "fastestFee"
