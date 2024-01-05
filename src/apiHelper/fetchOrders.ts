@@ -38,7 +38,7 @@ export async function fetchOrders(
       `${process.env.NEXT_PUBLIC_URL}/api/v2/inscribe/order`,
       {
         params: {
-          address: wallet,
+          receive_address: wallet,
           _sort: sort || "createdAt:-1",
           _limit: page_size,
           _start: (page - 1) * page_size,

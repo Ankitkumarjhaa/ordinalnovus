@@ -47,6 +47,14 @@ function Crafter() {
   const [order_result, setorderresult] = useState<any | null>(null);
 
   useEffect(() => {
+    if (!walletDetails && fees) {
+      setUnsignedPsbtBase64("");
+      setorderresult(null);
+      setCbrcs([]);
+    }
+  }, [walletDetails, fees]);
+
+  useEffect(() => {
     const shouldFetch =
       !fees ||
       !fees.lastChecked ||
@@ -298,6 +306,8 @@ function Crafter() {
           severity: "success",
         })
       );
+      setUnsignedPsbtBase64("");
+      setorderresult(null);
       dispatch(
         addNotification({
           id: new Date().valueOf(),
@@ -389,67 +399,77 @@ function Crafter() {
   }, [result, error]);
 
   return (
-    <div className="center min-h-[70vh] flex-col">
-      <div className="bg-secondary p-6 rounded-lg shadow-2xl">
-        <h2 className="uppercase font-bold tracking-wider pb-6">
-          Inscribe CBRC
-        </h2>
-        <div className="w-full center pb-4">
-          <CustomSelector
-            label="Operation"
-            value={op}
-            options={options}
-            onChange={setOp}
-            widthFull={true}
-          />
-        </div>
-
-        {cbrcs && op === "transfer" && (
-          <>
+    <div className="center min-h-[60vh] flex-col">
+      {walletDetails ? (
+        <>
+          <div className="bg-secondary p-6 rounded-lg shadow-2xl">
+            <h2 className="uppercase font-bold tracking-wider pb-6">
+              Inscribe CBRC
+            </h2>
             <div className="w-full center pb-4">
               <CustomSelector
-                label="Tick"
-                value={tick}
-                options={cbrcs}
-                onChange={setTick}
+                label="Operation"
+                value={op}
+                options={options}
+                onChange={setOp}
                 widthFull={true}
               />
             </div>
-            <div className="center py-2">
-              <CustomInput
-                value={amt.toString()}
-                placeholder="Amount Of Tokens"
-                onChange={(new_content) => setAmt(Number(new_content))}
-                helperText={
-                  amt <= 0 ||
-                  (cbrcs?.find((a: any) => a.value === tick)?.limit &&
-                    amt > cbrcs?.find((a: any) => a.value === tick).limit)
-                    ? `Wrong Amount. Max is: ${
-                        cbrcs?.find((a: any) => a.value === tick).limit
-                      }`
-                    : ""
-                }
-                error={
-                  amt <= 0 ||
-                  (cbrcs?.find((a: any) => a.value === tick)?.limit &&
-                    amt > cbrcs?.find((a: any) => a.value === tick).limit)
-                }
-                fullWidth
-              />
-            </div>
+
+            {cbrcs && op === "transfer" && (
+              <>
+                <div className="w-full center pb-4">
+                  <CustomSelector
+                    label="Tick"
+                    value={tick}
+                    options={cbrcs}
+                    onChange={setTick}
+                    widthFull={true}
+                  />
+                </div>
+                <p>MAX: {cbrcs?.find((a: any) => a.value === tick).limit}</p>
+                <div className="center py-2">
+                  <CustomInput
+                    value={amt.toString()}
+                    placeholder="Amount Of Tokens"
+                    endAdornmentText={tick.toUpperCase()}
+                    onChange={(new_content) => setAmt(Number(new_content))}
+                    helperText={
+                      amt <= 0 ||
+                      (cbrcs?.find((a: any) => a.value === tick)?.limit &&
+                        amt > cbrcs?.find((a: any) => a.value === tick).limit)
+                        ? `Wrong Amount. Max is: ${
+                            cbrcs?.find((a: any) => a.value === tick).limit
+                          }`
+                        : ""
+                    }
+                    error={
+                      amt <= 0 ||
+                      (cbrcs?.find((a: any) => a.value === tick)?.limit &&
+                        amt > cbrcs?.find((a: any) => a.value === tick).limit)
+                    }
+                    fullWidth
+                  />
+                </div>
+                <div className="center py-2">
+                  <CustomInput
+                    value={rep.toString()}
+                    placeholder="Amount to mint"
+                    onChange={(new_content) => setRep(Number(new_content))}
+                    fullWidth
+                    endAdornmentText=" Inscription"
+                    startAdornmentText="Mint "
+                    helperText={
+                      rep <= 0 || rep > 25
+                        ? "You can mint 1-25 inscriptions at a time."
+                        : ""
+                    }
+                    error={rep <= 0 || rep > 25}
+                  />
+                </div>
+              </>
+            )}
             {/* <div className="center py-2">
-              <CustomInput
-                value={rep.toString()}
-                placeholder="Amount to mint"
-                onChange={(new_content) => setRep(Number(new_content))}
-                fullWidth
-                endAdornmentText=" Inscription"
-                startAdornmentText="Mint "
-              />
-            </div> */}
-          </>
-        )}
-        {/* <div className="center py-2">
           <CustomInput
             multiline
             value={content}
@@ -458,61 +478,63 @@ function Crafter() {
             fullWidth
           />
         </div> */}
-        <div className="center py-2">
-          <CustomInput
-            value={feeRate.toString()}
-            placeholder="Fee Rate"
-            onChange={(fee) => setFeeRate(Number(fee))}
-            helperText={
-              feeRate < Math.min(10, defaultFeeRate - 40)
-                ? "Fee too low"
-                : feeRate > defaultFeeRate + 200
-                ? "Fee too high - make sure you are okay with it"
-                : ""
-            }
-            error={true}
-            endAdornmentText=" sats / vB"
-            startAdornmentText="Fee Rate"
-            fullWidth
-          />
-        </div>
-        {unsignedPsbtBase64 && order_result ? (
-          <div className="pt-3">
-            <p className="text-center pb-3">SAT {order_result.total_fee}</p>
-            <p className="text-center pb-3">
-              ${order_result.total_fees_in_dollars.toFixed(2)}
-            </p>
-            <div className="w-full">
-              <CustomButton
-                loading={loading || signLoading}
-                text={`Complete Payment`}
-                hoverBgColor="hover:bg-accent_dark"
-                hoverTextColor="text-white"
-                bgColor="bg-accent"
-                textColor="text-white"
-                className="transition-all w-full rounded uppercase tracking-widest"
-                onClick={() => signTx()} // Add this line to make the button functional
+            <div className="center py-2">
+              <CustomInput
+                value={feeRate.toString()}
+                placeholder="Fee Rate"
+                onChange={(fee) => setFeeRate(Number(fee))}
+                helperText={
+                  feeRate < Math.min(10, defaultFeeRate - 40)
+                    ? "Fee too low"
+                    : feeRate > defaultFeeRate + 200
+                    ? "Fee too high - make sure you are okay with it"
+                    : ""
+                }
+                error={true}
+                endAdornmentText=" sats / vB"
+                startAdornmentText="Fee Rate"
+                fullWidth
               />
             </div>
+            {unsignedPsbtBase64 && order_result ? (
+              <div className="pt-3">
+                <p className="text-center pb-3">SAT {order_result.total_fee}</p>
+                <p className="text-center pb-3">
+                  ${order_result.total_fees_in_dollars.toFixed(2)}
+                </p>
+                <div className="w-full">
+                  <CustomButton
+                    loading={loading || signLoading}
+                    text={`Complete Payment`}
+                    hoverBgColor="hover:bg-accent_dark"
+                    hoverTextColor="text-white"
+                    bgColor="bg-accent"
+                    textColor="text-white"
+                    className="transition-all w-full rounded uppercase tracking-widest"
+                    onClick={() => signTx()} // Add this line to make the button functional
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="w-full">
+                <CustomButton
+                  loading={loading}
+                  text={`Create ${op}`}
+                  hoverBgColor="hover:bg-accent_dark"
+                  hoverTextColor="text-white"
+                  bgColor="bg-accent"
+                  textColor="text-white"
+                  className="transition-all w-full rounded uppercase tracking-widest"
+                  onClick={() => handleUpload()} // Add this line to make the button functional
+                />
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="w-full">
-            <CustomButton
-              loading={loading}
-              text={`Create ${op}`}
-              hoverBgColor="hover:bg-accent_dark"
-              hoverTextColor="text-white"
-              bgColor="bg-accent"
-              textColor="text-white"
-              className="transition-all w-full rounded uppercase tracking-widest"
-              onClick={() => handleUpload()} // Add this line to make the button functional
-            />
-          </div>
-        )}
-      </div>
-      <div>
-        <ShowOrders />
-      </div>
+          <div>{walletDetails && <ShowOrders />}</div>
+        </>
+      ) : (
+        <div className="text-center text-sm">Connect wallet to continue</div>
+      )}
     </div>
   );
 }

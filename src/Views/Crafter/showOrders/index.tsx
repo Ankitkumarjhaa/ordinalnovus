@@ -41,7 +41,7 @@ function ShowOrders() {
 
   useEffect(() => {
     fetchData();
-  }, [sort, page, dispatch, pageSize]);
+  }, [sort, page, dispatch, pageSize, walletDetails]);
 
   const handleSearchChange = (value: string) => {
     setTick(value);
@@ -96,7 +96,7 @@ function ShowOrders() {
           )}
         </>
       ) : (
-        <OrderList orders={data} />
+        <OrderList orders={data} loading={loading}/>
       )}
     </div>
   );

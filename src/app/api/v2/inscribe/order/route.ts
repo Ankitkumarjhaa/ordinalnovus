@@ -6,6 +6,7 @@ import { setCache, getCache } from "@/lib/cache";
 import apiKeyMiddleware from "@/middlewares/apikeyMiddleware";
 
 const fetchOrders = async (query: any) => {
+  console.dir(query, { depth: null });
   return await Inscribe.aggregate([
     { $match: query.find },
     {
@@ -61,8 +62,6 @@ export async function GET(req: NextRequest, res: NextResponse) {
 
     await dbConnect();
     const orders = await fetchOrders(query);
-
-    console.log({ orders });
 
     const totalCount = await countOrders(query);
     // Cache the result

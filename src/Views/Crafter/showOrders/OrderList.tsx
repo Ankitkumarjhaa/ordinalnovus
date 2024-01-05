@@ -19,8 +19,9 @@ import { IInscribeOrder } from "@/types";
 import moment from "moment";
 type HeroProps = {
   orders: IInscribeOrder[];
+  loading: boolean;
 };
-function OrderList({ orders }: HeroProps) {
+function OrderList({ orders, loading }: HeroProps) {
   const handleListingClick = (id: string) => {
     window.open(`https://mempool.space/tx/${id}`, "_blank");
   };
@@ -147,6 +148,17 @@ function OrderList({ orders }: HeroProps) {
                     </TableRow>
                   );
                 })}
+              </TableBody>
+            ) : loading ? (
+              <TableBody>
+                <TableRow>
+                  <TableCell
+                    colSpan={7}
+                    style={{ textAlign: "center", color: "white" }}
+                  >
+                    <CircularProgress color="inherit" size={40} />
+                  </TableCell>
+                </TableRow>
               </TableBody>
             ) : (
               <TableBody>
