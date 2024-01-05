@@ -1,5 +1,4 @@
 // app/api/v2/cron/inscribe/route.ts
-import { CustomError, wait } from "@/utils";
 import { addressReceivedMoneyInThisTx, pushBTCpmt } from "@/utils/Inscribe";
 import { NextRequest, NextResponse } from "next/server";
 import * as cryptoUtils from "@cmdcode/crypto-utils";
@@ -15,6 +14,9 @@ import dbConnect from "@/lib/dbConnect";
 async function findOrder() {
   await dbConnect();
   const order = await Inscribe.findOne({ status: "payment received" }).limit(1);
+  if (!order) {
+    return { order: null, inscriptions: null };
+  }
   const inscriptions = await CreateInscription.find({
     order_id: order.order_id,
   });
@@ -175,7 +177,6 @@ export async function GET(req: NextRequest) {
     const pendingOrders = await Inscribe.countDocuments({
       status: "payment pending",
     });
-
     if (pendingOrders) {
       // Call the function
       await cancelOldPendingPayments().catch(console.error);
