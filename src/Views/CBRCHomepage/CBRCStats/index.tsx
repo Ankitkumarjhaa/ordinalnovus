@@ -1,6 +1,6 @@
 import { formatNumber, getBTCPriceInDollars } from "@/utils";
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setBTCPrice } from "@/stores/reducers/generalReducer";
 import { RootState } from "@/stores";
@@ -17,12 +17,16 @@ const CBRCStats = ({ stats }: {  stats:IStats }) => {
 
  console.log(stats,'stats in statscomponent')
 
-  const convertToUSD = (sats: number) => {
-    if (btcPrice) {
-      return formatNumber(Number(((sats / 100_000_000) * btcPrice).toFixed(3)));
-    }
-    return "Loading...";
-  };
+  const convertToUSD = useCallback(
+    (sats:number) => {
+      if (btcPrice) {
+        return formatNumber(Number(((sats / 100_000_000) * btcPrice).toFixed(3)));
+      }
+      return "Loading...";
+    },
+    [btcPrice],
+  )
+  
 
   return (
     <div className="pb-2">

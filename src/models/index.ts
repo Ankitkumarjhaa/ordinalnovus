@@ -7,6 +7,7 @@ import { BlocksSchema } from "./block";
 import { InscribeOrderSchema } from "./InscribeOrder";
 import { salesSchema } from "./Sale";
 import { WalletSchema } from "./Wallets";
+import { StatsSchema } from "./Stats";
 import { APIUsageLogSchema } from "./APIUsageLog";
 
 import { AllowedTokensSchema } from "./AllowedTokens";
@@ -24,6 +25,7 @@ const Inscribe = models.Inscribe || model("Inscribe", InscribeOrderSchema);
 const CreateInscription =
   models.CreateInscription || model("CreateInscription", createInscriptionSchema);
 const Sale = models.Sale || model("Sale", salesSchema);
+const Stats = models.Stats || model("Stats", StatsSchema);
 const Wallet = models.Wallet || model("Wallet", WalletSchema);
 const AllowedCbrcs =
   models.AllowedCbrcs || model("AllowedCbrcs", AllowedTokensSchema);
@@ -44,4 +46,5 @@ export {
   APIKeyUsage,
   AllowedCbrcs,
   CBRCToken,
+  Stats
 };

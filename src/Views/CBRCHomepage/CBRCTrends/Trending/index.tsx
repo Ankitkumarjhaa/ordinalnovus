@@ -4,6 +4,7 @@ import React from "react";
 import { BiSolidUpArrow, BiSolidDownArrow } from "react-icons/bi";
 
 const Trending = ({ data }: { data: IToken[] }) => {
+  console.log({data}, 'TRENDING>>>DATA')
   const calculateVolumeChange = (historicalData: IHistoricalData[]) => {
     if (!historicalData || historicalData.length < 2) {
       return { value: "N/A", isPositive: false }; // Not enough data

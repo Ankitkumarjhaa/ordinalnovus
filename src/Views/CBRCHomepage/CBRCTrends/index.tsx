@@ -6,6 +6,7 @@ import { IStats } from '@/types';
 import Hot from './Hot';
 
 const CBRCTrends = ({ token }: {  token:IStats }) => {
+  console.log({token}, 'TOKEN>>>>')
   return (
     <div className='py-6 flex flex-wrap justify-between items-center w-full'>
      <div className=' w-full lg:w-4/12'>
