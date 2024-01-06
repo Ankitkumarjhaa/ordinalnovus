@@ -3,16 +3,6 @@ import { RootState } from "@/stores";
 import { IInscription } from "@/types";
 import { formatNumber, stringToHex } from "@/utils";
 import { cbrcListed, myInscription } from "@/utils/validate";
-import {
-  CircularProgress,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-} from "@mui/material";
 import { useWalletAddress } from "bitcoin-wallet-adapter";
 import moment from "moment";
 import Link from "next/link";
@@ -42,7 +32,7 @@ function CbrcListings({ listings, loading }: HeroProps) {
     router.push(`/inscription/${id}`);
   };
   const handleMempoolClick = (txid: string) => {
-    window.open(`https://blockstream.info/tx/${txid}`);
+    window.open(`https://mempool.space/tx/${txid}`);
   };
 
   return (

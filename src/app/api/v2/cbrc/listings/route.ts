@@ -129,8 +129,8 @@ export async function GET(req: NextRequest, res: NextResponse) {
       processing_time: timeTaken,
     };
     // Cache the result
-    // 60 seconds
-    await setCache(cacheKey, JSON.stringify(responseData), 60);
+    // 30 seconds
+    await setCache(cacheKey, JSON.stringify(responseData), 30);
 
     return NextResponse.json(responseData);
   } catch (error: any) {

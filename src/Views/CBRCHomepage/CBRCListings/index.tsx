@@ -21,7 +21,7 @@ function CBRCLatestListings() {
   const [page, setPage] = useState<number>(1);
   const [data, setData] = useState<IInscription[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
-  const [pageSize, setPageSize] = useState<number>(30);
+  const [pageSize, setPageSize] = useState<number>(10);
   const [sort, setSort] = useState<string>("listed_at:-1");
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -43,7 +43,13 @@ function CBRCLatestListings() {
   }, [sort, page, pageSize]);
 
   useEffect(() => {
-    fetchData();
+    fetchData(); // Fetch data on mount and when dependencies change
+
+    const interval = setInterval(() => {
+      fetchData(); // Fetch data every 10 seconds
+    }, 30000); // 10000 milliseconds = 10 seconds
+
+    return () => clearInterval(interval); // Clear interval on unmount
   }, [sort, page, dispatch, pageSize]);
 
   const handlePageChange = (
@@ -94,6 +100,15 @@ function CBRCLatestListings() {
         </>
       ) : (
         <CbrcListings listings={data} loading={loading} />
+      )}
+      {data?.length > 0 && (
+        <div className="w-full center lg:justify-end">
+          <CustomPaginationComponent
+            count={Math.ceil(totalCount / pageSize)}
+            onChange={handlePageChange}
+            page={page}
+          />
+        </div>
       )}
     </div>
   );

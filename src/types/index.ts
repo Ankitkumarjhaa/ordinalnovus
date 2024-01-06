@@ -53,39 +53,42 @@ export interface IFeeInfo {
   lastChecked: Date;
 }
 
-export interface IFileSchema {
+export interface ICreateInscription {
+  order: string;
+  order_id: string;
+  privkey: string;
+  receive_address: string;
   file_type: string;
   file_name: string;
   base64_data: string;
   file_size: number;
   inscription_address: string;
-  txid?: string;
+  txid: string;
   leaf: string;
   tapkey: string;
   cblock: string;
   inscription_fee: number;
-  inscription_id?: string;
+  inscription_id: string;
+  metaprotocol: "none" | "cbrc";
+  tick?: string;
+  amt?: string;
+  op?: string;
+  network: "testnet" | "mainnet";
+  status: "payment pending" | "payment received" | "inscribed" | "cancelled";
+  webhook_url?: string;
+  fee_rate: number;
 }
 
-export interface IInscribeOrder extends Document {
+export interface IInscribeOrder {
+  _id?: string;
   order_id: string;
-  funding_address: string;
-  privkey: string;
   receive_address: string;
   chain_fee: number;
   service_fee: number;
-  inscriptions: IFileSchema[];
-  cursed: boolean;
-  network: "testnet" | "mainnet";
-  status:
-    | "payment pending"
-    | "payment received"
-    | "insufficient balance"
-    | "inscribed"
-    | "refunded";
-  webhook_url?: string;
-  fee_rate: number;
-  txid?: string;
+  txid: string;
+  psbt: string;
+  status: "payment pending" | "payment received" | "inscribed" | "cancelled";
+  inscriptionCount?: number;
   referrer?: string;
   referral_fee?: number;
   createdAt?: Date;

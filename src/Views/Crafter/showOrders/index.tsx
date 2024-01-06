@@ -2,45 +2,46 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { CircularProgress } from "@mui/material";
-import CustomSearch from "@/components/elements/CustomSearch";
-import { FaSearch } from "react-icons/fa";
 import CustomPaginationComponent from "@/components/elements/CustomPagination";
-import { IToken } from "@/types/CBRC";
-import { FetchCBRC } from "@/apiHelper/getCBRC";
-import TokenList from "./TokenList";
+import { fetchOrders } from "@/apiHelper/fetchOrders";
+import { useWalletAddress } from "bitcoin-wallet-adapter";
+import { IInscribeOrder } from "@/types";
+import OrderList from "./OrderList";
 
-function CBRCTokensList({ defaultData }: { defaultData: IToken[] }) {
+function ShowOrders() {
   const dispatch = useDispatch();
   const [page, setPage] = useState<number>(1);
-  const [data, setData] = useState<IToken[]>([]);
+  const [data, setData] = useState<IInscribeOrder[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
-  const [pageSize, setPageSize] = useState<number>(15);
-  const [sort, setSort] = useState<string>("volume:-1");
+  const [pageSize, setPageSize] = useState<number>(20);
+  const [sort, setSort] = useState<string>("createdAt:-1");
   const [loading, setLoading] = useState<boolean>(true);
   const [tick, setTick] = useState("");
+
+  const walletDetails = useWalletAddress();
 
   const fetchData = useCallback(async () => {
     {
       setLoading(true);
       setData([]);
-      const result = await FetchCBRC({
+      const result = await fetchOrders({
         page,
         page_size: pageSize,
         sort,
-        allowed: true,
-        ...(tick && { search: tick }),
+        wallet: walletDetails?.ordinal_address,
       });
+
       if (result && result.data) {
-        setData(result.data.tokens);
+        setData(result.data.orders);
         setTotalCount(result.data.pagination.total);
         setLoading(false);
       }
     }
-  }, [sort, page, pageSize, tick]);
+  }, [sort, page, pageSize, tick, walletDetails]);
 
   useEffect(() => {
     fetchData();
-  }, [sort, page, dispatch, pageSize]);
+  }, [sort, page, dispatch, pageSize, walletDetails]);
 
   const handleSearchChange = (value: string) => {
     setTick(value);
@@ -53,10 +54,10 @@ function CBRCTokensList({ defaultData }: { defaultData: IToken[] }) {
   };
 
   return (
-    <div>
+    <div className="w-full overflow-x-auto">
       <div className="SortSearchPages py-6 flex flex-wrap justify-between">
         <div className="w-full lg:w-auto flex justify-start items-center flex-wrap">
-          <div className="w-full center pb-4 lg:pb-0 lg:w-auto">
+          {/* <div className="w-full center pb-4 lg:pb-0 lg:w-auto">
             <CustomSearch
               placeholder="Ticker"
               value={tick}
@@ -65,7 +66,7 @@ function CBRCTokensList({ defaultData }: { defaultData: IToken[] }) {
               end={true}
               onIconClick={fetchData}
             />
-          </div>
+          </div> */}
           {/* <div className="w-full md:w-auto p-2 px-6">
             <div className="capitalize pb-1 text-xs flex items-center justify-evenly">
               <p> Buy Items with checkmark </p>
@@ -83,21 +84,21 @@ function CBRCTokensList({ defaultData }: { defaultData: IToken[] }) {
           </div>
         )}
       </div>
-      {!data || !defaultData ? (
+      {!data ? (
         <>
           {loading ? (
             <div className="text-white center py-16">
               <CircularProgress size={20} color="inherit" />
             </div>
           ) : (
-            <p className="min-h-[20vh] center"> No CBRC Token Found</p>
+            <p className="min-h-[20vh] center"> No Orders Found</p>
           )}
         </>
       ) : (
-        <TokenList tokens={data || defaultData} loading={loading} />
+        <OrderList orders={data} loading={loading} />
       )}
     </div>
   );
 }
 
-export default CBRCTokensList;
+export default ShowOrders;

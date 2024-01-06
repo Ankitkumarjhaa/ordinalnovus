@@ -6,7 +6,9 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(req: NextRequest) {
   await dbConnect();
 
-  const tokens = await CBRCToken.find({ allowed: true }).limit(500).lean();
+  const tokens = await CBRCToken.find({ checksum: { $exists: false } })
+    .limit(500)
+    .lean();
 
   // Find the tokens that match your criteria
 
@@ -17,13 +19,13 @@ export async function GET(req: NextRequest) {
   const bulkOps = [];
 
   for (const token of tokens) {
-    const fp = await Inscription.findOne({
-      listed_token: token.tick.trim().toLowerCase(),
-      listed: true,
-      in_mempool: false,
-    }).sort({ listed_price_per_token: 1 });
+    // const fp = await Inscription.findOne({
+    //   listed_token: token.tick.trim().toLowerCase(),
+    //   listed: true,
+    //   in_mempool: false,
+    // }).sort({ listed_price_per_token: 1 });
 
-    const price = fp ? fp.listed_price_per_token : 0;
+    // const price = fp ? fp.listed_price_per_token : 0;
 
     // Get Today's Sales
     const startOfDay = new Date();
@@ -53,10 +55,11 @@ export async function GET(req: NextRequest) {
     if (token) {
       bulkOps.push({
         updateOne: {
-          filter: { _id: token._id }, // Assuming _id is the identifier
+          filter: { _id: token._id },
           update: {
             $set: {
-              price,
+              checksum: stringToHex(token.tick.trim().toLowerCase()),
+              // price,
               volume: volumeInSats,
               allowed: allowed.includes(token.checksum),
             },

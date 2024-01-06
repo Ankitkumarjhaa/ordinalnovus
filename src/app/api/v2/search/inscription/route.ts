@@ -69,7 +69,7 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
 
     let query;
 
-    if (/^[0-9A-Fa-f]{64}i\d$/gm.test(id)) {
+    if (/^[0-9A-Fa-f]{64}i\d+$/gm.test(id)) {
       query = { inscription_id: id };
     } else if (!isNaN(Number(id))) {
       query = { inscription_number: Number(id) };

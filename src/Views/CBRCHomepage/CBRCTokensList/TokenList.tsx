@@ -67,9 +67,9 @@ function TokenList({ tokens, loading }: HeroProps) {
               <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
                 MARKET CAP
               </TableCell>
-              {/* <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+              <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
                 VOLUME (24h)
-              </TableCell> */}
+              </TableCell>
               <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
                 SUPPLY
               </TableCell>
@@ -80,7 +80,7 @@ function TokenList({ tokens, loading }: HeroProps) {
               <TableBody sx={{ color: "white" }}>
                 {tokens?.map((item: IToken) => {
                   const price = ((item?.price || 0) / 100_000_000) * btcPrice; // in $
-                  // if (allowed_cbrcs?.includes(item.checksum))
+                  const volume = ((item?.volume || 0) / 100_000_000) * btcPrice;
                   return (
                     <TableRow
                       onClick={() => handleListingClick(item.tick)}
@@ -215,18 +215,18 @@ function TokenList({ tokens, loading }: HeroProps) {
                             : "-"}
                         </p>
                       </TableCell>
-                      {/* <TableCell
-                      sx={{
-                        textAlign: "center",
-                        color: "white",
-                      }}
-                    >
-                      <p className="text-center">
-                        {item?.volume
-                          ? `$ ${formatNumber(Number(item?.volume.toFixed(0)))}`
-                          : "-"}
-                      </p>
-                    </TableCell> */}
+                      <TableCell
+                        sx={{
+                          textAlign: "center",
+                          color: "white",
+                        }}
+                      >
+                        <p className="text-center">
+                          {volume
+                            ? `$ ${formatNumber(Number(volume.toFixed(0)))}`
+                            : "-"}
+                        </p>
+                      </TableCell>
                       <TableCell
                         sx={{
                           textAlign: "center",

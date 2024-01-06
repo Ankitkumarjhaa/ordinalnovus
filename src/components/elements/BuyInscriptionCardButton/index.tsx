@@ -126,7 +126,7 @@ function BuyInscriptionCardButton({ data }: InscriptionProps) {
         cardinal_address: walletDetails.cardinal_address,
         ordinal_pubkey: walletDetails.ordinal_pubkey,
         cardinal_pubkey: walletDetails.cardinal_pubkey,
-        wallet: walletDetails.wallet,
+        wallet: walletDetails.cardinal_address,
         wallet_name: walletDetails.wallet,
         // Additional properties if needed
       });

@@ -15,11 +15,10 @@ import {
 import { convertSatToBtc } from "@/utils";
 import { satsToDollars } from "@/utils/Inscribe";
 
-const DUMMY_UTXO_MAX_VALUE = Number(1000);
-const DUMMY_UTXO_MIN_VALUE = Number(580);
-const DUMMY_UTXO_VALUE = 1000;
+export const DUMMY_UTXO_MIN_VALUE = Number(580);
+export const DUMMY_UTXO_VALUE = 1000;
 const ORDINALS_POSTAGE_VALUE = Number(1000);
-const PLATFORM_FEE_ADDRESS =
+export const PLATFORM_FEE_ADDRESS =
   process.env.PLATFORM_FEE_ADDRESS ||
   "bc1qz9fuxrcrta2ut0ad76zlse09e98x9wrr7su7u6";
 const BUYING_PSBT_SELLER_SIGNATURE_INDEX = 2;
@@ -294,7 +293,7 @@ async function selectDummyUTXOs(
   return result;
 }
 
-async function selectPaymentUTXOs(
+export async function selectPaymentUTXOs(
   utxos: AddressTxsUtxo[],
   amount: number, // amount is expected total output (except tx fee)
   vinsLength: number,
@@ -488,7 +487,7 @@ async function generateUnsignedBuyingPSBTBase64(
   // Create a platform fee output
   let platformFeeValue = Math.floor((listing.seller.price * (0 + 100)) / 10000);
   // Assuming listing.seller.price is in satoshis
-  platformFeeValue = Math.max(Math.round(listing.seller.price * 0.01), 580);
+  platformFeeValue = Math.max(Math.round(listing.seller.price * 0.01), 1000);
 
   // platformFeeValue > DUMMY_UTXO_MIN_VALUE ? platformFeeValue : 580;
 
