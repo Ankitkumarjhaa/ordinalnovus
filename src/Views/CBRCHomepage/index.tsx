@@ -5,18 +5,20 @@ import { IToken } from "@/types/CBRC";
 import CustomTab from "@/components/elements/CustomTab";
 import CBRCSales from "./CBRCSales";
 import CBRCLatestListings from "./CBRCListings";
-function CBRCHomepage({ tokens }: { tokens: IToken[] }) {
+import CbrcHero from "./CBRCHero";
+import CBRCStats from "./CBRCStats";
+import { IStats } from "@/types";
+import CBRCTrends from "./CBRCTrends";
+function CBRCHomepage({ tokens, stats }: { tokens: IToken[]; stats: IStats }) {
   const [tab, setTab] = useState("tokens");
+
+  console.log(stats, "stats");
 
   return (
     <div>
-      <div className="w-full my-2 text-xs py-2 uppercase font-bold text-white text-center">
-        <p
-          className={`text-gray-700 bg-gray-100  py-2 w-full border-accent border rounded tracking-widest font-bold`}
-        >
-          Data provided below might have inaccuracies.
-        </p>
-      </div>
+      <CBRCStats stats={stats} />
+      <CbrcHero />
+      <CBRCTrends token={stats} />
       <div className="pb-6 py-16 flex justify-center lg:justify-start ">
         <CustomTab
           tabsData={[
