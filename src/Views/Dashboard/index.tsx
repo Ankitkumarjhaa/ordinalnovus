@@ -237,7 +237,7 @@ function AccountPage() {
           </div>
         </div>
         <div className="py-4 md:py-0 flex-1 md:flex md:justify-center lg:justify-end">
-          <Link href="https://www.cybord.org/thecraft.html" target="_blank">
+          <Link href="/crafter">
             <p className="w-full md:w-auto px-4 py-1 bg-bitcoin text-yellow-900">
               Create Transfer Inscription
             </p>
