@@ -22,6 +22,25 @@ type InscriptionProps = {
 };
 
 function ListInscription({ data }: InscriptionProps) {
+  if (data.in_mempool) {
+    return (
+      <div className="flex-1 pt-6">
+        <CustomButton
+          loading={false}
+          text={"Sold. Tx in progress..."}
+          hoverBgColor="hover:bg-accent_dark"
+          hoverTextColor="text-white"
+          bgColor="bg-accent"
+          textColor="text-white"
+          className="transition-all w-full rounded-xl"
+          link={true}
+          newTab={true}
+          href={`https://mempool.space/tx/${data.txid}`}
+        />
+      </div>
+    );
+  }
+
   const dispatch = useDispatch();
   const router = useRouter();
   const walletDetails = useWalletAddress();

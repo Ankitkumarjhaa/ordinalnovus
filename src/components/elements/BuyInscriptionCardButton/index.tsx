@@ -349,7 +349,7 @@ function BuyInscriptionCardButton({ data }: InscriptionProps) {
         <CustomButton
           loading={loading}
           disabled={!data.listed}
-          text={`${data.in_mempool ? `In Mempool...` : `Buy Now `}`}
+          text={`${data.in_mempool ? `Sold. Tx in Progress...` : `Buy Now `}`}
           hoverBgColor="hover:bg-accent_dark"
           hoverTextColor="text-white"
           bgColor="bg-accent"

@@ -114,6 +114,9 @@ export const collectionSchema = new Schema(
     json_uploaded: { type: Boolean, default: false },
     email: { type: String },
     discord_id: { type: String },
+    metaprotocol: { type: String, enum: ["cbrc"], index: true },
+    royalty_bp: { type: Number },
+    royalty_address: { type: String },
   },
   {
     timestamps: { createdAt: "created_at", updatedAt: "updated_at" },

@@ -106,8 +106,9 @@ const CardContent: React.FC<CardContentProps> = ({
         </div>
       );
     } else if (
-      inscription?.metaprotocol?.includes("cbrc-20:mint") ||
-      inscription?.metaprotocol?.includes("cbrc-20:transfer")
+      (inscription?.metaprotocol?.includes("cbrc-20:mint") ||
+        inscription?.metaprotocol?.includes("cbrc-20:transfer")) &&
+      inscription?.tags?.includes("text")
     ) {
       const [tag, mode, tokenAmt] = inscription.metaprotocol.split(":");
       const [token, amt] = tokenAmt.split("=");
@@ -476,10 +477,11 @@ const CardContent: React.FC<CardContentProps> = ({
           </div>
         )}
       {inscription?.parsed_metaprotocol &&
-        inscription?.parsed_metaprotocol?.length > 2 && (
+        inscription?.parsed_metaprotocol?.length == 3 && (
           <div>
             <span className="absolute bg-bitcoin rounded font-bold text-yellow-900 capitalize text-xs p-1 z-10 top-[5px] right-[5px] ">
-              {inscription?.parsed_metaprotocol[1]}
+              {inscription?.parsed_metaprotocol[1]}{" "}
+              {inscription?.parsed_metaprotocol[2]}
             </span>
           </div>
         )}{" "}
