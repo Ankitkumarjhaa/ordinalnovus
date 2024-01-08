@@ -359,6 +359,11 @@ export interface IListingState {
   };
 }
 
+interface AggregateVolumeData {
+  _id: string; // Token identifier
+  totalAmt: number; // Total volume for the token
+}
+
 export interface IStats {
   tokens: number;
   btcHeight: number;
@@ -367,9 +372,13 @@ export interface IStats {
   dailyVolume: number;
   tokensTrend: IToken[];
   tokensHot: IToken[];
+  aggregateVolume : AggregateVolumeData[]
   monthlyVolume: number;
   allTimeVolume: number;
 }
+
+
+
 
 
 export type FeeRateTier =

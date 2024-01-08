@@ -15,8 +15,15 @@ const TokenSchema = new mongoose.Schema({
   tick: String,
   supply: Number,
   price: Number,
+  volume: Number,
+  in_mempool:Number,
   historicalData: [HistoricalDataSchema],
   // Include other relevant fields from tokensTrend and tokensHot
+});
+
+const AggregateVolumeSchema = new mongoose.Schema({
+  _id: String, // Token identifier
+  totalAmt: Number // Total volume for the token
 });
 
 export const StatsSchema = new mongoose.Schema({
@@ -49,7 +56,8 @@ export const StatsSchema = new mongoose.Schema({
     required: true
   },
   tokensTrend: [TokenSchema],
-  tokensHot: [TokenSchema]
+  tokensHot: [TokenSchema],
+  aggregateVolume: [AggregateVolumeSchema]
 }, {
   timestamps: true
 });

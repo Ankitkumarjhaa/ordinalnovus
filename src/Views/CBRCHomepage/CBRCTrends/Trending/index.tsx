@@ -1,33 +1,31 @@
+import { RootState } from "@/stores";
 import { IStats } from "@/types";
 import { IHistoricalData, IToken } from "@/types/CBRC";
-import React from "react";
+import { formatNumber } from "@/utils";
+import React, { useCallback } from "react";
 import { BiSolidUpArrow, BiSolidDownArrow } from "react-icons/bi";
+import { FaDollarSign } from "react-icons/fa";
+import { useDispatch, useSelector } from "react-redux";
 
-const Trending = ({ data }: { data: IToken[] }) => {
-  console.log({data}, 'TRENDING>>>DATA')
-  const calculateVolumeChange = (historicalData: IHistoricalData[]) => {
-    if (!historicalData || historicalData.length < 2) {
-      return { value: "N/A", isPositive: false }; // Not enough data
-    }
-  
-    const latestVolume = historicalData[0]?.volume ;
-    const previousVolume = historicalData[1]?.volume ;
+const Trending = ({ data }: { data: IStats }) => {
+  console.log({ data }, "TRENDING>>>DATA");
+  const dispatch = useDispatch();
 
-    if (previousVolume === 0) {
-      return {
-        value: latestVolume === 0 ? "0%" : "Infinity",
-        isPositive: latestVolume !== 0,
-      };
-    }
+  const btcPrice = useSelector(
+    (state: RootState) => state.general.btc_price_in_dollar
+  );
 
-    const change = latestVolume - previousVolume;
-    const percentageChange = (change / previousVolume) * 100;
-
-    return {
-      value: `${percentageChange.toFixed(2)}%`,
-      isPositive: percentageChange > 0,
-    };
-  };
+  const convertToUSD = useCallback(
+    (sats: number) => {
+      if (btcPrice) {
+        return formatNumber(
+          Number(((sats / 100_000_000) * btcPrice).toFixed(3))
+        );
+      }
+      return "Loading...";
+    },
+    [btcPrice]
+  );
 
   return (
     <div className="py-8 px-6 rounded-lg bg-violet">
@@ -39,22 +37,22 @@ const Trending = ({ data }: { data: IToken[] }) => {
           <p className="font-semibold text-xl text-white pl-2 ">Trending</p>
         </div>
       </div>
-      {data.slice(0, 3).map((item, index) => {
-        const { value, isPositive } = calculateVolumeChange(
-          item.historicalData
-        );
+      {data.tokensTrend.slice(0, 3).map((item, index) => {
         return (
           <div key={index} className=" p-3  flex justify-between items-center">
             <div className="text-light_gray text-md">
-              {index + 1}. <span className="pl-1 uppercase text-white font-medium"> {item.tick}</span>
+              {index + 1}.{" "}
+              <span className="pl-1 uppercase text-white font-medium">
+                {" "}
+                {item.tick}
+              </span>
             </div>
-            <div
-              className={` ${
-                isPositive ? "text-green-500" : "text-red-500"
-              } flex items-center  `}
-            >
-              {isPositive ? <BiSolidUpArrow /> : <BiSolidDownArrow />}
-              <span className="pl-2">{value}</span>
+            <div className="">
+              {/* {isPositive ? <BiSolidUpArrow /> : <BiSolidDownArrow />} */}
+              <p className="pl-2 flex">
+                <FaDollarSign className="text-green-500" />
+                {convertToUSD(item.price)}
+              </p>
             </div>
           </div>
         );

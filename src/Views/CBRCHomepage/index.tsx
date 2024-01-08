@@ -17,7 +17,7 @@ function CBRCHomepage({ tokens, stats }: { tokens: IToken[]; stats: IStats }) {
   return (
     <div>
       <CBRCStats stats={stats} />
-      <CbrcHero />
+      {/* <CbrcHero /> */}
       <CBRCTrends token={stats} />
       <div className="pb-6 py-16 flex justify-center lg:justify-start ">
         <CustomTab

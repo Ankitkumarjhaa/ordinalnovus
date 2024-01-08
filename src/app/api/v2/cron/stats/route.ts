@@ -7,6 +7,11 @@ import moment from "moment";
 
 import axios from "axios";
 
+interface AggregateVolumeData {
+  _id: string; // Token identifier
+  totalAmt: number; // Total volume for the token
+}
+
 export async function GET(req: NextRequest) {
   const { data } = await axios.get("https://api-prod.cybord.org/heights");
   const btcHeight = data.bitcoin;
@@ -17,7 +22,8 @@ export async function GET(req: NextRequest) {
 
   const mempoolBtcHeight = mempoolData;
 
-  const novusHeightData = await Block.findOne().sort({ height: -1 }).lean();
+  await dbConnect();
+  const novusHeightData = await Block.findOne({}).sort({ height: -1 });
   const novusBtcHeight = novusHeightData.height;
 
   await dbConnect();
@@ -34,6 +40,9 @@ export async function GET(req: NextRequest) {
     allowed: true,
   }).sort({ in_mempool: -1 }).limit(3).lean();
 
+
+
+
   if (!tokens) {
     return NextResponse.json({ message: "API down" });
   }
@@ -42,6 +51,7 @@ export async function GET(req: NextRequest) {
     dailyVolume: number;
     monthlyVolume: number;
     allTimeVolume: number;
+    aggregateVolume : AggregateVolumeData[]
   } = await fetchMarketStats();
   console.log({ total: tokens });
 
@@ -52,6 +62,7 @@ export async function GET(req: NextRequest) {
     allTimeVolume: statsData.allTimeVolume,
     dailyVolume: statsData.dailyVolume,
     monthlyVolume: statsData.monthlyVolume,
+    aggregateVolume:statsData.aggregateVolume,
     btcHeight,
     novusBtcHeight,
     mempoolBtcHeight,
@@ -122,6 +133,19 @@ async function fetchMarketStats() {
     },
   ];
 
+
+  const volume = [
+    { $match: {
+      timestamp: { $gte: twentyFourHoursAgo },
+      price_per_token: { $gt: 0 },
+      marketplace:"ordinalnovus"
+    }},
+    { $group: {
+      _id: "$token",
+      totalAmt: { $sum: "$price" }
+    }}
+  ];
+
   // console.dir(pipeline, { depth: null });
   // Aggregate query to calculate total volume, on_volume, and average price
   const aggregateDailyData = await Tx.aggregate(dailyPipeline);
@@ -130,6 +154,8 @@ async function fetchMarketStats() {
 
   const aggregateAllTimeData = await Tx.aggregate(allTimePipeline);
 
+  const aggregateVolume = await Tx.aggregate(volume)
+  console.log("aggregateVolume:", aggregateVolume); 
   const dailyData = aggregateDailyData.length
     ? aggregateDailyData[0]
     : { totalVolume: 0 };
@@ -148,6 +174,7 @@ async function fetchMarketStats() {
     dailyVolume: dailyData.totalVolume,
     monthlyVolume: monthlyData.totalVolume,
     allTimeVolume: allTimeData.totalVolume,
+    aggregateVolume : aggregateVolume
     // cybordBtcHeight : btcHeight
   };
 }

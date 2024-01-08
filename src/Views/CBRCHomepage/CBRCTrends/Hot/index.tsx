@@ -3,24 +3,22 @@ import { IHistoricalData, IToken } from "@/types/CBRC";
 import React from "react";
 import { BiSolidUpArrow, BiSolidDownArrow } from "react-icons/bi";
 
-const Hot= ({ data }: { data: IToken[] }) => {
-  const calculateVolumeChange = (historicalData: IHistoricalData[]) => {
-    if (historicalData.length < 2) {
-      return { value: "N/A", isPositive: false }; // Not enough data
-    }
-
-    const latestVolume = historicalData[0].volume;
-    const previousVolume = historicalData[1].volume;
-
-    if (previousVolume === 0) {
+const Hot = ({ data }: { data: IStats }) => {
+  const calculateVolumeChange = (item: IToken) => {
+    const currentVolume = item.volume;
+    const latestHistoricalVolume = item.historicalData[0]?.volume_sats || 0;
+    console.log(item.in_mempool,'inmempool')
+    if (latestHistoricalVolume === 0) {
       return {
-        value: latestVolume === 0 ? "0%" : "Infinity",
-        isPositive: latestVolume !== 0,
+        value: currentVolume === 0 ? "0%" : "Infinity",
+        isPositive: currentVolume !== 0,
       };
     }
 
-    const change = latestVolume - previousVolume;
-    const percentageChange = (change / previousVolume) * 100;
+    const change = currentVolume - latestHistoricalVolume;
+    const percentageChange = (change / latestHistoricalVolume) * 100;
+
+    console.log({ change, percentageChange });
 
     return {
       value: `${percentageChange.toFixed(2)}%`,
@@ -29,8 +27,9 @@ const Hot= ({ data }: { data: IToken[] }) => {
   };
 
   return (
-    <div className="py-8 px-6 rounded-lg bg-violet">
-      <div className="flex items-center pb-4">
+    <div className="py-8 px-6 rounded-lg  bg-violet">
+     <div className="pb-4 flex items-center justify-between">
+     <div className="flex items-center ">
         <div>
           <img src="/assets/images/hot.png" />
         </div>
@@ -38,22 +37,25 @@ const Hot= ({ data }: { data: IToken[] }) => {
           <p className="font-semibold text-xl text-white pl-2 ">Hot</p>
         </div>
       </div>
-      {data.slice(0, 3).map((item, index) => {
-        const { value, isPositive } = calculateVolumeChange(
-          item.historicalData
-        );
+      <div className="text-white ">
+        <p>In mempool</p>
+      </div>
+     </div>
+      {data.tokensHot.slice(0, 3).map((item, index) => {
+        const { value, isPositive } = calculateVolumeChange(item);
         return (
           <div key={index} className=" p-3  flex justify-between items-center">
             <div className="text-light_gray text-md">
-              {index + 1}. <span className="pl-1 uppercase text-white font-medium"> {item.tick}</span>
+              {index + 1}.{" "}
+              <span className="pl-1 uppercase text-white font-medium">
+                {" "}
+                {item.tick}
+              </span>
             </div>
             <div
-              className={` ${
-                isPositive ? "text-green-500" : "text-red-500"
-              } flex items-center  `}
+              className=""
             >
-              {isPositive ? <BiSolidUpArrow /> : <BiSolidDownArrow />}
-              <span className="pl-2">{value}</span>
+              <span className="pl-2">{item.in_mempool}</span>
             </div>
           </div>
         );
