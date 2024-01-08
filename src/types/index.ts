@@ -1,6 +1,5 @@
 import mongoose, { Document, Schema } from "mongoose";
 import * as bitcoin from "bitcoinjs-lib";
-import { Interface } from "readline";
 import { IToken } from "./CBRC";
 
 export interface ITransaction {
