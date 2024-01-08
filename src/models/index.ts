@@ -12,6 +12,7 @@ import { APIUsageLogSchema } from "./APIUsageLog";
 import { AllowedTokensSchema } from "./AllowedTokens";
 import { CBRCTokenSchema } from "./CBRCTokens";
 import { createInscriptionSchema } from "./createInscription";
+import { satsCollSchema } from "./SatCollection";
 
 const Inscription =
   models.Inscription || model("Inscription", inscriptionSchema);
@@ -22,7 +23,8 @@ const Tx = models.Tx || model("Tx", TXCacheSchema);
 const Block = models.Block || model("Block", BlocksSchema);
 const Inscribe = models.Inscribe || model("Inscribe", InscribeOrderSchema);
 const CreateInscription =
-  models.CreateInscription || model("CreateInscription", createInscriptionSchema);
+  models.CreateInscription ||
+  model("CreateInscription", createInscriptionSchema);
 const Sale = models.Sale || model("Sale", salesSchema);
 const Wallet = models.Wallet || model("Wallet", WalletSchema);
 const AllowedCbrcs =
@@ -31,6 +33,8 @@ const APIKeyUsage =
   models.APIKeyUsage || model("APIKeyUsage", APIUsageLogSchema);
 
 const CBRCToken = models.CBRCToken || model("CBRCToken", CBRCTokenSchema);
+const SatCollection =
+  models.SatCollection || model("SatCollection", satsCollSchema);
 export {
   Inscribe,
   CreateInscription,
@@ -44,4 +48,5 @@ export {
   APIKeyUsage,
   AllowedCbrcs,
   CBRCToken,
+  SatCollection,
 };

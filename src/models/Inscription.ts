@@ -197,6 +197,7 @@ export const inscriptionSchema = new mongoose.Schema(
     metadata: {
       type: Schema.Types.Mixed,
     },
+    valid: { type: Boolean },
   },
   {
     timestamps: { createdAt: "created_at", updatedAt: "updated_at" },
