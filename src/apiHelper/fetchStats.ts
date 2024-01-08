@@ -4,7 +4,7 @@ import axios from "axios";
 const fetchStats = async (): Promise<IStats | null> => {
   
   try {
-    const response = await axios.get<{data:IStats}>("http://localhost:3000/api/v2/stats");
+    const response = await axios.get<{data:IStats}>(`${process.env.NEXT_PUBLIC_URL}/v2/stats`);
     console.log(response.data, 'statsapi')
     return response.data.data;
   } catch (error) {
