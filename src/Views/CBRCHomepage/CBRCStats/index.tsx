@@ -15,7 +15,6 @@ const CBRCStats = ({ stats }: { stats: IStats }) => {
   ); // Retrieve BTC price from Redux store
   const fees = useSelector((state: RootState) => state.general.fees); // Retrieve fees from Redux store
 
-  console.log(stats, "stats in statscomponent");
 
   const convertToUSD = useCallback(
     (sats: number) => {

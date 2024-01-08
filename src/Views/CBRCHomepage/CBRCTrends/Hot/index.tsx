@@ -7,7 +7,6 @@ const Hot = ({ data }: { data: IStats }) => {
   const calculateVolumeChange = (item: IToken) => {
     const currentVolume = item.volume;
     const latestHistoricalVolume = item.historicalData[0]?.volume_sats || 0;
-    console.log(item.in_mempool,'inmempool')
     if (latestHistoricalVolume === 0) {
       return {
         value: currentVolume === 0 ? "0%" : "Infinity",
@@ -18,7 +17,6 @@ const Hot = ({ data }: { data: IStats }) => {
     const change = currentVolume - latestHistoricalVolume;
     const percentageChange = (change / latestHistoricalVolume) * 100;
 
-    console.log({ change, percentageChange });
 
     return {
       value: `${percentageChange.toFixed(2)}%`,

@@ -8,7 +8,6 @@ import { FaDollarSign } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 
 const Trending = ({ data }: { data: IStats }) => {
-  console.log({ data }, "TRENDING>>>DATA");
   const dispatch = useDispatch();
 
   const btcPrice = useSelector(

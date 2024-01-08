@@ -12,8 +12,6 @@ import CBRCTrends from "./CBRCTrends";
 function CBRCHomepage({ tokens, stats }: { tokens: IToken[]; stats: IStats }) {
   const [tab, setTab] = useState("tokens");
 
-  console.log(stats, "stats");
-
   return (
     <div>
       {/* <CBRCStats stats={stats} /> */}
