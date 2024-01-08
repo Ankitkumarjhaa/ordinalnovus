@@ -11,7 +11,7 @@ export default async function Home() {
 
   const statsData = await fetchStats()
 
-  if (!data?.data) {
+  if (!data?.data || !statsData) {
     notFound();
   }
 

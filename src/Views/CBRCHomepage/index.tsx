@@ -16,10 +16,10 @@ function CBRCHomepage({ tokens, stats }: { tokens: IToken[]; stats: IStats }) {
 
   return (
     <div>
-      <CBRCStats stats={stats} />
-      <CbrcHero />
-      <CBRCTrends token={stats} />
-      <div className="pb-6 py-16 flex justify-center lg:justify-start ">
+      {/* <CBRCStats stats={stats} /> */}
+      {/* <CbrcHero /> */}
+      {/* <CBRCTrends token={stats} /> */}
+      <div className="pb-6 py-16 flex justify-center lg:justify-start">
         <CustomTab
           tabsData={[
             { label: "Tokens", value: "tokens" },

@@ -4,15 +4,26 @@ import React, { useEffect, useState } from 'react'
 import Trending from './Trending';
 import { IStats } from '@/types';
 import Hot from './Hot';
+import TrendStats from './TrendStats';
 
 const CBRCTrends = ({ token }: {  token:IStats }) => {
+  console.log({token}, 'TOKEN>>>>')
   return (
-    <div className='py-6 flex flex-wrap justify-between items-center w-full'>
-     <div className=' w-full lg:w-4/12'>
-     <Trending data = {token.tokensTrend} />
+    <div className='py-6 flex flex-wrap justify-between  items-stretch w-full'>
+      <div className='p-4 w-full lg:w-4/12' >
+       <div>
+       <TrendStats data = {token} />
+       </div>
+      </div>
+     <div className='p-4 w-full lg:w-4/12'>
+    <div>
+    <Trending data = {token} />
+    </div>
      </div>
-     <div className=' w-full lg:w-4/12'>
-     <Hot data = {token.tokensHot} />
+     <div className='p-4 w-full lg:w-4/12'>
+   <div>
+   <Hot data = {token} />
+   </div>
      </div>
     </div>
   )
