@@ -121,7 +121,7 @@ const CardContent: React.FC<CardContentProps> = ({
           <p className="text-3xl">{amt}</p>
           <hr />
           <p className="uppercase font-sourcecode">{token}</p>
-          <div
+          {/* <div
             className={`text-center py-2 font-sourcecode font-semibold ${
               !allowed_cbrcs?.includes(checksum)
                 ? " bg-gray-900 text-white w-full p-2 my-2"
@@ -132,7 +132,7 @@ const CardContent: React.FC<CardContentProps> = ({
           >
             <p>Checksum</p>
             <p>{checksum}</p>
-          </div>
+          </div> */}
           <div>
             <span
               className={`absolute text-center ${

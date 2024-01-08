@@ -81,11 +81,14 @@ function Crafter() {
       const bal_result = await FetchCBRCBalance(params);
       if (bal_result && bal_result.data) {
         // console.log({ data: bal_result.data });
-        const tick_options = bal_result.data.map((a) => ({
-          value: a.tick,
-          label: a.tick,
-          limit: a.amt,
-        }));
+        const tick_options = bal_result.data
+          .filter((a) => a.amt > 0) // Filter out objects where amt is not greater than 0
+          .map((a) => ({
+            value: a.tick,
+            label: a.tick,
+            limit: a.amt,
+          }));
+
         // console.log({ tick_options });
 
         setTick(tick_options[0].value);
@@ -308,6 +311,7 @@ function Crafter() {
       );
       setUnsignedPsbtBase64("");
       setorderresult(null);
+      fetchCbrcBrc20();
       dispatch(
         addNotification({
           id: new Date().valueOf(),
