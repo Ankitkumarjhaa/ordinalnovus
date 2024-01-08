@@ -336,6 +336,25 @@ function ListInscription({ data }: InscriptionProps) {
     }
   }, [unsignedPsbtBase64]);
 
+  if (data.in_mempool) {
+    return (
+      <div className="flex-1 pt-6">
+        <CustomButton
+          loading={false}
+          text={"Sold. Tx in progress..."}
+          hoverBgColor="hover:bg-accent_dark"
+          hoverTextColor="text-white"
+          bgColor="bg-accent"
+          textColor="text-white"
+          className="transition-all w-full rounded-xl"
+          link={true}
+          newTab={true}
+          href={`https://mempool.space/tx/${data.txid}`}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="border-b-2   py-6 border-accent">
       {" "}

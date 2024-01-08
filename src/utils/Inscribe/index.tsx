@@ -304,8 +304,11 @@ async function generateUnsignedPsbtForInscriptionPSBTBase64(
         input.witnessUtxo = tx.outs[utxo.vout];
         if (wallet === "xverse") input.redeemScript = p2sh.redeem?.output;
       } else {
-        // unisat wallet should not have redeemscript for buy tx
+        // unisat wallet should not have redeemscript for buy tx (for native segwit)
         input.witnessUtxo = tx.outs[utxo.vout];
+        // if (!payment_address.startsWith("bc1q")) {
+        //   input.redeemScript = p2sh.redeem?.output;
+        // }
       }
     } else {
       // unisat
