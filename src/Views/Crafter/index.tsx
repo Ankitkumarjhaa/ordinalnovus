@@ -16,6 +16,7 @@ import ShowOrders from "./showOrders";
 import mixpanel from "mixpanel-browser";
 import updateOrder from "@/apiHelper/updateOrder";
 import { useRouter } from "next/navigation";
+import Reinscription from "./reinscription";
 const options = [
   // { value: "deploy", label: "DEPLOY" },
   { value: "transfer", label: "TRANSFER" },
@@ -45,6 +46,10 @@ function Crafter() {
   const [unsignedPsbtBase64, setUnsignedPsbtBase64] = useState<string>("");
   const [action, setAction] = useState<string>("dummy");
   const [order_result, setorderresult] = useState<any | null>(null);
+
+  const [mode, setMode] = useState<"cbrc" | "reinscribe">("cbrc");
+
+  const [inscription, setInscription] = useState("");
 
   useEffect(() => {
     if (!walletDetails && fees) {
@@ -486,6 +491,12 @@ function Crafter() {
             fullWidth
           />
         </div> */}
+
+            {/* <Reinscription
+              inscription={inscription}
+              setInscription={setInscription}
+              setMode={setMode}
+            /> */}
             <div className="center py-2">
               <CustomInput
                 value={feeRate.toString()}

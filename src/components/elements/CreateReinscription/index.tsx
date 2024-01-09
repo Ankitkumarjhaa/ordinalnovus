@@ -17,7 +17,6 @@ function CreateReinscription({ data }: InscriptionProps) {
         textColor="text-white"
         className="transition-all w-full rounded-xl"
         link={true}
-        newTab={true}
         href={`/crafter?inscription=${data.inscription_id}`}
       />
     </div>
