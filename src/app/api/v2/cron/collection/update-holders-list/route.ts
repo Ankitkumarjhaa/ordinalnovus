@@ -70,7 +70,7 @@ function needToUpdateHolders(collection: ICollection) {
 async function getCollections(query: any) {
   try {
     console.dir(query, { depth: null });
-    const coll = await Collection.find(query.find)
+    const coll = await Collection.find({ slug: "cpnk" })
       // .where(query.where)
       .sort({ supply: -1 })
       .skip(query.start)

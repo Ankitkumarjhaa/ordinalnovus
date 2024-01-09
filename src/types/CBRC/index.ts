@@ -38,7 +38,7 @@ export interface Icbrc {
 
 export interface IToken {
   listed: ReactNode;
-  in_mempool: ReactNode;
+  in_mempool: number;
   tick: string;
   checksum: string;
   supply: number;

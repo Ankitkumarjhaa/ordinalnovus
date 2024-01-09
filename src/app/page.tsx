@@ -1,4 +1,5 @@
 import CBRCHomepage from "@/Views/CBRCHomepage";
+import fetchStats from "@/apiHelper/fetchStats";
 import { FetchCBRC } from "@/apiHelper/getCBRC";
 import { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
@@ -8,13 +9,15 @@ export default async function Home() {
     page: 1,
   });
 
-  if (!data?.data) {
+  const statsData = await fetchStats()
+
+  if (!data?.data || !statsData) {
     notFound();
   }
 
   return (
     <div className="">
-      <CBRCHomepage tokens={data.data.tokens} />
+      <CBRCHomepage tokens={data.data.tokens} stats={statsData}/>
     </div>
   );
 }

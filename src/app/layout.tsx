@@ -53,21 +53,22 @@ export default function RootLayout({
             <main className=" py-52 lg:py-24 px-6 max-w-screen-2xl mx-auto relative">
               {/* <main className=" py-52 lg:py-24 px-6 lg:px-24 max-w-7xl mx-auto relative"> */}
               <Header />
-              <div className="w-full mt-2 text-xs py-2 uppercase font-bold text-white text-center">
-                <p
-                  className={`text-bitcoin bg-bitcoin bg-opacity-20  py-2 w-ful rounded tracking-widest font-bold`}
-                >
-                  1% Fee applied on all sales
-                </p>
-              </div>
-              <div className="w-full mb-2 text-xs py-2 uppercase font-bold text-white text-center">
-                <p
-                  className={`text-bitcoin bg-bitcoin bg-opacity-20  py-2 w-ful rounded tracking-widest font-bold`}
-                >
-                  SITE IN BETA MODE
-                </p>
-              </div>
-
+              {/* <div className="pt-2 pb-4">
+                <div className="w-full  text-xs  uppercase font-bold text-white text-center">
+                  <p
+                    className={`text-bitcoin bg-bitcoin bg-opacity-20  py-2 w-ful rounded tracking-widest font-bold`}
+                  >
+                    1% Fee applied on all sales
+                  </p>
+                </div>
+                <div className="w-full  text-xs pt-2 uppercase font-bold text-white text-center">
+                  <p
+                    className={`text-bitcoin bg-bitcoin bg-opacity-20  py-2 w-ful rounded tracking-widest font-bold`}
+                  >
+                    SITE IN BETA MODE
+                  </p>
+                </div>
+              </div> */}
               {children}
             </main>
             <div className="bg-secondary">

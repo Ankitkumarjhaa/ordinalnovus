@@ -10,14 +10,17 @@ import { calculateBTCCostInDollars, convertSatToBtc } from "@/utils";
 import { useWalletAddress } from "bitcoin-wallet-adapter";
 import ListInscriptionCardButton from "../../ListInscriptionCardButton";
 import { cbrcValid, myInscription } from "@/utils/validate";
+import CreateReinscription from "../../CreateReinscription";
 interface CollectionCardProps {
   inscription: IInscription;
   refreshData?: any;
+  availableCbrcsBalance?: any;
 }
 
 const ItemCard: React.FC<CollectionCardProps> = ({
   inscription,
   refreshData,
+  availableCbrcsBalance,
 }) => {
   const btcPrice = useSelector(
     (state: RootState) => state.general.btc_price_in_dollar
@@ -29,7 +32,7 @@ const ItemCard: React.FC<CollectionCardProps> = ({
 
   const walletDetails = useWalletAddress();
   return (
-    <div className="relative p-3 md:w-6/12 lg:w-3/12  2xl:w-2/12 w-full cursor-pointer">
+    <div className="relative p-6 md:w-6/12 lg:w-3/12  2xl:w-2/12 w-full cursor-pointer">
       <div className="border xl:border-2 border-accent bg-secondary rounded-xl shadow-xl p-3">
         <Link href={`/inscription/${inscription.inscription_id}`}>
           <div className="content-div h-[60%] rounded overflow-hidden relative">
@@ -109,6 +112,20 @@ const ItemCard: React.FC<CollectionCardProps> = ({
                 refreshData={refreshData}
               />
             )}
+
+          {inscription.address === walletDetails?.ordinal_address &&
+            inscription.official_collection &&
+            availableCbrcsBalance &&
+            availableCbrcsBalance.filter(
+              (a: any) =>
+                a.tick ===
+                  inscription.official_collection?.name.toLowerCase() ||
+                a.tick === inscription.official_collection?.slug.toLowerCase()
+            ) &&
+            myInscription(
+              inscription,
+              walletDetails?.ordinal_address || ""
+            ) && <CreateReinscription data={inscription} />}
         </div>
       </div>
     </div>

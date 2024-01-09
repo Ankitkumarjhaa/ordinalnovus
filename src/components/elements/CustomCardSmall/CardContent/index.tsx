@@ -106,8 +106,9 @@ const CardContent: React.FC<CardContentProps> = ({
         </div>
       );
     } else if (
-      inscription?.metaprotocol?.includes("cbrc-20:mint") ||
-      inscription?.metaprotocol?.includes("cbrc-20:transfer")
+      (inscription?.metaprotocol?.includes("cbrc-20:mint") ||
+        inscription?.metaprotocol?.includes("cbrc-20:transfer")) &&
+      inscription?.tags?.includes("text")
     ) {
       const [tag, mode, tokenAmt] = inscription.metaprotocol.split(":");
       const [token, amt] = tokenAmt.split("=");
@@ -120,7 +121,7 @@ const CardContent: React.FC<CardContentProps> = ({
           <p className="text-3xl">{amt}</p>
           <hr />
           <p className="uppercase font-sourcecode">{token}</p>
-          <div
+          {/* <div
             className={`text-center py-2 font-sourcecode font-semibold ${
               !allowed_cbrcs?.includes(checksum)
                 ? " bg-gray-900 text-white w-full p-2 my-2"
@@ -131,7 +132,7 @@ const CardContent: React.FC<CardContentProps> = ({
           >
             <p>Checksum</p>
             <p>{checksum}</p>
-          </div>
+          </div> */}
           <div>
             <span
               className={`absolute text-center ${
@@ -476,10 +477,11 @@ const CardContent: React.FC<CardContentProps> = ({
           </div>
         )}
       {inscription?.parsed_metaprotocol &&
-        inscription?.parsed_metaprotocol?.length > 2 && (
+        inscription?.parsed_metaprotocol?.length == 3 && (
           <div>
             <span className="absolute bg-bitcoin rounded font-bold text-yellow-900 capitalize text-xs p-1 z-10 top-[5px] right-[5px] ">
-              {inscription?.parsed_metaprotocol[1]}
+              {inscription?.parsed_metaprotocol[1]}{" "}
+              {inscription?.parsed_metaprotocol[2]}
             </span>
           </div>
         )}{" "}

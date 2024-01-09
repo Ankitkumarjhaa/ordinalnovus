@@ -1,5 +1,6 @@
 import mongoose, { Document, Schema } from "mongoose";
 import * as bitcoin from "bitcoinjs-lib";
+import { IToken } from "./CBRC";
 
 export interface ITransaction {
   txid: string;
@@ -246,6 +247,9 @@ export interface ICollection extends ICollectionBase, Document {
   holders_count: number;
   listed?: number;
   fp?: number;
+  royalty_bp?: number;
+  royalty_address?: string;
+  metaprotocol?: string;
 }
 
 export interface ISale extends Document {
@@ -355,6 +359,24 @@ export interface IListingState {
     buyerPaymentUTXOs?: AddressTxsUtxo[]; // after the selection
     mergedSignedBuyingPSBTBase64?: string;
   };
+}
+
+interface AggregateVolumeData {
+  _id: string; // Token identifier
+  totalAmt: number; // Total volume for the token
+}
+
+export interface IStats {
+  tokens: number;
+  btcHeight: number;
+  novusBtcHeight: number;
+  mempoolBtcHeight: number;
+  dailyVolume: number;
+  tokensTrend: IToken[];
+  tokensHot: IToken[];
+  aggregateVolume: AggregateVolumeData[];
+  monthlyVolume: number;
+  allTimeVolume: number;
 }
 
 export type FeeRateTier =

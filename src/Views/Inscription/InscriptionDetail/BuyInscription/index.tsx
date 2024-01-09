@@ -320,7 +320,7 @@ function BuyInscription({ data }: InscriptionProps) {
             action === "dummy"
               ? "Confirm Transaction for Dummy UTXO"
               : data.in_mempool
-              ? `In Mempool...`
+              ? `Sold. Tx in progress...`
               : `Buy Now ${
                   data?.listed_price
                     ? `for ${convertSatToBtc(

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { IInscription, ITransaction } from "@/types";
 import { useRouter } from "next/navigation";
 import CardContent from "@/components/elements/CustomCardSmall/CardContent";
@@ -56,7 +56,11 @@ function AccountPage() {
           );
           if (tab === "cbrc-20")
             setInscriptions(
-              result.data.inscriptions.filter((a) => a.cbrc_valid)
+              result.data.inscriptions.filter(
+                (a) =>
+                  (a.cbrc_valid && a.tags?.includes("text")) ||
+                  !a.tags?.includes("text")
+              )
             );
           else setInscriptions(result.data.inscriptions);
           setTotal(result.data.pagination.total);
@@ -330,6 +334,7 @@ function AccountPage() {
               loading={loading}
               pageSize={page_size}
               refreshData={fetchWalletInscriptions}
+              availableCbrcsBalance={cbrcs}
             />
           ) : (
             <>

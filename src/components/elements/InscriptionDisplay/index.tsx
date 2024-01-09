@@ -9,6 +9,7 @@ type ItemProps = {
   loading: boolean;
   pageSize: number;
   refreshData?: any;
+  availableCbrcsBalance?: any;
 };
 
 function InscriptionDisplay({
@@ -16,6 +17,7 @@ function InscriptionDisplay({
   loading,
   pageSize,
   refreshData,
+  availableCbrcsBalance,
 }: ItemProps) {
   return (
     <section>
@@ -28,6 +30,7 @@ function InscriptionDisplay({
               refreshData={refreshData}
               key={item.inscription_id}
               inscription={item}
+              availableCbrcsBalance={availableCbrcsBalance}
             />
           ))
         ) : (
