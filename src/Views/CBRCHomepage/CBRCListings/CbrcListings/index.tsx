@@ -1,18 +1,8 @@
 import BuyInscriptionCardButton from "@/components/elements/BuyInscriptionCardButton";
 import { RootState } from "@/stores";
 import { IInscription } from "@/types";
-import { formatNumber, stringToHex } from "@/utils";
+import { formatNumber } from "@/utils";
 import { cbrcListed, myInscription } from "@/utils/validate";
-import {
-  CircularProgress,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-} from "@mui/material";
 import { useWalletAddress } from "bitcoin-wallet-adapter";
 import moment from "moment";
 import Link from "next/link";
@@ -51,7 +41,7 @@ function CbrcListings({ listings, loading }: HeroProps) {
         <div className="flex justify-start items-center w-full flex-wrap">
           {listings.map((item: IInscription) => (
             <div
-              className="w-full md:w-6/12 lg:w-3/12  p-2"
+              className="w-full md:w-6/12 lg:w-3/12  p-6"
               key={item.inscription_id}
             >
               <div className="border-2 overflow-hidden border-gray-700 rounded-lg bg-slate-900">

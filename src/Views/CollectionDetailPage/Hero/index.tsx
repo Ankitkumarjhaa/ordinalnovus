@@ -1,6 +1,6 @@
 "use client";
 import { ICollection } from "@/types";
-import React, { useEffect } from "react";
+import React from "react";
 import { AiFillCheckCircle } from "react-icons/ai";
 import { FaDiscord, FaGlobe } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
@@ -115,6 +115,17 @@ function Hero({ data }: HeroProps) {
               <span>Supply</span>
               <span className="text-white">{data.supply}</span>
             </div>
+
+            {data?.royalty_bp && data?.royalty_bp > 0 ? (
+              <div className="supply bg-primary-dark px-3 py-1 rounded-lg my-3 md:m-3 text-sm md:ml-0 w-full flex justify-between items-center">
+                <span>Royalty</span>
+                <span className="text-white">
+                  {(data.royalty_bp / 100).toFixed(2)} %
+                </span>
+              </div>
+            ) : (
+              <></>
+            )}
             {data?.max && data.max > 0 ? (
               <div className="supply bg-primary-dark px-3 py-1 rounded-lg my-3 md:m-3 text-sm md:ml-0 w-full flex justify-between items-center">
                 <span>Max</span>
@@ -123,7 +134,7 @@ function Hero({ data }: HeroProps) {
             ) : (
               <></>
             )}
-            {data?.min && data.min > 0 ? (
+            {data?.min && !isNaN(data?.min) ? (
               <div className="supply bg-primary-dark px-3 py-1 rounded-lg my-3 md:m-3 text-sm md:ml-0 w-full flex justify-between items-center">
                 <span>Min</span>
                 <span className="text-white">{data.min}</span>

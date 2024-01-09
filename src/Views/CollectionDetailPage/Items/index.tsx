@@ -154,9 +154,9 @@ function Items({ collection }: ItemProps) {
           </div>
         )}
       </div>
-      <div className="SortSearchPages py-6 flex justify-end">
+      <div className="w-full">
         {data?.length > 0 && (
-          <div className="">
+          <div className="SortSearchPages py-6 w-full  flex justify-end">
             <CustomPaginationComponent
               count={Math.ceil(totalCount / pageSize)}
               onChange={handlePageChange}
