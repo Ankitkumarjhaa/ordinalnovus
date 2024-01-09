@@ -12,10 +12,8 @@ import CBRCTrends from "./CBRCTrends";
 function CBRCHomepage({ tokens, stats }: { tokens: IToken[]; stats: IStats }) {
   const [tab, setTab] = useState("tokens");
 
-  console.log(stats, "stats");
-
   return (
-    <div>
+    <div className="min-h-[70vh]">
       {/* <CBRCStats stats={stats} /> */}
       {/* <CbrcHero /> */}
       {/* <CBRCTrends token={stats} /> */}

@@ -4,6 +4,7 @@ import mongoose, { Schema, Document } from "mongoose";
 export const satsCollSchema = new mongoose.Schema(
   {
     sat: { type: Number, required: true, unique: true },
+    inscription_id: { type: String, required: true, unique: true },
     collection_item_name: { type: String, set: (v: string) => v.trim() },
     collection_item_number: { type: Number },
     // collection detail

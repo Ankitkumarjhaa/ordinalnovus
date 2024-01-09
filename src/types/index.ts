@@ -247,6 +247,9 @@ export interface ICollection extends ICollectionBase, Document {
   holders_count: number;
   listed?: number;
   fp?: number;
+  royalty_bp?: number;
+  royalty_address?: string;
+  metaprotocol?: string;
 }
 
 export interface ISale extends Document {
@@ -371,14 +374,10 @@ export interface IStats {
   dailyVolume: number;
   tokensTrend: IToken[];
   tokensHot: IToken[];
-  aggregateVolume : AggregateVolumeData[]
+  aggregateVolume: AggregateVolumeData[];
   monthlyVolume: number;
   allTimeVolume: number;
 }
-
-
-
-
 
 export type FeeRateTier =
   | "fastestFee"
