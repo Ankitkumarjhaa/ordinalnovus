@@ -215,12 +215,15 @@ function Crafter() {
         fee_rate: feeRate,
         wallet: walletDetails?.wallet,
         metaprotocol: "cbrc",
+        inscription_id: inscription,
+        ordinal_publickey: walletDetails.ordinal_pubkey,
+        cardinal_publickey: walletDetails.cardinal_pubkey,
       };
 
-      const { data } = await axios.post(
-        "/api/v2/inscribe/create-cbrc-order",
-        BODY
-      );
+      const url = !inscription
+        ? "/api/v2/inscribe/create-cbrc-order"
+        : "/api/v2/inscribe/reinscribe";
+      const { data } = await axios.post(url, BODY);
       // console.log({ data });
       setUnsignedPsbtBase64(data.psbt);
       setorderresult(data);
@@ -269,17 +272,35 @@ function Crafter() {
       return;
     }
     let inputs = [];
-    inputs.push({
-      address: walletDetails.cardinal_address,
-      publickey: walletDetails.cardinal_pubkey,
-      sighash: 1,
-      index: [0],
-    });
+    if (mode === "reinscribe") {
+      inputs.push({
+        address: walletDetails.ordinal_address,
+        publickey: walletDetails.ordinal_pubkey,
+        sighash: 1,
+        index: [0],
+      });
+
+      Array.from({ length: order_result.inputs - 1 }, (_, idx) => {
+        inputs.push({
+          address: walletDetails.cardinal_address,
+          publickey: walletDetails.cardinal_pubkey,
+          sighash: 1,
+          index: [idx + 1],
+        });
+      });
+    } else {
+      inputs.push({
+        address: walletDetails.cardinal_address,
+        publickey: walletDetails.cardinal_pubkey,
+        sighash: 1,
+        index: [0],
+      });
+    }
 
     const options: any = {
       psbt: unsignedPsbtBase64,
       network: "Mainnet",
-      action,
+      action: mode !== "reinscribe" ? "dummy" : "others",
       inputs,
     };
     // console.log(options, "OPTIONS");
@@ -462,22 +483,24 @@ function Crafter() {
                     fullWidth
                   />
                 </div>
-                <div className="center py-2">
-                  <CustomInput
-                    value={rep.toString()}
-                    placeholder="Amount to mint"
-                    onChange={(new_content) => setRep(Number(new_content))}
-                    fullWidth
-                    endAdornmentText=" Inscription"
-                    startAdornmentText="Mint "
-                    helperText={
-                      rep <= 0 || rep > 25
-                        ? "You can mint 1-25 inscriptions at a time."
-                        : ""
-                    }
-                    error={rep <= 0 || rep > 25}
-                  />
-                </div>
+                {mode !== "reinscribe" && (
+                  <div className="center py-2">
+                    <CustomInput
+                      value={rep.toString()}
+                      placeholder="Amount to mint"
+                      onChange={(new_content) => setRep(Number(new_content))}
+                      fullWidth
+                      endAdornmentText=" Inscription"
+                      startAdornmentText="Mint "
+                      helperText={
+                        rep <= 0 || rep > 25
+                          ? "You can mint 1-25 inscriptions at a time."
+                          : ""
+                      }
+                      error={rep <= 0 || rep > 25}
+                    />
+                  </div>
+                )}
               </>
             ) : (
               <></>
@@ -492,11 +515,11 @@ function Crafter() {
           />
         </div> */}
 
-            {/* <Reinscription
+            <Reinscription
               inscription={inscription}
               setInscription={setInscription}
               setMode={setMode}
-            /> */}
+            />
             <div className="center py-2">
               <CustomInput
                 value={feeRate.toString()}

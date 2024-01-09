@@ -54,6 +54,7 @@ function Reinscription({
     }
     if (params?.get("inscription")) {
       setInscription(params?.get("inscription"));
+      setMode("reinscribe");
     }
   }, [walletDetails, page, params]);
 
@@ -114,7 +115,10 @@ function Reinscription({
                     <div className="flex justify-normal items-center overflow-auto flex-wrap">
                       {inscriptions.map((i) => (
                         <div
-                          onClick={() => setInscription(i.inscription_id)}
+                          onClick={() => {
+                            setInscription(i.inscription_id);
+                            setMode("reinscribe");
+                          }}
                           key={i.inscription_id}
                           className={`relative p-6 md:w-6/12 lg:w-3/12  2xl:w-2/12 w-full cursor-pointer `}
                         >
