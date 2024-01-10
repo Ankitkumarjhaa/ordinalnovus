@@ -5,7 +5,7 @@ import { CBRCToken, Inscription, Tx } from "@/models";
 import { getBTCPriceInDollars, stringToHex } from "@/utils";
 
 // price in $
-async function updateTokenPrice(tick: string, _price?: number) {
+async function updateTokenPrice(tick: string, action: string, _price?: number) {
   if (!tick) {
     throw new Error("Invalid parameters");
   }
@@ -39,6 +39,7 @@ async function updateTokenPrice(tick: string, _price?: number) {
         $match: {
           token: tokenLower,
           timestamp: { $gte: startOfDay, $lte: endOfDay },
+          // marketplace: "ordinalnovus",
         },
       },
       {
@@ -59,7 +60,7 @@ async function updateTokenPrice(tick: string, _price?: number) {
       {
         $set: {
           price: price, // in sats
-          in_mempool: inMempoolCount + 1,
+          in_mempool: action === "buy" ? inMempoolCount + 1 : inMempoolCount,
           marketcap: price * token.supply, // in sats
           volume: volumeInSats, // in sats
         },

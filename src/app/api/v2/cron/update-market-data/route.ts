@@ -1,19 +1,10 @@
 import dbConnect from "@/lib/dbConnect";
-import { CBRCToken, Sale, Tx } from "@/models";
+import { CBRCToken, Inscription, Sale, Tx } from "@/models";
 import { getBTCPriceInDollars } from "@/utils";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   await dbConnect();
-  let btcPrice = null;
-  // const cacheKey = "bitcoinPrice";
-  // const cache = await getCache(cacheKey);
-  // if (cache) btcPrice = cache;
-  // else {
-  btcPrice = await getBTCPriceInDollars();
-  //   await setCache(cacheKey, btcPrice, 30 * 60);
-  // }
-  console.log({ btcPrice });
 
   const startDate = new Date("2023-12-17");
   const today = new Date();
@@ -30,15 +21,16 @@ export async function GET(req: NextRequest) {
       { last_updated: { $lte: twentyFourHoursAgo } }, // Tokens updated 24 hours ago or earlier
       { last_updated: { $exists: false } }, // Tokens without a lastUpdated field
     ],
+    allowed: true,
   })
-    .limit(1)
+    .limit(10)
     .lean();
 
   if (!tokens.length) {
     return NextResponse.json({ message: "All tokens are up-to-date" });
   }
 
-  console.log({ total: tokens.length });
+  const btcPrice = await getBTCPriceInDollars();
 
   const bulkOps: any = [];
 
@@ -75,7 +67,45 @@ export async function GET(req: NextRequest) {
       // marketplace: "ordinalnovus",
     }).sort({ timestamp: -1 });
 
-    console.log({ latestSale });
+    // Floor Price
+    const fp = await Inscription.findOne({
+      listed_token: token.tick.trim().toLowerCase(),
+      listed: true,
+      in_mempool: false,
+    }).sort({ listed_price_per_token: 1 });
+
+    const price = fp ? fp?.listed_price_per_token : latestSale?.price_per_token;
+    const inMempoolCount = await Inscription.countDocuments({
+      listed_token: token.tick.trim().toLowerCase(),
+      in_mempool: true,
+      listed: true,
+    });
+
+    // Get 24 hours Sales volume
+    const endOfDay = new Date(); // Current time
+    const startOfDay = new Date();
+    startOfDay.setTime(endOfDay.getTime() - 24 * 60 * 60 * 1000); // 24 hours back from now
+
+    const todaysVolume = await Tx.aggregate([
+      {
+        $match: {
+          token: token.tick.trim().toLowerCase(),
+          timestamp: { $gte: startOfDay, $lte: endOfDay },
+          // marketplace: "ordinalnovus",
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalVolume: {
+            $sum: { $multiply: ["$amount", "$price_per_token"] },
+          },
+        },
+      },
+    ]);
+
+    const volumeInSats =
+      todaysVolume.length > 0 ? todaysVolume[0].totalVolume : 0;
 
     while (currentDate < today) {
       console.log({ currentDate });
@@ -98,13 +128,14 @@ export async function GET(req: NextRequest) {
           token.supply
         );
 
-        console.log({ marketData });
-
-        if (marketData && marketData.price !== undefined) {
+        if (marketData && marketData.price !== undefined && btcPrice) {
           bulkOps.push({
             updateOne: {
               filter: { _id: token._id },
               update: {
+                price,
+                volume: volumeInSats,
+                in_mempool: inMempoolCount,
                 last_updated: new Date(),
                 // ...(latestSale &&
                 //   latestSale.price_per_token && {
@@ -141,6 +172,9 @@ export async function GET(req: NextRequest) {
                 //     price:
                 //       (latestSale.price_per_token / 100_000_000) * btcPrice,
                 //   }),
+                price,
+                volume: volumeInSats,
+                in_mempool: inMempoolCount,
                 last_updated: new Date(),
               },
             },

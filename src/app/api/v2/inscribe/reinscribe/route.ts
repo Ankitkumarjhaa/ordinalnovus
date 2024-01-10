@@ -1,4 +1,4 @@
-// app/api/v2/inscribe/create-cbrc-order/route.ts
+// app/api/v2/inscribe/reinscribe/route.ts
 import { NextRequest, NextResponse } from "next/server";
 //@ts-ignore
 import mime from "mime-types";
@@ -18,7 +18,7 @@ import {
 const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
 const BASE_SIZE = 160;
 const PADDING = 1000;
-const PREFIX = 160;
+const PREFIX = 230; // increased fee due to reinscription
 const MINIMUM_FEE = 5000;
 
 export async function POST(req: NextRequest) {
@@ -35,7 +35,9 @@ export async function POST(req: NextRequest) {
       metaprotocol,
       wallet,
       payment_address,
-      publickey,
+      cardinal_publickey,
+      ordinal_publickey,
+      inscription_id,
     } = await req.json();
 
     const order_id = uuidv4();
@@ -49,6 +51,14 @@ export async function POST(req: NextRequest) {
 
     if (!receive_address || !fee_rate) {
       throw new CustomError("Fee or address missing", 400);
+    }
+
+    if (!cardinal_publickey || !ordinal_publickey) {
+      throw new CustomError("publickey missing", 400);
+    }
+
+    if (!inscription_id) {
+      throw new CustomError("Inscription id missing", 400);
     }
 
     let fileInfoArray = await processFiles({
@@ -89,13 +99,15 @@ export async function POST(req: NextRequest) {
       status: "payment pending",
     };
 
-    const { psbt } = await generateUnsignedPsbtForInscription(
+    const { psbt, inputs } = await generateUnsignedPsbtForInscription(
       payment_address,
-      publickey,
+      cardinal_publickey,
       fee_rate,
       wallet,
       inscriptions,
-      data
+      data,
+      inscription_id,
+      ordinal_publickey
     );
 
     console.log({ psbt });
@@ -127,7 +139,8 @@ export async function POST(req: NextRequest) {
       total_fees,
       service_fee,
       referral_fee,
-      psbt
+      psbt,
+      inputs || 0
     );
 
     return NextResponse.json(final_response);
@@ -344,7 +357,8 @@ async function constructResponse(
   total_fees: number,
   service_fee: number,
   referral_fee: number | undefined,
-  psbt: string
+  psbt: string,
+  inputs: number
 ) {
   return {
     inscriptions: inscriptions,
@@ -356,5 +370,6 @@ async function constructResponse(
       total_fees + service_fee + (referral_fee || 0)
     ),
     psbt,
+    inputs,
   };
 }

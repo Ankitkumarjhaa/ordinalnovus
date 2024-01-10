@@ -15,7 +15,7 @@ const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
 const BASE_SIZE = 160;
 const PADDING = 1000;
 const PREFIX = 546;
-const MINIMUM_FEE = 1000;
+const MINIMUM_FEE = 5000;
 
 export async function POST(req: NextRequest) {
   try {

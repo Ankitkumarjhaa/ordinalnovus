@@ -1,3 +1,4 @@
+"use server";
 // Utils.ts
 import * as bitcoin from "bitcoinjs-lib";
 import secp256k1 from "@bitcoinerlab/secp256k1";
@@ -16,7 +17,9 @@ import {
   toXOnly,
 } from "../Marketplace";
 import { AddressTxsUtxo } from "@mempool/mempool.js/lib/interfaces/bitcoin/addresses";
-import { ICreateInscription, IInscribeOrder } from "@/types";
+import { ICreateInscription, IInscribeOrder, IInscription } from "@/types";
+import dbConnect from "@/lib/dbConnect";
+import { Inscription } from "@/models";
 
 // ----------------------------
 // File Operations
@@ -219,7 +222,9 @@ export async function generateUnsignedPsbtForInscription(
   fee_rate: number,
   wallet: string,
   inscriptions: ICreateInscription[],
-  order: IInscribeOrder
+  order: IInscribeOrder,
+  inscription_id?: string,
+  ordinal_publickey?: string
 ) {
   let payerUtxos: AddressTxsUtxo[];
   let paymentUtxos: AddressTxsUtxo[] | undefined;
@@ -241,15 +246,35 @@ export async function generateUnsignedPsbtForInscription(
 
     if (!paymentUtxos) throw Error("Balance not enough");
 
-    return await generateUnsignedPsbtForInscriptionPSBTBase64(
-      payment_address,
-      publickey,
-      paymentUtxos,
-      fee_rate,
-      wallet,
-      inscriptions,
-      order
-    );
+    let psbt = null;
+    let inputs = null; // Assuming inputs is not declared elsewhere
+
+    if (inscription_id && ordinal_publickey) {
+      ({ psbt, inputs } =
+        await generateReinscriptionUnsignedPsbtForInscriptionPSBTBase64(
+          payment_address,
+          publickey,
+          paymentUtxos,
+          fee_rate,
+          wallet,
+          inscriptions,
+          order,
+          inscription_id,
+          ordinal_publickey
+        ));
+    } else {
+      psbt = await generateUnsignedPsbtForInscriptionPSBTBase64(
+        payment_address,
+        publickey,
+        paymentUtxos,
+        fee_rate,
+        wallet,
+        inscriptions,
+        order
+      );
+    }
+    console.log({ psbt, inputs });
+    return { psbt, inputs };
   } catch (err: any) {
     throw Error(err);
   }
@@ -374,4 +399,170 @@ async function generateUnsignedPsbtForInscriptionPSBTBase64(
   console.log("psbt made");
 
   return psbt.toBase64();
+}
+
+async function generateReinscriptionUnsignedPsbtForInscriptionPSBTBase64(
+  payment_address: string,
+  publickey: string | undefined,
+  unqualifiedUtxos: AddressTxsUtxo[],
+  fee_rate: number,
+  wallet: string,
+  inscriptions: ICreateInscription[],
+  order: IInscribeOrder,
+  inscription_id: string,
+  ordinal_publickey: string
+): Promise<{ psbt: string; inputs: number }> {
+  await dbConnect();
+  const ordItem: IInscription | null = await Inscription.findOne({
+    inscription_id,
+  });
+
+  if (ordItem?.offset !== 0) {
+    throw Error("Inscription offset isn't zero.");
+  }
+  const ordinalTaprootAddress =
+    ordItem && ordItem?.address && ordItem?.address.startsWith("bc1p");
+  let ordinalUtxoTxId, ordinalUtxoVout;
+
+  if (!ordItem) throw Error("Item hasn't been added to our DB");
+  if (ordItem.address && ordItem.output && ordItem.output_value) {
+    [ordinalUtxoTxId, ordinalUtxoVout] = ordItem.output.split(":");
+  }
+
+  if (!ordinalUtxoTxId) throw Error("No Ordinal found");
+  wallet = wallet?.toLowerCase();
+  bitcoin.initEccLib(secp256k1);
+
+  const psbt = new bitcoin.Psbt({ network: undefined });
+
+  const tx = bitcoin.Transaction.fromHex(await getTxHexById(ordinalUtxoTxId));
+
+  if (!publickey) {
+    for (const output in tx.outs) {
+      try {
+        tx.setWitness(parseInt(output), []);
+      } catch {}
+    }
+  }
+
+  const input: any = {
+    hash: ordinalUtxoTxId,
+    index: parseInt(ordinalUtxoVout || "0"),
+    nonWitnessUtxo: tx.toBuffer(),
+    witnessUtxo: tx.outs[Number(ordinalUtxoVout)],
+  };
+  if (ordinalTaprootAddress) {
+    input.tapInternalKey = toXOnly(
+      tx.toBuffer().constructor(ordinal_publickey, "hex")
+    );
+  }
+
+  psbt.addInput(input);
+
+  const [mappedUnqualifiedUtxos, recommendedFee] = await Promise.all([
+    mapUtxos(unqualifiedUtxos),
+    fee_rate,
+  ]);
+
+  // Loop the unqualified utxos until we have enough to create a dummy utxo
+  let totalValue = 0;
+  let paymentUtxoCount = 0;
+
+  const taprootAddress = payment_address.startsWith("bc1p");
+  for (const utxo of mappedUnqualifiedUtxos) {
+    if (await doesUtxoContainInscription(utxo)) {
+      continue;
+    }
+    const tx = bitcoin.Transaction.fromHex(await getTxHexById(utxo.txid));
+
+    const input: any = {
+      hash: utxo.txid,
+      index: utxo.vout,
+      ...(taprootAddress && {
+        nonWitnessUtxo: utxo.tx.toBuffer(),
+      }),
+    };
+
+    if (!taprootAddress) {
+      const redeemScript = bitcoin.payments.p2wpkh({
+        pubkey: Buffer.from(publickey!, "hex"),
+      }).output;
+      const p2sh = bitcoin.payments.p2sh({
+        redeem: { output: redeemScript },
+      });
+
+      if (wallet !== "unisat") {
+        input.witnessUtxo = tx.outs[utxo.vout];
+        if (wallet === "xverse") input.redeemScript = p2sh.redeem?.output;
+      } else {
+        // unisat wallet should not have redeemscript for buy tx (for native segwit)
+        input.witnessUtxo = tx.outs[utxo.vout];
+        // if (!payment_address.startsWith("bc1q")) {
+        //   input.redeemScript = p2sh.redeem?.output;
+        // }
+      }
+    } else {
+      // unisat
+      input.witnessUtxo = utxo.tx.outs[utxo.vout];
+      input.tapInternalKey = toXOnly(
+        utxo.tx.toBuffer().constructor(publickey, "hex")
+      );
+    }
+
+    psbt.addInput(input);
+    totalValue += utxo.value;
+    paymentUtxoCount += 1;
+
+    const fees = calculateTxBytesFeeWithRate(
+      paymentUtxoCount,
+      inscriptions.length + 1, // inscription + service fee output
+      fee_rate
+    );
+    if (totalValue >= DUMMY_UTXO_VALUE * 2 + fees) {
+      break;
+    }
+  }
+
+  const finalFees = calculateTxBytesFeeWithRate(
+    paymentUtxoCount,
+    inscriptions.length + 1, // inscription + service fee output
+    fee_rate
+  );
+
+  console.log({ totalValue, finalFees });
+  const changeValue =
+    totalValue -
+    (order.chain_fee + order.service_fee) -
+    Math.floor(fee_rate < 150 ? finalFees / 1.5 : finalFees / 1.3);
+  console.log({ changeValue });
+
+  // We must have enough value to create a dummy utxo and pay for tx fees
+  if (changeValue < 0) {
+    throw new Error(
+      `You might have pending transactions or not enough fund to complete tx at the provided FeeRate`
+    );
+  }
+
+  inscriptions.map((i: ICreateInscription) => {
+    psbt.addOutput({
+      address: i.inscription_address,
+      value: i.inscription_fee,
+    });
+  });
+  psbt.addOutput({
+    address: "bc1qqv48lhfhqjz8au3grvnc6nxjcmhzsuucj80frr",
+    value: order.service_fee,
+  });
+
+  // to avoid dust
+  if (changeValue > DUMMY_UTXO_MIN_VALUE) {
+    psbt.addOutput({
+      address: payment_address,
+      value: changeValue,
+    });
+  }
+
+  console.log("psbt made");
+
+  return { psbt: psbt.toBase64(), inputs: psbt.inputCount };
 }

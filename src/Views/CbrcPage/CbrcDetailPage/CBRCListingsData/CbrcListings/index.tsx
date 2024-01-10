@@ -1,4 +1,6 @@
 import BuyInscriptionCardButton from "@/components/elements/BuyInscriptionCardButton";
+import CustomButton from "@/components/elements/CustomButton";
+import CardContent from "@/components/elements/CustomCardSmall/CardContent";
 import { RootState } from "@/stores";
 import { IInscription } from "@/types";
 import { formatNumber, stringToHex } from "@/utils";
@@ -45,49 +47,61 @@ function CbrcListings({ listings, loading }: HeroProps) {
               key={item.inscription_id}
             >
               <div className="border-2 overflow-hidden border-gray-700 rounded-lg bg-slate-900">
-                <div className="TokenDetail p-2">
-                  <div className="flex justify-between items-center p-2">
-                    <p className="px-2 py-1 rounded tracking-wider bg-black text-white font-bold uppercase">
-                      {item.listed_token}
-                    </p>
-                    <p className="px-2 py-1 rounded tracking-wider bg-accent_dark text-white">
-                      Transfer
-                    </p>
+                {!item?.content_type?.includes("text/plain") ? (
+                  <div className=" relative">
+                    <CardContent
+                      inscriptionId={item.inscription_id}
+                      content_type={item.content_type}
+                      inscription={item}
+                    />
                   </div>
-                  <p className="text-center font-bold text-2xl py-6 text-white">
-                    {formatNumber(item.listed_amount || 0)}
-                  </p>
+                ) : (
+                  <>
+                    <div className="TokenDetail p-2">
+                      <div className="flex justify-between items-center p-2">
+                        <p className="px-2 py-1 rounded tracking-wider bg-black text-white font-bold uppercase">
+                          {item.listed_token}
+                        </p>
+                        <p className="px-2 py-1 rounded tracking-wider bg-accent_dark text-white">
+                          Transfer
+                        </p>
+                      </div>
+                      <p className="text-center font-bold text-2xl py-6 text-white">
+                        {formatNumber(item.listed_amount || 0)}
+                      </p>
 
-                  {item.listed_amount &&
-                    item.listed_token &&
-                    item.listed_price &&
-                    item.listed_price_per_token && (
-                      <>
-                        <div className="px-2 text-center">
-                          <span className="text-yellow-500 text-xl">
-                            {" "}
-                            {item.listed_price_per_token.toFixed(0)}{" "}
-                          </span>
-                          <span>
-                            {" sats / "}{" "}
-                            <span className="uppercase">
-                              {" "}
-                              {item.listed_token}
-                            </span>
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-center py-2">
-                          <div className="mr-2 text-green-500">
-                            <FaDollarSign className="" />
-                          </div>
-                          {(
-                            (item.listed_price_per_token / 100_000_000) *
-                            btcPrice
-                          ).toFixed(2)}{" "}
-                        </div>
-                      </>
-                    )}
-                </div>
+                      {item.listed_amount &&
+                        item.listed_token &&
+                        item.listed_price &&
+                        item.listed_price_per_token && (
+                          <>
+                            <div className="px-2 text-center">
+                              <span className="text-yellow-500 text-xl">
+                                {" "}
+                                {item.listed_price_per_token.toFixed(0)}{" "}
+                              </span>
+                              <span>
+                                {" sats / "}{" "}
+                                <span className="uppercase">
+                                  {" "}
+                                  {item.listed_token}
+                                </span>
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-center py-2">
+                              <div className="mr-2 text-green-500">
+                                <FaDollarSign className="" />
+                              </div>
+                              {(
+                                (item.listed_price_per_token / 100_000_000) *
+                                btcPrice
+                              ).toFixed(2)}{" "}
+                            </div>
+                          </>
+                        )}
+                    </div>
+                  </>
+                )}
                 <div className="ListingDetail bg-primary p-2">
                   <div className="text-white pb-2 border-b border-gray-300 w-full flex justify-between items-center">
                     <Link href={`/inscription/${item.inscription_number}`}>
@@ -129,6 +143,18 @@ function CbrcListings({ listings, loading }: HeroProps) {
                           </div>
                         </div>
                         <BuyInscriptionCardButton data={item} />
+                      </>
+                    )}
+                  {cbrcListed(item, allowed_cbrcs || []) &&
+                    myInscription(item, walletDetails?.ordinal_address || "") &&
+                    item.listed_price && (
+                      <>
+                        <CustomButton
+                          text="My Item"
+                          className="w-full my-2"
+                          link={true}
+                          href={`/inscription/${item.inscription_id}`}
+                        />
                       </>
                     )}
                 </div>

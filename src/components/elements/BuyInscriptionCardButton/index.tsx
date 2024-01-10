@@ -165,6 +165,7 @@ function BuyInscriptionCardButton({ data }: InscriptionProps) {
       if (inscription?.listed_price_per_token && inscription?.listed_token)
         await updateTokenPrice(
           inscription?.listed_token,
+          action,
           (inscription?.listed_price_per_token / 100_000_000) * btcPrice
         );
       window.open(`https://mempool.space/tx/${data.data.txid}`, "_blank");
