@@ -387,10 +387,7 @@ const CardContent: React.FC<CardContentProps> = ({
           <div className="w-full h-full">
             <iframe
               sandbox="allow-scripts"
-              className={
-                className ||
-                " no-scrollbar small-scrollbar  w-[300px] h-[300px]"
-              }
+              className={className || " no-scrollbar   w-[300px] h-[300px]"}
               src={`/content/${inscriptionId}`}
               style={{ minWidth: "100%", minHeight: "100%" }}
             />
@@ -455,37 +452,26 @@ const CardContent: React.FC<CardContentProps> = ({
           Invalid Domain
         </span>
       )}{" "}
-      {inscription?.token && (
+      {/* {inscription?.token && (
         <span className="absolute bg-bitcoin rounded font-bold text-yellow-900 capitalize text-xs p-1 z-10 top-[5px] left-[5px] ">
           TOKEN
         </span>
-      )}{" "}
+      )}{" "} */}
       {inscription?.tags?.includes("bitmap") && (
         <span className="absolute bg-bitcoin rounded font-bold text-yellow-900 capitalize text-xs p-1 z-10 top-[5px] left-[5px] ">
           BITMAP
         </span>
       )}{" "}
-      {inscription?.metaprotocol?.includes("cbrc-20") && (
+      {inscription?.metaprotocol?.includes("cbrc-20") && inscription?.valid && (
         <div>
           <span className="absolute bg-bitcoin rounded font-bold text-yellow-900 capitalize text-xs p-1 z-10 top-[5px] left-[5px] ">
             CBRC-20
           </span>
         </div>
       )}{" "}
-      {inscription?.metaprotocol?.includes("cbrc-20:mint") &&
-        inscription.listed && (
-          <div>
-            <Tooltip title="Buying Mint Inscription wont increase CBRC-20 Balance">
-              <span
-                className={`absolute flex justify-center items-center bg-red-400 text-red-900  rounded  capitalize text-xs py-3 z-10 bottom-0 right-0 left-0 `}
-              >
-                <IoMdWarning /> <p>Warning</p>
-              </span>
-            </Tooltip>
-          </div>
-        )}
       {inscription?.parsed_metaprotocol &&
-        inscription?.parsed_metaprotocol?.length == 3 && (
+        inscription?.parsed_metaprotocol?.length == 3 &&
+        inscription?.valid && (
           <div>
             <span className="absolute bg-bitcoin rounded font-bold text-yellow-900 capitalize text-xs p-1 z-10 top-[5px] right-[5px] ">
               {inscription?.parsed_metaprotocol[1]}{" "}
@@ -493,29 +479,31 @@ const CardContent: React.FC<CardContentProps> = ({
             </span>
           </div>
         )}{" "}
-      <div>
-        <span
-          className={`absolute text-center ${
-            inscription?.cbrc_valid
-              ? cbrcValid(inscription, allowed_cbrcs || [])
-                ? "bg-green-400 text-green-900 " // Condition 1
-                : "bg-gray-400 text-gray-900 " // Condition 2
-              : inscription?.cbrc_valid === false
-              ? cbrcValid(inscription, allowed_cbrcs || [])
-                ? "bg-red-400 text-red-900 " // Condition 3
-                : "bg-gray-400 text-gray-900 " // Condition 4
-              : "bg-red-400 text-red-900 " // Condition 5
-          } rounded font-bold capitalize text-sm py-1 z-10 bottom-0 right-0 left-0`}
-        >
-          {inscription?.cbrc_valid !== undefined
-            ? inscription?.cbrc_valid
-              ? cbrcValid(inscription, allowed_cbrcs || [])
-                ? "Valid Transfer Note"
-                : "Token not listed"
-              : "Token Used"
-            : "API down. Can't check validity."}
-        </span>
-      </div>
+      {inscription?.cbrc_valid !== undefined && (
+        <div>
+          <span
+            className={`absolute text-center ${
+              inscription?.cbrc_valid
+                ? cbrcValid(inscription, allowed_cbrcs || [])
+                  ? "bg-green-400 text-green-900 " // Condition 1
+                  : "bg-gray-400 text-gray-900 " // Condition 2
+                : inscription?.cbrc_valid === false
+                ? cbrcValid(inscription, allowed_cbrcs || [])
+                  ? "bg-red-400 text-red-900 " // Condition 3
+                  : "bg-gray-400 text-gray-900 " // Condition 4
+                : "bg-red-400 text-red-900 " // Condition 5
+            } rounded font-bold capitalize text-sm py-1 z-10 bottom-0 right-0 left-0`}
+          >
+            {inscription?.cbrc_valid !== undefined
+              ? inscription?.cbrc_valid
+                ? cbrcValid(inscription, allowed_cbrcs || [])
+                  ? "Valid Transfer Note"
+                  : "Token not listed"
+                : "Token Used"
+              : "API down. Can't check validity."}
+          </span>
+        </div>
+      )}
       {isLoading ? (
         <div className="flex justify-center items-center  h-full text-white py-6  w-full">
           {/* <CircularProgress color="inherit" size={10} />{" "} */}

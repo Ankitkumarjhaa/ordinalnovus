@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Inscription, Collection } from "@/models";
+import { Inscription, Collection, SatCollection } from "@/models";
 import dbConnect from "@/lib/dbConnect";
 import convertParams from "@/utils/api/convertParams";
 
@@ -7,7 +7,7 @@ import apiKeyMiddleware from "@/middlewares/apikeyMiddleware";
 import { CustomError } from "@/utils";
 import moment from "moment";
 import { checkCbrcValidity } from "../search/inscription/route";
-import { IInscription } from "@/types";
+import { ICollection, IInscription } from "@/types";
 
 const getProjectionFields = (show: string) => {
   if (show === "prune") {
@@ -59,17 +59,24 @@ const countInscriptions = async (query: any) => {
   return await Inscription.countDocuments({ ...query.find }, { limit: 100000 });
 };
 
-export async function processInscriptions(inscriptions: IInscription[]) {
+export async function processInscriptions(
+  inscriptions: IInscription[],
+  collection?: ICollection | null
+) {
   for (const ins of inscriptions) {
     if (ins && ins.parsed_metaprotocol) {
       if (
         ins.parsed_metaprotocol.includes("cbrc-20") &&
-        ins.parsed_metaprotocol.includes("transfer")
+        ins.parsed_metaprotocol.includes("transfer") &&
+        ins.valid !== false
       ) {
         try {
+          console.log("checking validity...");
           const valid = await checkCbrcValidity(ins.inscription_id);
           if (valid !== undefined) {
             ins.cbrc_valid = valid; // Update the current inscription
+
+            await updateInscriptionDB(ins.inscription_id, valid); // assuming updateInscriptionDB is the function to update DB
           } else {
             console.debug(
               "checkCbrcValidity returned undefined for inscription_id: ",
@@ -85,9 +92,44 @@ export async function processInscriptions(inscriptions: IInscription[]) {
         }
       }
     }
+    const reinscriptions = await Inscription.find({ sat: ins.sat })
+      .select(
+        "inscription_id inscription_number content_type official_collection metaprotocol parsed_metaprotocol sat collection_item_name collection_item_number valid"
+      )
+      .populate({
+        path: "official_collection",
+        select: "name slug icon supply _id", // specify the fields you want to populate
+      })
+      .lean();
+
+    if (reinscriptions.length > 1) {
+      ins.reinscriptions = reinscriptions;
+    }
+
+    if (collection && collection.metaprotocol === "cbrc") {
+      ins.sat_collection = await SatCollection.findOne({
+        sat: ins.sat,
+      }).populate({
+        path: "official_collection",
+        select: "name slug icon supply _id", // specify the fields you want to populate
+      });
+      if (ins.sat_collection) {
+        ins.official_collection = ins.sat_collection.official_collection;
+        ins.collection_item_name = ins.sat_collection.collection_item_name;
+        ins.collection_item_number = ins.sat_collection.collection_item_number;
+      }
+    }
   }
 
   return inscriptions; // Return the updated array
+}
+
+// Example implementation of updateInscriptionDB (modify as per your DB structure and requirements)
+async function updateInscriptionDB(inscriptionId: string, isValid: boolean) {
+  await Inscription.findOneAndUpdate(
+    { inscription_id: inscriptionId },
+    { valid: isValid }
+  );
 }
 export async function GET(req: NextRequest, res: NextResponse) {
   console.log("***** INSCRIPTION API CALLED *****");
@@ -104,11 +146,12 @@ export async function GET(req: NextRequest, res: NextResponse) {
       return middlewareResponse;
     }
     const query = convertParams(Inscription, req.nextUrl);
+    let collection: ICollection | null = null;
     console.dir(query, { depth: null });
     if (req.nextUrl.searchParams.has("slug")) {
-      const collection = await Collection.findOne({
+      collection = await Collection.findOne({
         slug: req.nextUrl.searchParams.get("slug"),
-      }).select("name");
+      }).select("-holders");
 
       if (!collection) throw new CustomError("Collection Not Found", 404);
       query.find.official_collection = collection._id;
@@ -118,7 +161,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
     await dbConnect();
     const inscriptions = await fetchInscriptions(query, projectionFields);
 
-    const processedIns = await processInscriptions(inscriptions);
+    const processedIns = await processInscriptions(inscriptions, collection);
 
     const totalCount = await countInscriptions(query);
     const endTime = Date.now(); // Record the end time

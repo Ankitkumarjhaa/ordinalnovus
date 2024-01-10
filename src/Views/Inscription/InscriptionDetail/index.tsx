@@ -18,12 +18,7 @@ import BuyInscription from "./BuyInscription";
 import DisplayAttributes from "./DisplayAttributes";
 import { RootState } from "@/stores";
 import { stringToHex } from "@/utils";
-import {
-  cbrcListed,
-  cbrcNotListed,
-  cbrcValid,
-  myInscription,
-} from "@/utils/validate";
+import { cbrcListed, cbrcValid, myInscription } from "@/utils/validate";
 type InscriptionProps = {
   data: IInscription;
 };

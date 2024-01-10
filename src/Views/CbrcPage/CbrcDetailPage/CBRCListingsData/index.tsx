@@ -52,7 +52,7 @@ function CBRCListingsData({ cbrc }: CbrcDetailPageProps) {
 
     const interval = setInterval(() => {
       fetchData(); // Fetch data every 10 seconds
-    }, 30000); // 10000 milliseconds = 10 seconds
+    }, 60000); // 10000 milliseconds = 10 seconds
 
     return () => clearInterval(interval); // Clear interval on unmount
   }, [sort, page, dispatch, pageSize]);

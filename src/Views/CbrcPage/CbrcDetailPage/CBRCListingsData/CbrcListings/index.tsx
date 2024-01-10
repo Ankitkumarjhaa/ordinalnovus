@@ -1,6 +1,7 @@
 import BuyInscriptionCardButton from "@/components/elements/BuyInscriptionCardButton";
 import CustomButton from "@/components/elements/CustomButton";
 import CardContent from "@/components/elements/CustomCardSmall/CardContent";
+import ReinscriptionCarousel from "@/components/elements/ReinscriptionCarousel";
 import { RootState } from "@/stores";
 import { IInscription } from "@/types";
 import { formatNumber, stringToHex } from "@/utils";
@@ -18,8 +19,6 @@ type HeroProps = {
   loading: boolean;
 };
 function CbrcListings({ listings, loading }: HeroProps) {
-  const router = useRouter();
-
   //wallet
   const walletDetails = useWalletAddress();
 
@@ -29,13 +28,6 @@ function CbrcListings({ listings, loading }: HeroProps) {
   const btcPrice = useSelector(
     (state: RootState) => state.general.btc_price_in_dollar
   );
-  const dispatch = useDispatch();
-  const handleListingClick = (id: string) => {
-    router.push(`/inscription/${id}`);
-  };
-  const handleMempoolClick = (txid: string) => {
-    window.open(`https://mempool.space/tx/${txid}`);
-  };
 
   return (
     <div className="py-2 w-full">
@@ -48,13 +40,19 @@ function CbrcListings({ listings, loading }: HeroProps) {
             >
               <div className="border-2 overflow-hidden border-gray-700 rounded-lg bg-slate-900">
                 {!item?.content_type?.includes("text/plain") ? (
-                  <div className=" relative">
-                    <CardContent
-                      inscriptionId={item.inscription_id}
-                      content_type={item.content_type}
-                      inscription={item}
-                    />
-                  </div>
+                  <>
+                    {item?.reinscriptions ? (
+                      <ReinscriptionCarousel data={item.reinscriptions} />
+                    ) : (
+                      <div className=" relative">
+                        <CardContent
+                          inscriptionId={item.inscription_id}
+                          content_type={item.content_type}
+                          inscription={item}
+                        />
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <>
                     <div className="TokenDetail p-2">
