@@ -89,37 +89,46 @@ function Items({ collection }: ItemProps) {
         setLoading(false);
       }
     }
-  }, [sort, page, pageSize]);
+  }, [sort, page, pageSize, search]);
 
   const fetchCbrcListingData = useCallback(async () => {
     {
       setLoading(true);
       setData([]);
-      const result = await fetchCBRCListings({
+      const params: any = {
         page,
         page_size: pageSize,
         sort,
         tick: collection.slug,
-      });
+      };
+      // Check if search is a valid number greater than 0
+      if (!isNaN(Number(search)) && Number(search) > 0) {
+        params.collection_item_number = Number(search);
+      }
+      const result = await fetchCBRCListings(params);
       if (result && result.data) {
         setData(result.data.inscriptions);
         setTotalCount(result.data.pagination.total);
         setLoading(false);
       }
     }
-  }, [sort, page, pageSize]);
+  }, [sort, page, pageSize, search]);
 
   const handleSearchChange = (value: string) => {
     setSearch(value);
   };
 
   useEffect(() => {
-    if (sort.includes("listed") && collection.metaprotocol === "cbrc") {
+    if (sort.includes("listed_price") && collection.metaprotocol === "cbrc") {
       fetchCbrcListingData();
+
+      const interval = setInterval(() => {
+        fetchCbrcListingData(); // Fetch data every 10 seconds
+      }, 60000); // 10000 milliseconds = 10 seconds
     } else {
       fetchData();
     }
-  }, [collection._id, sort, page, pageSize]);
+  }, [collection._id, sort, page, pageSize, search]);
 
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
@@ -142,7 +151,7 @@ function Items({ collection }: ItemProps) {
           </div>
           <div className="w-full center pb-4 lg:pb-0 md:pl-4 lg:w-auto">
             <CustomSearch
-              placeholder="Item number or attribute value..."
+              placeholder="Item number..."
               value={search}
               onChange={handleSearchChange}
               icon={FaSearch}
@@ -168,7 +177,8 @@ function Items({ collection }: ItemProps) {
           ))
         ) : data?.length > 0 ? (
           <>
-            {sort.includes("listed") && collection.metaprotocol === "cbrc" ? (
+            {sort.includes("listed_price") &&
+            collection.metaprotocol === "cbrc" ? (
               <>
                 <CbrcListings listings={data} loading={loading} />
               </>

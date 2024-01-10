@@ -29,6 +29,20 @@ function ReinscriptionCarousel({ data }: { data: IInscription[] }) {
               content_type={item.content_type}
               inscription={item}
             />
+            {item.collection_item_name && item.collection_item_number && (
+              <div className="absolute bottom-0 p-2 left-0">
+                <p className="bg-secondary px-2 py-1">
+                  {item.collection_item_name} #{item.collection_item_number}
+                </p>
+              </div>
+            )}
+            {item.inscription_number && (
+              <div className="absolute bottom-0 right-0 p-2">
+                <p className="bg-secondary px-2 py-1">
+                  #{item.inscription_number}
+                </p>
+              </div>
+            )}
           </div>
         ))}
       </Slider>
