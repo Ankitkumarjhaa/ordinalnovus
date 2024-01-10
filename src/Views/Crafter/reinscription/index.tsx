@@ -12,15 +12,15 @@ import React, { useCallback, useEffect, useState } from "react";
 function Reinscription({
   inscription,
   setInscription,
-  setMode,
   inscriptionId,
   setInscriptionId,
+  locked,
 }: {
   inscription: IInscription | null;
   setInscription: any;
-  setMode: any;
   inscriptionId: string;
   setInscriptionId: any;
+  locked: boolean;
 }) {
   const params = useSearchParams();
   const [inscriptions, setInscriptions] = useState<IInscription[] | null>(null);
@@ -67,7 +67,6 @@ function Reinscription({
           (a) => a.inscription_id === params.get("inscription")
         )[0]
       );
-      setMode("reinscribe");
     }
   }, [walletDetails, page, params, inscriptions]);
 
@@ -90,14 +89,14 @@ function Reinscription({
         <div className="flex-1">
           <CustomButton
             loading={loading}
-            disabled={!inscriptions || !inscriptions.length}
+            disabled={!inscriptions || !inscriptions.length || locked}
             text={`${"Choose Inscription To Reinscribe"}`}
             hoverBgColor="hover:bg-accent_dark"
             hoverTextColor="text-white"
             bgColor="bg-accent"
             textColor="text-white"
             className="transition-all w-full rounded"
-            onClick={handleOpen} // Add this line to make the button functional
+            onClick={() => !locked && handleOpen()} // Add this line to make the button functional
           />
         </div>
         {inscription && inscriptionId && (
@@ -140,7 +139,6 @@ function Reinscription({
                           onClick={() => {
                             setInscriptionId(i.inscription_id);
                             setInscription(i);
-                            setMode("reinscribe");
                           }}
                           key={i.inscription_id}
                           className={`relative p-6 md:w-6/12 lg:w-3/12  2xl:w-2/12 w-full cursor-pointer `}

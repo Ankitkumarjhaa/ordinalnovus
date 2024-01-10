@@ -18,17 +18,19 @@ import updateOrder from "@/apiHelper/updateOrder";
 import { useRouter } from "next/navigation";
 import Reinscription from "./reinscription";
 import { IInscription } from "@/types";
-import CustomTab from "@/components/elements/CustomTab";
+import { useSearchParams } from "next/navigation";
+
 const options = [
   // { value: "deploy", label: "DEPLOY" },
   { value: "transfer", label: "TRANSFER" },
   // { value: "mint", label: "MINT" },
 ];
 
-function Crafter() {
+function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
   const { loading: signLoading, result, error, signTx: sign } = useSignTx();
 
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [feeRate, setFeeRate] = useState<number>(0);
   const [defaultFeeRate, setDefaultFeerate] = useState(0);
@@ -49,10 +51,10 @@ function Crafter() {
   const [action, setAction] = useState<string>("dummy");
   const [order_result, setorderresult] = useState<any | null>(null);
 
-  const [mode, setMode] = useState<"cbrc" | "reinscribe">("cbrc");
-
   const [inscription, setInscription] = useState<IInscription | null>(null);
   const [inscriptionId, setInscriptionId] = useState("");
+
+  const [locked, setLocked] = useState(false);
 
   useEffect(() => {
     if (!walletDetails && fees) {
@@ -99,17 +101,37 @@ function Crafter() {
 
         // console.log({ tick_options });
 
-        setTick(tick_options[0].value);
+        let selectedTick = tick_options[0].value;
+
+        if (searchParams?.has("inscription") && searchParams.has("tickAmt")) {
+          console.log("setting locked data...");
+          const tickAmt = searchParams.get("tickAmt");
+          console.log({ tickAmt });
+          if (tickAmt?.includes("=")) {
+            const [_tick, _amt] = tickAmt?.split("=");
+            if (_tick) selectedTick = _tick;
+            if (!isNaN(Number(_amt))) {
+              setAmt(Number(_amt));
+            }
+            setOp("transfer");
+
+            if (_tick && !isNaN(Number(_amt))) {
+              setLocked(true);
+            }
+          }
+        }
+
+        setTick(selectedTick);
         setCbrcs(tick_options);
       }
     } catch (e: any) {}
-  }, [walletDetails]);
+  }, [walletDetails, searchParams]);
 
   useEffect(() => {
     if (walletDetails?.connected && walletDetails.ordinal_address) {
       fetchCbrcBrc20();
     }
-  }, [walletDetails]);
+  }, [walletDetails, searchParams]);
 
   const handleFileChange = (event: any) => {
     const selectedFiles = Array.from(event.target.files)
@@ -460,26 +482,12 @@ function Crafter() {
     setLoading(false);
   }, [result, error]);
 
+  console.log({ locked });
   return (
     <div className="center min-h-[60vh] flex-col w-full">
       {walletDetails ? (
         <div className="w-full center flex-col">
           <div className="bg-secondary p-6 rounded-lg shadow-2xl min-w-xl w-4/12">
-            <div className="pb-6 flex justify-center lg:justify-start">
-              <CustomTab
-                tabsData={[
-                  { label: "CBRC", value: "cbrc" },
-                  { label: "Reinscribe", value: "reinscribe" },
-                ]}
-                currentTab={mode}
-                onTabChange={(_, newTab) => {
-                  setMode(newTab);
-                  setInscription(null);
-                  setInscriptionId("");
-                  setRep(1);
-                }}
-              />
-            </div>{" "}
             <h2 className="uppercase font-bold tracking-wider pb-6">
               Inscribe CBRC
             </h2>
@@ -504,20 +512,22 @@ function Crafter() {
                   />
                 </div>
                 <p>
-                  MAX: {cbrcs?.find((a: any) => a.value === tick).limit} {tick}
+                  MAX: {cbrcs?.find((a: any) => a.value === tick)?.limit} {tick}
                 </p>
-                <div className="center py-2">
+                <div className={`center py-2`}>
                   <CustomInput
                     value={amt.toString()}
                     placeholder="Amount Of Tokens"
                     endAdornmentText={tick.toUpperCase()}
-                    onChange={(new_content) => setAmt(Number(new_content))}
+                    onChange={(new_content) =>
+                      !locked && setAmt(Number(new_content))
+                    }
                     helperText={
                       amt <= 0 ||
                       (cbrcs?.find((a: any) => a.value === tick)?.limit &&
                         amt > cbrcs?.find((a: any) => a.value === tick).limit)
                         ? `Wrong Amount. Max is: ${
-                            cbrcs?.find((a: any) => a.value === tick).limit
+                            cbrcs?.find((a: any) => a.value === tick)?.limit
                           }`
                         : ""
                     }
@@ -532,6 +542,7 @@ function Crafter() {
                 {mode !== "reinscribe" && (
                   <div className="center py-2">
                     <CustomInput
+                      disabled={locked}
                       value={rep.toString()}
                       placeholder="Amount to mint"
                       onChange={(new_content) => setRep(Number(new_content))}
@@ -566,26 +577,51 @@ function Crafter() {
                 setInscription={setInscription}
                 inscriptionId={inscriptionId}
                 setInscriptionId={setInscriptionId}
-                setMode={setMode}
+                locked={locked}
               />
             )}
-            <div className="center py-2">
-              <CustomInput
-                value={feeRate.toString()}
-                placeholder="Fee Rate"
-                onChange={(fee) => setFeeRate(Number(fee))}
-                helperText={
-                  feeRate < Math.min(10, defaultFeeRate - 40)
-                    ? "Fee too low"
-                    : feeRate > defaultFeeRate + 200
-                    ? "Fee too high - make sure you are okay with it"
-                    : ""
-                }
-                error={true}
-                endAdornmentText=" sats / vB"
-                startAdornmentText="Fee Rate"
-                fullWidth
-              />
+            {inscription?.valid ||
+              inscription?.cbrc_valid ||
+              (inscription?.reinscriptions &&
+                inscription.reinscriptions.find((a) => a.valid) && (
+                  <p className="bg-red-800 text-red-200 p-x text-center uppercase font-bold">
+                    This Sat might have a valid token
+                  </p>
+                ))}
+            <div className="py-3">
+              <p className="text-sm text-center ">
+                Choose Transfer Speed (Fee Rate)
+              </p>
+              <div className="flex justify-between py-2">
+                {new Array(3).fill(1).map((_, idx) => {
+                  // Calculating feeRate for each speed option
+                  let rate = defaultFeeRate;
+                  if (idx === 0) {
+                    rate = defaultFeeRate - 5; // Slow
+                  } else if (idx === 1) {
+                    rate = defaultFeeRate; // Fast
+                  } else {
+                    rate = defaultFeeRate + 10; // Fastest
+                  }
+
+                  return (
+                    <div
+                      onClick={() => setFeeRate(rate)}
+                      className={`p-2 flex-1 ${
+                        feeRate === rate
+                          ? "border border-white cursor-not-allowed"
+                          : "cursor-pointer"
+                      }`}
+                      key={idx}
+                    >
+                      <p className="text-lg text-center">
+                        {idx === 0 ? "Slow" : idx === 1 ? "Fast" : "Fastest"}
+                      </p>
+                      <p className="text-xs text-center">{rate} s/vB</p>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
             {unsignedPsbtBase64 && order_result ? (
               <div className="pt-3">

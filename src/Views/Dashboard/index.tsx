@@ -132,6 +132,7 @@ function AccountPage() {
   const handleSearchChange = (value: string) => {
     setSearch(value);
   };
+
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
     value: number

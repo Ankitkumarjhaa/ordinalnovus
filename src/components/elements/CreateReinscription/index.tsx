@@ -17,7 +17,9 @@ function CreateReinscription({ data }: InscriptionProps) {
         textColor="text-white"
         className="transition-all w-full rounded-xl"
         link={true}
-        href={`/crafter?inscription=${data.inscription_id}`}
+        href={`/reinscribe?inscription=${data.inscription_id}&tickAmt=${
+          data?.parsed_metaprotocol ? data?.parsed_metaprotocol[2] : ""
+        }`}
       />
     </div>
   );

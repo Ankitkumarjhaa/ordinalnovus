@@ -3,7 +3,6 @@ import {
   Select,
   MenuItem,
   FormControl,
-  InputLabel,
   styled,
   SelectChangeEvent,
 } from "@mui/material";
@@ -55,6 +54,7 @@ interface CustomSelectorProps {
   value?: string;
   options: { value: string; label: string }[];
   onChange: (value: string) => void;
+  disabled?: boolean;
   widthFull?: boolean;
 }
 
@@ -64,9 +64,10 @@ const CustomSelector: React.FC<CustomSelectorProps> = ({
   options,
   onChange,
   widthFull,
+  disabled,
 }) => {
   const handleChange = (event: SelectChangeEvent<string>) => {
-    onChange(event.target.value);
+    !disabled && onChange(event.target.value);
   };
 
   return (
