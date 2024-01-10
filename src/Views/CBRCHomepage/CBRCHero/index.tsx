@@ -6,6 +6,7 @@ import { ICollection } from "@/types";
 import CardContent from "@/components/elements/CustomCardSmall/CardContent";
 import Link from "next/link";
 import { FaXTwitter } from "react-icons/fa6";
+import CustomButton from "@/components/elements/CustomButton";
 
 const CbrcHero = ({ data }: { data: ICollection[] }) => {
   const settings = {
@@ -106,7 +107,8 @@ const CbrcHero = ({ data }: { data: ICollection[] }) => {
                   </div>
                   <div>
                     <div className="pt-8  ">
-                      <Link
+                      <CustomButton  href={`/collection/${item.slug}`} link={true} text="View collection"  />
+                      {/* <Link
                         href={`/collection/${item.slug}`}
                         shallow
                         prefetch={false}
@@ -114,7 +116,7 @@ const CbrcHero = ({ data }: { data: ICollection[] }) => {
                         <button className="bg-violet rounded-md  px-4 py-4 text-md text-white">
                           View Collection
                         </button>
-                      </Link>
+                      </Link> */}
                     </div>
                   </div>
                 </div>

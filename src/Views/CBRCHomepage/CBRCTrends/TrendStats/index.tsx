@@ -70,7 +70,7 @@ const TrendStats = ({ data }: { data: IStats }) => {
   return (
     <div className="py-8 px-6   rounded-lg bg-violet">
       <div className="flex justify-between items-center">
-        <div className="flex">
+        <div className="flex items-center">
           <FaDollarSign className="text-green-500" />
           <p>{convertToUSD(data.dailyVolume)}</p>
         </div>
@@ -93,8 +93,8 @@ const TrendStats = ({ data }: { data: IStats }) => {
       <div className="legend pt-4 flex flex-wrap ">
         {pieChartData.map((entry, index) => (
           <div key={index} className="legend-item px-2 ">
-            <span style={{ color: entry.color }}>■</span>
-            <span>{entry.title}: {entry.percentage}</span>
+            <span className='text-2xl' style={{ color: entry.color }}>■</span>
+            <span className='uppercase'>{entry.title}: {entry.percentage}</span>
           </div>
         ))}
       </div>

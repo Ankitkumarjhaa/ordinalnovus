@@ -48,7 +48,7 @@ const Trending = ({ data }: { data: IStats }) => {
             </div>
             <div className="">
               {/* {isPositive ? <BiSolidUpArrow /> : <BiSolidDownArrow />} */}
-              <p className="pl-2 flex">
+              <p className="pl-2 flex items-center">
                 <FaDollarSign className="text-green-500" />
                 {convertToUSD(item.price)}
               </p>
