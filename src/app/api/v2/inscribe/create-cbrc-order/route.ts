@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
       status: "payment pending",
     };
 
-    const psbt = await generateUnsignedPsbtForInscription(
+    const { psbt } = await generateUnsignedPsbtForInscription(
       payment_address,
       publickey,
       fee_rate,

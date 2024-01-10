@@ -36,12 +36,13 @@ function Header() {
     console.log("Getting new BTC Price...");
     const price = await getBTCPriceInDollars();
     console.log({ price: price });
-    dispatch(setBTCPrice(price));
+    if (price) dispatch(setBTCPrice(price));
   }, [dispatch]);
 
   const fetchAllowedTokensChecksum = useCallback(async () => {
     const allowed = await fetchAllowed();
-    dispatch(setAllowedCbrcs(allowed));
+    // TODO: Remove
+    dispatch(setAllowedCbrcs([...allowed, "63706e6b"]));
   }, [dispatch]);
 
   async function collectWalletDetails() {

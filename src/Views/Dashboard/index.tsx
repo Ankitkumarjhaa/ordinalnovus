@@ -142,7 +142,7 @@ function AccountPage() {
   return (
     <div className="pt-16 text-white">
       <div className="profile w-full flex flex-wrap items-start border-2 rounded-xl p-6 py-16 border-accent">
-        <div className="w-[100px]">
+        <div className="w-[200px] relative">
           {inscriptions?.length && profile?.inscription_id ? (
             <CardContent
               inscriptionId={profile?.inscription_id}

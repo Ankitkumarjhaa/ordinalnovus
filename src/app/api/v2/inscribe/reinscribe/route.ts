@@ -18,7 +18,7 @@ import {
 const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
 const BASE_SIZE = 160;
 const PADDING = 1000;
-const PREFIX = 160;
+const PREFIX = 230; // increased fee due to reinscription
 const MINIMUM_FEE = 5000;
 
 export async function POST(req: NextRequest) {

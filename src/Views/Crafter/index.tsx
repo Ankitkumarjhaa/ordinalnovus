@@ -17,6 +17,8 @@ import mixpanel from "mixpanel-browser";
 import updateOrder from "@/apiHelper/updateOrder";
 import { useRouter } from "next/navigation";
 import Reinscription from "./reinscription";
+import { IInscription } from "@/types";
+import CustomTab from "@/components/elements/CustomTab";
 const options = [
   // { value: "deploy", label: "DEPLOY" },
   { value: "transfer", label: "TRANSFER" },
@@ -49,7 +51,8 @@ function Crafter() {
 
   const [mode, setMode] = useState<"cbrc" | "reinscribe">("cbrc");
 
-  const [inscription, setInscription] = useState("");
+  const [inscription, setInscription] = useState<IInscription | null>(null);
+  const [inscriptionId, setInscriptionId] = useState("");
 
   useEffect(() => {
     if (!walletDetails && fees) {
@@ -146,11 +149,40 @@ function Crafter() {
 
   function textToFileData(text: string, filename: string) {
     const base64EncodedData = btoa(unescape(encodeURIComponent(text)));
-    const dataURI = `data:text/plain;base64,${base64EncodedData}`;
+    let dataURI = `data:text/plain;charset=utf-8;base64,${base64EncodedData}`;
+    let type = "text/plain;charset=utf-8";
+
+    if (
+      mode === "reinscribe" &&
+      tick &&
+      !inscription?.content_type?.includes("text") &&
+      inscriptionId
+    ) {
+      type = "text/html;charset=utf-8";
+      const html = `<!DOCTYPE html>
+<html>
+<head>
+    <title>Image in Iframe</title>
+</head>
+<body style="margin: 0; padding: 0;">
+    <img id="dynamicImage" style="width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated;" 
+         src="/content/${inscription?.inscription_id}" />
+    <div style="position: absolute; top: 20%; width: 100%; background-color: rgba(0, 0, 0, 0.5); text-align: center;">
+        <p style="color: white; margin: 10px 0;">${tick.toUpperCase()} ${op} Inscription</p>
+        <p style="color: white; margin: 10px 0;">Created on Ordinalnovus</p>
+    </div>
+</body>
+</html>
+`;
+
+      const base64EncodedData = btoa(html);
+      dataURI = `data:text/html;charset=utf-8;base64,${base64EncodedData}`;
+      filename = `CBRC-20:${op}:${tick}=${amt}.html`;
+    }
 
     return {
       file: {
-        type: "text/plain",
+        type,
         size: base64EncodedData.length,
         name: filename,
       },
@@ -215,7 +247,7 @@ function Crafter() {
         fee_rate: feeRate,
         wallet: walletDetails?.wallet,
         metaprotocol: "cbrc",
-        inscription_id: inscription,
+        inscription_id: inscription?.inscription_id,
         ordinal_publickey: walletDetails.ordinal_pubkey,
         cardinal_publickey: walletDetails.cardinal_pubkey,
       };
@@ -429,10 +461,25 @@ function Crafter() {
   }, [result, error]);
 
   return (
-    <div className="center min-h-[60vh] flex-col">
+    <div className="center min-h-[60vh] flex-col w-full">
       {walletDetails ? (
-        <>
-          <div className="bg-secondary p-6 rounded-lg shadow-2xl">
+        <div className="w-full center flex-col">
+          <div className="bg-secondary p-6 rounded-lg shadow-2xl min-w-xl w-4/12">
+            <div className="pb-6 flex justify-center lg:justify-start">
+              <CustomTab
+                tabsData={[
+                  { label: "CBRC", value: "cbrc" },
+                  { label: "Reinscribe", value: "reinscribe" },
+                ]}
+                currentTab={mode}
+                onTabChange={(_, newTab) => {
+                  setMode(newTab);
+                  setInscription(null);
+                  setInscriptionId("");
+                  setRep(1);
+                }}
+              />
+            </div>{" "}
             <h2 className="uppercase font-bold tracking-wider pb-6">
               Inscribe CBRC
             </h2>
@@ -445,7 +492,6 @@ function Crafter() {
                 widthFull={true}
               />
             </div>
-
             {cbrcs && cbrcs.length && op === "transfer" ? (
               <>
                 <div className="w-full center pb-4">
@@ -514,12 +560,15 @@ function Crafter() {
             fullWidth
           />
         </div> */}
-
-            <Reinscription
-              inscription={inscription}
-              setInscription={setInscription}
-              setMode={setMode}
-            />
+            {mode === "reinscribe" && (
+              <Reinscription
+                inscription={inscription}
+                setInscription={setInscription}
+                inscriptionId={inscriptionId}
+                setInscriptionId={setInscriptionId}
+                setMode={setMode}
+              />
+            )}
             <div className="center py-2">
               <CustomInput
                 value={feeRate.toString()}
@@ -573,7 +622,7 @@ function Crafter() {
             )}
           </div>
           <div className="w-full">{walletDetails && <ShowOrders />}</div>
-        </>
+        </div>
       ) : (
         <div className="text-center text-sm">Connect wallet to continue</div>
       )}

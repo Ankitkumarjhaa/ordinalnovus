@@ -13,10 +13,14 @@ function Reinscription({
   inscription,
   setInscription,
   setMode,
+  inscriptionId,
+  setInscriptionId,
 }: {
-  inscription: string;
+  inscription: IInscription | null;
   setInscription: any;
   setMode: any;
+  inscriptionId: string;
+  setInscriptionId: any;
 }) {
   const params = useSearchParams();
   const [inscriptions, setInscriptions] = useState<IInscription[] | null>(null);
@@ -49,14 +53,23 @@ function Reinscription({
   }, [walletDetails, page]);
 
   useEffect(() => {
-    if (walletDetails?.connected && walletDetails.ordinal_address) {
+    if (
+      walletDetails?.connected &&
+      walletDetails.ordinal_address &&
+      !inscriptions
+    ) {
       fetchWalletInscriptions();
     }
-    if (params?.get("inscription")) {
-      setInscription(params?.get("inscription"));
+    if (params?.get("inscription") && inscriptions) {
+      setInscriptionId(params?.get("inscription"));
+      setInscription(
+        inscriptions.filter(
+          (a) => a.inscription_id === params.get("inscription")
+        )[0]
+      );
       setMode("reinscribe");
     }
-  }, [walletDetails, page, params]);
+  }, [walletDetails, page, params, inscriptions]);
 
   const handleSearchChange = (value: string) => {
     setSearch(value);
@@ -72,22 +85,31 @@ function Reinscription({
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
   return (
-    <div>
-      <CustomButton
-        loading={loading}
-        disabled={!inscriptions || !inscriptions.length}
-        text={`${
-          inscription
-            ? "Inscription: " + shortenString(inscription)
-            : "Choose Inscription To Reinscribe"
-        }`}
-        hoverBgColor="hover:bg-accent_dark"
-        hoverTextColor="text-white"
-        bgColor="bg-accent"
-        textColor="text-white"
-        className="transition-all w-full rounded"
-        onClick={handleOpen} // Add this line to make the button functional
-      />
+    <div className="w-full">
+      <div className="flex justify-between items-center w-full">
+        <div className="flex-1">
+          <CustomButton
+            loading={loading}
+            disabled={!inscriptions || !inscriptions.length}
+            text={`${"Choose Inscription To Reinscribe"}`}
+            hoverBgColor="hover:bg-accent_dark"
+            hoverTextColor="text-white"
+            bgColor="bg-accent"
+            textColor="text-white"
+            className="transition-all w-full rounded"
+            onClick={handleOpen} // Add this line to make the button functional
+          />
+        </div>
+        {inscription && inscriptionId && (
+          <div className="pl-2">
+            <CardContent
+              inscriptionId={inscriptionId}
+              content_type={inscription.content_type}
+              className="w-[60px]"
+            />
+          </div>
+        )}
+      </div>
       <Modal open={open} onClose={handleClose}>
         <div
           className="absolute top-0 bottom-0 right-0 left-0 bg-black bg-opacity-90"
@@ -116,7 +138,8 @@ function Reinscription({
                       {inscriptions.map((i) => (
                         <div
                           onClick={() => {
-                            setInscription(i.inscription_id);
+                            setInscriptionId(i.inscription_id);
+                            setInscription(i);
                             setMode("reinscribe");
                           }}
                           key={i.inscription_id}
@@ -124,7 +147,7 @@ function Reinscription({
                         >
                           <div
                             className={`border xl:border-2 border-accent  rounded-xl shadow-xl p-3 ${
-                              inscription === i.inscription_id
+                              inscriptionId === i.inscription_id
                                 ? "bg-accent_dark"
                                 : "bg-secondary"
                             }`}
@@ -144,7 +167,7 @@ function Reinscription({
                                   <h5 className=" text-sm font-bold tracking-tight text-white">
                                     #{i.inscription_number}
                                   </h5>
-                                  {inscription === i.inscription_id && (
+                                  {inscriptionId === i.inscription_id && (
                                     <p>SELECTED</p>
                                   )}
                                 </div>

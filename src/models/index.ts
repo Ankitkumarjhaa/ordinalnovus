@@ -7,7 +7,7 @@ import { BlocksSchema } from "./block";
 import { InscribeOrderSchema } from "./InscribeOrder";
 import { salesSchema } from "./Sale";
 import { WalletSchema } from "./Wallets";
-import { StatsSchema } from "./Stats";
+import { CbrcStatsSchema } from "./CBRCStats";
 import { APIUsageLogSchema } from "./APIUsageLog";
 
 import { AllowedTokensSchema } from "./AllowedTokens";
@@ -27,7 +27,6 @@ const CreateInscription =
   models.CreateInscription ||
   model("CreateInscription", createInscriptionSchema);
 const Sale = models.Sale || model("Sale", salesSchema);
-const Stats = models.Stats || model("Stats", StatsSchema);
 const Wallet = models.Wallet || model("Wallet", WalletSchema);
 const AllowedCbrcs =
   models.AllowedCbrcs || model("AllowedCbrcs", AllowedTokensSchema);
@@ -35,6 +34,7 @@ const APIKeyUsage =
   models.APIKeyUsage || model("APIKeyUsage", APIUsageLogSchema);
 
 const CBRCToken = models.CBRCToken || model("CBRCToken", CBRCTokenSchema);
+const CBRCStats = models.CBRCStats || model("CBRCStats", CbrcStatsSchema);
 const SatCollection =
   models.SatCollection || model("SatCollection", satsCollSchema);
 export {
@@ -51,5 +51,5 @@ export {
   AllowedCbrcs,
   CBRCToken,
   SatCollection,
-  Stats
+  CBRCStats,
 };
