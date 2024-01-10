@@ -92,11 +92,19 @@ export async function processInscriptions(
         }
       }
     }
-    ins.reinscriptions = await Inscription.find({ sat: ins.sat })
+    const reinscriptions = await Inscription.find({ sat: ins.sat })
       .select(
-        "inscription_id inscription_number content_type metaprotocol parsed_metaprotocol sat collection_item_name collection_item_number"
+        "inscription_id inscription_number content_type official_collection metaprotocol parsed_metaprotocol sat collection_item_name collection_item_number valid"
       )
+      .populate({
+        path: "official_collection",
+        select: "name slug icon supply _id", // specify the fields you want to populate
+      })
       .lean();
+
+    if (reinscriptions.length > 1) {
+      ins.reinscriptions = reinscriptions;
+    }
 
     if (collection && collection.metaprotocol === "cbrc") {
       ins.sat_collection = await SatCollection.findOne({

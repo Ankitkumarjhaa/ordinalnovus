@@ -1,6 +1,7 @@
 import BuyInscriptionCardButton from "@/components/elements/BuyInscriptionCardButton";
 import CustomButton from "@/components/elements/CustomButton";
 import CardContent from "@/components/elements/CustomCardSmall/CardContent";
+import ReinscriptionCarousel from "@/components/elements/ReinscriptionCarousel";
 import { RootState } from "@/stores";
 import { IInscription } from "@/types";
 import { formatNumber, stringToHex } from "@/utils";
@@ -48,13 +49,19 @@ function CbrcListings({ listings, loading }: HeroProps) {
             >
               <div className="border-2 overflow-hidden border-gray-700 rounded-lg bg-slate-900">
                 {!item?.content_type?.includes("text/plain") ? (
-                  <div className=" relative">
-                    <CardContent
-                      inscriptionId={item.inscription_id}
-                      content_type={item.content_type}
-                      inscription={item}
-                    />
-                  </div>
+                  <>
+                    {item?.reinscriptions ? (
+                      <ReinscriptionCarousel data={item.reinscriptions} />
+                    ) : (
+                      <div className=" relative">
+                        <CardContent
+                          inscriptionId={item.inscription_id}
+                          content_type={item.content_type}
+                          inscription={item}
+                        />
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <>
                     <div className="TokenDetail p-2">

@@ -102,8 +102,8 @@ function Items({ collection }: ItemProps) {
   };
 
   return (
-    <section>
-      <div className="SortSearchPages py-6 flex flex-wrap justify-between">
+    <section className="w-full">
+      <div className="SortSearchPages py-6 flex flex-wrap justify-between w-full">
         <div className="w-full lg:w-auto flex justify-start items-center flex-wrap">
           <div className="w-full center pb-4 lg:pb-0 lg:w-auto">
             <CustomSelector
@@ -134,7 +134,7 @@ function Items({ collection }: ItemProps) {
           </div>
         )}
       </div>
-      <div className="flex items-center flex-wrap">
+      <div className="flex items-center flex-wrap w-full">
         {loading ? (
           Array.from(Array(pageSize)).map((_, i) => (
             <SkeletonCollectionItemCard key={i} />

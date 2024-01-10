@@ -90,7 +90,7 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
       limit
     );
 
-    console.log(inscriptions.length, " inscriptions found in db");
+    // console.log(inscriptions.length, " inscriptions found in db");
 
     if (inscriptions.length) {
       const ins = inscriptions[0];
@@ -112,11 +112,19 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
             console.error("Error in checkCbrcValidity: ", error);
           }
         }
-        ins.reinscriptions = await Inscription.find({ sat: ins.sat })
+        const reinscriptions = await Inscription.find({ sat: ins.sat })
           .select(
-            "inscription_id inscription_number content_type metaprotocol parsed_metaprotocol sat collection_item_name collection_item_number"
+            "inscription_id inscription_number content_type official_collection metaprotocol parsed_metaprotocol sat collection_item_name collection_item_number valid"
           )
+          .populate({
+            path: "official_collection",
+            select: "name slug icon supply _id", // specify the fields you want to populate
+          })
           .lean();
+
+        if (reinscriptions.length > 1) {
+          ins.reinscriptions = reinscriptions;
+        }
 
         ins.sat_collection = await SatCollection.findOne({
           sat: ins.sat,

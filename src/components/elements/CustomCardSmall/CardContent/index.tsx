@@ -452,37 +452,26 @@ const CardContent: React.FC<CardContentProps> = ({
           Invalid Domain
         </span>
       )}{" "}
-      {inscription?.token && (
+      {/* {inscription?.token && (
         <span className="absolute bg-bitcoin rounded font-bold text-yellow-900 capitalize text-xs p-1 z-10 top-[5px] left-[5px] ">
           TOKEN
         </span>
-      )}{" "}
+      )}{" "} */}
       {inscription?.tags?.includes("bitmap") && (
         <span className="absolute bg-bitcoin rounded font-bold text-yellow-900 capitalize text-xs p-1 z-10 top-[5px] left-[5px] ">
           BITMAP
         </span>
       )}{" "}
-      {inscription?.metaprotocol?.includes("cbrc-20") && (
+      {inscription?.metaprotocol?.includes("cbrc-20") && inscription?.valid && (
         <div>
           <span className="absolute bg-bitcoin rounded font-bold text-yellow-900 capitalize text-xs p-1 z-10 top-[5px] left-[5px] ">
             CBRC-20
           </span>
         </div>
       )}{" "}
-      {inscription?.metaprotocol?.includes("cbrc-20:mint") &&
-        inscription.listed && (
-          <div>
-            <Tooltip title="Buying Mint Inscription wont increase CBRC-20 Balance">
-              <span
-                className={`absolute flex justify-center items-center bg-red-400 text-red-900  rounded  capitalize text-xs py-3 z-10 bottom-0 right-0 left-0 `}
-              >
-                <IoMdWarning /> <p>Warning</p>
-              </span>
-            </Tooltip>
-          </div>
-        )}
       {inscription?.parsed_metaprotocol &&
-        inscription?.parsed_metaprotocol?.length == 3 && (
+        inscription?.parsed_metaprotocol?.length == 3 &&
+        inscription?.valid && (
           <div>
             <span className="absolute bg-bitcoin rounded font-bold text-yellow-900 capitalize text-xs p-1 z-10 top-[5px] right-[5px] ">
               {inscription?.parsed_metaprotocol[1]}{" "}

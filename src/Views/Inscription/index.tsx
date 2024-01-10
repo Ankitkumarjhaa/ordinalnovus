@@ -4,6 +4,7 @@ import React from "react";
 import Content from "./Content";
 import InscriptionDetail from "./InscriptionDetail";
 import CardContent from "@/components/elements/CustomCardSmall/CardContent";
+import Link from "next/link";
 type SearchDetailProps = {
   data: IInscription;
 };
@@ -37,24 +38,32 @@ function SearchDetailPage({ data }: SearchDetailProps) {
                   <div
                     className={`border xl:border-2 border-accent  rounded-xl shadow-xl p-3 $ bg-secondary`}
                   >
-                    <div className="content-div h-[60%] rounded overflow-hidden relative">
-                      <CardContent
-                        inscriptionId={i.inscription_id}
-                        content_type={i.content_type}
-                        inscription={i}
-                      />
-                    </div>
+                    <Link href={`/inscription/${i.inscription_id}`}>
+                      <div className="content-div h-[60%] rounded overflow-hidden relative cursor-pointer">
+                        <CardContent
+                          inscriptionId={i.inscription_id}
+                          content_type={i.content_type}
+                          inscription={i}
+                        />
+                      </div>
+                    </Link>
                     <div className={`h-[40%] flex flex-col justify-end `}>
                       <div className="py-2 mb-2 center">
                         <div className="flex-1">
                           <h5 className=" text-sm font-bold tracking-tight text-white">
                             #{i.inscription_number}
                           </h5>
-                          {i && i?.collection_item_name && (
-                            <span className="bg-yellow-500 mb-2 rounded-md text-center text-xs py-1 px-3 font-bold text-yellow-900">
-                              {i.collection_item_name}
-                            </span>
-                          )}
+                          {i &&
+                            i?.collection_item_name &&
+                            i?.official_collection && (
+                              <Link
+                                href={`/collection/${i?.official_collection?.slug}`}
+                              >
+                                <span className="bg-yellow-500 mb-2 rounded-md text-center text-xs py-1 px-3 font-bold text-yellow-900">
+                                  {i.collection_item_name}
+                                </span>
+                              </Link>
+                            )}
                         </div>
                       </div>
                     </div>
