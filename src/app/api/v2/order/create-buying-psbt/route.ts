@@ -52,7 +52,7 @@ async function processOrdItem(
   const dbItem: any | null = await Inscription.findOne({
     inscription_id,
     listed: true,
-  });
+  }).populate("official_collection");
 
   console.log("got db listing");
 

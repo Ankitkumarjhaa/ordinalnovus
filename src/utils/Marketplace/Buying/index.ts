@@ -347,6 +347,8 @@ async function generateUnsignedBuyingPSBTBase64(
   wallet = wallet.toLowerCase();
   const psbt = new bitcoin.Psbt({ network: undefined });
 
+  const collection = listing.seller.ordItem.official_collection;
+
   const taprootAddress = listing?.buyer?.buyerAddress.startsWith("bc1p");
   const buyerPublicKey = listing?.buyer?.buyerPublicKey;
   if (
@@ -487,7 +489,7 @@ async function generateUnsignedBuyingPSBTBase64(
   // Create a platform fee output
   let platformFeeValue = Math.floor((listing.seller.price * (0 + 100)) / 10000);
   // Assuming listing.seller.price is in satoshis
-  platformFeeValue = Math.max(Math.round(listing.seller.price * 0.01), 1000);
+  platformFeeValue = Math.max(Math.round(listing.seller.price * 0.01), 2000);
 
   // platformFeeValue > DUMMY_UTXO_MIN_VALUE ? platformFeeValue : 580;
 
@@ -497,6 +499,25 @@ async function generateUnsignedBuyingPSBTBase64(
       address: PLATFORM_FEE_ADDRESS,
       value: platformFeeValue,
     });
+  }
+
+  if (collection && collection?.royalty_address && collection?.royalty_bp) {
+    const bp = collection.royalty_bp; // 300 represents 3% (since 100 basis points = 1%)
+
+    // Calculate the royalty value based on the basis points
+    let royaltyValue = Math.round((listing.seller.price * bp) / 10000);
+
+    // Ensure the minimum royalty value is 2000 if the calculated value is less
+    royaltyValue = Math.max(royaltyValue, 2000);
+
+    console.log(royaltyValue, "ROYALTY_FEE");
+
+    if (royaltyValue > 0) {
+      psbt.addOutput({
+        address: collection.royalty_address,
+        value: royaltyValue,
+      });
+    }
   }
 
   // Create two new dummy utxo output for the next purchase
