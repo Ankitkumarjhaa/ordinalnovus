@@ -187,7 +187,10 @@ function ListInscriptionCardButton({ data, refreshData }: InscriptionProps) {
           data.parsed_metaprotocol.length >= 3 &&
           data?.parsed_metaprotocol[2].split("=")[0]
         )
-          await updateTokenPrice(data?.parsed_metaprotocol[2].split("=")[0]);
+          await updateTokenPrice(
+            data?.parsed_metaprotocol[2].split("=")[0],
+            "list"
+          );
         mixpanel.track("Listing Completed Dashboard", {
           inscription_id: data.inscription_id,
           price: convertBtcToSat(Number(price)),
