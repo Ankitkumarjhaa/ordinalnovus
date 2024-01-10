@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Inscription, Collection } from "@/models";
+import { Inscription, Collection, SatCollection } from "@/models";
 import dbConnect from "@/lib/dbConnect";
 import convertParams from "@/utils/api/convertParams";
 
@@ -64,12 +64,16 @@ export async function processInscriptions(inscriptions: IInscription[]) {
     if (ins && ins.parsed_metaprotocol) {
       if (
         ins.parsed_metaprotocol.includes("cbrc-20") &&
-        ins.parsed_metaprotocol.includes("transfer")
+        ins.parsed_metaprotocol.includes("transfer") &&
+        ins.valid !== false
       ) {
         try {
+          console.log("checking validity...");
           const valid = await checkCbrcValidity(ins.inscription_id);
           if (valid !== undefined) {
             ins.cbrc_valid = valid; // Update the current inscription
+
+            await updateInscriptionDB(ins.inscription_id, valid); // assuming updateInscriptionDB is the function to update DB
           } else {
             console.debug(
               "checkCbrcValidity returned undefined for inscription_id: ",
@@ -85,9 +89,29 @@ export async function processInscriptions(inscriptions: IInscription[]) {
         }
       }
     }
+    ins.reinscriptions = await Inscription.find({ sat: ins.sat })
+      .select(
+        "inscription_id inscription_number content_type metaprotocol parsed_metaprotocol sat collection_item_name collection_item_number"
+      )
+      .lean();
+
+    ins.sat_collection = await SatCollection.findOne({ sat: ins.sat }).populate(
+      {
+        path: "official_collection",
+        select: "name slug icon supply ", // specify the fields you want to populate
+      }
+    );
   }
 
   return inscriptions; // Return the updated array
+}
+
+// Example implementation of updateInscriptionDB (modify as per your DB structure and requirements)
+async function updateInscriptionDB(inscriptionId: string, isValid: boolean) {
+  await Inscription.findOneAndUpdate(
+    { inscription_id: inscriptionId },
+    { valid: isValid }
+  );
 }
 export async function GET(req: NextRequest, res: NextResponse) {
   console.log("***** INSCRIPTION API CALLED *****");

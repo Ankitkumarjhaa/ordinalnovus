@@ -105,8 +105,18 @@ interface Attribute {
   trait_type: string;
   value: string;
 }
+export interface ISatCollection {
+  _id: string;
+  collection_item_name?: string;
+  collection_item_number?: number;
+  sat: number;
+  official_collection: ICollection;
+}
 
 export interface IInscription {
+  sat_collection?: ISatCollection;
+  valid?: boolean;
+  reinscriptions?: IInscription[];
   _id: string;
   inscription_number: number;
   inscription_id: string;

@@ -3,7 +3,7 @@ import axios from "axios";
 import dbConnect from "@/lib/dbConnect";
 import apiKeyMiddleware from "@/middlewares/apikeyMiddleware";
 import { CustomError } from "@/utils";
-import { Inscription } from "@/models";
+import { Inscription, SatCollection } from "@/models";
 import { getCache, setCache } from "@/lib/cache";
 
 type Data = {
@@ -97,12 +97,14 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
       if (ins && ins.parsed_metaprotocol) {
         if (
           ins.parsed_metaprotocol.includes("cbrc-20") &&
-          ins.parsed_metaprotocol.includes("transfer")
+          ins.parsed_metaprotocol.includes("transfer") &&
+          ins.valid !== false
         ) {
           try {
             const valid = await checkCbrcValidity(ins.inscription_id);
             if (valid !== undefined) {
               inscriptions[0].cbrc_valid = valid;
+              await updateInscriptionDB(ins.inscription_id, valid);
             } else {
               console.debug("checkCbrcValidity returned undefined");
             }
@@ -110,6 +112,15 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
             console.error("Error in checkCbrcValidity: ", error);
           }
         }
+        ins.reinscriptions = await Inscription.find({ sat: ins.sat })
+          .select(
+            "inscription_id inscription_number content_type metaprotocol parsed_metaprotocol sat collection_item_name collection_item_number"
+          )
+          .lean();
+
+        ins.sat_collection = await SatCollection.findOne({
+          sat: ins.sat,
+        }).populate("official_collection");
       }
       return NextResponse.json({
         statusCode: 200,
@@ -212,6 +223,14 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
       { status: error.status || 500 }
     );
   }
+}
+
+// Example implementation of updateInscriptionDB (modify as per your DB structure and requirements)
+async function updateInscriptionDB(inscriptionId: string, isValid: boolean) {
+  await Inscription.findOneAndUpdate(
+    { inscription_id: inscriptionId },
+    { valid: isValid }
+  );
 }
 
 export const checkCbrcValidity = async (id: string) => {
