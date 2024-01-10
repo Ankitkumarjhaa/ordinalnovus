@@ -11,11 +11,14 @@ const CbrcHero = ({ data }: { data: ICollection[] }) => {
   const settings = {
     dots: true,
     arrows: false,
-    infinite: false,
-    speed: 500,
+    infinite: true,
     slidesToShow: 1,
     slidesToScroll: 1,
     initialSlide: 0,
+    autoplay: true,
+    autoplaySpeed: 3000,
+    loop: true,
+    speed: 500,
     responsive: [
       {
         breakpoint: 1024,
