@@ -1,31 +1,31 @@
-import { FetchCBRC } from '@/apiHelper/getCBRC';
-import { IToken } from '@/types/CBRC';
-import React, { useEffect, useState } from 'react'
-import Trending from './Trending';
-import { IStats } from '@/types';
-import Hot from './Hot';
-import TrendStats from './TrendStats';
+import { FetchCBRC } from "@/apiHelper/getCBRC";
+import { IToken } from "@/types/CBRC";
+import React, { useEffect, useState } from "react";
+import Trending from "./Trending";
+import { IStats } from "@/types";
+import Hot from "./Hot";
+import TrendStats from "./TrendStats";
 
-const CBRCTrends = ({ token }: {  token:IStats }) => {
+const CBRCTrends = ({ token }: { token: IStats }) => {
   return (
-    <div className='py-6 flex flex-wrap justify-between  items-stretch w-full min-h-[30vh]'>
-      <div className='p-4 w-full lg:w-4/12 ' >
-       <div>
-       <TrendStats data = {token} />
-       </div>
+    <div className="py-6 flex flex-wrap justify-between items-stretch w-full min-h-[30vh]">
+      <div className="p-4 w-full lg:w-4/12 h-full">
+        <div className="h-full">
+          <TrendStats data={token} />
+        </div>
       </div>
-     <div className='p-4 w-full lg:w-4/12 '>
-    <div>
-    <Trending data = {token} />
+      <div className="p-4 w-full lg:w-4/12 flex flex-col shadow-xl">
+        <div className="flex-grow">
+          <Trending data={token} />
+        </div>
+      </div>
+      <div className="p-4 w-full lg:w-4/12 flex flex-col shadow-xl">
+        <div className="flex-grow">
+          <Hot data={token} />
+        </div>
+      </div>
     </div>
-     </div>
-     <div className='p-4 w-full lg:w-4/12 '>
-   <div>
-   <Hot data = {token} />
-   </div>
-     </div>
-    </div>
-  )
-}
+  );
+};
 
-export default CBRCTrends
+export default CBRCTrends;

@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from "react";
-import { FaDollarSign } from "react-icons/fa";
+import { FaBitcoin, FaDollarSign } from "react-icons/fa";
 import { RootState } from "@/stores";
 import { IStats } from "@/types";
 import { useSelector } from "react-redux";
@@ -83,14 +83,24 @@ const TrendStats = ({ data }: { data: IStats }) => {
   }, [data.aggregateVolume, btcPrice]);
 
   return (
-    <div className="py-8 px-6   rounded-lg bg-violet">
+    <div className="py-8 px-6   rounded-lg bg-violet h-full">
+      <div>
+        <p>24Hr Volume ( Ordinalnovus )</p>
+      </div>
       <div className="flex justify-between items-center">
-        <div className="flex items-center">
-          <FaDollarSign className="text-green-500" />
-          <p className="pl-1">{convertToUSD(data.dailyVolume)}</p>
-        </div>
         <div>
-          <p>24Hr Volume</p>
+          <div className="flex items-center">
+            <FaDollarSign className="text-green-500" />
+            <p className="pl-1">{convertToUSD(data.dailyVolume)}</p>
+          </div>
+          <div className="">
+            <div className="flex items-center">
+              <FaBitcoin className="text-bitcoin" />
+              <p className="pl-1">
+                {(data.dailyVolume / 100_000_000).toFixed(3)}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
       <div style={{ height: 200, width: "100%" }}>

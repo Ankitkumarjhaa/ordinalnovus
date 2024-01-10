@@ -1,7 +1,6 @@
 import { IStats } from "@/types";
-import { IHistoricalData, IToken } from "@/types/CBRC";
+import { IToken } from "@/types/CBRC";
 import React from "react";
-import { BiSolidUpArrow, BiSolidDownArrow } from "react-icons/bi";
 
 const Hot = ({ data }: { data: IStats }) => {
   const calculateVolumeChange = (item: IToken) => {
@@ -17,7 +16,6 @@ const Hot = ({ data }: { data: IStats }) => {
     const change = currentVolume - latestHistoricalVolume;
     const percentageChange = (change / latestHistoricalVolume) * 100;
 
-
     return {
       value: `${percentageChange.toFixed(2)}%`,
       isPositive: percentageChange > 0,
@@ -25,20 +23,20 @@ const Hot = ({ data }: { data: IStats }) => {
   };
 
   return (
-    <div className="py-8 px-6 rounded-lg  bg-violet">
-     <div className="pb-4 flex items-center justify-between">
-     <div className="flex items-center ">
-        <div>
-          <img src="/assets/images/hot.png" />
+    <div className="py-8 px-6 rounded-lg  bg-violet h-full">
+      <div className="pb-4 flex items-center justify-between">
+        <div className="flex items-center ">
+          <div>
+            <img src="/assets/images/hot.png" />
+          </div>
+          <div>
+            <p className="font-semibold text-xl text-white pl-2 ">Hot</p>
+          </div>
         </div>
-        <div>
-          <p className="font-semibold text-xl text-white pl-2 ">Hot</p>
+        <div className="text-white ">
+          <p>In mempool</p>
         </div>
       </div>
-      <div className="text-white ">
-        <p>In mempool</p>
-      </div>
-     </div>
       {data.tokensHot.map((item, index) => {
         const { value, isPositive } = calculateVolumeChange(item);
         return (
@@ -50,9 +48,7 @@ const Hot = ({ data }: { data: IStats }) => {
                 {item.tick}
               </span>
             </div>
-            <div
-              className=""
-            >
+            <div className="">
               <span className="pl-2">{item.in_mempool}</span>
             </div>
           </div>
