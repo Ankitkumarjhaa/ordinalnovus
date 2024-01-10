@@ -97,8 +97,8 @@ function ListInscription({ data }: InscriptionProps) {
         mixpanel.track("Error", {
           inscription_id: data.inscription_id,
           message:
-            e.response.data.message ||
-            e.message ||
+            e?.response?.data?.message ||
+            e?.message ||
             e ||
             "Error creating listing psbt",
           tag: "listing psbt error catch",
@@ -199,7 +199,8 @@ function ListInscription({ data }: InscriptionProps) {
     } catch (e: any) {
       mixpanel.track("Error", {
         inscription_id: data.inscription_id,
-        message: e.response.data.message || e.message || e || "Listing failed",
+        message:
+          e?.response?.data?.message || e?.message || e || "Listing failed",
         tag: "Listing Error",
         wallet: walletDetails?.ordinal_address,
         // Additional properties if needed
@@ -264,7 +265,7 @@ function ListInscription({ data }: InscriptionProps) {
       mixpanel.track("Error", {
         inscription_id: data.inscription_id,
         message:
-          e.response.data.message ||
+          e?.response?.data?.message ||
           e.message ||
           e ||
           "Error in removing listing",
