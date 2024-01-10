@@ -54,9 +54,9 @@ const CbrcHero = ({ data }: { data: ICollection[] }) => {
           {data.map((item, index) => (
             <div key={index} className="rounded-md h-auto lg:h-[45vh]">
               <div className="w-full flex flex-wrap justify-between py-6 px-8 rounded-md h-full border border-accent">
-                <div className="lg:w-4/12 w-full h-full">
+                <div className="lg:w-4/12  w-full h-full">
                   {item?.inscription_icon?.inscription_id ? (
-                    <div className="w-full md:flex md:justify-center lg:justify-start rounded-md lg:w-[80%] h-full overflow-hidden relative ">
+                    <div className="w-full md:flex md:justify-center lg:justify-start rounded-md lg:w-[80%]  max-h-[300px] h-[250px] xl:h-[300px]  overflow-hidden relative ">
                       <CardContent
                         inscriptionId={item.inscription_icon.inscription_id}
                         content_type={item.inscription_icon.content_type}
@@ -65,7 +65,7 @@ const CbrcHero = ({ data }: { data: ICollection[] }) => {
                     </div>
                   ) : (
                     <div className="w-full md:flex md:justify-center lg:justify-start rounded-md lg:w-[80%] h-full overflow-hidden">
-                      <img src={item.icon} />
+                      <img className="rounded-md" src={item.icon} />
                     </div>
                   )}
                 </div>
