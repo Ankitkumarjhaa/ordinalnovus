@@ -69,10 +69,10 @@ const CbrcHero = ({ data }: { data: ICollection[] }) => {
                     </div>
                   )}
                 </div>
-                <div className="lg:w-8/12 w-full lg:pt-0 pt-4">
+                <div className="lg:w-8/12 w-full lg:pt-8 pt-4">
                   <div>
                     <p className="text-5xl font-bold text-white">{item.name}</p>
-                    <p className="text-lg pt-3 font-light">
+                    <p className="text-lg pt-6 font-light">
                       {item.description}
                     </p>
                   </div>
@@ -107,16 +107,7 @@ const CbrcHero = ({ data }: { data: ICollection[] }) => {
                   </div>
                   <div>
                     <div className="pt-8  ">
-                      <CustomButton  href={`/collection/${item.slug}`} link={true} text="View collection"  />
-                      {/* <Link
-                        href={`/collection/${item.slug}`}
-                        shallow
-                        prefetch={false}
-                      >
-                        <button className="bg-violet rounded-md  px-4 py-4 text-md text-white">
-                          View Collection
-                        </button>
-                      </Link> */}
+                      <CustomButton bgColor="bg-accent" hoverBgColor="hover:bg-accent_dark"  href={`/collection/${item.slug}`} link={true} text="View collection"  />
                     </div>
                   </div>
                 </div>

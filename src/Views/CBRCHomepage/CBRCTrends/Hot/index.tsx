@@ -39,7 +39,7 @@ const Hot = ({ data }: { data: IStats }) => {
         <p>In mempool</p>
       </div>
      </div>
-      {data.tokensHot.slice(0, 3).map((item, index) => {
+      {data.tokensHot.map((item, index) => {
         const { value, isPositive } = calculateVolumeChange(item);
         return (
           <div key={index} className=" p-3  flex justify-between items-center">

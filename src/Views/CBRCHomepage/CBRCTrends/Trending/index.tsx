@@ -18,7 +18,7 @@ const Trending = ({ data }: { data: IStats }) => {
     (sats: number) => {
       if (btcPrice) {
         return formatNumber(
-          Number(((sats / 100_000_000) * btcPrice).toFixed(3))
+          Number(((sats / 100_000_000) * btcPrice).toFixed(2))
         );
       }
       return "Loading...";
@@ -36,7 +36,7 @@ const Trending = ({ data }: { data: IStats }) => {
           <p className="font-semibold text-xl text-white pl-2 ">Trending</p>
         </div>
       </div>
-      {data.tokensTrend.slice(0, 3).map((item, index) => {
+      {data.tokensTrend.map((item, index) => {
         return (
           <div key={index} className=" p-3  flex justify-between items-center">
             <div className="text-light_gray text-md">
@@ -50,7 +50,7 @@ const Trending = ({ data }: { data: IStats }) => {
               {/* {isPositive ? <BiSolidUpArrow /> : <BiSolidDownArrow />} */}
               <p className="pl-2 flex items-center">
                 <FaDollarSign className="text-green-500" />
-                {convertToUSD(item.price)}
+               <span className="pl-1">{convertToUSD(item.price)}</span>
               </p>
             </div>
           </div>
