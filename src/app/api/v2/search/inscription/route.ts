@@ -120,7 +120,17 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
 
         ins.sat_collection = await SatCollection.findOne({
           sat: ins.sat,
-        }).populate("official_collection");
+        }).populate({
+          path: "official_collection",
+          select: "name slug icon supply _id", // specify the fields you want to populate
+        });
+
+        if (ins.sat_collection) {
+          ins.official_collection = ins.sat_collection.official_collection;
+          ins.collection_item_name = ins.sat_collection.collection_item_name;
+          ins.collection_item_number =
+            ins.sat_collection.collection_item_number;
+        }
       }
       return NextResponse.json({
         statusCode: 200,

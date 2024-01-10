@@ -24,7 +24,7 @@ const CollectionItemCard: React.FC<CollectionCardProps> = ({
     (state: RootState) => state.general.btc_price_in_dollar
   );
   return (
-    <div className="relative p-6 md:w-6/12 lg:w-3/12  2xl:w-2/12 w-full cursor-pointer">
+    <div className="relative p-6 md:w-6/12 lg:w-3/12  w-full cursor-pointer">
       <Link href={`/inscription/${item.inscription_id}`}>
         <div className="border xl:border-2 border-accent bg-secondary rounded-xl shadow-xl p-3">
           <div className="min-h-[300px] md:min-h-[150px] lg:w-full relative rounded-xl overflow-hidden">

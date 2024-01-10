@@ -7,7 +7,7 @@ import apiKeyMiddleware from "@/middlewares/apikeyMiddleware";
 import { CustomError } from "@/utils";
 import moment from "moment";
 import { checkCbrcValidity } from "../search/inscription/route";
-import { IInscription } from "@/types";
+import { ICollection, IInscription } from "@/types";
 
 const getProjectionFields = (show: string) => {
   if (show === "prune") {
@@ -59,7 +59,10 @@ const countInscriptions = async (query: any) => {
   return await Inscription.countDocuments({ ...query.find }, { limit: 100000 });
 };
 
-export async function processInscriptions(inscriptions: IInscription[]) {
+export async function processInscriptions(
+  inscriptions: IInscription[],
+  collection?: ICollection | null
+) {
   for (const ins of inscriptions) {
     if (ins && ins.parsed_metaprotocol) {
       if (
@@ -95,12 +98,19 @@ export async function processInscriptions(inscriptions: IInscription[]) {
       )
       .lean();
 
-    ins.sat_collection = await SatCollection.findOne({ sat: ins.sat }).populate(
-      {
+    if (collection && collection.metaprotocol === "cbrc") {
+      ins.sat_collection = await SatCollection.findOne({
+        sat: ins.sat,
+      }).populate({
         path: "official_collection",
-        select: "name slug icon supply ", // specify the fields you want to populate
+        select: "name slug icon supply _id", // specify the fields you want to populate
+      });
+      if (ins.sat_collection) {
+        ins.official_collection = ins.sat_collection.official_collection;
+        ins.collection_item_name = ins.sat_collection.collection_item_name;
+        ins.collection_item_number = ins.sat_collection.collection_item_number;
       }
-    );
+    }
   }
 
   return inscriptions; // Return the updated array
@@ -128,11 +138,12 @@ export async function GET(req: NextRequest, res: NextResponse) {
       return middlewareResponse;
     }
     const query = convertParams(Inscription, req.nextUrl);
+    let collection: ICollection | null = null;
     console.dir(query, { depth: null });
     if (req.nextUrl.searchParams.has("slug")) {
-      const collection = await Collection.findOne({
+      collection = await Collection.findOne({
         slug: req.nextUrl.searchParams.get("slug"),
-      }).select("name");
+      }).select("-holders");
 
       if (!collection) throw new CustomError("Collection Not Found", 404);
       query.find.official_collection = collection._id;
@@ -142,7 +153,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
     await dbConnect();
     const inscriptions = await fetchInscriptions(query, projectionFields);
 
-    const processedIns = await processInscriptions(inscriptions);
+    const processedIns = await processInscriptions(inscriptions, collection);
 
     const totalCount = await countInscriptions(query);
     const endTime = Date.now(); // Record the end time

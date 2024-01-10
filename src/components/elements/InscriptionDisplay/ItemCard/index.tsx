@@ -32,7 +32,7 @@ const ItemCard: React.FC<CollectionCardProps> = ({
 
   const walletDetails = useWalletAddress();
   return (
-    <div className="relative p-6 md:w-6/12 lg:w-3/12  2xl:w-2/12 w-full cursor-pointer">
+    <div className="relative p-6 md:w-6/12 lg:w-3/12 w-full cursor-pointer">
       <div className="border xl:border-2 border-accent bg-secondary rounded-xl shadow-xl p-3">
         <Link href={`/inscription/${inscription.inscription_id}`}>
           <div className="content-div h-[60%] rounded overflow-hidden relative">
