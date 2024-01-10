@@ -7,7 +7,7 @@
   font-family: "Facebook Sans";
   font-style: normal;
   font-weight: 400;
-  src: url("/assets/fonts/FacebookSans/FacebookSansRegular.ttf")
+  src: url("/static-assets/fonts/FacebookSans/FacebookSansRegular.ttf")
     format("truetype");
 }
 
@@ -15,14 +15,15 @@
   font-family: "Facebook Sans";
   font-style: normal;
   font-weight: 700;
-  src: url("/assets/fonts/FacebookSans/FacebookSansBold.ttf") format("truetype");
+  src: url("/static-assets/fonts/FacebookSans/FacebookSansBold.ttf")
+    format("truetype");
 }
 
 @font-face {
   font-family: "Facebook Sans";
   font-style: normal;
   font-weight: 900;
-  src: url("/assets/fonts/FacebookSans/FacebookSansHeavy.ttf")
+  src: url("/static-assets/fonts/FacebookSans/FacebookSansHeavy.ttf")
     format("truetype");
 }
 

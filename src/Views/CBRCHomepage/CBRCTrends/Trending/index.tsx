@@ -26,7 +26,7 @@ const Trending = ({ data }: { data: IStats }) => {
     <div className="py-8 px-6 rounded-lg bg-violet h-full">
       <div className="flex items-center pb-4">
         <div>
-          <img src="/assets/images/trending.png" />
+          <img src="/static-assets/images/trending.png" />
         </div>
         <div>
           <p className="font-semibold text-xl text-white pl-2 ">Trending</p>

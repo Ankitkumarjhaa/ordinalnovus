@@ -27,7 +27,7 @@ const Hot = ({ data }: { data: IStats }) => {
       <div className="pb-4 flex items-center justify-between">
         <div className="flex items-center ">
           <div>
-            <img src="/assets/images/hot.png" />
+            <img src="/static-assets/images/hot.png" />
           </div>
           <div>
             <p className="font-semibold text-xl text-white pl-2 ">Hot</p>
