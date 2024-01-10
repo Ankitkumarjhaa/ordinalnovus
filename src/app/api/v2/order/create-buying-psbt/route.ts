@@ -1,5 +1,5 @@
 // pages/api/v1/order/createBuyPsbt.ts
-import { Inscription } from "@/models";
+import { Inscription, SatCollection } from "@/models";
 import dbConnect from "@/lib/dbConnect";
 import { NextRequest, NextResponse } from "next/server";
 import { fetchLatestInscriptionData } from "@/utils/Marketplace";
@@ -53,6 +53,13 @@ async function processOrdItem(
     inscription_id,
     listed: true,
   }).populate("official_collection");
+
+  const sat_item = await SatCollection.findOne({ sat: dbItem.sat }).populate(
+    "official_collection"
+  );
+  if (sat_item) {
+    dbItem.official_collection = sat_item.official_collection;
+  }
 
   console.log("got db listing");
 

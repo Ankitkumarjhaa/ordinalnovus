@@ -32,10 +32,19 @@ const ItemCard: React.FC<CollectionCardProps> = ({
 
   const walletDetails = useWalletAddress();
   return (
-    <div className="relative p-6 md:w-6/12 lg:w-3/12 w-full cursor-pointer">
+    <div
+      className={`relative p-6 md:w-6/12 lg:w-3/12 w-full ${
+        inscription?.reinscriptions &&
+        inscription?.reinscriptions.find((a) => a.valid) &&
+        !inscription?.valid &&
+        !inscription.cbrc_valid
+          ? " hidden"
+          : ""
+      }`}
+    >
       <div className="border xl:border-2 border-accent bg-secondary rounded-xl shadow-xl p-3">
         <Link href={`/inscription/${inscription.inscription_id}`}>
-          <div className="content-div h-[60%] rounded overflow-hidden relative">
+          <div className="content-div h-[60%] rounded overflow-hidden relative cursor-pointer">
             {inscription?.version && inscription?.version > 0 && (
               <p className="absolute bg-bitcoin rounded font-bold text-yellow-900 text-xs p-1 z-10 top-[5px] right-[5px] ">
                 V{inscription.version}

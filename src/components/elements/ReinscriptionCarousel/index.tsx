@@ -4,7 +4,13 @@ import Slider from "react-slick";
 import { IInscription } from "@/types";
 import CardContent from "../CustomCardSmall/CardContent";
 
-function ReinscriptionCarousel({ data }: { data: IInscription[] }) {
+function ReinscriptionCarousel({
+  data,
+  latest,
+}: {
+  data: IInscription[];
+  latest: IInscription;
+}) {
   const settings = {
     dots: false,
     infinite: false,
@@ -22,13 +28,25 @@ function ReinscriptionCarousel({ data }: { data: IInscription[] }) {
   return (
     <div className="">
       <Slider {...settings}>
-        {data?.map((item: IInscription) => (
+        {data?.map((item: IInscription, idx: number) => (
           <div key={item.inscription_id} className="w-full relative">
             <CardContent
               inscriptionId={item.inscription_id}
               content_type={item.content_type}
               inscription={item}
             />
+            {idx === 0 && latest ? (
+              <>
+                <div className="absolute top-0 p-2 left-0 right-0">
+                  <p className="bg-secondary px-2 py-1 text-center font-bold">
+                    {latest?.listed_amount}{" "}
+                    {latest?.listed_token?.toUpperCase()}
+                  </p>
+                </div>
+              </>
+            ) : (
+              <></>
+            )}
             {item.collection_item_name && item.collection_item_number && (
               <div className="absolute bottom-0 p-2 left-0">
                 <p className="bg-secondary px-2 py-1">
