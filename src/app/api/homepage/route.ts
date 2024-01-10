@@ -92,26 +92,26 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
       .select("inscription_number")
       .lean();
 
-    let recentInscriptions = null;
+    // let recentInscriptions = null;
 
-    try {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_URL}/api/ordapi/feed?apikey=${process.env.API_KEY}`
-      );
-      recentInscriptions = response?.data || [];
-    } catch (err: any) {}
+    // try {
+    //   const response = await axios.get(
+    //     `${process.env.NEXT_PUBLIC_URL}/api/ordapi/feed?apikey=${process.env.API_KEY}`
+    //   );
+    //   recentInscriptions = response?.data || [];
+    // } catch (err: any) {}
 
-    // Add the recentInscriptions to the data
-    data.recentInscriptions = recentInscriptions || [];
-    const latestInscription = recentInscriptions
-      ? recentInscriptions[0].number
-      : highestInDB.inscription_number;
-    data.latest = latestInscription;
-    data.highest = highestInDB.inscription_number;
-    data.height = highestInDB.genesis_height;
-    data.percentParsed = Number(
-      ((highestInDB.inscription_number / latestInscription) * 100).toFixed(2)
-    );
+    // // Add the recentInscriptions to the data
+    // data.recentInscriptions = recentInscriptions || [];
+    // const latestInscription = recentInscriptions
+    //   ? recentInscriptions[0].number
+    //   : highestInDB.inscription_number;
+    // data.latest = latestInscription;
+    // data.highest = highestInDB.inscription_number;
+    // data.height = highestInDB.genesis_height;
+    // data.percentParsed = Number(
+    //   ((highestInDB.inscription_number / latestInscription) * 100).toFixed(2)
+    // );
 
     // const listings = await Inscription.find({
     //   listed: true,

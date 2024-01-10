@@ -68,13 +68,13 @@ const CBRCStats = ({ stats }: { stats: IStats }) => {
               {btcPrice}
             </p>
           </div>
-          <div className="flex">
-            <p className="text-gray">Latest height :</p>
+          <div className="flex items-center">
+            <p className="text-gray">Latest height : </p>
             <p
-              className={`pl-2 ${
+              className={`px-2 font-medium text-white rounded-sm py-3 ${
                 stats.btcHeight - stats.novusBtcHeight !== 0
-                  ? "text-red-500"
-                  : "text-green-500"
+                  ? "bg-red-500"
+                  : ""
               }`}
             >
               {stats.btcHeight}

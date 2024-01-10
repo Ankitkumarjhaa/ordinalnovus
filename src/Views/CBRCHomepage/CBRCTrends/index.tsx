@@ -8,18 +8,18 @@ import TrendStats from './TrendStats';
 
 const CBRCTrends = ({ token }: {  token:IStats }) => {
   return (
-    <div className='py-6 flex flex-wrap justify-between  items-stretch w-full'>
-      <div className='p-4 w-full lg:w-4/12' >
+    <div className='py-6 flex flex-wrap justify-between  items-stretch w-full min-h-[30vh]'>
+      <div className='p-4 w-full lg:w-4/12 ' >
        <div>
        <TrendStats data = {token} />
        </div>
       </div>
-     <div className='p-4 w-full lg:w-4/12'>
+     <div className='p-4 w-full lg:w-4/12 '>
     <div>
     <Trending data = {token} />
     </div>
      </div>
-     <div className='p-4 w-full lg:w-4/12'>
+     <div className='p-4 w-full lg:w-4/12 '>
    <div>
    <Hot data = {token} />
    </div>
