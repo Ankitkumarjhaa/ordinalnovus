@@ -324,26 +324,41 @@ function BuyInscriptionCardButton({ data }: InscriptionProps) {
 
   return (
     <>
-      <div className="w-full  py-6 ">
+      <div className="w-full  py-6 bg-secondary">
         {!data.in_mempool && (
-          <div>
-            <div className="center py-2">
-              <CustomInput
-                value={feeRate.toString()}
-                placeholder="Fee Rate"
-                onChange={(fee) => setFeeRate(Number(fee))}
-                helperText={
-                  feeRate < Math.min(10, defaultFeeRate - 40)
-                    ? "Fee too low"
-                    : feeRate > defaultFeeRate + 200
-                    ? "Fee too high - make sure you are okay with it"
-                    : ""
+          <div className="pb-3">
+            <p className="text-sm text-center ">
+              Choose Transfer Speed (Fee Rate)
+            </p>
+            <div className="flex justify-between py-2">
+              {new Array(3).fill(1).map((_, idx) => {
+                // Calculating feeRate for each speed option
+                let rate = defaultFeeRate;
+                if (idx === 0) {
+                  rate = defaultFeeRate - 5; // Slow
+                } else if (idx === 1) {
+                  rate = defaultFeeRate; // Fast
+                } else {
+                  rate = defaultFeeRate + 10; // Fastest
                 }
-                error={true}
-                endAdornmentText=" sats / vB"
-                startAdornmentText="Fee Rate"
-                fullWidth
-              />
+
+                return (
+                  <div
+                    onClick={() => setFeeRate(rate)}
+                    className={`p-2 flex-1 ${
+                      feeRate === rate
+                        ? "border border-white cursor-not-allowed"
+                        : "cursor-pointer"
+                    }`}
+                    key={idx}
+                  >
+                    <p className="text-lg text-center">
+                      {idx === 0 ? "Slow" : idx === 1 ? "Fast" : "Fastest"}
+                    </p>
+                    <p className="text-xs text-center">{rate} s/vB</p>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
