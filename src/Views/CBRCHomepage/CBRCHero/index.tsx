@@ -48,7 +48,7 @@ const CbrcHero = ({ data }: { data: ICollection[] }) => {
     ],
   };
   return (
-    <div>
+    <div className="pt-6 lg:pt-0">
       <div>
         <Slider {...settings}>
           {data.map((item, index) => (
@@ -56,7 +56,7 @@ const CbrcHero = ({ data }: { data: ICollection[] }) => {
               <div className="w-full flex flex-wrap justify-between py-6 px-8 rounded-md h-full border border-accent">
                 <div className="lg:w-4/12 w-full h-full">
                   {item?.inscription_icon?.inscription_id ? (
-                    <div className="w-full rounded-md lg:w-[80%] h-full overflow-hidden relative ">
+                    <div className="w-full md:flex md:justify-center lg:justify-start rounded-md lg:w-[80%] h-full overflow-hidden relative ">
                       <CardContent
                         inscriptionId={item.inscription_icon.inscription_id}
                         content_type={item.inscription_icon.content_type}
@@ -64,15 +64,15 @@ const CbrcHero = ({ data }: { data: ICollection[] }) => {
                       />
                     </div>
                   ) : (
-                    <div className="w-full  rounded-md lg:w-[80%] h-full overflow-hidden">
+                    <div className="w-full md:flex md:justify-center lg:justify-start rounded-md lg:w-[80%] h-full overflow-hidden">
                       <img src={item.icon} />
                     </div>
                   )}
                 </div>
                 <div className="lg:w-8/12 w-full lg:pt-8 pt-4">
                   <div>
-                    <p className="text-5xl font-bold text-white">{item.name}</p>
-                    <p className="text-lg pt-6 font-light">
+                    <p className=" text-3xl lg:text-5xl font-bold text-white">{item.name}</p>
+                    <p className="text-lg lg:text-lg pt-6 font-light">
                       {item.description}
                     </p>
                   </div>
