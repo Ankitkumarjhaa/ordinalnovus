@@ -37,10 +37,10 @@ const TrendStats = ({ data }: { data: IStats }) => {
   const getRandomLightColor = () => {
     const hue = Math.floor(Math.random() * 360);
     const saturation = Math.floor(Math.random() * 26) + 74; // Range: 74-100
-    const lightness = Math.floor(Math.random() * 26) + 60; // Adjusted Range: 60-85
+    const lightness = Math.floor(Math.random() * 21) + 40; // Adjusted Range: 40-60
     return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
   };
-
+  
   const pieChartData = useMemo(() => {
     const totalAmt = data.aggregateVolume.reduce(
       (acc, item) => acc + convertSatsToUSD(item.totalAmt),
