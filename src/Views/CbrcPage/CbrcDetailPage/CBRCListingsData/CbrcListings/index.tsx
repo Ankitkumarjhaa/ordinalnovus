@@ -19,8 +19,6 @@ type HeroProps = {
   loading: boolean;
 };
 function CbrcListings({ listings, loading }: HeroProps) {
-  const router = useRouter();
-
   //wallet
   const walletDetails = useWalletAddress();
 
@@ -30,13 +28,6 @@ function CbrcListings({ listings, loading }: HeroProps) {
   const btcPrice = useSelector(
     (state: RootState) => state.general.btc_price_in_dollar
   );
-  const dispatch = useDispatch();
-  const handleListingClick = (id: string) => {
-    router.push(`/inscription/${id}`);
-  };
-  const handleMempoolClick = (txid: string) => {
-    window.open(`https://mempool.space/tx/${txid}`);
-  };
 
   return (
     <div className="py-2 w-full">
