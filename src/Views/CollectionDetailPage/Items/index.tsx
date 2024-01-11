@@ -22,7 +22,7 @@ type ItemProps = {
 const options = [
   { value: "listed_price:1", label: "Listed" },
   { value: "collection_item_number:1", label: "Item Name" },
-  { value: "inscription_number:1", label: "Number" },
+  // { value: "inscription_number:1", label: "Number" },
 ];
 
 function Items({ collection }: ItemProps) {
