@@ -1,9 +1,9 @@
 import { IStats } from "@/types";
-import { IToken } from "@/types/CBRC";
+import { ICbrcToken } from "@/types/CBRC";
 import React from "react";
 
 const Hot = ({ data }: { data: IStats }) => {
-  const calculateVolumeChange = (item: IToken) => {
+  const calculateVolumeChange = (item: ICbrcToken) => {
     const currentVolume = item.volume;
     const latestHistoricalVolume = item.historicalData[0]?.volume_sats || 0;
     if (latestHistoricalVolume === 0) {

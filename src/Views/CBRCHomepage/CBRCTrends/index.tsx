@@ -1,5 +1,5 @@
 import { FetchCBRC } from "@/apiHelper/getCBRC";
-import { IToken } from "@/types/CBRC";
+import { ICbrcToken } from "@/types/CBRC";
 import React, { useEffect, useState } from "react";
 import Trending from "./Trending";
 import { IStats } from "@/types";

@@ -1,4 +1,4 @@
-import { IToken } from "@/types/CBRC";
+import { ICbrcToken } from "@/types/CBRC";
 import { useRouter } from "next/navigation";
 import React from "react";
 

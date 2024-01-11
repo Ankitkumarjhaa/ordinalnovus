@@ -318,8 +318,8 @@ function BuyInscriptionCardButton({ data }: InscriptionProps) {
 
   useEffect(() => {
     if (fees?.fastestFee) {
-      setFeeRate(fees.fastestFee);
-      setDefaultFeerate(fees.fastestFee);
+      setFeeRate(fees.fastestFee + 5);
+      setDefaultFeerate(fees.fastestFee + 5);
     }
   }, [fees]);
 

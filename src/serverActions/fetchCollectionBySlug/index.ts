@@ -32,7 +32,7 @@ async function fetchCollectionBySlug(slug: string) {
       return { success: true, message: "collection found", collection };
     } else return { success: false, message: "collection not found" };
   } catch (err: any) {
-    console.error("Error updating token price:", err);
+    console.error("Error finding collection:", err);
     return { success: false, message: err.message };
   }
 }

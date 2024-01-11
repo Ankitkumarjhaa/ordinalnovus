@@ -1,5 +1,5 @@
 "use server";
-import { IToken } from "@/types/CBRC";
+import { ICbrcToken } from "@/types/CBRC";
 import axios from "axios";
 
 export interface FetchCBRCParams {
@@ -11,7 +11,7 @@ export interface FetchCBRCParams {
 }
 
 export interface CBRCTokenResponse {
-  tokens: IToken[];
+  tokens: ICbrcToken[];
   pagination: {
     page: number;
     limit: number;

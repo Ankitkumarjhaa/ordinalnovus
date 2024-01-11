@@ -20,6 +20,8 @@ import Reinscription from "./reinscription";
 import { IInscription } from "@/types";
 import { useSearchParams } from "next/navigation";
 import fetchCollectionBySlug from "@/serverActions/fetchCollectionBySlug";
+import { ICbrcToken } from "@/types/CBRC";
+import fetchTokenByTick from "@/serverActions/fetchTokenByTick";
 
 const options = [
   // { value: "deploy", label: "DEPLOY" },
@@ -42,9 +44,11 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
   const dispatch = useDispatch<AppDispatch>();
   const [loading, setLoading] = useState(false);
 
+  const [tokenInfo, setTokenInfo] = useState<ICbrcToken | null>(null);
+
   const [content, setContent] = useState("");
   const [op, setOp] = useState("transfer");
-  const [tick, setTick] = useState("none");
+  const [tick, setTick] = useState("");
   const [amt, setAmt] = useState(1);
   const [cbrcs, setCbrcs] = useState<any>(null);
   const [files, setFiles] = useState<any>([]);
@@ -79,8 +83,8 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
 
   useEffect(() => {
     if (fees?.fastestFee) {
-      setFeeRate(fees.fastestFee);
-      setDefaultFeerate(fees.fastestFee);
+      setFeeRate(fees.fastestFee + 5);
+      setDefaultFeerate(fees.fastestFee + 5);
     }
   }, [fees]);
 
@@ -257,7 +261,7 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
       return;
     }
     try {
-      if (!tick || !amt || !feeRate) {
+      if (!tick || !options || options.length === 0 || !amt || !feeRate) {
         dispatch(
           addNotification({
             id: new Date().valueOf(),
@@ -522,6 +526,34 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
     setLoading(false);
   }, [result, error]);
 
+  const fetchToken = useCallback(async () => {
+    if (op === "mint") {
+      const fetchTokenRes = await fetchTokenByTick(tick);
+      if (fetchTokenRes && fetchTokenRes.success) {
+        setTokenInfo(fetchTokenRes.cbrc);
+        console.log({ token: fetchTokenRes });
+        if (fetchTokenRes.cbrc.supply !== fetchTokenRes.cbrc.max)
+          setAmt(fetchTokenRes.cbrc.lim);
+        else {
+          dispatch(
+            addNotification({
+              id: new Date().valueOf(),
+              message: `This token has been completely minted`,
+              open: true,
+              severity: "error",
+            })
+          );
+        }
+      }
+    }
+  }, [tick, op]);
+
+  useEffect(() => {
+    if (tick && tick.length === 4 && op) {
+      fetchToken();
+    }
+  }, [tick, op]);
+
   return (
     <div className="center min-h-[60vh] flex-col w-full">
       {walletDetails ? (
@@ -605,15 +637,48 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
             ) : (
               <></>
             )}
-            {/* <div className="center py-2">
-          <CustomInput
-            multiline
-            value={content}
-            placeholder="Any Content here. By default Token & Amt will be used."
-            onChange={(new_content) => setContent(new_content)}
-            fullWidth
-          />
-        </div> */}
+            {op === "mint" && (
+              <>
+                <div className="center py-2">
+                  <CustomInput
+                    value={tick}
+                    placeholder={`Tick`}
+                    onChange={(new_content) => setTick(new_content)}
+                    fullWidth
+                  />
+                </div>
+                <div className={`center py-2`}>
+                  <CustomInput
+                    value={amt.toString()}
+                    placeholder="Amount Of Tokens"
+                    endAdornmentText={tick.toUpperCase()}
+                    onChange={(new_content) =>
+                      !locked && setAmt(Number(new_content))
+                    }
+                    fullWidth
+                  />
+                </div>
+                {mode !== "reinscribe" && (
+                  <div className="center py-2">
+                    <CustomInput
+                      disabled={locked}
+                      value={rep.toString()}
+                      placeholder="Amount to mint"
+                      onChange={(new_content) => setRep(Number(new_content))}
+                      fullWidth
+                      endAdornmentText=" Inscription"
+                      startAdornmentText="Mint "
+                      helperText={
+                        rep <= 0 || rep > 25
+                          ? "You can mint 1-25 inscriptions at a time."
+                          : ""
+                      }
+                      error={rep <= 0 || rep > 25}
+                    />
+                  </div>
+                )}
+              </>
+            )}
             {mode === "reinscribe" && (
               <Reinscription
                 inscription={inscription}

@@ -1,4 +1,4 @@
-import { IToken } from "@/types/CBRC";
+import { ICbrcToken } from "@/types/CBRC";
 import { useRouter } from "next/navigation";
 import React from "react";
 
@@ -18,7 +18,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/stores";
 
 type HeroProps = {
-  tokens: IToken[];
+  tokens: ICbrcToken[];
   loading: boolean;
 };
 function TokenList({ tokens, loading }: HeroProps) {
@@ -78,7 +78,7 @@ function TokenList({ tokens, loading }: HeroProps) {
           <>
             {tokens && tokens.length ? (
               <TableBody sx={{ color: "white" }}>
-                {tokens?.map((item: IToken) => {
+                {tokens?.map((item: ICbrcToken) => {
                   const price = ((item?.price || 0) / 100_000_000) * btcPrice; // in $
                   const volume = ((item?.volume || 0) / 100_000_000) * btcPrice;
                   return (

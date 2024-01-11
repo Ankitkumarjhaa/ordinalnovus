@@ -1,5 +1,5 @@
 "use client";
-import { IToken, Icbrc } from "@/types/CBRC";
+import { ICbrcToken, Icbrc } from "@/types/CBRC";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { IInscription } from "@/types";
