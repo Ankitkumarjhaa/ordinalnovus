@@ -83,7 +83,7 @@ function Header() {
     const shouldFetch =
       !fees ||
       !fees.lastChecked ||
-      moment().diff(moment(fees.lastChecked), "minutes") >= 10;
+      moment().diff(moment(fees.lastChecked), "minutes") >= 5;
     // console.log({ shouldFetch, fees });
     if (shouldFetch) {
       fetchFees(dispatch);

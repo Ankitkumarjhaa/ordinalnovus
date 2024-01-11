@@ -244,6 +244,17 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
       );
       return;
     }
+    if ((!inscription || !tick || !amt || !op) && mode === "reinscribe") {
+      dispatch(
+        addNotification({
+          id: new Date().valueOf(),
+          message: "Some info is missing for reinscription",
+          open: true,
+          severity: "error",
+        })
+      );
+      return;
+    }
     if (
       inscription?.valid ||
       inscription?.cbrc_valid ||
@@ -558,7 +569,12 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
     <div className="center min-h-[60vh] flex-col w-full">
       {walletDetails ? (
         <div className="w-full center flex-col">
-          <div className="bg-secondary p-6 rounded-lg shadow-2xl min-w-xl w-4/12">
+          <div className="bg-secondary p-6 rounded-lg shadow-2xl min-w-xl w-5/12">
+            {walletDetails.wallet === "Unisat" && (
+              <p className="bg-red-500 text-white py-1 px-4 text-center uppercase tracking-wider font-bold mb-2">
+                DO NOT USE UNISAT FOR REINSCRIPTIONS
+              </p>
+            )}
             <h2 className="uppercase font-bold tracking-wider text-xl text-center">
               {mode === "cbrc" ? "Inscribe CBRC" : `Attach ${tick} CBRC Token`}
             </h2>

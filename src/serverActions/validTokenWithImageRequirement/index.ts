@@ -37,7 +37,7 @@ async function validTokenWithImageRequirement(inscription: IInscription) {
       else {
         return {
           success: false,
-          message: "token is present on invalid sat. cant't list.",
+          message: "Token is present on invalid sat. Can't list.",
         };
       }
     } else return { success: true, message: "token doesnt need correct sat" };
