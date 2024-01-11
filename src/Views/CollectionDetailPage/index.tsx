@@ -6,6 +6,7 @@ import Items from "./Items";
 import Holders from "./Holders";
 import mixpanel from "mixpanel-browser";
 import { useWalletAddress } from "bitcoin-wallet-adapter";
+import Sales from "./Sales";
 type CollectionDetailPageProps = {
   collections: ICollection[];
   inscriptionCount: number;
@@ -32,7 +33,7 @@ function CollectionDetailPage({
         </button>
         <button
           disabled={!collections[0].holders_count}
-          className={`${
+          className={`border-l border-black ${
             tab === "holders"
               ? "bg-accent text-white"
               : "bg-gray-300 text-primary"
@@ -52,9 +53,21 @@ function CollectionDetailPage({
         >
           Holders
         </button>
+        <button
+          className={`border-l border-black ${
+            tab === "sales"
+              ? "bg-accent text-white"
+              : "bg-gray-300 text-primary"
+          } text-sm tracking-widest px-4 py-2`}
+          onClick={() => setTab("sales")}
+        >
+          Sales
+        </button>
       </div>
       {tab === "items" ? (
         <Items collection={collections[0]} total={inscriptionCount} />
+      ) : tab === "sales" ? (
+        <Sales collection={collections[0]} />
       ) : (
         <Holders collection={collections[0]} />
       )}
