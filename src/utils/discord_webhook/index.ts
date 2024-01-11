@@ -52,7 +52,7 @@ const discordWebhookCBRCSaleAlert = async (txBulkOps: any[]) => {
   const cache = await getCache(cacheKey);
   if (cache) btcPrice = cache;
   else {
-    btcPrice = await getBTCPriceInDollars();
+    btcPrice = (await getBTCPriceInDollars()) || 0;
     await setCache(cacheKey, btcPrice, 60);
   }
   console.log({ btcPrice });

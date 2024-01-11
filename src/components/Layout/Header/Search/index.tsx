@@ -49,7 +49,7 @@ function Search() {
         });
       setPossibleTypes(possible);
       if (possible.includes("collection") && id) {
-        console.log({ possible, id });
+        // console.log({ possible, id });
         await fetchCollectionsBySearch(id);
       }
     } catch (e) {
@@ -61,7 +61,7 @@ function Search() {
 
   const fetchCollectionsBySearch = async (id: string) => {
     if (id.trim()) {
-      console.log("fetching coll data: ", id);
+      // console.log("fetching coll data: ", id);
       const result = await fetchCollections({ search: id, live: true });
       if (result?.data) {
         setCollections(result.data.collections);

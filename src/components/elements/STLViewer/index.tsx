@@ -2,7 +2,7 @@ import React, { useState } from "react";
 //@ts-ignore
 import { StlViewer } from "react-stl-file-viewer";
 function STL({ url }: { url: string }) {
-  console.log(url, "STL_URL");
+  // console.log(url, "STL_URL");
   const [volume, setvolume] = useState(0);
   return (
     <StlViewer

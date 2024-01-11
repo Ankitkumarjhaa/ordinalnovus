@@ -33,7 +33,7 @@ function Header() {
   const pathname = usePathname();
   const dispatch = useDispatch();
   const getBTCPrice = useCallback(async () => {
-    console.log("Getting new BTC Price...");
+    // console.log("Getting new BTC Price...");
     const price = await getBTCPriceInDollars();
     console.log({ price: price });
     if (price) dispatch(setBTCPrice(price));
@@ -41,8 +41,7 @@ function Header() {
 
   const fetchAllowedTokensChecksum = useCallback(async () => {
     const allowed = await fetchAllowed();
-    // TODO: Remove
-    dispatch(setAllowedCbrcs([...allowed, "63706e6b"]));
+    dispatch(setAllowedCbrcs([...allowed]));
   }, [dispatch]);
 
   async function collectWalletDetails() {
@@ -84,7 +83,7 @@ function Header() {
       !fees ||
       !fees.lastChecked ||
       moment().diff(moment(fees.lastChecked), "minutes") >= 10;
-    console.log({ shouldFetch, fees });
+    // console.log({ shouldFetch, fees });
     if (shouldFetch) {
       fetchFees(dispatch);
       getBTCPrice();
