@@ -107,14 +107,14 @@ function Header() {
       <Logo />
       <Search />
       <div className="w-full lg:w-auto flex justify-center lg:justify-end">
-        <CustomButton
+        {/* <CustomButton
           text="Crafter"
           bgColor="bg-indigo-600"
           hoverBgColor="hover:bg-indigo-800"
           href={`/crafter`}
           link={true}
           className="mr-2"
-        />
+        /> */}
         <ConnectMultiButton
           additionalMenuItems={additionalItems}
           buttonClassname="bg-accent text-white px-4 py-2 rounded center "
