@@ -83,8 +83,8 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
 
   useEffect(() => {
     if (fees?.fastestFee) {
-      setFeeRate(fees.fastestFee + 5);
-      setDefaultFeerate(fees.fastestFee + 5);
+      setFeeRate(fees.fastestFee + 10);
+      setDefaultFeerate(fees.fastestFee + 10);
     }
   }, [fees]);
 
