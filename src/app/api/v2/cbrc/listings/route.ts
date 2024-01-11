@@ -156,11 +156,23 @@ export async function processInscriptions(
 
 // Example implementation of updateInscriptionDB (modify as per your DB structure and requirements)
 async function updateInscriptionDB(inscriptionId: string, isValid: boolean) {
-  await Inscription.findOneAndUpdate(
-    { inscription_id: inscriptionId },
-    { valid: isValid }
-  );
+  let update: any = { valid: isValid };
+
+  if (isValid === false) {
+    update = {
+      ...update,
+      listed: false,
+      listed_price: 0,
+      listed_price_per_token: 0,
+      signed_psbt: "",
+      unsigned_psbt: "",
+      in_mempool: false,
+    };
+  }
+
+  await Inscription.findOneAndUpdate({ inscription_id: inscriptionId }, update);
 }
+
 export async function GET(req: NextRequest, res: NextResponse) {
   console.log("***** CBRC LISTINGS API CALLED *****");
   const startTime = Date.now(); // Record the start time
