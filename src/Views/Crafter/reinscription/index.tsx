@@ -115,7 +115,6 @@ function Reinscription({
           onClick={() => handleClose()}
         >
           <div className="relative center w-full h-screen">
-            {/* TODO: Handle images and texts and videos on large */}
             <div
               className={`card_div p-2 h-[90vh] center flex-wrap overflow-y-auto`}
             >
@@ -137,8 +136,16 @@ function Reinscription({
                       {inscriptions.map((i) => (
                         <div
                           onClick={() => {
-                            setInscriptionId(i.inscription_id);
-                            setInscription(i);
+                            if (
+                              i?.valid ||
+                              i?.cbrc_valid ||
+                              (i?.reinscriptions &&
+                                i.reinscriptions.find((a) => a.valid))
+                            ) {
+                            } else {
+                              setInscriptionId(i.inscription_id);
+                              setInscription(i);
+                            }
                           }}
                           key={i.inscription_id}
                           className={`relative p-6 md:w-6/12 lg:w-3/12  2xl:w-2/12 w-full cursor-pointer `}
@@ -168,6 +175,14 @@ function Reinscription({
                                   {inscriptionId === i.inscription_id && (
                                     <p>SELECTED</p>
                                   )}
+                                  {i?.valid ||
+                                    i?.cbrc_valid ||
+                                    (i?.reinscriptions &&
+                                      i.reinscriptions.find((a) => a.valid) && (
+                                        <p className="bg-red-800 text-red-200 p-x text-center uppercase font-bold">
+                                          This Sat might have a valid token
+                                        </p>
+                                      ))}
                                 </div>
                               </div>
                             </div>

@@ -1,12 +1,9 @@
 "use client";
 import Link from "next/link";
 import React from "react";
-import { FaBitcoin, FaCopy, FaDiscord } from "react-icons/fa";
+import { FaDiscord } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import Image from "next/image";
-import { shortenString } from "@/utils";
-import copy from "copy-to-clipboard";
-import { addNotification } from "@/stores/reducers/notificationReducer";
 import { useDispatch } from "react-redux";
 import mixpanel from "mixpanel-browser";
 import { RiNftFill } from "react-icons/ri";
@@ -59,6 +56,18 @@ function Footer() {
                 <span className="hover:text-white">Developer</span>
               </Link>
             </div>
+
+            <div>
+              <Link shallow href="/crafter">
+                <span className="hover:text-white">Crafter</span>
+              </Link>
+            </div>
+
+            <div>
+              <Link shallow href="/reinscribe">
+                <span className="hover:text-white">Reinscribe</span>
+              </Link>
+            </div>
           </div>
         </div>
         <div className="socials w-full md:w-6/12 lg:w-4/12  pb-6 lg:pb-0">
@@ -78,9 +87,9 @@ function Footer() {
             <li>
               <a
                 onClick={() =>
-                  handleSocialClick("x", "https://twitter.com/OrdinalNovus")
+                  handleSocialClick("x", "https://x.com/OrdinalNovus")
                 }
-                href="https://twitter.com/OrdinalNovus"
+                href="https://x.com/OrdinalNovus"
                 target={"#"}
               >
                 <FaXTwitter />

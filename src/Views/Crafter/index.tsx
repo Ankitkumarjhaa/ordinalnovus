@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 import Reinscription from "./reinscription";
 import { IInscription } from "@/types";
 import { useSearchParams } from "next/navigation";
+import fetchCollectionBySlug from "@/serverActions/fetchCollectionBySlug";
 
 const options = [
   // { value: "deploy", label: "DEPLOY" },
@@ -32,6 +33,7 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  const [customFee, setCustomFee] = useState(false);
   const [feeRate, setFeeRate] = useState<number>(0);
   const [defaultFeeRate, setDefaultFeerate] = useState(0);
   const [rep, setRep] = useState(1);
@@ -55,6 +57,7 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
   const [inscriptionId, setInscriptionId] = useState("");
 
   const [locked, setLocked] = useState(false);
+  const [txLink, setTxLink] = useState("");
 
   useEffect(() => {
     if (!walletDetails && fees) {
@@ -105,14 +108,24 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
 
         if (searchParams?.has("inscription") && searchParams.has("tickAmt")) {
           console.log("setting locked data...");
-          const tickAmt = searchParams.get("tickAmt");
+          const tickAmt = decodeURIComponent(searchParams.get("tickAmt") || "");
           console.log({ tickAmt });
           if (tickAmt?.includes("=")) {
             const [_tick, _amt] = tickAmt?.split("=");
-            if (_tick) selectedTick = _tick;
-            if (!isNaN(Number(_amt))) {
-              setAmt(Number(_amt));
+            if (_tick) {
+              selectedTick = _tick;
+              const isCbrcCollectionRes = await fetchCollectionBySlug(
+                _tick.trim().toLowerCase()
+              );
+              if (isCbrcCollectionRes?.collection) {
+                setAmt(1);
+              } else {
+                if (!isNaN(Number(_amt))) {
+                  setAmt(Number(_amt));
+                }
+              }
             }
+
             setOp("transfer");
 
             if (_tick && !isNaN(Number(_amt))) {
@@ -227,6 +240,22 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
       );
       return;
     }
+    if (
+      inscription?.valid ||
+      inscription?.cbrc_valid ||
+      (inscription?.reinscriptions &&
+        inscription.reinscriptions.find((a) => a.valid))
+    ) {
+      dispatch(
+        addNotification({
+          id: new Date().valueOf(),
+          message: "This Sat probably has a valid CBRC Token on it.",
+          open: true,
+          severity: "error",
+        })
+      );
+      return;
+    }
     try {
       if (!tick || !amt || !feeRate) {
         dispatch(
@@ -286,6 +315,10 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
       mixpanel.track("Crafter Psbt Created", {
         order_id: data.inscriptions[0].order_id,
         wallet: walletDetails?.ordinal_address,
+        mode,
+        tick,
+        amt,
+        op,
         // Additional properties if needed
       });
     } catch (error: any) {
@@ -378,9 +411,19 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
         publickey: walletDetails?.cardinal_pubkey,
         wallet: walletDetails?.wallet,
         fee_rate: feeRate,
+        mode,
         // Additional properties if needed
       });
-      window.open(`https://mempool.space/tx/${broadcast_res.txid}`, "_blank");
+      if (mode === "cbrc") {
+        setUnsignedPsbtBase64("");
+        setorderresult(null);
+        setRep(1);
+        setAmt(1);
+        await fetchCbrcBrc20();
+        window.open(`https://mempool.space/tx/${broadcast_res.txid}`, "_blank");
+      } else {
+        setTxLink(`https://mempool.space/tx/${broadcast_res.txid}`);
+      }
       dispatch(
         addNotification({
           id: new Date().valueOf(),
@@ -389,9 +432,6 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
           severity: "success",
         })
       );
-      setUnsignedPsbtBase64("");
-      setorderresult(null);
-      fetchCbrcBrc20();
       dispatch(
         addNotification({
           id: new Date().valueOf(),
@@ -482,24 +522,26 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
     setLoading(false);
   }, [result, error]);
 
-  console.log({ locked });
   return (
     <div className="center min-h-[60vh] flex-col w-full">
       {walletDetails ? (
         <div className="w-full center flex-col">
           <div className="bg-secondary p-6 rounded-lg shadow-2xl min-w-xl w-4/12">
-            <h2 className="uppercase font-bold tracking-wider pb-6">
-              Inscribe CBRC
+            <h2 className="uppercase font-bold tracking-wider text-xl text-center">
+              {mode === "cbrc" ? "Inscribe CBRC" : `Attach ${tick} CBRC Token`}
             </h2>
-            <div className="w-full center pb-4">
-              <CustomSelector
-                label="Operation"
-                value={op}
-                options={options}
-                onChange={setOp}
-                widthFull={true}
-              />
-            </div>
+            <hr className="mb-5 mt-3 bg-white" />
+            {mode === "cbrc" && (
+              <div className="w-full center pb-4">
+                <CustomSelector
+                  label="Operation"
+                  value={op}
+                  options={options}
+                  onChange={setOp}
+                  widthFull={true}
+                />
+              </div>
+            )}
             {cbrcs && cbrcs.length && op === "transfer" ? (
               <>
                 <div className="w-full center pb-4">
@@ -512,7 +554,8 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
                   />
                 </div>
                 <p>
-                  MAX: {cbrcs?.find((a: any) => a.value === tick)?.limit} {tick}
+                  You Have: {cbrcs?.find((a: any) => a.value === tick)?.limit}{" "}
+                  {tick}
                 </p>
                 <div className={`center py-2`}>
                   <CustomInput
@@ -606,7 +649,15 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
 
                   return (
                     <div
-                      onClick={() => setFeeRate(rate)}
+                      onClick={() => {
+                        setFeeRate(rate);
+
+                        if (idx === 2) {
+                          setCustomFee(true);
+                        } else {
+                          setCustomFee(false);
+                        }
+                      }}
                       className={`p-2 flex-1 ${
                         feeRate === rate
                           ? "border border-white cursor-not-allowed"
@@ -615,33 +666,74 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
                       key={idx}
                     >
                       <p className="text-lg text-center">
-                        {idx === 0 ? "Slow" : idx === 1 ? "Fast" : "Fastest"}
+                        {idx === 0 ? "Slow" : idx === 1 ? "Fast" : "Custom"}
                       </p>
                       <p className="text-xs text-center">{rate} s/vB</p>
                     </div>
                   );
                 })}
               </div>
+              {customFee ? (
+                <div>
+                  <CustomInput
+                    value={feeRate.toString()}
+                    placeholder="Fee Rate"
+                    onChange={(fee) => setFeeRate(Number(fee))}
+                    helperText={
+                      feeRate < Math.min(10, defaultFeeRate - 40)
+                        ? "Fee too low"
+                        : feeRate > defaultFeeRate + 200
+                        ? "Fee too high - make sure you are okay with it"
+                        : ""
+                    }
+                    error={true}
+                    endAdornmentText=" sats / vB"
+                    startAdornmentText="Fee Rate"
+                    fullWidth
+                  />
+                </div>
+              ) : (
+                <></>
+              )}
             </div>
             {unsignedPsbtBase64 && order_result ? (
-              <div className="pt-3">
-                <p className="text-center pb-3">SAT {order_result.total_fee}</p>
-                <p className="text-center pb-3">
-                  ${order_result.total_fees_in_dollars.toFixed(2)}
-                </p>
-                <div className="w-full">
+              <>
+                {txLink ? (
                   <CustomButton
-                    loading={loading || signLoading}
-                    text={`Complete Payment`}
+                    loading={loading}
+                    text={`${tick} Reinscribed Successfully`}
                     hoverBgColor="hover:bg-accent_dark"
                     hoverTextColor="text-white"
                     bgColor="bg-accent"
                     textColor="text-white"
                     className="transition-all w-full rounded uppercase tracking-widest"
-                    onClick={() => signTx()} // Add this line to make the button functional
+                    link={true}
+                    href={txLink}
+                    newTab={true}
                   />
-                </div>
-              </div>
+                ) : (
+                  <div className="pt-3">
+                    <p className="text-center pb-3">
+                      SAT {order_result.total_fee}
+                    </p>
+                    <p className="text-center pb-3">
+                      ${order_result.total_fees_in_dollars.toFixed(2)}
+                    </p>
+                    <div className="w-full">
+                      <CustomButton
+                        loading={loading || signLoading}
+                        text={`Complete Payment`}
+                        hoverBgColor="hover:bg-accent_dark"
+                        hoverTextColor="text-white"
+                        bgColor="bg-accent"
+                        textColor="text-white"
+                        className="transition-all w-full rounded uppercase tracking-widest"
+                        onClick={() => signTx()} // Add this line to make the button functional
+                      />
+                    </div>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="w-full">
                 <CustomButton
