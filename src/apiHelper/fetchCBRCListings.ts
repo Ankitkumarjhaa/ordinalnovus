@@ -8,6 +8,7 @@ export interface FetchInscriptionsParams {
   page: number;
   sort?: string;
   tick?: string;
+  collection_item_number?: number;
 }
 
 export interface InscriptionResponse {
@@ -22,7 +23,7 @@ export interface InscriptionResponse {
 export async function fetchCBRCListings(
   params: FetchInscriptionsParams
 ): Promise<{ data: InscriptionResponse; error: string | null } | undefined> {
-  const { sort, page_size, page, tick } = params;
+  const { sort, page_size, page, tick, collection_item_number } = params;
   try {
     const response = await axios.get(
       `${process.env.NEXT_PUBLIC_URL}/api/v2/cbrc/listings`,
@@ -33,6 +34,7 @@ export async function fetchCBRCListings(
           _limit: page_size,
           _start: (page - 1) * page_size,
           tick,
+          collection_item_number,
           apikey: process.env.API_KEY,
         },
       }

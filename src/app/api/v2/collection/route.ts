@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Inscription, Collection } from "@/models";
 import dbConnect from "@/lib/dbConnect";
 import convertParams from "@/utils/api/convertParams";
-import { getCache,  setCache } from "@/lib/cache";
+import { getCache, setCache } from "@/lib/cache";
 import apiKeyMiddleware from "@/middlewares/apikeyMiddleware";
 import { CustomError } from "@/utils";
 import { ICollection } from "@/types";
@@ -11,18 +11,35 @@ import { ICollection } from "@/types";
 //TODO: return collection volume data
 async function getListingData(collections: ICollection[]) {
   const updatedCollections = await Promise.all(
-    collections.map(async (collection: any) => {
+    collections.map(async (collection: ICollection) => {
       // Fetch inscriptions for each collection
-      const inscriptions = await Inscription.find({
-        official_collection: collection._id,
-        listed: true,
-      }).sort({ listed_price: 1 });
+      let queryCondition = {};
+
+      if (collection.metaprotocol === "cbrc") {
+        queryCondition = {
+          listed_token: collection.slug,
+          listed: true,
+        };
+      } else {
+        queryCondition = {
+          official_collection: collection._id,
+          listed: true,
+        };
+      }
+
+      const inscriptions = await Inscription.find(queryCondition).sort({
+        ...(collection.metaprotocol === "cbrc"
+          ? { listed_price_per_token: 1 }
+          : { listed_price: 1 }),
+      });
 
       // Count the number of listed
       const listed = inscriptions.length || 0;
 
       // Find the inscription with the lowest listed_price
       let fp = inscriptions[0]?.listed_price || 0;
+      if (collection.metaprotocol && collection.metaprotocol === "cbrc")
+        fp = inscriptions[0]?.listed_price_per_token;
       // Return the updated collection object
       collection.listed = listed;
       collection.fp = fp;

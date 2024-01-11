@@ -132,6 +132,7 @@ function AccountPage() {
   const handleSearchChange = (value: string) => {
     setSearch(value);
   };
+
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
     value: number
@@ -142,7 +143,7 @@ function AccountPage() {
   return (
     <div className="pt-16 text-white">
       <div className="profile w-full flex flex-wrap items-start border-2 rounded-xl p-6 py-16 border-accent">
-        <div className="w-[100px]">
+        <div className="w-[200px] relative">
           {inscriptions?.length && profile?.inscription_id ? (
             <CardContent
               inscriptionId={profile?.inscription_id}
@@ -156,32 +157,15 @@ function AccountPage() {
             />
           )}
         </div>
-        <div className="pl-4">
-          <div className="text-white text-sm hidden lg:block">
-            <div
-              className="flex justify-start items-center bg-slate-700 tracking-widest px-4 py-2 rounded cursor-pointer mb-2"
-              onClick={() => {
-                copy(walletDetails?.ordinal_address + "");
-                dispatch(
-                  addNotification({
-                    id: new Date().valueOf(),
-                    message: "Address Copied",
-                    open: true,
-                    severity: "success",
-                  })
-                );
-              }}
-            >
-              <span>{walletDetails?.ordinal_address}</span>
-              <FaCopy className="ml-2" />
-            </div>
-            {walletDetails &&
-              walletDetails.ordinal_address !==
-                walletDetails.cardinal_address && (
+        {walletDetails && (
+          <>
+            {" "}
+            <div className="pl-4">
+              <div className="text-white text-sm hidden lg:block">
                 <div
                   className="flex justify-start items-center bg-slate-700 tracking-widest px-4 py-2 rounded cursor-pointer mb-2"
                   onClick={() => {
-                    copy(walletDetails?.cardinal_address + "");
+                    copy(walletDetails?.ordinal_address + "");
                     dispatch(
                       addNotification({
                         id: new Date().valueOf(),
@@ -192,36 +176,36 @@ function AccountPage() {
                     );
                   }}
                 >
-                  <span>{walletDetails?.cardinal_address}</span>
+                  <span>{walletDetails?.ordinal_address}</span>
                   <FaCopy className="ml-2" />
                 </div>
-              )}
-          </div>
-          <div className="text-gray-400 text-xs lg:hidden w-full">
-            <div
-              className="flex justify-start items-center bg-slate-700 tracking-widest px-4 py-2 rounded cursor-pointer mb-2"
-              onClick={() => {
-                copy(walletDetails?.ordinal_address + "");
-                dispatch(
-                  addNotification({
-                    id: new Date().valueOf(),
-                    message: "Address Copied",
-                    open: true,
-                    severity: "success",
-                  })
-                );
-              }}
-            >
-              <span>{shortenString(walletDetails?.ordinal_address || "")}</span>
-              <FaCopy className="ml-2" />
-            </div>
-            {walletDetails &&
-              walletDetails.cardinal_address !==
-                walletDetails.ordinal_address && (
+                {walletDetails &&
+                  walletDetails.ordinal_address !==
+                    walletDetails.cardinal_address && (
+                    <div
+                      className="flex justify-start items-center bg-slate-700 tracking-widest px-4 py-2 rounded cursor-pointer mb-2"
+                      onClick={() => {
+                        copy(walletDetails?.cardinal_address + "");
+                        dispatch(
+                          addNotification({
+                            id: new Date().valueOf(),
+                            message: "Address Copied",
+                            open: true,
+                            severity: "success",
+                          })
+                        );
+                      }}
+                    >
+                      <span>{walletDetails?.cardinal_address}</span>
+                      <FaCopy className="ml-2" />
+                    </div>
+                  )}
+              </div>
+              <div className="text-gray-400 text-xs lg:hidden w-full">
                 <div
                   className="flex justify-start items-center bg-slate-700 tracking-widest px-4 py-2 rounded cursor-pointer mb-2"
                   onClick={() => {
-                    copy(walletDetails?.cardinal_address + "");
+                    copy(walletDetails?.ordinal_address + "");
                     dispatch(
                       addNotification({
                         id: new Date().valueOf(),
@@ -233,20 +217,44 @@ function AccountPage() {
                   }}
                 >
                   <span>
-                    {shortenString(walletDetails?.cardinal_address || "")}
+                    {shortenString(walletDetails?.ordinal_address || "")}
                   </span>
                   <FaCopy className="ml-2" />
                 </div>
-              )}
-          </div>
-        </div>
-        <div className="py-4 md:py-0 flex-1 md:flex md:justify-center lg:justify-end">
-          <Link href="/crafter">
-            <p className="w-full md:w-auto px-4 py-1 bg-bitcoin text-yellow-900">
-              Create Transfer Inscription
-            </p>
-          </Link>
-        </div>
+                {walletDetails &&
+                  walletDetails.cardinal_address !==
+                    walletDetails.ordinal_address && (
+                    <div
+                      className="flex justify-start items-center bg-slate-700 tracking-widest px-4 py-2 rounded cursor-pointer mb-2"
+                      onClick={() => {
+                        copy(walletDetails?.cardinal_address + "");
+                        dispatch(
+                          addNotification({
+                            id: new Date().valueOf(),
+                            message: "Address Copied",
+                            open: true,
+                            severity: "success",
+                          })
+                        );
+                      }}
+                    >
+                      <span>
+                        {shortenString(walletDetails?.cardinal_address || "")}
+                      </span>
+                      <FaCopy className="ml-2" />
+                    </div>
+                  )}
+              </div>
+            </div>
+            <div className="py-4 md:py-0 flex-1 md:flex md:justify-center lg:justify-end">
+              <Link href="/crafter">
+                <p className="w-full md:w-auto px-4 py-1 bg-bitcoin text-yellow-900">
+                  Create Transfer Inscription
+                </p>
+              </Link>
+            </div>
+          </>
+        )}
       </div>
       <div className="pb-6 py-16 flex justify-center lg:justify-start ">
         <CustomTab
@@ -339,9 +347,17 @@ function AccountPage() {
           ) : (
             <>
               {loading ? (
-                <div className="text-white center py-16">
-                  <CircularProgress size={20} color="inherit" />
-                </div>
+                <>
+                  {walletDetails ? (
+                    <div className="text-white center py-16">
+                      <CircularProgress size={20} color="inherit" />
+                    </div>
+                  ) : (
+                    <div className="text-white center py-16">
+                      Wallet not connected
+                    </div>
+                  )}
+                </>
               ) : (
                 <div className="text-center py-16">
                   {tab === "cbrc-20" ? (

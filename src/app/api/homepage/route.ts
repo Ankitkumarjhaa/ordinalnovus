@@ -54,25 +54,20 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
   try {
     // If the data is not in the cache, fetch it and store it in the cache
     if (!data) {
-      const featuredCollections = await Collection.find({ featured: true })
-        .limit(10)
-        .populate({
+      const featuredCollections = await Collection.find({
+        featured: true,
+        metaprotocol: "cbrc",
+      }).limit(10).populate({
           path: "inscription_icon",
           select: "content_type inscription_id inscription_number token tags",
-        })
-        .lean()
-        .exec();
+        }).lean().exec();
 
       const verifiedCollections = await Collection.find({
         $and: [{ verified: true }],
-      })
-        .populate({
+      }).populate({
           path: "inscription_icon",
           select: "content_type inscription_id inscription_number token tags",
-        })
-        .limit(12)
-        .lean()
-        .exec();
+        }).limit(12).lean().exec();
 
       // Store the data in the cache
       data = {
@@ -87,31 +82,28 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
       verified: data.verified ? await getListingData(data.verified) : [],
     };
 
-    const highestInDB = await Inscription.findOne({})
-      .sort({ inscription_number: -1 })
-      .select("inscription_number")
-      .lean();
+    const highestInDB = await Inscription.findOne({}).sort({ inscription_number: -1 }).select("inscription_number").lean();
 
-    let recentInscriptions = null;
+    // let recentInscriptions = null;
 
-    try {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_URL}/api/ordapi/feed?apikey=${process.env.API_KEY}`
-      );
-      recentInscriptions = response?.data || [];
-    } catch (err: any) {}
+    // try {
+    //   const response = await axios.get(
+    //     `${process.env.NEXT_PUBLIC_URL}/api/ordapi/feed?apikey=${process.env.API_KEY}`
+    //   );
+    //   recentInscriptions = response?.data || [];
+    // } catch (err: any) {}
 
-    // Add the recentInscriptions to the data
-    data.recentInscriptions = recentInscriptions || [];
-    const latestInscription = recentInscriptions
-      ? recentInscriptions[0].number
-      : highestInDB.inscription_number;
-    data.latest = latestInscription;
-    data.highest = highestInDB.inscription_number;
-    data.height = highestInDB.genesis_height;
-    data.percentParsed = Number(
-      ((highestInDB.inscription_number / latestInscription) * 100).toFixed(2)
-    );
+    // // Add the recentInscriptions to the data
+    // data.recentInscriptions = recentInscriptions || [];
+    // const latestInscription = recentInscriptions
+    //   ? recentInscriptions[0].number
+    //   : highestInDB.inscription_number;
+    // data.latest = latestInscription;
+    // data.highest = highestInDB.inscription_number;
+    // data.height = highestInDB.genesis_height;
+    // data.percentParsed = Number(
+    //   ((highestInDB.inscription_number / latestInscription) * 100).toFixed(2)
+    // );
 
     // const listings = await Inscription.find({
     //   listed: true,

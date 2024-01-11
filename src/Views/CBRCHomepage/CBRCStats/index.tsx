@@ -38,21 +38,21 @@ const CBRCStats = ({ stats }: { stats: IStats }) => {
           </div>
           <div className="flex">
             <p className="text-gray">24Hr Vol :</p>
-            <p className="pl-2 text-bitcoin flex ">
+            <p className="pl-2 text-bitcoin flex items-center ">
               <FaDollarSign className="text-green-500" />
               {convertToUSD(stats.dailyVolume)}
             </p>
           </div>
           <div className="flex">
             <p className="text-gray">30 Days Vol :</p>
-            <p className="pl-2 text-bitcoin flex">
+            <p className="pl-2 text-bitcoin flex items-center">
               <FaDollarSign className="text-green-500" />
               {convertToUSD(stats.monthlyVolume)}
             </p>
           </div>
           <div className="flex">
             <p className="text-gray">All time Vol :</p>
-            <p className="pl-2 text-bitcoin flex">
+            <p className="pl-2 text-bitcoin flex items-center">
               <FaDollarSign className="text-green-500" />
               {convertToUSD(stats.allTimeVolume)}
             </p>
@@ -63,18 +63,18 @@ const CBRCStats = ({ stats }: { stats: IStats }) => {
           </div>
           <div className="flex">
             <p className="text-gray">BTC :</p>
-            <p className="pl-2 text-bitcoin flex">
+            <p className="pl-2 text-bitcoin flex items-center">
               <FaDollarSign className="text-green-500" />
               {btcPrice}
             </p>
           </div>
-          <div className="flex">
-            <p className="text-gray">Latest height :</p>
+          <div className="flex items-center">
+            <p className="text-gray">Latest height : </p>
             <p
-              className={`pl-2 ${
+              className={`px-2 font-medium text-white rounded-sm py-3 ${
                 stats.btcHeight - stats.novusBtcHeight !== 0
-                  ? "text-red-500"
-                  : "text-green-500"
+                  ? "bg-red-500"
+                  : ""
               }`}
             >
               {stats.btcHeight}

@@ -3,7 +3,7 @@ import axios from "axios";
 import dbConnect from "@/lib/dbConnect";
 import apiKeyMiddleware from "@/middlewares/apikeyMiddleware";
 import { CustomError } from "@/utils";
-import { Inscription } from "@/models";
+import { Inscription, SatCollection } from "@/models";
 import { getCache, setCache } from "@/lib/cache";
 
 type Data = {
@@ -90,25 +90,54 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
       limit
     );
 
-    console.log(inscriptions.length, " inscriptions found in db");
+    // console.log(inscriptions.length, " inscriptions found in db");
 
     if (inscriptions.length) {
       const ins = inscriptions[0];
       if (ins && ins.parsed_metaprotocol) {
         if (
           ins.parsed_metaprotocol.includes("cbrc-20") &&
-          ins.parsed_metaprotocol.includes("transfer")
+          ins.parsed_metaprotocol.includes("transfer") &&
+          ins.valid !== false
         ) {
           try {
             const valid = await checkCbrcValidity(ins.inscription_id);
             if (valid !== undefined) {
               inscriptions[0].cbrc_valid = valid;
+              await updateInscriptionDB(ins.inscription_id, valid);
             } else {
               console.debug("checkCbrcValidity returned undefined");
             }
           } catch (error) {
             console.error("Error in checkCbrcValidity: ", error);
           }
+        }
+        const reinscriptions = await Inscription.find({ sat: ins.sat })
+          .select(
+            "inscription_id inscription_number content_type official_collection metaprotocol parsed_metaprotocol sat collection_item_name collection_item_number valid"
+          )
+          .populate({
+            path: "official_collection",
+            select: "name slug icon supply _id", // specify the fields you want to populate
+          })
+          .lean();
+
+        if (reinscriptions.length > 1) {
+          ins.reinscriptions = reinscriptions;
+        }
+
+        ins.sat_collection = await SatCollection.findOne({
+          sat: ins.sat,
+        }).populate({
+          path: "official_collection",
+          select: "name slug icon supply _id", // specify the fields you want to populate
+        });
+
+        if (ins.sat_collection) {
+          ins.official_collection = ins.sat_collection.official_collection;
+          ins.collection_item_name = ins.sat_collection.collection_item_name;
+          ins.collection_item_number =
+            ins.sat_collection.collection_item_number;
         }
       }
       return NextResponse.json({
@@ -212,6 +241,25 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
       { status: error.status || 500 }
     );
   }
+}
+
+// Example implementation of updateInscriptionDB (modify as per your DB structure and requirements)
+async function updateInscriptionDB(inscriptionId: string, isValid: boolean) {
+  let update: any = { valid: isValid };
+
+  if (isValid === false) {
+    update = {
+      ...update,
+      listed: false,
+      listed_price: 0,
+      listed_price_per_token: 0,
+      signed_psbt: "",
+      unsigned_psbt: "",
+      in_mempool: false,
+    };
+  }
+
+  await Inscription.findOneAndUpdate({ inscription_id: inscriptionId }, update);
 }
 
 export const checkCbrcValidity = async (id: string) => {

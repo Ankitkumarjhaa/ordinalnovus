@@ -1,6 +1,6 @@
 import CbrcDetailPage from "@/Views/CbrcPage/CbrcDetailPage";
 import { FetchCBRC } from "@/apiHelper/getCBRC";
-import { IToken, Icbrc } from "@/types/CBRC";
+import { ICbrcToken, Icbrc } from "@/types/CBRC";
 import { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 type Props = {
@@ -22,7 +22,7 @@ export async function generateMetadata(
     if (!cbrcs) {
       notFound();
     }
-    const cbrc: IToken = cbrcs.data.tokens[0];
+    const cbrc: ICbrcToken = cbrcs.data.tokens[0];
     return {
       title: `${params.tick} | Ordinalnovus`,
       description: `${params.tick} is a CBRC-20 Token on BTC Blockchain with a supply of ${cbrc.max}`,
@@ -122,7 +122,7 @@ export default async function Page({
   if (!cbrcs) {
     notFound();
   }
-  const cbrc: IToken = cbrcs.data.tokens[0];
+  const cbrc: ICbrcToken = cbrcs.data.tokens[0];
   if (!cbrc) {
     notFound();
   }

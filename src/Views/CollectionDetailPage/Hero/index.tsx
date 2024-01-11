@@ -96,7 +96,7 @@ function Hero({ data }: HeroProps) {
               )}
             </div>
           </div>
-          <div className="sidePanel w-full md:w-4/12 md:border-l border-accent py-6 md:p-3">
+          <div className="sidePanel w-full md:w-4/12 md:border-l border-accent py-6 md:p-3 overflow-y-auto overflow-x-hidden no-scrollbar max-h-full ">
             {data?.tags && data.tags.length > 0 && (
               <div className="tags flex items-center justify-start text-xs">
                 {data?.tags?.map((item, idx) => {

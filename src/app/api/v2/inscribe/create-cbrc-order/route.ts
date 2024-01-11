@@ -19,7 +19,7 @@ const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
 const BASE_SIZE = 160;
 const PADDING = 1000;
 const PREFIX = 160;
-const MINIMUM_FEE = 2000;
+const MINIMUM_FEE = 5000;
 
 export async function POST(req: NextRequest) {
   try {
@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
       status: "payment pending",
     };
 
-    const psbt = await generateUnsignedPsbtForInscription(
+    const { psbt } = await generateUnsignedPsbtForInscription(
       payment_address,
       publickey,
       fee_rate,

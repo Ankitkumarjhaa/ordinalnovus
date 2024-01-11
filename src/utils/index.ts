@@ -214,7 +214,7 @@ export async function downloadInscription(inscription: string) {
     .then((response) => {
       const contentType = response.headers["content-type"];
       const filename = `${inscription}.${contentType.split("/")[1]}`;
-      console.log({ contentType, filename });
+      // console.log({ contentType, filename });
 
       const blob = new Blob([response.data], { type: contentType });
       saveAs(blob, filename || inscription);

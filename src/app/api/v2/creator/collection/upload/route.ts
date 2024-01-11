@@ -73,8 +73,8 @@ export async function POST(request: NextRequest) {
   const relativeUploadDir = `/collections`; // Using slug in the path
   const baseDir =
     process.env.NEXT_PUBLIC_URL === "https://ordinalnovus.com"
-      ? "/usr/src/app/assets"
-      : "/home/crypticmeta/Desktop/assets";
+      ? "/usr/src/app/static-assets"
+      : "/home/crypticmeta/Desktop/static-assets";
   const uploadDir = join(baseDir, relativeUploadDir);
 
   const filename = `${slug}.${mime.getExtension(file.type)}`;

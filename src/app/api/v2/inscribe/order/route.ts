@@ -8,7 +8,7 @@ import apiKeyMiddleware from "@/middlewares/apikeyMiddleware";
 const fetchOrders = async (query: any) => {
   console.dir(query, { depth: null });
   return await Inscribe.aggregate([
-    { $match: query.find },
+    { $match: { ...query.find, status: { $ne: "cancelled" } } },
     {
       $lookup: {
         from: "createinscriptions", // The collection name for createInscription documents
@@ -56,6 +56,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
     }
 
     const query = convertParams(Inscribe, req.nextUrl);
+
     console.dir(query, { depth: null });
     // Generate a unique cache key based on the query
     const cacheKey = `inscribeOrder:${JSON.stringify(query)}`;

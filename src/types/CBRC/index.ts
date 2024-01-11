@@ -36,7 +36,7 @@ export interface Icbrc {
   mintops: string[];
 }
 
-export interface IToken {
+export interface ICbrcToken {
   listed: ReactNode;
   in_mempool: number;
   tick: string;

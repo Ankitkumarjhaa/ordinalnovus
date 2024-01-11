@@ -2,7 +2,7 @@ import Crafter from "@/Views/Crafter";
 import React from "react";
 
 function page() {
-  return <Crafter />;
+  return <Crafter mode="cbrc" />;
 }
 
 export default page;

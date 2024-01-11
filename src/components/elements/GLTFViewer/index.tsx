@@ -4,7 +4,7 @@
 import "@google/model-viewer";
 import React from "react";
 function GLTF({ url }: { url: string }) {
-  console.log({ url });
+  // console.log({ url });
   return (
     <model-viewer
       camera-controls={true}

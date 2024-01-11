@@ -21,6 +21,7 @@ import { Icbrc } from "@/types/CBRC";
 import { Tooltip } from "@mui/material";
 import { useSelector } from "react-redux";
 import { RootState } from "@/stores";
+import { cbrcValid } from "@/utils/validate";
 
 type CardContentProps = {
   inscriptionId: string;
@@ -108,11 +109,13 @@ const CardContent: React.FC<CardContentProps> = ({
     } else if (
       (inscription?.metaprotocol?.includes("cbrc-20:mint") ||
         inscription?.metaprotocol?.includes("cbrc-20:transfer")) &&
-      inscription?.tags?.includes("text")
+      inscription?.tags?.includes("text") &&
+      inscription?.content_type?.includes("plain")
     ) {
       const [tag, mode, tokenAmt] = inscription.metaprotocol.split(":");
       const [token, amt] = tokenAmt.split("=");
       const checksum = stringToHex(token.toLowerCase().trim());
+
       return (
         <div
           className={`w-full h-full flex flex-col justify-center items-center text-sm tracking-widest  py-12 font-sourcecode `}
@@ -133,7 +136,7 @@ const CardContent: React.FC<CardContentProps> = ({
             <p>Checksum</p>
             <p>{checksum}</p>
           </div> */}
-          <div>
+          {/* <div>
             <span
               className={`absolute text-center ${
                 inscription?.cbrc_valid
@@ -155,14 +158,14 @@ const CardContent: React.FC<CardContentProps> = ({
                   : "Token Used"
                 : "API down. Can't check validity."}
             </span>
-          </div>
+          </div> */}
         </div>
       );
     }
     const contentType = fetchedContentType
       ? fetchedContentType
       : "No content type provided";
-    switch (contentType) {
+    switch (contentType.split(" ").join("")) {
       case "image/jpeg":
       case "image/png":
       case "image/gif":
@@ -381,12 +384,14 @@ const CardContent: React.FC<CardContentProps> = ({
       case "text/html;charset=utf-8":
       case "text/html":
         return (
-          <iframe
-            sandbox="allow-scripts"
-            className="no-scrollbar small-scrollbar"
-            src={`/content/${inscriptionId}`}
-            style={{ minWidth: "100%", minHeight: "100%" }}
-          />
+          <div className="w-full h-full">
+            <iframe
+              sandbox="allow-scripts"
+              className={className || " no-scrollbar   w-[300px] h-[300px]"}
+              src={`/content/${inscriptionId}`}
+              style={{ minWidth: "100%", minHeight: "100%" }}
+            />
+          </div>
         );
       case "model/stl":
         return <STL url={`/content/${inscriptionId}`} />;
@@ -436,7 +441,7 @@ const CardContent: React.FC<CardContentProps> = ({
   };
 
   return (
-    <div className="w-full h-full overflow-y-auto overflow-x-hidden no-scrollbar">
+    <div className="w-full h-full overflow-y-auto overflow-x-hidden no-scrollbar min-w-full min-h-full">
       {inscription?.domain_valid && (
         <span className="absolute bg-bitcoin rounded font-bold text-yellow-900 capitalize text-xs p-1 z-10 top-[5px] left-[5px] ">
           Valid Domain
@@ -447,37 +452,26 @@ const CardContent: React.FC<CardContentProps> = ({
           Invalid Domain
         </span>
       )}{" "}
-      {inscription?.token && (
+      {/* {inscription?.token && (
         <span className="absolute bg-bitcoin rounded font-bold text-yellow-900 capitalize text-xs p-1 z-10 top-[5px] left-[5px] ">
           TOKEN
         </span>
-      )}{" "}
+      )}{" "} */}
       {inscription?.tags?.includes("bitmap") && (
         <span className="absolute bg-bitcoin rounded font-bold text-yellow-900 capitalize text-xs p-1 z-10 top-[5px] left-[5px] ">
           BITMAP
         </span>
       )}{" "}
-      {inscription?.metaprotocol?.includes("cbrc-20") && (
+      {inscription?.metaprotocol?.includes("cbrc-20") && inscription?.valid && (
         <div>
           <span className="absolute bg-bitcoin rounded font-bold text-yellow-900 capitalize text-xs p-1 z-10 top-[5px] left-[5px] ">
             CBRC-20
           </span>
         </div>
       )}{" "}
-      {inscription?.metaprotocol?.includes("cbrc-20:mint") &&
-        inscription.listed && (
-          <div>
-            <Tooltip title="Buying Mint Inscription wont increase CBRC-20 Balance">
-              <span
-                className={`absolute flex justify-center items-center bg-red-400 text-red-900  rounded  capitalize text-xs py-3 z-10 bottom-0 right-0 left-0 `}
-              >
-                <IoMdWarning /> <p>Warning</p>
-              </span>
-            </Tooltip>
-          </div>
-        )}
       {inscription?.parsed_metaprotocol &&
-        inscription?.parsed_metaprotocol?.length == 3 && (
+        inscription?.parsed_metaprotocol?.length == 3 &&
+        inscription?.valid && (
           <div>
             <span className="absolute bg-bitcoin rounded font-bold text-yellow-900 capitalize text-xs p-1 z-10 top-[5px] right-[5px] ">
               {inscription?.parsed_metaprotocol[1]}{" "}
@@ -485,8 +479,33 @@ const CardContent: React.FC<CardContentProps> = ({
             </span>
           </div>
         )}{" "}
+      {inscription?.cbrc_valid !== undefined && (
+        <div>
+          <span
+            className={`absolute text-center ${
+              inscription?.cbrc_valid
+                ? cbrcValid(inscription, allowed_cbrcs || [])
+                  ? "bg-green-400 text-green-900 " // Condition 1
+                  : "bg-gray-400 text-gray-900 " // Condition 2
+                : inscription?.cbrc_valid === false
+                ? cbrcValid(inscription, allowed_cbrcs || [])
+                  ? "bg-red-400 text-red-900 " // Condition 3
+                  : "bg-gray-400 text-gray-900 " // Condition 4
+                : "bg-red-400 text-red-900 " // Condition 5
+            } rounded font-bold capitalize text-sm py-1 z-10 bottom-0 right-0 left-0`}
+          >
+            {inscription?.cbrc_valid !== undefined
+              ? inscription?.cbrc_valid
+                ? cbrcValid(inscription, allowed_cbrcs || [])
+                  ? "Valid Transfer Note"
+                  : "Token not listed"
+                : "Token Used"
+              : "API down. Can't check validity."}
+          </span>
+        </div>
+      )}
       {isLoading ? (
-        <div className="flex justify-center items-center h-full text-white py-6  w-full">
+        <div className="flex justify-center items-center  h-full text-white py-6  w-full">
           {/* <CircularProgress color="inherit" size={10} />{" "} */}
           <div
             className={`${

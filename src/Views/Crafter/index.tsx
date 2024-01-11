@@ -16,17 +16,26 @@ import ShowOrders from "./showOrders";
 import mixpanel from "mixpanel-browser";
 import updateOrder from "@/apiHelper/updateOrder";
 import { useRouter } from "next/navigation";
+import Reinscription from "./reinscription";
+import { IInscription } from "@/types";
+import { useSearchParams } from "next/navigation";
+import fetchCollectionBySlug from "@/serverActions/fetchCollectionBySlug";
+import { ICbrcToken } from "@/types/CBRC";
+import fetchTokenByTick from "@/serverActions/fetchTokenByTick";
+
 const options = [
   // { value: "deploy", label: "DEPLOY" },
   { value: "transfer", label: "TRANSFER" },
   // { value: "mint", label: "MINT" },
 ];
 
-function Crafter() {
+function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
   const { loading: signLoading, result, error, signTx: sign } = useSignTx();
 
   const router = useRouter();
+  const searchParams = useSearchParams();
 
+  const [customFee, setCustomFee] = useState(false);
   const [feeRate, setFeeRate] = useState<number>(0);
   const [defaultFeeRate, setDefaultFeerate] = useState(0);
   const [rep, setRep] = useState(1);
@@ -35,9 +44,11 @@ function Crafter() {
   const dispatch = useDispatch<AppDispatch>();
   const [loading, setLoading] = useState(false);
 
+  const [tokenInfo, setTokenInfo] = useState<ICbrcToken | null>(null);
+
   const [content, setContent] = useState("");
   const [op, setOp] = useState("transfer");
-  const [tick, setTick] = useState("none");
+  const [tick, setTick] = useState("");
   const [amt, setAmt] = useState(1);
   const [cbrcs, setCbrcs] = useState<any>(null);
   const [files, setFiles] = useState<any>([]);
@@ -45,6 +56,12 @@ function Crafter() {
   const [unsignedPsbtBase64, setUnsignedPsbtBase64] = useState<string>("");
   const [action, setAction] = useState<string>("dummy");
   const [order_result, setorderresult] = useState<any | null>(null);
+
+  const [inscription, setInscription] = useState<IInscription | null>(null);
+  const [inscriptionId, setInscriptionId] = useState("");
+
+  const [locked, setLocked] = useState(false);
+  const [txLink, setTxLink] = useState("");
 
   useEffect(() => {
     if (!walletDetails && fees) {
@@ -66,8 +83,8 @@ function Crafter() {
 
   useEffect(() => {
     if (fees?.fastestFee) {
-      setFeeRate(fees.fastestFee);
-      setDefaultFeerate(fees.fastestFee);
+      setFeeRate(fees.fastestFee + 5);
+      setDefaultFeerate(fees.fastestFee + 5);
     }
   }, [fees]);
 
@@ -91,17 +108,47 @@ function Crafter() {
 
         // console.log({ tick_options });
 
-        setTick(tick_options[0].value);
+        let selectedTick = tick_options[0].value;
+
+        if (searchParams?.has("inscription") && searchParams.has("tickAmt")) {
+          console.log("setting locked data...");
+          const tickAmt = decodeURIComponent(searchParams.get("tickAmt") || "");
+          console.log({ tickAmt });
+          if (tickAmt?.includes("=")) {
+            const [_tick, _amt] = tickAmt?.split("=");
+            if (_tick) {
+              selectedTick = _tick;
+              const isCbrcCollectionRes = await fetchCollectionBySlug(
+                _tick.trim().toLowerCase()
+              );
+              if (isCbrcCollectionRes?.collection) {
+                setAmt(1);
+              } else {
+                if (!isNaN(Number(_amt))) {
+                  setAmt(Number(_amt));
+                }
+              }
+            }
+
+            setOp("transfer");
+
+            if (_tick && !isNaN(Number(_amt))) {
+              setLocked(true);
+            }
+          }
+        }
+
+        setTick(selectedTick);
         setCbrcs(tick_options);
       }
     } catch (e: any) {}
-  }, [walletDetails]);
+  }, [walletDetails, searchParams]);
 
   useEffect(() => {
     if (walletDetails?.connected && walletDetails.ordinal_address) {
       fetchCbrcBrc20();
     }
-  }, [walletDetails]);
+  }, [walletDetails, searchParams]);
 
   const handleFileChange = (event: any) => {
     const selectedFiles = Array.from(event.target.files)
@@ -141,11 +188,40 @@ function Crafter() {
 
   function textToFileData(text: string, filename: string) {
     const base64EncodedData = btoa(unescape(encodeURIComponent(text)));
-    const dataURI = `data:text/plain;base64,${base64EncodedData}`;
+    let dataURI = `data:text/plain;charset=utf-8;base64,${base64EncodedData}`;
+    let type = "text/plain;charset=utf-8";
+
+    if (
+      mode === "reinscribe" &&
+      tick &&
+      !inscription?.content_type?.includes("text") &&
+      inscriptionId
+    ) {
+      type = "text/html;charset=utf-8";
+      const html = `<!DOCTYPE html>
+<html>
+<head>
+    <title>Image in Iframe</title>
+</head>
+<body style="margin: 0; padding: 0;">
+    <img id="dynamicImage" style="width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated;" 
+         src="/content/${inscription?.inscription_id}" />
+    <div style="position: absolute; top: 20%; width: 100%; background-color: rgba(0, 0, 0, 0.5); text-align: center;">
+        <p style="color: white; margin: 10px 0;">${tick.toUpperCase()} ${op} Inscription</p>
+        <p style="color: white; margin: 10px 0;">Created on Ordinalnovus</p>
+    </div>
+</body>
+</html>
+`;
+
+      const base64EncodedData = btoa(html);
+      dataURI = `data:text/html;charset=utf-8;base64,${base64EncodedData}`;
+      filename = `CBRC-20:${op}:${tick}=${amt}.html`;
+    }
 
     return {
       file: {
-        type: "text/plain",
+        type,
         size: base64EncodedData.length,
         name: filename,
       },
@@ -168,8 +244,35 @@ function Crafter() {
       );
       return;
     }
+    if ((!inscription || !tick || !amt || !op) && mode === "reinscribe") {
+      dispatch(
+        addNotification({
+          id: new Date().valueOf(),
+          message: "Some info is missing for reinscription",
+          open: true,
+          severity: "error",
+        })
+      );
+      return;
+    }
+    if (
+      inscription?.valid ||
+      inscription?.cbrc_valid ||
+      (inscription?.reinscriptions &&
+        inscription.reinscriptions.find((a) => a.valid))
+    ) {
+      dispatch(
+        addNotification({
+          id: new Date().valueOf(),
+          message: "This Sat probably has a valid CBRC Token on it.",
+          open: true,
+          severity: "error",
+        })
+      );
+      return;
+    }
     try {
-      if (!tick || !amt || !feeRate) {
+      if (!tick || !options || options.length === 0 || !amt || !feeRate) {
         dispatch(
           addNotification({
             id: new Date().valueOf(),
@@ -210,12 +313,15 @@ function Crafter() {
         fee_rate: feeRate,
         wallet: walletDetails?.wallet,
         metaprotocol: "cbrc",
+        inscription_id: inscription?.inscription_id,
+        ordinal_publickey: walletDetails.ordinal_pubkey,
+        cardinal_publickey: walletDetails.cardinal_pubkey,
       };
 
-      const { data } = await axios.post(
-        "/api/v2/inscribe/create-cbrc-order",
-        BODY
-      );
+      const url = !inscription
+        ? "/api/v2/inscribe/create-cbrc-order"
+        : "/api/v2/inscribe/reinscribe";
+      const { data } = await axios.post(url, BODY);
       // console.log({ data });
       setUnsignedPsbtBase64(data.psbt);
       setorderresult(data);
@@ -224,6 +330,10 @@ function Crafter() {
       mixpanel.track("Crafter Psbt Created", {
         order_id: data.inscriptions[0].order_id,
         wallet: walletDetails?.ordinal_address,
+        mode,
+        tick,
+        amt,
+        op,
         // Additional properties if needed
       });
     } catch (error: any) {
@@ -264,17 +374,35 @@ function Crafter() {
       return;
     }
     let inputs = [];
-    inputs.push({
-      address: walletDetails.cardinal_address,
-      publickey: walletDetails.cardinal_pubkey,
-      sighash: 1,
-      index: [0],
-    });
+    if (mode === "reinscribe") {
+      inputs.push({
+        address: walletDetails.ordinal_address,
+        publickey: walletDetails.ordinal_pubkey,
+        sighash: 1,
+        index: [0],
+      });
+
+      Array.from({ length: order_result.inputs - 1 }, (_, idx) => {
+        inputs.push({
+          address: walletDetails.cardinal_address,
+          publickey: walletDetails.cardinal_pubkey,
+          sighash: 1,
+          index: [idx + 1],
+        });
+      });
+    } else {
+      inputs.push({
+        address: walletDetails.cardinal_address,
+        publickey: walletDetails.cardinal_pubkey,
+        sighash: 1,
+        index: [0],
+      });
+    }
 
     const options: any = {
       psbt: unsignedPsbtBase64,
       network: "Mainnet",
-      action,
+      action: mode !== "reinscribe" ? "dummy" : "others",
       inputs,
     };
     // console.log(options, "OPTIONS");
@@ -298,9 +426,19 @@ function Crafter() {
         publickey: walletDetails?.cardinal_pubkey,
         wallet: walletDetails?.wallet,
         fee_rate: feeRate,
+        mode,
         // Additional properties if needed
       });
-      window.open(`https://mempool.space/tx/${broadcast_res.txid}`, "_blank");
+      if (mode === "cbrc") {
+        setUnsignedPsbtBase64("");
+        setorderresult(null);
+        setRep(1);
+        setAmt(1);
+        await fetchCbrcBrc20();
+        window.open(`https://mempool.space/tx/${broadcast_res.txid}`, "_blank");
+      } else {
+        setTxLink(`https://mempool.space/tx/${broadcast_res.txid}`);
+      }
       dispatch(
         addNotification({
           id: new Date().valueOf(),
@@ -309,9 +447,6 @@ function Crafter() {
           severity: "success",
         })
       );
-      setUnsignedPsbtBase64("");
-      setorderresult(null);
-      fetchCbrcBrc20();
       dispatch(
         addNotification({
           id: new Date().valueOf(),
@@ -402,24 +537,59 @@ function Crafter() {
     setLoading(false);
   }, [result, error]);
 
-  return (
-    <div className="center min-h-[60vh] flex-col">
-      {walletDetails ? (
-        <>
-          <div className="bg-secondary p-6 rounded-lg shadow-2xl">
-            <h2 className="uppercase font-bold tracking-wider pb-6">
-              Inscribe CBRC
-            </h2>
-            <div className="w-full center pb-4">
-              <CustomSelector
-                label="Operation"
-                value={op}
-                options={options}
-                onChange={setOp}
-                widthFull={true}
-              />
-            </div>
+  const fetchToken = useCallback(async () => {
+    if (op === "mint") {
+      const fetchTokenRes = await fetchTokenByTick(tick);
+      if (fetchTokenRes && fetchTokenRes.success) {
+        setTokenInfo(fetchTokenRes.cbrc);
+        console.log({ token: fetchTokenRes });
+        if (fetchTokenRes.cbrc.supply !== fetchTokenRes.cbrc.max)
+          setAmt(fetchTokenRes.cbrc.lim);
+        else {
+          dispatch(
+            addNotification({
+              id: new Date().valueOf(),
+              message: `This token has been completely minted`,
+              open: true,
+              severity: "error",
+            })
+          );
+        }
+      }
+    }
+  }, [tick, op]);
 
+  useEffect(() => {
+    if (tick && tick.length === 4 && op) {
+      fetchToken();
+    }
+  }, [tick, op]);
+
+  return (
+    <div className="center min-h-[60vh] flex-col w-full">
+      {walletDetails ? (
+        <div className="w-full center flex-col">
+          <div className="bg-secondary p-6 rounded-lg shadow-2xl min-w-xl w-5/12">
+            {walletDetails.wallet === "Unisat" && mode === "reinscribe" && (
+              <p className="bg-red-500 text-white py-1 px-4 text-center uppercase tracking-wider font-bold mb-2">
+                DO NOT USE UNISAT FOR REINSCRIPTIONS
+              </p>
+            )}
+            <h2 className="uppercase font-bold tracking-wider text-xl text-center">
+              {mode === "cbrc" ? "Inscribe CBRC" : `Attach ${tick} CBRC Token`}
+            </h2>
+            <hr className="mb-5 mt-3 bg-white" />
+            {mode === "cbrc" && (
+              <div className="w-full center pb-4">
+                <CustomSelector
+                  label="Operation"
+                  value={op}
+                  options={options}
+                  onChange={setOp}
+                  widthFull={true}
+                />
+              </div>
+            )}
             {cbrcs && cbrcs.length && op === "transfer" ? (
               <>
                 <div className="w-full center pb-4">
@@ -432,20 +602,23 @@ function Crafter() {
                   />
                 </div>
                 <p>
-                  MAX: {cbrcs?.find((a: any) => a.value === tick).limit} {tick}
+                  You Have: {cbrcs?.find((a: any) => a.value === tick)?.limit}{" "}
+                  {tick}
                 </p>
-                <div className="center py-2">
+                <div className={`center py-2`}>
                   <CustomInput
                     value={amt.toString()}
                     placeholder="Amount Of Tokens"
                     endAdornmentText={tick.toUpperCase()}
-                    onChange={(new_content) => setAmt(Number(new_content))}
+                    onChange={(new_content) =>
+                      !locked && setAmt(Number(new_content))
+                    }
                     helperText={
                       amt <= 0 ||
                       (cbrcs?.find((a: any) => a.value === tick)?.limit &&
                         amt > cbrcs?.find((a: any) => a.value === tick).limit)
                         ? `Wrong Amount. Max is: ${
-                            cbrcs?.find((a: any) => a.value === tick).limit
+                            cbrcs?.find((a: any) => a.value === tick)?.limit
                           }`
                         : ""
                     }
@@ -457,72 +630,191 @@ function Crafter() {
                     fullWidth
                   />
                 </div>
-                <div className="center py-2">
-                  <CustomInput
-                    value={rep.toString()}
-                    placeholder="Amount to mint"
-                    onChange={(new_content) => setRep(Number(new_content))}
-                    fullWidth
-                    endAdornmentText=" Inscription"
-                    startAdornmentText="Mint "
-                    helperText={
-                      rep <= 0 || rep > 25
-                        ? "You can mint 1-25 inscriptions at a time."
-                        : ""
-                    }
-                    error={rep <= 0 || rep > 25}
-                  />
-                </div>
+                {mode !== "reinscribe" && (
+                  <div className="center py-2">
+                    <CustomInput
+                      disabled={locked}
+                      value={rep.toString()}
+                      placeholder="Amount to mint"
+                      onChange={(new_content) => setRep(Number(new_content))}
+                      fullWidth
+                      endAdornmentText=" Inscription"
+                      startAdornmentText="Mint "
+                      helperText={
+                        rep <= 0 || rep > 25
+                          ? "You can mint 1-25 inscriptions at a time."
+                          : ""
+                      }
+                      error={rep <= 0 || rep > 25}
+                    />
+                  </div>
+                )}
               </>
             ) : (
               <></>
             )}
-            {/* <div className="center py-2">
-          <CustomInput
-            multiline
-            value={content}
-            placeholder="Any Content here. By default Token & Amt will be used."
-            onChange={(new_content) => setContent(new_content)}
-            fullWidth
-          />
-        </div> */}
-            <div className="center py-2">
-              <CustomInput
-                value={feeRate.toString()}
-                placeholder="Fee Rate"
-                onChange={(fee) => setFeeRate(Number(fee))}
-                helperText={
-                  feeRate < Math.min(10, defaultFeeRate - 40)
-                    ? "Fee too low"
-                    : feeRate > defaultFeeRate + 200
-                    ? "Fee too high - make sure you are okay with it"
-                    : ""
-                }
-                error={true}
-                endAdornmentText=" sats / vB"
-                startAdornmentText="Fee Rate"
-                fullWidth
+            {op === "mint" && (
+              <>
+                <div className="center py-2">
+                  <CustomInput
+                    value={tick}
+                    placeholder={`Tick`}
+                    onChange={(new_content) => setTick(new_content)}
+                    fullWidth
+                  />
+                </div>
+                <div className={`center py-2`}>
+                  <CustomInput
+                    value={amt.toString()}
+                    placeholder="Amount Of Tokens"
+                    endAdornmentText={tick.toUpperCase()}
+                    onChange={(new_content) =>
+                      !locked && setAmt(Number(new_content))
+                    }
+                    fullWidth
+                  />
+                </div>
+                {mode !== "reinscribe" && (
+                  <div className="center py-2">
+                    <CustomInput
+                      disabled={locked}
+                      value={rep.toString()}
+                      placeholder="Amount to mint"
+                      onChange={(new_content) => setRep(Number(new_content))}
+                      fullWidth
+                      endAdornmentText=" Inscription"
+                      startAdornmentText="Mint "
+                      helperText={
+                        rep <= 0 || rep > 25
+                          ? "You can mint 1-25 inscriptions at a time."
+                          : ""
+                      }
+                      error={rep <= 0 || rep > 25}
+                    />
+                  </div>
+                )}
+              </>
+            )}
+            {mode === "reinscribe" && (
+              <Reinscription
+                inscription={inscription}
+                setInscription={setInscription}
+                inscriptionId={inscriptionId}
+                setInscriptionId={setInscriptionId}
+                locked={locked}
               />
+            )}
+            {inscription?.valid ||
+              inscription?.cbrc_valid ||
+              (inscription?.reinscriptions &&
+                inscription.reinscriptions.find((a) => a.valid) && (
+                  <p className="bg-red-800 text-red-200 p-x text-center uppercase font-bold">
+                    This Sat might have a valid token
+                  </p>
+                ))}
+            <div className="py-3">
+              <p className="text-sm text-center ">
+                Choose Transfer Speed (Fee Rate)
+              </p>
+              <div className="flex justify-between py-2">
+                {new Array(3).fill(1).map((_, idx) => {
+                  // Calculating feeRate for each speed option
+                  let rate = defaultFeeRate;
+                  if (idx === 0) {
+                    rate = defaultFeeRate - 5; // Slow
+                  } else if (idx === 1) {
+                    rate = defaultFeeRate; // Fast
+                  } else {
+                    rate = defaultFeeRate + 10; // Fastest
+                  }
+
+                  return (
+                    <div
+                      onClick={() => {
+                        setFeeRate(rate);
+
+                        if (idx === 2) {
+                          setCustomFee(true);
+                        } else {
+                          setCustomFee(false);
+                        }
+                      }}
+                      className={`p-2 flex-1 ${
+                        feeRate === rate
+                          ? "border border-white cursor-not-allowed"
+                          : "cursor-pointer"
+                      }`}
+                      key={idx}
+                    >
+                      <p className="text-lg text-center">
+                        {idx === 0 ? "Slow" : idx === 1 ? "Fast" : "Custom"}
+                      </p>
+                      <p className="text-xs text-center">{rate} s/vB</p>
+                    </div>
+                  );
+                })}
+              </div>
+              {customFee ? (
+                <div>
+                  <CustomInput
+                    value={feeRate.toString()}
+                    placeholder="Fee Rate"
+                    onChange={(fee) => setFeeRate(Number(fee))}
+                    helperText={
+                      feeRate < Math.min(10, defaultFeeRate - 40)
+                        ? "Fee too low"
+                        : feeRate > defaultFeeRate + 200
+                        ? "Fee too high - make sure you are okay with it"
+                        : ""
+                    }
+                    error={true}
+                    endAdornmentText=" sats / vB"
+                    startAdornmentText="Fee Rate"
+                    fullWidth
+                  />
+                </div>
+              ) : (
+                <></>
+              )}
             </div>
             {unsignedPsbtBase64 && order_result ? (
-              <div className="pt-3">
-                <p className="text-center pb-3">SAT {order_result.total_fee}</p>
-                <p className="text-center pb-3">
-                  ${order_result.total_fees_in_dollars.toFixed(2)}
-                </p>
-                <div className="w-full">
+              <>
+                {txLink ? (
                   <CustomButton
-                    loading={loading || signLoading}
-                    text={`Complete Payment`}
+                    loading={loading}
+                    text={`${tick} Reinscribed Successfully`}
                     hoverBgColor="hover:bg-accent_dark"
                     hoverTextColor="text-white"
                     bgColor="bg-accent"
                     textColor="text-white"
                     className="transition-all w-full rounded uppercase tracking-widest"
-                    onClick={() => signTx()} // Add this line to make the button functional
+                    link={true}
+                    href={txLink}
+                    newTab={true}
                   />
-                </div>
-              </div>
+                ) : (
+                  <div className="pt-3">
+                    <p className="text-center pb-3">
+                      SAT {order_result.total_fee}
+                    </p>
+                    <p className="text-center pb-3">
+                      ${order_result.total_fees_in_dollars.toFixed(2)}
+                    </p>
+                    <div className="w-full">
+                      <CustomButton
+                        loading={loading || signLoading}
+                        text={`Complete Payment`}
+                        hoverBgColor="hover:bg-accent_dark"
+                        hoverTextColor="text-white"
+                        bgColor="bg-accent"
+                        textColor="text-white"
+                        className="transition-all w-full rounded uppercase tracking-widest"
+                        onClick={() => signTx()} // Add this line to make the button functional
+                      />
+                    </div>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="w-full">
                 <CustomButton
@@ -539,7 +831,7 @@ function Crafter() {
             )}
           </div>
           <div className="w-full">{walletDetails && <ShowOrders />}</div>
-        </>
+        </div>
       ) : (
         <div className="text-center text-sm">Connect wallet to continue</div>
       )}

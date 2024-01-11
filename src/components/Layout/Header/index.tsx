@@ -19,6 +19,7 @@ import { CollectWallet } from "@/apiHelper/collectWalletHelper";
 import { fetchAllowed } from "@/apiHelper/fetchAllowed";
 import moment from "moment";
 import { RootState } from "@/stores";
+import CustomButton from "@/components/elements/CustomButton";
 const additionalItems = [
   <Link key={"dashboard"} href="/dashboard" shallow>
     <div className="flex items-center">
@@ -33,15 +34,15 @@ function Header() {
   const pathname = usePathname();
   const dispatch = useDispatch();
   const getBTCPrice = useCallback(async () => {
-    console.log("Getting new BTC Price...");
+    // console.log("Getting new BTC Price...");
     const price = await getBTCPriceInDollars();
     console.log({ price: price });
-    dispatch(setBTCPrice(price));
+    if (price) dispatch(setBTCPrice(price));
   }, [dispatch]);
 
   const fetchAllowedTokensChecksum = useCallback(async () => {
     const allowed = await fetchAllowed();
-    dispatch(setAllowedCbrcs(allowed));
+    dispatch(setAllowedCbrcs([...allowed, "63706e6b"]));
   }, [dispatch]);
 
   async function collectWalletDetails() {
@@ -78,18 +79,27 @@ function Header() {
       });
     }
   }, [walletDetails]);
+
   useEffect(() => {
-    const shouldFetch =
-      !fees ||
-      !fees.lastChecked ||
-      moment().diff(moment(fees.lastChecked), "minutes") >= 10;
-    console.log({ shouldFetch, fees });
-    if (shouldFetch) {
+    // Function to fetch fees and other data
+    const fetchData = () => {
       fetchFees(dispatch);
       getBTCPrice();
-    }
-    fetchAllowedTokensChecksum();
-  }, [dispatch, fees]);
+      fetchAllowedTokensChecksum();
+    };
+
+    // Call the function immediately when the component mounts
+    fetchData();
+
+    // Set up an interval to call the function every minute (60000 milliseconds)
+    const interval = setInterval(() => {
+      fetchData();
+    }, 30000);
+
+    // Clear the interval when the component is unmounted
+    return () => clearInterval(interval);
+  }, [dispatch]); // Add other dependencies if necessary
+
   return (
     <div className="fixed bg-primary w-full left-0 right-0 top-0 z-[999] flex justify-center lg:justify-between items-center flex-wrap py-6 px-6 max-w-screen-2xl mx-auto ">
       <CustomNotification />
@@ -97,6 +107,14 @@ function Header() {
       <Logo />
       <Search />
       <div className="w-full lg:w-auto flex justify-center lg:justify-end">
+        <CustomButton
+          text="Crafter"
+          bgColor="bg-indigo-600"
+          hoverBgColor="hover:bg-indigo-800"
+          href={`/crafter`}
+          link={true}
+          className="mr-2"
+        />
         <ConnectMultiButton
           additionalMenuItems={additionalItems}
           buttonClassname="bg-accent text-white px-4 py-2 rounded center "

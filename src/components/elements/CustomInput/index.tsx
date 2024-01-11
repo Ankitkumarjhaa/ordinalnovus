@@ -30,6 +30,17 @@ const CustomTextField = styled(TextField)(({ theme }) => ({
   "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
     borderBottom: "2px solid #9102f0", // Bottom border on focus
   },
+
+  "&.Mui-disabled": {
+    backgroundColor: "#3a3a3a", // Change background color when disabled
+    color: "#b1b1b1", // Change text color when disabled
+    "& .MuiInputLabel-root": {
+      color: "#b1b1b1", // Change label color when disabled
+    },
+    "& .MuiOutlinedInput-notchedOutline": {
+      border: "1px solid #757575", // Change border color when disabled
+    },
+  },
 }));
 
 interface CustomInputProps {
@@ -46,6 +57,7 @@ interface CustomInputProps {
   startAdornmentText?: string;
   endAdornmentText?: string;
   adornmentStyle?: string;
+  disabled?: boolean;
 }
 
 const CustomInput: React.FC<CustomInputProps> = ({
@@ -59,6 +71,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
   helperText,
   error,
   onBlur,
+  disabled,
   startAdornmentText,
   endAdornmentText,
   adornmentStyle = " text-white text-xs 2xl:text-sm",
@@ -109,6 +122,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
       InputLabelProps={{
         shrink: true,
       }}
+      disabled={disabled}
       name="search"
       autoComplete="off"
       className={fullWidth ? "w-full" : "w-full sm:w-auto"}
