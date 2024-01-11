@@ -42,7 +42,7 @@ function Header() {
 
   const fetchAllowedTokensChecksum = useCallback(async () => {
     const allowed = await fetchAllowed();
-    dispatch(setAllowedCbrcs([...allowed, "63706e6b"]));
+    dispatch(setAllowedCbrcs([...allowed]));
   }, [dispatch]);
 
   async function collectWalletDetails() {
