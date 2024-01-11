@@ -8,6 +8,7 @@ import { CustomError } from "@/utils";
 import moment from "moment";
 import { checkCbrcValidity } from "../search/inscription/route";
 import { ICollection, IInscription } from "@/types";
+import { getCache, setCache } from "@/lib/cache";
 
 const getProjectionFields = (show: string) => {
   if (show === "prune") {
@@ -63,6 +64,31 @@ export async function processInscriptions(
   inscriptions: IInscription[],
   collection?: ICollection | null
 ) {
+  let satList = [];
+
+  if (collection) {
+    const cacheKey = `satList:${collection.slug}`;
+    const cachedSatList = await getCache(cacheKey);
+
+    if (cachedSatList) {
+      // If data is found in the cache, use it
+      satList = cachedSatList;
+    } else {
+      // If data is not in the cache, fetch it from the database
+      const satListInfo = await SatCollection.find({
+        official_collection: collection._id,
+      })
+        .select("sat")
+        .lean(); // Improves performance for large datasets
+
+      // Extract the sat numbers from the query results
+      satList = satListInfo.map((item) => item.sat);
+
+      // Store the satList in the cache for 1 hour
+      await setCache(cacheKey, satList, 3600); // 3600 seconds = 1 hour
+    }
+  }
+
   for (const ins of inscriptions) {
     if (ins && ins.parsed_metaprotocol) {
       if (
@@ -73,11 +99,40 @@ export async function processInscriptions(
         try {
           console.log("checking validity...");
           const valid = await checkCbrcValidity(ins.inscription_id);
+          // Check if the 'valid' variable is not undefined.
           if (valid !== undefined) {
-            ins.cbrc_valid = valid; // Update the current inscription
+            // If 'valid' is defined, proceed to the next condition.
 
-            await updateInscriptionDB(ins.inscription_id, valid); // assuming updateInscriptionDB is the function to update DB
+            // Check if 'satList' (presumably a list of sat numbers) is not empty or undefined.
+            if (satList && collection) {
+              // If 'satList' exists, check if it includes the 'sat' property of the 'ins' object.
+              if (satList.includes(ins.sat)) {
+                // If 'satList' contains 'ins.sat', set 'cbrc_valid' property of 'ins' to the value of 'valid'.
+                ins.cbrc_valid = valid;
+
+                // Then, update the inscription in the database using the 'updateInscriptionDB' function.
+                // This function presumably updates the 'valid' status of an inscription identified by 'inscription_id'.
+                await updateInscriptionDB(ins.inscription_id, valid);
+              } else {
+                console.log(
+                  `Marking inscription ${ins.inscription_id} as Invalid because it is inscribed on a sat that does belong to collection: ${collection.slug}`
+                );
+                // If 'satList' does not contain 'ins.sat', set 'cbrc_valid' property of 'ins' to false.
+                ins.cbrc_valid = false;
+
+                // Update the inscription in the database, setting its 'valid' status to false.
+                await updateInscriptionDB(ins.inscription_id, false);
+              }
+            } else {
+              // If 'satList' is empty or undefined, directly set 'cbrc_valid' property of 'ins' to the value of 'valid'.
+              ins.cbrc_valid = valid;
+
+              // Update the inscription in the database with the current 'valid' value.
+              await updateInscriptionDB(ins.inscription_id, valid);
+            }
           } else {
+            // If 'valid' is undefined, log a debug message indicating that the 'checkCbrcValidity' function
+            // returned undefined for a specific inscription ID.
             console.debug(
               "checkCbrcValidity returned undefined for inscription_id: ",
               ins.inscription_id

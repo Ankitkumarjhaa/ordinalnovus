@@ -20,6 +20,7 @@ import deleteListing from "@/apiHelper/deleteListing";
 import { FaDollarSign } from "react-icons/fa";
 import updateTokenPrice from "@/apiHelper/updatePrice";
 import { cbrcValid } from "@/utils/validate";
+import validTokenWithImageRequirement from "@/serverActions/validTokenWithImageRequirement";
 
 type InscriptionProps = {
   data: IInscription;
@@ -63,6 +64,19 @@ function ListInscriptionCardButton({ data, refreshData }: InscriptionProps) {
       }
       try {
         setLoading(true);
+        const validationRes = await validTokenWithImageRequirement(data);
+        if (!validationRes.success) {
+          dispatch(
+            addNotification({
+              id: new Date().valueOf(),
+              message: validationRes.message,
+              open: true,
+              severity: "error",
+            })
+          );
+          setLoading(false);
+          return;
+        }
         const result = await getUnsignedListingPsbt({
           inscription_id: data.inscription_id,
           price: convertBtcToSat(Number(price)),

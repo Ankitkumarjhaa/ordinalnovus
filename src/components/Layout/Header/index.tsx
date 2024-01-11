@@ -19,6 +19,7 @@ import { CollectWallet } from "@/apiHelper/collectWalletHelper";
 import { fetchAllowed } from "@/apiHelper/fetchAllowed";
 import moment from "moment";
 import { RootState } from "@/stores";
+import CustomButton from "@/components/elements/CustomButton";
 const additionalItems = [
   <Link key={"dashboard"} href="/dashboard" shallow>
     <div className="flex items-center">
@@ -41,7 +42,7 @@ function Header() {
 
   const fetchAllowedTokensChecksum = useCallback(async () => {
     const allowed = await fetchAllowed();
-    dispatch(setAllowedCbrcs([...allowed]));
+    dispatch(setAllowedCbrcs([...allowed, "63706e6b"]));
   }, [dispatch]);
 
   async function collectWalletDetails() {
@@ -97,6 +98,14 @@ function Header() {
       <Logo />
       <Search />
       <div className="w-full lg:w-auto flex justify-center lg:justify-end">
+        <CustomButton
+          text="Crafter"
+          bgColor="bg-indigo-600"
+          hoverBgColor="hover:bg-indigo-800"
+          href={`/crafter`}
+          link={true}
+          className="mr-2"
+        />
         <ConnectMultiButton
           additionalMenuItems={additionalItems}
           buttonClassname="bg-accent text-white px-4 py-2 rounded center "

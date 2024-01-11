@@ -17,6 +17,7 @@ import listInscription from "@/apiHelper/listInscription";
 import { useRouter } from "next/navigation";
 import mixpanel from "mixpanel-browser";
 import deleteListing from "@/apiHelper/deleteListing";
+import validTokenWithImageRequirement from "@/serverActions/validTokenWithImageRequirement";
 type InscriptionProps = {
   data: IInscription;
 };
@@ -58,6 +59,19 @@ function ListInscription({ data }: InscriptionProps) {
       }
       try {
         setLoading(true);
+        const validationRes = await validTokenWithImageRequirement(data);
+        if (!validationRes.success) {
+          dispatch(
+            addNotification({
+              id: new Date().valueOf(),
+              message: validationRes.message,
+              open: true,
+              severity: "error",
+            })
+          );
+          setLoading(false);
+          return;
+        }
         const result = await getUnsignedListingPsbt({
           inscription_id: data.inscription_id,
           price: convertBtcToSat(Number(price)),
@@ -164,6 +178,7 @@ function ListInscription({ data }: InscriptionProps) {
         );
         return;
       }
+
       const result = await listInscription({
         seller_receive_address: walletDetails.cardinal_address || "",
         price: convertBtcToSat(Number(price)),
