@@ -5,8 +5,6 @@ import { getCache, setCache } from "@/lib/cache";
 import { Inscription, SatCollection } from "@/models";
 import { ICollection, IInscription } from "@/types";
 
-
-
 export async function processInscriptionsForCbrc(
   inscriptions: IInscription[],
   collection: ICollection | null = null
@@ -192,5 +190,5 @@ async function updateInscriptionDB(inscriptionId: string, isValid: boolean) {
     };
   }
 
-  // await Inscription.findOneAndUpdate({ inscription_id: inscriptionId }, update);
+  await Inscription.findOneAndUpdate({ inscription_id: inscriptionId }, update);
 }
