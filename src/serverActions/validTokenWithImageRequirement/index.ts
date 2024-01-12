@@ -3,7 +3,6 @@
 import dbConnect from "@/lib/dbConnect";
 import { Collection, SatCollection } from "@/models";
 import { ICollection, IInscription } from "@/types";
-import { TAGS } from "bitcoinjs-lib/src/crypto";
 
 async function validTokenWithImageRequirement(inscription: IInscription) {
   if (!inscription) {
@@ -27,6 +26,7 @@ async function validTokenWithImageRequirement(inscription: IInscription) {
     const coll: ICollection | null = await Collection.findOne({
       slug: tick.toLowerCase().trim(),
     });
+
     if (coll) {
       const correctSat = await SatCollection.findOne({
         official_collection: coll._id,
