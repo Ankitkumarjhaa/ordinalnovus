@@ -4,7 +4,18 @@ import { getCache, getCacheExpiry, setCache } from "@/lib/cache";
 import axios from "axios";
 
 export default async function fetchContentFromProviders(contentId: string) {
+  const cacheKey = `on_content:${contentId}`;
+  let content = await getCache(cacheKey);
+  if (content) {
+    // console.log("returning content from cache");
+    return content;
+  }
   const PROVIDERS = [process.env.NEXT_PUBLIC_PROVIDER, "https://ordinals.com"];
+  // if (process.env.NODE_ENV === "production") {
+  //   if (process.env.NEXT_PUBLIC_URL?.includes("localhost"))
+  //     PROVIDERS.unshift("http://192.168.1.33:8080");
+  //   else PROVIDERS.unshift("http://ord-container:8080");
+  // }
   let activeProvider = await getCache("activeProvider");
 
   if (!activeProvider) {
@@ -16,7 +27,9 @@ export default async function fetchContentFromProviders(contentId: string) {
 
   for (let i = startIndex; i < PROVIDERS.length; i++) {
     try {
-      const response = await axios.get(`${PROVIDERS[i]}/content/${contentId}`, {
+      const contentUrl = `${PROVIDERS[i]}/content/${contentId}`;
+      // console.log(contentUrl);
+      const response = await axios.get(contentUrl, {
         responseType: "arraybuffer",
       });
 
@@ -26,7 +39,17 @@ export default async function fetchContentFromProviders(contentId: string) {
         await setCache("activeProvider", PROVIDERS[i], 600); // 600 seconds = 10 minutes
       }
 
-      return response;
+      if (response.status === 200) {
+        const content = {
+          data: response.data.toString("base64"),
+          contentType: response.headers["content-type"],
+        };
+
+        await setCache(cacheKey, content, 5 * 60 * 60);
+
+        return content;
+      }
+      throw Error("API Call failed");
     } catch (error) {
       console.warn(`Provider ${PROVIDERS[i]} failed. Trying next.`);
 
