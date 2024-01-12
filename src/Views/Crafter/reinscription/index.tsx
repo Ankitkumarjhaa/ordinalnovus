@@ -42,6 +42,7 @@ function Reinscription({
       };
 
       const result = await fetchInscriptions(params);
+      console.log({ result });
       if (result && result.data) {
         setInscriptions(result.data.inscriptions);
         setTotal(result.data.pagination.total);
@@ -58,6 +59,7 @@ function Reinscription({
       walletDetails.ordinal_address &&
       !inscriptions
     ) {
+      console.log("fetching wallet ins...");
       fetchWalletInscriptions();
     }
     if (params?.get("inscription") && inscriptions) {
@@ -83,6 +85,8 @@ function Reinscription({
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
+  console.log({ inscriptions });
   return (
     <div className="w-full">
       <div className="flex justify-between items-center w-full">
