@@ -77,3 +77,4 @@ export async function GET(req: NextRequest) {
     tokens,
   });
 }
+export const dynamic = "force-dynamic";
