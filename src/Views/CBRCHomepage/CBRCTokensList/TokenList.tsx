@@ -80,7 +80,8 @@ function TokenList({ tokens, loading }: HeroProps) {
               <TableBody sx={{ color: "white" }}>
                 {tokens?.map((item: ICbrcToken) => {
                   const price = ((item?.price || 0) / 100_000_000) * btcPrice; // in $
-                  const volume = ((item?.volume || 0) / 100_000_000) * btcPrice;
+                  const volume =
+                    ((item?.on_volume || 0) / 100_000_000) * btcPrice;
                   return (
                     <TableRow
                       onClick={() => handleListingClick(item.tick)}

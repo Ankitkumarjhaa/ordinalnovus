@@ -12,6 +12,7 @@ export interface FetchTxParams {
   metaprotocol?: string;
   tick?: string;
   wallet?: string;
+  marketplace?: string;
 }
 
 export interface TXResponse {
@@ -35,6 +36,7 @@ export async function fetchTxes(
     tick,
     metaprotocol,
     wallet,
+    marketplace,
   } = params;
   try {
     const response = await axios.get(
@@ -50,6 +52,7 @@ export async function fetchTxes(
           tick,
           wallet,
           apikey: process.env.API_KEY,
+          marketplace,
         },
       }
     );
