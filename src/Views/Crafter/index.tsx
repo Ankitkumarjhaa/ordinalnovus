@@ -88,7 +88,7 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
     }
   }, [fees]);
 
-  const fetchCbrcBrc20 = useCallback(async () => {
+  const fetchCbrc20 = useCallback(async () => {
     try {
       if (!walletDetails?.ordinal_address) return;
       const params = {
@@ -116,11 +116,15 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
           console.log({ tickAmt });
           if (tickAmt?.includes("=")) {
             const [_tick, _amt] = tickAmt?.split("=");
+            // console.log({ _tick, _amt });
             if (_tick) {
               selectedTick = _tick;
+              // console.log("fetching coll by slug...");
               const isCbrcCollectionRes = await fetchCollectionBySlug(
                 _tick.trim().toLowerCase()
               );
+
+              // console.log("got it...");
               if (isCbrcCollectionRes?.collection) {
                 setAmt(1);
               } else {
@@ -141,12 +145,14 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
         setTick(selectedTick);
         setCbrcs(tick_options);
       }
-    } catch (e: any) {}
+    } catch (e: any) {
+      console.error(e, "Error in reinscribe, fetchCbrc20 func");
+    }
   }, [walletDetails, searchParams]);
 
   useEffect(() => {
     if (walletDetails?.connected && walletDetails.ordinal_address) {
-      fetchCbrcBrc20();
+      fetchCbrc20();
     }
   }, [walletDetails, searchParams]);
 
@@ -434,7 +440,7 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
         setorderresult(null);
         setRep(1);
         setAmt(1);
-        await fetchCbrcBrc20();
+        await fetchCbrc20();
         window.open(`https://mempool.space/tx/${broadcast_res.txid}`, "_blank");
       } else {
         setTxLink(`https://mempool.space/tx/${broadcast_res.txid}`);
@@ -818,6 +824,7 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
             ) : (
               <div className="w-full">
                 <CustomButton
+                  disabled={!tick || !amt}
                   loading={loading}
                   text={`Create ${op}`}
                   hoverBgColor="hover:bg-accent_dark"
