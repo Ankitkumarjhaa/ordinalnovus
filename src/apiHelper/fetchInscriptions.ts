@@ -18,6 +18,7 @@ export interface FetchInscriptionsParams {
   listed?: boolean;
   metaprotocol?: string;
   inscription_number?: number;
+  inscription_id?: string;
 }
 
 export interface InscriptionResponse {
@@ -47,6 +48,7 @@ export async function fetchInscriptions(
     listed,
     metaprotocol,
     inscription_number,
+    inscription_id,
   } = params;
   try {
     const response = await axios.get(
@@ -65,7 +67,7 @@ export async function fetchInscriptions(
           _start: (page - 1) * page_size,
           tag,
           listed,
-
+          ...(inscription_id && { inscription_id }),
           ...(inscription_number && { inscription_number }),
           ...(metaprotocol && { metaprotocol }),
           ...(collection_item_number && { collection_item_number }),

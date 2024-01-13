@@ -3,8 +3,6 @@ import React, { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-import { IoMdWarning } from "react-icons/io";
-
 import STL from "../../STLViewer";
 import GLTF from "../../GLTFViewer";
 
@@ -18,7 +16,6 @@ import {
 } from "@/utils";
 import { IInscription } from "@/types";
 import { Icbrc } from "@/types/CBRC";
-import { Tooltip } from "@mui/material";
 import { useSelector } from "react-redux";
 import { RootState } from "@/stores";
 import { cbrcValid } from "@/utils/validate";
@@ -209,6 +206,7 @@ const CardContent: React.FC<CardContentProps> = ({
           />
         );
       case "application/json":
+      case "application/json;charset=utf-8":
         let jsonContent;
 
         try {

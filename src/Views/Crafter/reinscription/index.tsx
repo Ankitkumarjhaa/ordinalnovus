@@ -33,7 +33,7 @@ function Reinscription({
   const walletDetails = useWalletAddress();
   const fetchWalletInscriptions = useCallback(async () => {
     try {
-      const params = {
+      const queryParams: any = {
         wallet: walletDetails?.ordinal_address,
         page_size: page_size,
         page,
@@ -41,17 +41,36 @@ function Reinscription({
         sort: "inscription_number:-1",
       };
 
-      const result = await fetchInscriptions(params);
-      console.log({ result });
+      if (params && params?.get("inscription")) {
+        setInscriptionId(params?.get("inscription"));
+        queryParams.inscription_id = params.get("inscription");
+      }
+
+      const result = await fetchInscriptions(queryParams);
       if (result && result.data) {
         setInscriptions(result.data.inscriptions);
         setTotal(result.data.pagination.total);
+        if (
+          params &&
+          params?.get("inscription") &&
+          result.data.inscriptions &&
+          result.data.inscriptions.length
+        ) {
+          const tempInscriptions = result.data.inscriptions;
+          setInscriptionId(params?.get("inscription"));
+          queryParams.inscription_id = params.get("inscription");
+          setInscription(
+            tempInscriptions.filter(
+              (a) => a.inscription_id === params.get("inscription")
+            )[0]
+          );
+        }
       }
       setLoading(false);
     } catch (e: any) {
       setLoading(false);
     }
-  }, [walletDetails, page]);
+  }, [walletDetails, page, params]);
 
   useEffect(() => {
     if (
@@ -61,14 +80,6 @@ function Reinscription({
     ) {
       console.log("fetching wallet ins...");
       fetchWalletInscriptions();
-    }
-    if (params?.get("inscription") && inscriptions) {
-      setInscriptionId(params?.get("inscription"));
-      setInscription(
-        inscriptions.filter(
-          (a) => a.inscription_id === params.get("inscription")
-        )[0]
-      );
     }
   }, [walletDetails, page, params, inscriptions]);
 
