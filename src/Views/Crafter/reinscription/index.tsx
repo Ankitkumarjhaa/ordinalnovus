@@ -41,11 +41,14 @@ function Reinscription({
         sort: "inscription_number:-1",
       };
 
+      console.log({ queryParams });
+
       if (params && params?.get("inscription")) {
         setInscriptionId(params?.get("inscription"));
         queryParams.inscription_id = params.get("inscription");
       }
 
+      setLoading(true);
       const result = await fetchInscriptions(queryParams);
       if (result && result.data) {
         setInscriptions(result.data.inscriptions);
@@ -69,6 +72,8 @@ function Reinscription({
       setLoading(false);
     } catch (e: any) {
       setLoading(false);
+    } finally {
+      setLoading(false);
     }
   }, [walletDetails, page, params]);
 
@@ -91,13 +96,13 @@ function Reinscription({
     value: number
   ) => {
     setPage(value);
+    setInscriptions(null);
   };
 
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  console.log({ inscriptions });
   return (
     <div className="w-full">
       <div className="flex justify-between items-center w-full">
@@ -125,15 +130,20 @@ function Reinscription({
         )}
       </div>
       <Modal open={open} onClose={handleClose}>
-        <div
-          className="absolute top-0 bottom-0 right-0 left-0 bg-black bg-opacity-90"
-          onClick={() => handleClose()}
-        >
-          <div className="relative center w-full h-screen">
+        <div className="absolute top-0 bottom-0 right-0 left-0 bg-black bg-opacity-90">
+          <div className="relative center w-full h-screen  min-h-full min-w-full">
             <div
-              className={`card_div p-2 h-[90vh] center flex-wrap overflow-y-auto`}
+              className={`card_div p-2 h-[99vh] center flex-wrap overflow-y-auto min-w-full`}
             >
-              <div className="pt-16 text-white">
+              <div className="absolute right-5 top-5">
+                <CustomButton
+                  text="Close"
+                  onClick={() => handleClose()}
+                  bgColor="bg-red-600"
+                  hoverBgColor="bg-red-800"
+                />
+              </div>
+              <div className="pt-6 text-white  min-h-full min-w-full">
                 <div className="SortSearchPages py-6 flex flex-wrap justify-between">
                   {total / page_size > 1 && (
                     <div className="w-full lg:w-auto center">
@@ -145,9 +155,9 @@ function Reinscription({
                     </div>
                   )}
                 </div>
-                <div className="py-6">
+                <div className="py-6 min-h-full min-w-full">
                   {inscriptions?.length ? (
-                    <div className="flex justify-normal items-center overflow-auto flex-wrap">
+                    <div className="flex justify-normal items-center overflow-auto flex-wrap min-h-full min-w-full">
                       {inscriptions.map((i) => (
                         <div
                           onClick={() => {
@@ -160,6 +170,7 @@ function Reinscription({
                             } else {
                               setInscriptionId(i.inscription_id);
                               setInscription(i);
+                              handleClose();
                             }
                           }}
                           key={i.inscription_id}

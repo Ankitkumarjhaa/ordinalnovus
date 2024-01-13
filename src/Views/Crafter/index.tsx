@@ -544,24 +544,60 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
   }, [result, error]);
 
   const fetchToken = useCallback(async () => {
-    if (op === "mint") {
-      const fetchTokenRes = await fetchTokenByTick(tick);
-      if (fetchTokenRes && fetchTokenRes.success) {
-        setTokenInfo(fetchTokenRes.cbrc);
-        console.log({ token: fetchTokenRes });
-        if (fetchTokenRes.cbrc.supply !== fetchTokenRes.cbrc.max)
-          setAmt(fetchTokenRes.cbrc.lim);
-        else {
-          dispatch(
-            addNotification({
-              id: new Date().valueOf(),
-              message: `This token has been completely minted`,
-              open: true,
-              severity: "error",
-            })
-          );
+    try {
+      if (op === "mint") {
+        const fetchTokenRes = await fetchTokenByTick(tick);
+        if (fetchTokenRes && fetchTokenRes.success) {
+          setTokenInfo(fetchTokenRes.cbrc);
+          console.log({ token: fetchTokenRes });
+          if (fetchTokenRes.cbrc.supply !== fetchTokenRes.cbrc.max)
+            setAmt(fetchTokenRes.cbrc.lim);
+          else {
+            dispatch(
+              addNotification({
+                id: new Date().valueOf(),
+                message: `This token has been completely minted`,
+                open: true,
+                severity: "error",
+              })
+            );
+          }
+        }
+      } else if (op === "transfer") {
+        // console.log("fetching coll by slug...");
+        const isCbrcCollectionRes = await fetchCollectionBySlug(
+          tick.trim().toLowerCase()
+        );
+
+        // console.log("got it...");
+        if (isCbrcCollectionRes?.collection) {
+          if (mode === "cbrc") {
+            dispatch(
+              addNotification({
+                id: new Date().valueOf(),
+                message: `This token should be used only with reinscriber.`,
+                open: true,
+                severity: "error",
+              })
+            );
+            setTick("");
+            return;
+          } else if (mode === "reinscribe") {
+            if (amt > 1)
+              dispatch(
+                addNotification({
+                  id: new Date().valueOf(),
+                  message: `This token belongs to a collection. Should contain only 1 amt`,
+                  open: true,
+                  severity: "error",
+                })
+              );
+            setAmt(1);
+          }
         }
       }
+    } catch (e: any) {
+      console.log(e, "FETCHTOKEN");
     }
   }, [tick, op]);
 
