@@ -54,6 +54,7 @@ function CBRCSales({ tick }: { tick: string }) {
       page_size,
       page,
       tag: "sale",
+      marketplace: "ordinalnovus",
       ...(tick ? { tick } : { metaprotocol: "transfer" }),
     };
     const result = await fetchTxes(q);
