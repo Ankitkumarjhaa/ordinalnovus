@@ -1,7 +1,6 @@
 import dbConnect from "@/lib/dbConnect";
 import { Inscription } from "@/models";
 import moment from "moment";
-import axios from "axios"; // Ensure axios is installed
 import { NextResponse } from "next/server";
 import { fetchLatestInscriptionData } from "@/utils/Marketplace";
 
@@ -11,56 +10,70 @@ export async function GET() {
 
     const twoDaysAgo = moment().subtract(2, "days").startOf("day").toDate();
 
-    const inMempoolForMoreThanADayTx = await Inscription.find({
+    const query = {
+      listed: true,
       in_mempool: true,
-      updated_at: { $lt: twoDaysAgo },
-    });
+      listed_at: { $lt: twoDaysAgo },
+    };
 
-    for (const inscription of inMempoolForMoreThanADayTx) {
+    // const query = {
+    //   inscription_id:
+    //     "9747fac58b0531b8fe312eab3792006e01189ac991a5d5889fd1014b127a4f9ai0",
+    // };
+
+    console.dir(query, { depth: null });
+
+    const inMempoolForMoreThanADayTx = await Inscription.find(query);
+
+    if (!inMempoolForMoreThanADayTx) {
+      return NextResponse.json({
+        message: "All items processed",
+      });
+    }
+
+    console.log(
+      "received in mempool items...",
+      inMempoolForMoreThanADayTx.length
+    );
+
+    const bulkOps = inMempoolForMoreThanADayTx.map(async (inscription) => {
       try {
-        const { data } = await axios.get(
-          `https://mempool-api.ordinalnovus.com/tx/${inscription.txid}`
-        );
-
+        console.log("fetching inscription details...");
         const inscriptionDetails = await fetchLatestInscriptionData(
           inscription.inscription_id
         );
 
-        await Inscription.updateOne(
-          { _id: inscription._id },
-          {
-            $set: {
-              ...inscriptionDetails,
-              listed: false,
-              listed_price: 0,
-              in_mempool: false,
-              signed_psbt: "",
-              unsigned_psbt: "",
-              listed_token: "",
-              listed_price_per_token: "",
-              listed_amount: "",
-              tap_internal_key: "",
-              listed_seller_receive_address: "",
+        return {
+          updateOne: {
+            filter: { _id: inscription._id },
+            update: {
+              $set: {
+                ...inscriptionDetails,
+                listed: false,
+                listed_price: 0,
+                in_mempool: false,
+                signed_psbt: "",
+                unsigned_psbt: "",
+                listed_token: "",
+                listed_price_per_token: "",
+                listed_amount: "",
+                tap_internal_key: "",
+                listed_seller_receive_address: "",
+              },
             },
-          }
-        );
-      } catch (error: any) {
+          },
+        };
+      } catch (error) {
         console.error(
           `Error fetching status for txid ${inscription.txid}:`,
           error
         );
       }
-    }
-
-    // Optionally, refetch the updated list of inscriptions
-    const updatedInscriptions = await Inscription.find({
-      in_mempool: true,
-      updated_at: { $lt: twoDaysAgo },
     });
 
-    return NextResponse.json({
-      total: updatedInscriptions.length,
-      updatedInscriptions,
+    // Execute the bulk operation
+    return Promise.all(bulkOps).then((operations: any) => {
+      return Inscription.bulkWrite(operations.filter((op: any) => op != null));
     });
   } catch (err: any) {
     console.error("Error fetching data:", err.message);
