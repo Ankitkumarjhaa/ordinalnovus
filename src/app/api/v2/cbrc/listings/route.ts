@@ -33,7 +33,6 @@ const countInscriptions = async (query: any) => {
   );
 };
 
-
 export async function GET(req: NextRequest, res: NextResponse) {
   console.log("***** CBRC LISTINGS API CALLED *****");
   const startTime = Date.now(); // Record the start time

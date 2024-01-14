@@ -91,3 +91,4 @@ function validateJsonData(jsonData: any) {
 
   return { valid: true };
 }
+export const dynamic = "force-dynamic";

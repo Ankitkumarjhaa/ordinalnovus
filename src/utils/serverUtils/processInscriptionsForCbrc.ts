@@ -84,12 +84,12 @@ async function processInscription(
 
           // Then, update the inscription in the database using the 'updateInscriptionDB' function.
           // This function presumably updates the 'valid' status of an inscription identified by 'inscription_id'.
-          await updateInscriptionDB(ins.inscription_id, valid);
+          // await updateInscriptionDB(ins.inscription_id, valid);
 
-          if (valid === true) {
-            console.log("setting validity cache...");
-            await setCache(cacheKey, valid, 120);
-          }
+          // if (valid === true) {
+          //   console.log("setting validity cache...");
+          //   // await setCache(cacheKey, valid, 120);
+          // }
         } else {
           console.log(
             `Marking inscription ${ins.inscription_id} as Invalid because it is inscribed on a sat that does belong to collection: ${collection.slug}`
@@ -98,26 +98,26 @@ async function processInscription(
           ins.cbrc_valid = false;
 
           // Update the inscription in the database, setting its 'valid' status to false.
-          await updateInscriptionDB(ins.inscription_id, false);
+          // await updateInscriptionDB(ins.inscription_id, false);
         }
       } else {
         // Just CBRC Token
         ins.cbrc_valid = valid; // true | false
 
         // Update the inscription in the database with the current 'valid' value.
-        await updateInscriptionDB(ins.inscription_id, valid);
+        // await updateInscriptionDB(ins.inscription_id, valid);
 
-        if (valid === true) {
-          console.log("setting validity cache...");
-          await setCache(cacheKey, valid, 120);
-        }
+        // if (valid === true) {
+        //   console.log("setting validity cache...");
+        //   // await setCache(cacheKey, valid, 120);
+        // }
       }
     } else {
       console.debug(
         "checkCbrcValidity returned undefined for inscription_id:",
         ins.inscription_id
       );
-      await setCache(cacheKey, valid, 120); // Cache the undefined value to recheck later
+      // await setCache(cacheKey, valid, 120); // Cache the undefined value to recheck later
     }
   } catch (error) {
     console.error(
@@ -172,23 +172,4 @@ async function enrichInscriptionWithSatCollection(ins: IInscription) {
       error
     );
   }
-}
-
-// Example implementation of updateInscriptionDB (modify as per your DB structure and requirements)
-async function updateInscriptionDB(inscriptionId: string, isValid: boolean) {
-  let update: any = { valid: isValid };
-
-  if (isValid === false) {
-    update = {
-      ...update,
-      listed: false,
-      listed_price: 0,
-      listed_price_per_token: 0,
-      signed_psbt: "",
-      unsigned_psbt: "",
-      in_mempool: false,
-    };
-  }
-
-  await Inscription.findOneAndUpdate({ inscription_id: inscriptionId }, update);
 }
