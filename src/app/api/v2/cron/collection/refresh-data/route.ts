@@ -13,7 +13,9 @@ export async function GET() {
       throw new Error("Collection not found");
     }
 
-    const coll_ins = await Inscription.find({ official_collection: coll._id });
+    const coll_ins = await Inscription.find({
+      official_collection: coll._id,
+    });
 
     // Process in chunks
     const chunkSize = 100;
@@ -38,7 +40,7 @@ export async function GET() {
         );
       }
 
-      await Collection.updateOne({ _id: coll._id }, { updated: i + chunkSize });
+      // await Collection.updateOne({ _id: coll._id }, { updated: i + chunkSize });
       // Wait for 1 second before processing the next batch
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
