@@ -239,7 +239,8 @@ export async function generateUnsignedPsbtForInscription(
     paymentUtxos = await selectPaymentUTXOs(
       payerUtxos,
       order.chain_fee + order.service_fee + 10000,
-      Math.floor(Math.random() * 3) + 1,
+      Math.floor(Math.random() * 3) + 2, // number between 2-5
+
       inscriptions.length + 2,
       fee_rate
     );
