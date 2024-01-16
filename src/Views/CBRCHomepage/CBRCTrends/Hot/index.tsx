@@ -41,12 +41,31 @@ const Hot = ({ data }: { data: IStats }) => {
         const { value, isPositive } = calculateVolumeChange(item);
         return (
           <div key={index} className=" p-3  flex justify-between items-center">
-            <div className="text-light_gray text-md">
-              {index + 1}.{" "}
-              <span className="pl-1 uppercase text-white font-medium">
-                {" "}
-                {item.tick}
-              </span>
+            <div>
+              <div className="pl-1 uppercase flex items-center  text-white font-medium">
+                <div className="text-light_gray text-md pr-2">{index + 1}. </div>
+                <div className="flex items-center ">
+                  {item.icon ? (
+                    <div className=" rounded-full w-7 h-7 border border-white">
+                      <img
+                        src={item.icon}
+                        alt="Icon"
+                        className=" object-cover w-full h-full overflow-none rounded-full " // Adjust width and height as needed
+                      />
+                    </div>
+                  ) : (
+                    <div className="">
+                      <div
+                        className="rounded-full w-7 h-7 border border-white flex justify-center items-center bg-accent" // Use your secondary color here
+                        style={{ lineHeight: "1.5rem" }} // Adjust line height to match your text size
+                      >
+                        {item.tick.charAt(0).toUpperCase()}
+                      </div>
+                    </div>
+                  )}
+                  <div className="pl-3"> {item.tick}</div>
+                </div>
+              </div>
             </div>
             <div className="">
               <span className="pl-2">{item.in_mempool}</span>

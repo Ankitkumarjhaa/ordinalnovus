@@ -86,9 +86,28 @@ function CBRCSales() {
   ) => {
     setPage(value);
   };
+  const convertSatsToBTC = useCallback(
+    (sats: number) => {
+      // Convert satoshis to BTC and fix the result to 3 decimal places
+      return (sats / 100_000_000).toFixed(3);
+    },
+    [] // No dependencies are needed as the conversion rate is fixed
+  );
+
+  const renderPagination = () =>
+    txs &&
+    txs?.length > 0 && (
+      <div className="w-full lg:w-auto center">
+        <CustomPaginationComponent
+          count={Math.ceil(totalCount / page_size)}
+          onChange={handlePageChange}
+          page={page}
+        />
+      </div>
+    );
 
   return (
-    <section className=" w-full">
+    <section className="cbrc-sales w-full">
       <div className="SortSearchPages py-6 flex flex-wrap justify-between">
         <div className="w-full lg:w-auto flex justify-start items-center flex-wrap">
           <div className="w-full center pb-4 lg:pb-0 lg:w-auto">
@@ -110,7 +129,7 @@ function CBRCSales() {
             />
           </div>
         </div>
-        {txs && txs?.length > 0 && (
+        {/* {txs && txs?.length > 0 && (
           <div className="w-full lg:w-auto center">
             <CustomPaginationComponent
               count={Math.ceil(totalCount / page_size)}
@@ -118,7 +137,8 @@ function CBRCSales() {
               page={page}
             />
           </div>
-        )}
+        )} */}
+        {renderPagination()}
       </div>
       {!txs || !txs?.length ? (
         <>
@@ -135,10 +155,10 @@ function CBRCSales() {
           <TableContainer
             component={Paper}
             sx={{
-              bgcolor: "#3d0263",
+              bgcolor: "transparent",
               color: "white",
               border: "3px",
-              borderColor: "#3d0263",
+              borderColor: "rgba(145, 2, 240, 0.50)",
             }}
           >
             <Table
@@ -146,34 +166,78 @@ function CBRCSales() {
               sx={{ minWidth: 650 }}
               aria-label="cbrc-20 table"
             >
-              <TableHead sx={{ bgcolor: "#84848a", color: "white" }}>
+              <TableHead
+                sx={{ bgcolor: "rgba(145, 2, 240, 0.12)", color: "white" }}
+              >
                 <TableRow>
-                  <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+                  <TableCell
+                    sx={{
+                      fontWeight: "bold",
+                      fontSize: "1rem",
+                      color: "#84848a",
+                    }}
+                  >
                     TICK
                   </TableCell>
-                  <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+                  <TableCell
+                    sx={{
+                      fontWeight: "bold",
+                      fontSize: "1rem",
+                      color: "#84848a",
+                    }}
+                  >
                     FROM
                   </TableCell>
-                  <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+                  <TableCell
+                    sx={{
+                      fontWeight: "bold",
+                      fontSize: "1rem",
+                      color: "#84848a",
+                    }}
+                  >
                     TO
                   </TableCell>
-                  <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+                  <TableCell
+                    sx={{
+                      fontWeight: "bold",
+                      fontSize: "1rem",
+                      color: "#84848a",
+                    }}
+                  >
                     PRICE (TOTAL)
                   </TableCell>
-                  <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+                  <TableCell
+                    sx={{
+                      fontWeight: "bold",
+                      fontSize: "1rem",
+                      color: "#84848a",
+                    }}
+                  >
                     PRICE (PER TOKEN)
                   </TableCell>
-                  <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+                  <TableCell
+                    sx={{
+                      fontWeight: "bold",
+                      fontSize: "1rem",
+                      color: "#84848a",
+                    }}
+                  >
                     AMOUNT
                   </TableCell>
-                  <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+                  <TableCell
+                    sx={{
+                      fontWeight: "bold",
+                      fontSize: "1rem",
+                      color: "#84848a",
+                    }}
+                  >
                     TIMESTAMP
                   </TableCell>
                 </TableRow>
               </TableHead>
               <>
                 {txs && txs.length ? (
-                  <TableBody sx={{ bgcolor: "#3d0263", color: "white" }}>
+                  <TableBody sx={{ bgcolor: "", color: "white" }}>
                     {txs?.map((item: ITransaction) => {
                       const op = item.parsed_metaprotocol[1];
                       const tokenAmt = item.parsed_metaprotocol[2];
@@ -189,8 +253,11 @@ function CBRCSales() {
                             onClick={() => handleTxClick(item.txid)}
                             key={item.txid}
                             sx={{
-                              "&:last-child td, &:last-child th": { border: 0 },
-                              "&:hover": { bgcolor: "#1f1d3e" },
+                              "&:last-child td, &:last-child th": {
+                                border: "3px",
+                                borderColor: "rgba(145, 2, 240, 0.50)",
+                              },
+                              "&:hover": { bgcolor: "rgba(145, 2, 240, 0.12)" },
                               color: "white",
                               cursor: "pointer",
                             }}
@@ -218,7 +285,6 @@ function CBRCSales() {
                                     <FaBitcoin className="" />
                                   </div>
                                   {(item.price / 100_000_000).toFixed(5)}
-                                  {" BTC"}
                                 </div>
                                 <div className="flex items-center ">
                                   <div className="mr-2 text-green-500">
@@ -237,8 +303,8 @@ function CBRCSales() {
                                   <div className="mr-2 text-bitcoin">
                                     <FaBitcoin className="" />
                                   </div>
-                                  {(item.price / amount).toFixed(0)}
-                                  {" sats"}
+                                  {/* {(item.price / amount).toFixed(0)} */}
+                                  {convertSatsToBTC(item.price)}
                                 </div>
                                 <div className="flex items-center ">
                                   <div className="mr-2 text-green-500">
@@ -283,6 +349,7 @@ function CBRCSales() {
           </TableContainer>
         </div>
       )}
+      <div className="flex justify-end w-full pt-10">{renderPagination()}</div>
     </section>
   );
 }

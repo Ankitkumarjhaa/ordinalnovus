@@ -34,6 +34,22 @@ export const WalletSchema = new mongoose.Schema(
     tag: {
       type: String,
     },
+    rank: {
+      type: Number,
+      default: 0,
+    },
+    cbrcRank: {
+      type: Number,
+      default: 0,
+    },
+    Volume: {
+      type: Number,
+      default: 0,
+    },
+    cbrcVolume: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,

@@ -53,4 +53,5 @@ export interface ICbrcToken {
   on_volume: number;
   on_volume_in_sats: number;
   historicalData: IHistoricalData[];
+  icon?:string;
 }
