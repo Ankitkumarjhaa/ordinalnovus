@@ -18,7 +18,7 @@ function page() {
           Risks: Your inscription might get stuck in an address that we might
           not have access to right now.
         </div>
-        <div>There's a 0.1% chance of this happening</div>
+        <div>There&apos;s a 0.1% chance of this happening</div>
       </div>
       <Crafter mode="reinscribe" />
     </>
