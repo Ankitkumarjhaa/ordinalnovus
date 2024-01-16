@@ -1,5 +1,5 @@
 "use client";
-import { IToken, Icbrc } from "@/types/CBRC";
+import { ICbrcToken, Icbrc } from "@/types/CBRC";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { IInscription } from "@/types";
@@ -47,7 +47,7 @@ function CBRCLatestListings() {
 
     const interval = setInterval(() => {
       fetchData(); // Fetch data every 10 seconds
-    }, 30000); // 10000 milliseconds = 10 seconds
+    }, 120000);
 
     return () => clearInterval(interval); // Clear interval on unmount
   }, [sort, page, dispatch, pageSize]);

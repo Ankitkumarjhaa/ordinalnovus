@@ -15,7 +15,6 @@ const CBRCStats = ({ stats }: { stats: IStats }) => {
   ); // Retrieve BTC price from Redux store
   const fees = useSelector((state: RootState) => state.general.fees); // Retrieve fees from Redux store
 
-
   const convertToUSD = useCallback(
     (sats: number) => {
       if (btcPrice) {
@@ -72,7 +71,7 @@ const CBRCStats = ({ stats }: { stats: IStats }) => {
             <p className="text-gray">Latest height : </p>
             <p
               className={`px-2 font-medium text-white rounded-sm py-3 ${
-                stats.btcHeight - stats.novusBtcHeight !== 0
+                Math.abs(stats.btcHeight - stats.novusBtcHeight) > 2
                   ? "bg-red-500"
                   : ""
               }`}

@@ -1,5 +1,5 @@
 "use client";
-import { IToken } from "@/types/CBRC";
+import { ICbrcToken } from "@/types/CBRC";
 import React, { useState } from "react";
 import Hero from "./CbrcHero";
 import CustomTab from "@/components/elements/CustomTab";
@@ -7,7 +7,7 @@ import CBRCListingsData from "./CBRCListingsData";
 import CBRCSales from "./CBRCSales";
 
 type CbrcDetailPageProps = {
-  cbrc: IToken;
+  cbrc: ICbrcToken;
 };
 
 function CbrcDetailPage({ cbrc }: CbrcDetailPageProps) {

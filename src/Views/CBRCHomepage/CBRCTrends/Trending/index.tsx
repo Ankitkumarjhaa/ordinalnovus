@@ -1,15 +1,11 @@
 import { RootState } from "@/stores";
 import { IStats } from "@/types";
-import { IHistoricalData, IToken } from "@/types/CBRC";
 import { formatNumber } from "@/utils";
 import React, { useCallback } from "react";
-import { BiSolidUpArrow, BiSolidDownArrow } from "react-icons/bi";
 import { FaDollarSign } from "react-icons/fa";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 
 const Trending = ({ data }: { data: IStats }) => {
-  const dispatch = useDispatch();
-
   const btcPrice = useSelector(
     (state: RootState) => state.general.btc_price_in_dollar
   );
@@ -27,10 +23,10 @@ const Trending = ({ data }: { data: IStats }) => {
   );
 
   return (
-    <div className="py-8 px-6 rounded-lg bg-violet">
+    <div className="py-8 px-6 rounded-lg bg-violet h-full">
       <div className="flex items-center pb-4">
         <div>
-          <img src="/assets/images/trending.png" />
+          <img src="/static-assets/images/trending.png" />
         </div>
         <div>
           <p className="font-semibold text-xl text-white pl-2 ">Trending</p>
@@ -50,7 +46,7 @@ const Trending = ({ data }: { data: IStats }) => {
               {/* {isPositive ? <BiSolidUpArrow /> : <BiSolidDownArrow />} */}
               <p className="pl-2 flex items-center">
                 <FaDollarSign className="text-green-500" />
-               <span className="pl-1">{convertToUSD(item.price)}</span>
+                <span className="pl-1">{convertToUSD(item.price)}</span>
               </p>
             </div>
           </div>

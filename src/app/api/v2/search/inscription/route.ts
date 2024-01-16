@@ -104,7 +104,7 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
             const valid = await checkCbrcValidity(ins.inscription_id);
             if (valid !== undefined) {
               inscriptions[0].cbrc_valid = valid;
-              await updateInscriptionDB(ins.inscription_id, valid);
+              // await updateInscriptionDB(ins.inscription_id, valid);
             } else {
               console.debug("checkCbrcValidity returned undefined");
             }
@@ -243,14 +243,6 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
   }
 }
 
-// Example implementation of updateInscriptionDB (modify as per your DB structure and requirements)
-async function updateInscriptionDB(inscriptionId: string, isValid: boolean) {
-  await Inscription.findOneAndUpdate(
-    { inscription_id: inscriptionId },
-    { valid: isValid }
-  );
-}
-
 export const checkCbrcValidity = async (id: string) => {
   try {
     const cacheKey = `cbrc_status_${id}`;
@@ -270,6 +262,17 @@ export const checkCbrcValidity = async (id: string) => {
       // console.dir(data, { depth: null });
       const isValid = !data.transfer.transfered;
 
+      if (isValid === true || isValid === false) {
+        // Update InscriptionDB only if transferred is true or false
+        await updateInscriptionDB(id, isValid);
+        const statusCacheKey = `cbrcValidityCheck:${id}`;
+
+        // Set cache for 120 seconds
+        await setCache(statusCacheKey, isValid, 120); // Cache for 2 minutes
+
+        console.log({ id, isValid });
+      }
+
       // If invalid, store 'false' in the cache
       if (!isValid) {
         await setCache(cacheKey, false, 60 * 60); // Cache for 1 hour
@@ -286,4 +289,26 @@ export const checkCbrcValidity = async (id: string) => {
   }
 };
 
+// Example implementation of updateInscriptionDB (modify as per your DB structure and requirements)
+async function updateInscriptionDB(inscriptionId: string, isValid: boolean) {
+  let update: any = { valid: isValid };
+
+  if (isValid === false) {
+    update = {
+      ...update,
+      listed: false,
+      listed_price: 0,
+      listed_price_per_token: 0,
+      signed_psbt: "",
+      unsigned_psbt: "",
+      in_mempool: false,
+    };
+  }
+
+  if (isValid === true || isValid === false)
+    await Inscription.findOneAndUpdate(
+      { inscription_id: inscriptionId },
+      update
+    );
+}
 export const dynamic = "force-dynamic";

@@ -51,27 +51,33 @@ const CbrcHero = ({ data }: { data: ICollection[] }) => {
     <div className="pt-6 lg:pt-0">
       <div>
         <Slider {...settings}>
-          {data.map((item, index) => (
-            <div key={index} className="rounded-md h-auto lg:h-[45vh]">
+          {data.map((item: ICollection, index) => (
+            <div key={index} className="rounded-md h-auto">
               <div className="w-full flex flex-wrap justify-between py-6 px-8 rounded-md h-full border border-accent">
-                <div className="lg:w-4/12  w-full h-full">
-                  {item?.inscription_icon?.inscription_id ? (
+                <div className="lg:w-4/12  w-full h-auto p-6">
+                  {item.icon ? (
                     <div className="w-full md:flex md:justify-center lg:justify-start rounded-md lg:w-[80%]  max-h-[300px] h-[250px] xl:h-[300px]  overflow-hidden relative ">
-                      <CardContent
-                        inscriptionId={item.inscription_icon.inscription_id}
-                        content_type={item.inscription_icon.content_type}
-                        inscription={item.inscription_icon}
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-full md:flex md:justify-center lg:justify-start rounded-md lg:w-[80%] h-full overflow-hidden">
                       <img className="rounded-md" src={item.icon} />
                     </div>
+                  ) : (
+                    <>
+                      {item?.inscription_icon?.inscription_id && (
+                        <div className="w-full md:flex md:justify-center lg:justify-start rounded-md lg:w-[80%]  max-h-[300px] h-[250px] xl:h-[300px]  overflow-hidden relative ">
+                          <CardContent
+                            inscriptionId={item.inscription_icon.inscription_id}
+                            content_type={item.inscription_icon.content_type}
+                            inscription={item.inscription_icon}
+                          />
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
-                <div className="lg:w-8/12 w-full lg:pt-8 pt-4">
+                <div className="lg:w-8/12 w-full lg:pt-6">
                   <div>
-                    <p className=" text-3xl lg:text-5xl font-bold text-white">{item.name}</p>
+                    <p className=" text-3xl lg:text-5xl font-bold text-white">
+                      {item.name}
+                    </p>
                     <p className="text-lg lg:text-lg pt-6 font-light">
                       {item.description}
                     </p>
@@ -107,7 +113,13 @@ const CbrcHero = ({ data }: { data: ICollection[] }) => {
                   </div>
                   <div>
                     <div className="pt-8  ">
-                      <CustomButton bgColor="bg-accent" hoverBgColor="hover:bg-accent_dark"  href={`/collection/${item.slug}`} link={true} text="View collection"  />
+                      <CustomButton
+                        bgColor="bg-accent"
+                        hoverBgColor="hover:bg-accent_dark"
+                        href={`/collection/${item.slug}`}
+                        link={true}
+                        text="View collection"
+                      />
                     </div>
                   </div>
                 </div>

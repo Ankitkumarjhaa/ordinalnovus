@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema } from "mongoose";
 import * as bitcoin from "bitcoinjs-lib";
-import { IToken } from "./CBRC";
+import { ICbrcToken } from "./CBRC";
 
 export interface ITransaction {
   txid: string;
@@ -382,8 +382,8 @@ export interface IStats {
   novusBtcHeight: number;
   mempoolBtcHeight: number;
   dailyVolume: number;
-  tokensTrend: IToken[];
-  tokensHot: IToken[];
+  tokensTrend: ICbrcToken[];
+  tokensHot: ICbrcToken[];
   aggregateVolume: AggregateVolumeData[];
   monthlyVolume: number;
   allTimeVolume: number;

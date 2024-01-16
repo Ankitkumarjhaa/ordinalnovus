@@ -4,16 +4,15 @@ import CardContent from "@/components/elements/CustomCardSmall/CardContent";
 import ReinscriptionCarousel from "@/components/elements/ReinscriptionCarousel";
 import { RootState } from "@/stores";
 import { IInscription } from "@/types";
-import { formatNumber, stringToHex } from "@/utils";
+import { formatNumber } from "@/utils";
 import { cbrcListed, myInscription } from "@/utils/validate";
 import { useWalletAddress } from "bitcoin-wallet-adapter";
-import moment from "moment";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { FaBitcoin, FaCheckCircle, FaDollarSign } from "react-icons/fa";
 import { IoIosWarning } from "react-icons/io";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 type HeroProps = {
   listings: IInscription[];
   loading: boolean;
@@ -41,7 +40,7 @@ function CbrcListings({ listings, loading }: HeroProps) {
               <div className="border-2 overflow-hidden border-gray-700 rounded-lg bg-slate-900">
                 {!item?.content_type?.includes("text/plain") ? (
                   <>
-                    {item?.reinscriptions ? (
+                    {item?.reinscriptions && item?.official_collection ? (
                       <ReinscriptionCarousel
                         data={item.reinscriptions}
                         latest={item}
@@ -58,7 +57,7 @@ function CbrcListings({ listings, loading }: HeroProps) {
                   </>
                 ) : (
                   <>
-                    {item?.reinscriptions ? (
+                    {item?.reinscriptions && item?.official_collection ? (
                       <ReinscriptionCarousel
                         data={item.reinscriptions}
                         latest={item}

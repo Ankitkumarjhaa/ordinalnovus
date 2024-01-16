@@ -23,6 +23,7 @@ function BuyInscriptionCardButton({ data }: InscriptionProps) {
 
   const [loading, setLoading] = useState<boolean>(false);
 
+  const [customFee, setCustomFee] = useState(false);
   const [unsignedPsbtBase64, setUnsignedPsbtBase64] = useState<string>("");
   const [inputLength, setInputLength] = useState(0);
   const [action, setAction] = useState<string>("");
@@ -162,12 +163,12 @@ function BuyInscriptionCardButton({ data }: InscriptionProps) {
         fee_rate: feeRate,
         // Additional properties if needed
       });
-      if (inscription?.listed_price_per_token && inscription?.listed_token)
-        await updateTokenPrice(
-          inscription?.listed_token,
-          action,
-          (inscription?.listed_price_per_token / 100_000_000) * btcPrice
-        );
+      // if (inscription?.listed_price_per_token && inscription?.listed_token)
+      //   await updateTokenPrice(
+      //     inscription?.listed_token,
+      //     action,
+      //     (inscription?.listed_price_per_token / 100_000_000) * btcPrice
+      //   );
       window.open(`https://mempool.space/tx/${data.data.txid}`, "_blank");
       dispatch(
         addNotification({
@@ -317,8 +318,8 @@ function BuyInscriptionCardButton({ data }: InscriptionProps) {
 
   useEffect(() => {
     if (fees?.fastestFee) {
-      setFeeRate(fees.fastestFee);
-      setDefaultFeerate(fees.fastestFee);
+      setFeeRate(fees.fastestFee + 10);
+      setDefaultFeerate(fees.fastestFee + 10);
     }
   }, [fees]);
 
@@ -326,7 +327,7 @@ function BuyInscriptionCardButton({ data }: InscriptionProps) {
     <>
       <div className="w-full  py-6 bg-secondary">
         {!data.in_mempool && (
-          <div className="pb-3">
+          <div className="py-3">
             <p className="text-sm text-center ">
               Choose Transfer Speed (Fee Rate)
             </p>
@@ -344,7 +345,15 @@ function BuyInscriptionCardButton({ data }: InscriptionProps) {
 
                 return (
                   <div
-                    onClick={() => setFeeRate(rate)}
+                    onClick={() => {
+                      setFeeRate(rate);
+
+                      if (idx === 2) {
+                        setCustomFee(true);
+                      } else {
+                        setCustomFee(false);
+                      }
+                    }}
                     className={`p-2 flex-1 ${
                       feeRate === rate
                         ? "border border-white cursor-not-allowed"
@@ -353,13 +362,35 @@ function BuyInscriptionCardButton({ data }: InscriptionProps) {
                     key={idx}
                   >
                     <p className="text-lg text-center">
-                      {idx === 0 ? "Slow" : idx === 1 ? "Fast" : "Fastest"}
+                      {idx === 0 ? "Slow" : idx === 1 ? "Fast" : "Custom"}
                     </p>
                     <p className="text-xs text-center">{rate} s/vB</p>
                   </div>
                 );
               })}
             </div>
+            {customFee ? (
+              <div>
+                <CustomInput
+                  value={feeRate.toString()}
+                  placeholder="Fee Rate"
+                  onChange={(fee) => setFeeRate(Number(fee))}
+                  helperText={
+                    feeRate < Math.min(10, defaultFeeRate - 40)
+                      ? "Fee too low"
+                      : feeRate > defaultFeeRate + 200
+                      ? "Fee too high - make sure you are okay with it"
+                      : ""
+                  }
+                  error={true}
+                  endAdornmentText=" sats / vB"
+                  startAdornmentText="Fee Rate"
+                  fullWidth
+                />
+              </div>
+            ) : (
+              <></>
+            )}
           </div>
         )}
         <CustomButton

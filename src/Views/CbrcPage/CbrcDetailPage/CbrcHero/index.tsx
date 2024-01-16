@@ -1,11 +1,11 @@
 "use client";
 import React from "react";
-import { IToken } from "@/types/CBRC";
+import { ICbrcToken } from "@/types/CBRC";
 import { formatNumber } from "@/utils";
 import { useSelector } from "react-redux";
 import { RootState } from "@/stores";
 type HeroProps = {
-  data: IToken;
+  data: ICbrcToken;
 };
 function Hero({ data }: HeroProps) {
   const btcPrice = useSelector(

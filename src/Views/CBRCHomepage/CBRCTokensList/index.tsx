@@ -5,17 +5,17 @@ import { CircularProgress } from "@mui/material";
 import CustomSearch from "@/components/elements/CustomSearch";
 import { FaSearch } from "react-icons/fa";
 import CustomPaginationComponent from "@/components/elements/CustomPagination";
-import { IToken } from "@/types/CBRC";
+import { ICbrcToken } from "@/types/CBRC";
 import { FetchCBRC } from "@/apiHelper/getCBRC";
 import TokenList from "./TokenList";
 
-function CBRCTokensList({ defaultData }: { defaultData: IToken[] }) {
+function CBRCTokensList({ defaultData }: { defaultData: ICbrcToken[] }) {
   const dispatch = useDispatch();
   const [page, setPage] = useState<number>(1);
-  const [data, setData] = useState<IToken[]>([]);
+  const [data, setData] = useState<ICbrcToken[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(15);
-  const [sort, setSort] = useState<string>("volume:-1");
+  const [sort, setSort] = useState<string>("on_volume:-1");
   const [loading, setLoading] = useState<boolean>(true);
   const [tick, setTick] = useState("");
 

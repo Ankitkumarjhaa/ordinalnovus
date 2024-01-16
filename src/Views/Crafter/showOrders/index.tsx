@@ -74,7 +74,7 @@ function ShowOrders() {
             </div>
           </div> */}
         </div>
-        {data?.length > 0 && (
+        {data?.length > 0 && Math.ceil(totalCount / pageSize) > 1 && (
           <div className="w-full lg:w-auto center">
             <CustomPaginationComponent
               count={Math.ceil(totalCount / pageSize)}

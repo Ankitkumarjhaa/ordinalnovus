@@ -1,5 +1,5 @@
 "use client";
-import { IToken, Icbrc } from "@/types/CBRC";
+import { ICbrcToken, Icbrc } from "@/types/CBRC";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { IInscription } from "@/types";
@@ -11,7 +11,7 @@ import { FaCheckCircle } from "react-icons/fa";
 import CustomSelector from "@/components/elements/CustomSelector";
 
 type CbrcDetailPageProps = {
-  cbrc: IToken;
+  cbrc: ICbrcToken;
 };
 
 const options = [
@@ -51,8 +51,9 @@ function CBRCListingsData({ cbrc }: CbrcDetailPageProps) {
     fetchData(); // Fetch data on mount and when dependencies change
 
     const interval = setInterval(() => {
-      fetchData(); // Fetch data every 10 seconds
-    }, 60000); // 10000 milliseconds = 10 seconds
+      console.log("3 minutes passed", new Date().valueOf());
+      fetchData(); // Fetch data every 3 minutes
+    }, 180_000);
 
     return () => clearInterval(interval); // Clear interval on unmount
   }, [sort, page, dispatch, pageSize]);
