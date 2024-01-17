@@ -1,5 +1,6 @@
 import { IStats } from "@/types";
 import { ICbrcToken } from "@/types/CBRC";
+import Link from "next/link";
 import React from "react";
 
 const Hot = ({ data }: { data: IStats }) => {
@@ -23,7 +24,7 @@ const Hot = ({ data }: { data: IStats }) => {
   };
 
   return (
-    <div className="py-8 px-6 rounded-lg  bg-violet h-full">
+    <div className="py-8 px-6 rounded-lg  bg-primary h-full">
       <div className="pb-4 flex items-center justify-between">
         <div className="flex items-center ">
           <div>
@@ -44,7 +45,8 @@ const Hot = ({ data }: { data: IStats }) => {
             <div>
               <div className="pl-1 uppercase flex items-center  text-white font-medium">
                 <div className="text-light_gray text-md pr-2">{index + 1}. </div>
-                <div className="flex items-center ">
+              <Link href={`/cbrc-20/${item.tick}`}>
+              <div className="flex items-center ">
                   {item.icon ? (
                     <div className=" rounded-full w-7 h-7 border border-white">
                       <img
@@ -65,10 +67,14 @@ const Hot = ({ data }: { data: IStats }) => {
                   )}
                   <div className="pl-3"> {item.tick}</div>
                 </div>
+              </Link>
               </div>
             </div>
-            <div className="">
+            <div className=" flex items-center">
               <span className="pl-2">{item.in_mempool}</span>
+              <div className="pl-2">
+                <img className="w-6 h-6" src="/static-assets/images/pending.gif"/>
+              </div>
             </div>
           </div>
         );

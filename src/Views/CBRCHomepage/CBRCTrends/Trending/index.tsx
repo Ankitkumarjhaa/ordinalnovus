@@ -1,6 +1,7 @@
 import { RootState } from "@/stores";
 import { IStats } from "@/types";
 import { formatNumber } from "@/utils";
+import Link from "next/link";
 import React, { useCallback } from "react";
 import { FaDollarSign } from "react-icons/fa";
 import { useSelector } from "react-redux";
@@ -13,9 +14,11 @@ const Trending = ({ data }: { data: IStats }) => {
   const convertToUSD = useCallback(
     (sats: number) => {
       if (btcPrice) {
-        return formatNumber(
-          Number(((sats / 100_000_000) * btcPrice).toFixed(2))
-        );
+        const usdValue = (sats / 100_000_000) * btcPrice;
+        // Check if the value is less than 0 and format accordingly
+        return usdValue <= 0 
+          ? formatNumber(Number(usdValue.toFixed(4))) 
+          : formatNumber(Number(usdValue.toFixed(2)));
       }
       return "Loading...";
     },
@@ -23,7 +26,7 @@ const Trending = ({ data }: { data: IStats }) => {
   );
 
   return (
-    <div className="py-8 px-6 rounded-lg bg-violet h-full">
+    <div className="py-8 px-6 rounded-lg bg-primary h-full">
       <div className="flex items-center pb-4">
         <div>
           <img src="/static-assets/images/trending.png" />
@@ -38,7 +41,8 @@ const Trending = ({ data }: { data: IStats }) => {
            <div>
               <div className="pl-1 uppercase flex items-center  text-white font-medium">
                 <div className="text-light_gray text-md pr-2">{index + 1}. </div>
-                <div className="flex items-center ">
+              <Link shallow href={`/cbrc-20/${item.tick}`}>
+              <div className="flex items-center ">
                   {item.icon ? (
                     <div className=" rounded-full w-7 h-7 border border-white">
                       <img
@@ -59,6 +63,7 @@ const Trending = ({ data }: { data: IStats }) => {
                   )}
                   <div className="pl-3"> {item.tick}</div>
                 </div>
+              </Link>
               </div>
             </div>
             <div className="">

@@ -8,7 +8,7 @@ import TrendStats from "./TrendStats";
 
 const CBRCTrends = ({ token }: { token: IStats }) => {
   return (
-    <div className="py-6 flex flex-wrap justify-between items-stretch w-full min-h-[30vh]">
+    <div className="py-6 flex flex-wrap justify-between bg-violet  items-stretch w-full min-h-[30vh]">
       <div className="p-4 w-full lg:w-4/12 h-full">
         <div className="h-full">
           <TrendStats data={token} />

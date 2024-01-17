@@ -154,24 +154,26 @@ function TokenList({ tokens, loading }: HeroProps) {
                       >
                         <div className="flex items-center ">
                           {item.icon ? (
-                           <div className=" rounded-full w-7 h-7 border border-white">
-                             <img
-                              src={item.icon}
-                              alt="Icon"
-                              className=" object-cover w-full h-full overflow-none rounded-full " // Adjust width and height as needed
-                            />
-                           </div>
-                          ) : (
-                           <div className="">
-                             <div
-                              className="rounded-full w-7 h-7 border border-white flex justify-center items-center bg-accent" // Use your secondary color here
-                              style={{ lineHeight: "1.5rem" }} // Adjust line height to match your text size
-                            >
-                              {item.tick.charAt(0).toUpperCase()}
+                            <div className=" rounded-full w-7 h-7 border border-white">
+                              <img
+                                src={item.icon}
+                                alt="Icon"
+                                className=" object-cover w-full h-full overflow-none rounded-full " // Adjust width and height as needed
+                              />
                             </div>
-                           </div>
+                          ) : (
+                            <div className="">
+                              <div
+                                className="rounded-full w-7 h-7 border border-white flex justify-center items-center bg-accent" // Use your secondary color here
+                                style={{ lineHeight: "1.5rem" }} // Adjust line height to match your text size
+                              >
+                                {item.tick.charAt(0).toUpperCase()}
+                              </div>
+                            </div>
                           )}
-                          <p className="text-left pl-3 uppercase">{item.tick}</p>
+                          <p className="text-left pl-3 font-bold tracking-wide uppercase">
+                            {item.tick}
+                          </p>
                         </div>
                       </TableCell>
                       <TableCell
@@ -264,11 +266,17 @@ function TokenList({ tokens, loading }: HeroProps) {
                           color: "white",
                         }}
                       >
-                        <p className="text-start">
-                          {item?.historicalData && item.historicalData?.length
-                            ? `$ ${formatNumber(item.supply * price)}`
-                            : "-"}
-                        </p>
+                        <div className="flex items-center">
+                          <div className="text-green-500 pr-1">
+                            {" "}
+                            <FaDollarSign />
+                          </div>
+                          <p className="text-start">
+                            {item?.historicalData && item.historicalData?.length
+                              ? ` ${formatNumber(item.supply * price)}`
+                              : "-"}
+                          </p>
+                        </div>
                       </TableCell>
                       <TableCell
                         sx={{

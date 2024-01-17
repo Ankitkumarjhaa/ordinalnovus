@@ -24,6 +24,7 @@ import { RootState } from "@/stores";
 import { FaBitcoin, FaDollarSign } from "react-icons/fa";
 import { shortenString } from "@/utils";
 import CustomSelector from "@/components/elements/CustomSelector";
+import InscriptionImage from "./InscriptionImage";
 
 const options = [
   { value: "timestamp:-1", label: "Latest Sales" },
@@ -186,6 +187,15 @@ function CBRCSales() {
                       color: "#84848a",
                     }}
                   >
+                    INSCRIPTION
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      fontWeight: "bold",
+                      fontSize: "1rem",
+                      color: "#84848a",
+                    }}
+                  >
                     FROM
                   </TableCell>
                   <TableCell
@@ -244,6 +254,7 @@ function CBRCSales() {
                       const token = tokenAmt.includes("=")
                         ? tokenAmt.split("=")[0]
                         : "";
+                      console.log(txs, "token");
                       const amount = tokenAmt.includes("=")
                         ? Number(tokenAmt.split("=")[1])
                         : 0;
@@ -270,7 +281,12 @@ function CBRCSales() {
                                 textTransform: "uppercase",
                               }}
                             >
-                              {token}
+                              <div className="font-bold"> {token}</div>
+                            </TableCell>
+                            <TableCell sx={{ color: "white" }}>
+                              <InscriptionImage
+                                inscriptionId={item.inscriptions[0]}
+                              />
                             </TableCell>
                             <TableCell sx={{ color: "white" }}>
                               {shortenString(item.from)}
@@ -323,9 +339,6 @@ function CBRCSales() {
                             <TableCell sx={{ color: "white" }}>
                               <div className="flex justify-start items-center">
                                 {moment(item.timestamp).fromNow()}{" "}
-                                {item?.marketplace === "ordinalnovus" && (
-                                  <FaHome className="ml-3" />
-                                )}
                               </div>
                             </TableCell>
                           </TableRow>

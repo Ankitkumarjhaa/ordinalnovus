@@ -98,7 +98,7 @@ const TrendStats = ({ data }: { data: IStats }) => {
   }, [data.aggregateVolume, btcPrice, themeColors]);
 
   return (
-    <div className="py-8 px-6   rounded-lg bg-violet h-full">
+    <div className="py-8 px-6   rounded-lg h-full">
       <div>
         <p>24Hr Volume ( Ordinalnovus )</p>
       </div>

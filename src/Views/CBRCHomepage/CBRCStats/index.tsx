@@ -28,11 +28,11 @@ const CBRCStats = ({ stats }: { stats: IStats }) => {
   );
 
   const convertSatsToBTC = useCallback(
-    (sats: number) => {
-      // Convert satoshis to BTC and fix the result to 3 decimal places
-      return (sats / 100_000_000).toFixed(0);
+    (sats: number, decimalPlaces: number) => {
+      // Convert satoshis to BTC with variable decimal places
+      return (sats / 100_000_000).toFixed(decimalPlaces);
     },
-    [] // No dependencies are needed as the conversion rate is fixed
+    [] // No dependencies
   );
 
   return (
@@ -47,21 +47,21 @@ const CBRCStats = ({ stats }: { stats: IStats }) => {
             <p className="text-gray">24Hr Vol :</p>
             <p className="pl-2 text-bitcoin flex items-center ">
              <span className="pr-1"><FaBitcoin className="text-bitcoin " /></span> 
-              {convertSatsToBTC(stats.dailyVolume)}
+              {convertSatsToBTC(stats.dailyVolume,2)}
             </p>
           </div>
           <div className="flex">
             <p className="text-gray">30 Days Vol :</p>
             <p className="pl-2 text-bitcoin flex items-center">
              <span className="pr-1"><FaBitcoin className="text-bitcoin " /></span> 
-              {convertSatsToBTC(stats.monthlyVolume)}
+              {convertSatsToBTC(stats.monthlyVolume,0)}
             </p>
           </div>
           <div className="flex">
             <p className="text-gray">All time Vol :</p>
             <p className="pl-2 text-bitcoin flex items-center">
              <span className="pr-1"><FaBitcoin className="text-bitcoin " /></span> 
-              {convertSatsToBTC(stats.allTimeVolume)}
+              {convertSatsToBTC(stats.allTimeVolume,0)}
             </p>
           </div>
           <div className="flex">
