@@ -1,7 +1,12 @@
 import { ICbrcToken } from "@/types/CBRC";
 import { useRouter } from "next/navigation";
 import React, { useCallback } from "react";
-import { FaBitcoin, FaDollarSign } from "react-icons/fa";
+import {
+  FaArrowDown,
+  FaBitcoin,
+  FaChevronDown,
+  FaDollarSign,
+} from "react-icons/fa";
 
 import {
   CircularProgress,
@@ -105,7 +110,9 @@ function TokenList({ tokens, loading }: HeroProps) {
               <TableCell
                 sx={{ fontWeight: "bold", fontSize: "1rem", color: "#84848a" }}
               >
-                NOVUS VOLUME (24h)
+                <div className="flex items-center">
+                  NOVUS VOLUME (24h) <FaArrowDown className="ml-2" />
+                </div>
               </TableCell>
               <TableCell
                 sx={{ fontWeight: "bold", fontSize: "1rem", color: "#84848a" }}
