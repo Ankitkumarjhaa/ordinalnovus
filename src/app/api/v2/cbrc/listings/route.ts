@@ -10,7 +10,7 @@ import { processInscriptionsForCbrc } from "@/utils/serverUtils/processInscripti
 const fetchInscriptions = async (query: any) => {
   return await Inscription.find({
     ...query.find,
-    in_mempool: false,
+    // in_mempool: false,
     $or: [{ valid: { $exists: false } }, { valid: true }],
   })
     .select("-signed_psbt -unsigned_psbt -content")
@@ -26,7 +26,7 @@ const countInscriptions = async (query: any) => {
   return await Inscription.countDocuments(
     {
       ...query.find,
-      in_mempool: false,
+      // in_mempool: false,
       $or: [{ valid: { $exists: false } }, { valid: true }],
     },
     { limit: 100000 }
@@ -76,7 +76,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
 
     // Try to get cached data
     let cachedData = await getCache(cacheKey);
-    if (cachedData) {
+    if (cachedData && !process.env.NEXT_PUBLIC_URL?.includes("localhost")) {
       console.log("Responding from cache");
       return NextResponse.json(JSON.parse(cachedData));
     }

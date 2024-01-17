@@ -9,6 +9,7 @@ import CbrcHero from "./CBRCHero";
 import CBRCStats from "./CBRCStats";
 import { ICollection, IStats } from "@/types";
 import CBRCTrends from "./CBRCTrends";
+import Homepage from "../Homepage";
 function CBRCHomepage({
   featured,
   tokens,
@@ -23,8 +24,22 @@ function CBRCHomepage({
   return (
     <div className="min-h-[70vh]">
       <CBRCStats stats={stats} />
+      {/* <div className="pb-6 py-16 flex justify-center lg:justify-start">
+        <CustomTab
+          tabsData={[
+            { label: "Cbrc", value: "cbrc" },
+            { label: "Marketpace", value: "markeplace" },
+          ]}
+          currentTab={tab}
+          onTabChange={(_, newTab) => setTab(newTab)}
+        />
+      </div>{" "}
+      {tab === "cbrc" && <CBRCHomepage  />}
+      {tab === "marketplace" && <Homepage />} */}
       <CbrcHero data={featured} />
-      <CBRCTrends token={stats} />
+  <div className="pt-6">
+  <CBRCTrends token={stats} />
+  </div>
       <div className="pb-6 py-16 flex justify-center lg:justify-start">
         <CustomTab
           tabsData={[

@@ -44,10 +44,10 @@ function CbrcListings({ listings, loading }: HeroProps) {
               className="w-full md:w-6/12 lg:w-3/12  p-6"
               key={item.inscription_id}
             >
-              <div className="border-2 overflow-hidden border-gray-700 rounded-lg bg-slate-900">
-                <div className="TokenDetail p-2">
+              <div className="border-2 overflow-hidden border-gray-700 rounded-lg bg-accent bg-opacity-[12%]">
+                <div className="TokenDetail p-1">
                   <div className="flex justify-between items-center p-2">
-                    <p className="px-2 py-1 rounded tracking-wider bg-black text-white font-bold uppercase">
+                    <p className="px-2 py-1 rounded tracking-wider bg-dark_gray bg-opacity-30 text-white font-bold uppercase">
                       {item.listed_token}
                     </p>
                     <p className="px-2 py-1 rounded tracking-wider bg-accent_dark text-white">
@@ -88,8 +88,8 @@ function CbrcListings({ listings, loading }: HeroProps) {
                       </>
                     )}
                 </div>
-                <div className="ListingDetail bg-primary p-2">
-                  <div className="text-white pb-2 border-b border-gray-300 w-full flex justify-between items-center">
+                <div className="ListingDetail  bg-primary p-5">
+                  <div className="text-white pb-2 border-b border-gray-600 w-full flex justify-between items-center">
                     <Link href={`/inscription/${item.inscription_number}`}>
                       {" "}
                       <p className="">#{item.inscription_number}</p>
@@ -109,16 +109,16 @@ function CbrcListings({ listings, loading }: HeroProps) {
                     ) &&
                     item.listed_price && (
                       <>
-                        <div className="flex justify-between items-center">
-                          <div className="pt-2 flex justify-between items-center">
-                            <div className="flex items-center pb-1">
+                        <div className="flex justify-between pt-2 items-center">
+                          <div className="pt-2 flex justify-between  items-center">
+                            <div className="flex items-center text-white pb-1">
                               <div className="mr-2 text-bitcoin">
                                 <FaBitcoin className="" />
                               </div>
                               {(item?.listed_price / 100_000_000).toFixed(6)}{" "}
                             </div>
                           </div>
-                          <div className="flex items-center ">
+                          <div className="flex items-center text-white">
                             <div className="mr-2 text-green-500">
                               <FaDollarSign className="" />
                             </div>

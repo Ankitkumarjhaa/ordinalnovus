@@ -325,8 +325,8 @@ function BuyInscriptionCardButton({ data }: InscriptionProps) {
 
   return (
     <>
-      <div className="w-full  py-6 bg-secondary">
-        {!data.in_mempool && (
+      <div className="w-full  pt-6 pb-2 bg-primary">
+        {!data.in_mempool ? (
           <div className="py-3">
             <p className="text-sm text-center ">
               Choose Transfer Speed (Fee Rate)
@@ -345,6 +345,7 @@ function BuyInscriptionCardButton({ data }: InscriptionProps) {
 
                 return (
                   <div
+                    key={idx}
                     onClick={() => {
                       setFeeRate(rate);
 
@@ -354,14 +355,14 @@ function BuyInscriptionCardButton({ data }: InscriptionProps) {
                         setCustomFee(false);
                       }
                     }}
-                    className={`p-2 flex-1 ${
+                    className={`p-2 flex-1  ${
                       feeRate === rate
-                        ? "border border-white cursor-not-allowed"
+                        ? "border  border-white cursor-not-allowed"
                         : "cursor-pointer"
-                    }`}
-                    key={idx}
+                    }${idx === 0 ? "flex-grow-0" : "flex-grow"}`}
+                    style={{ width: idx === 2 ? "100%" : "auto" }}
                   >
-                    <p className="text-lg text-center">
+                    <p className="text-lg  text-white text-center">
                       {idx === 0 ? "Slow" : idx === 1 ? "Fast" : "Custom"}
                     </p>
                     <p className="text-xs text-center">{rate} s/vB</p>
@@ -392,24 +393,36 @@ function BuyInscriptionCardButton({ data }: InscriptionProps) {
               <></>
             )}
           </div>
+        ) : (
+          <div className="py-16"></div>
         )}
         <CustomButton
           loading={loading}
-          disabled={!data.listed}
+          disabled={!data.listed || data.in_mempool}
           text={`${data.in_mempool ? `Sold. Tx in Progress...` : `Buy Now `}`}
-          hoverBgColor="hover:bg-accent_dark"
+          hoverBgColor="hover:bg-accent"
           hoverTextColor="text-white"
-          bgColor="bg-accent"
+          bgColor="bg-accent_dark"
           textColor="text-white"
-          className="transition-all w-full rounded"
-          link={data.in_mempool}
-          href={`https://mempool.space/tx/${data.txid}`}
-          newTab={true}
-          onClick={buy} // Add this line to make the button functional
+          className="transition-all w-full py-4 font-bold bg-opacity-40 rounded"
+          // link={data.in_mempool}
+          // href={`https://mempool.space/tx/${data.txid}`}
+          // newTab={true}
+          icon={data.in_mempool ? PendingIcon : null}
+          onClick={buy}
+          border="border"
+          borderColor="border-[#9102F0]" // Add this line to make the button functional
         />
       </div>
     </>
   );
 }
 
+const PendingIcon = () => {
+  return (
+    <span className="mr-2 ">
+      <img width={30} src="/static-assets/images/pending.gif" />
+    </span>
+  );
+};
 export default BuyInscriptionCardButton;

@@ -572,16 +572,16 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
         // console.log("got it...");
         if (isCbrcCollectionRes?.collection) {
           if (mode === "cbrc") {
-            dispatch(
-              addNotification({
-                id: new Date().valueOf(),
-                message: `This token should be used only with reinscriber.`,
-                open: true,
-                severity: "error",
-              })
-            );
-            setTick("");
-            return;
+            // dispatch(
+            //   addNotification({
+            //     id: new Date().valueOf(),
+            //     message: `This token should be used only with reinscriber.`,
+            //     open: true,
+            //     severity: "error",
+            //   })
+            // );
+            // setTick("");
+            // return;
           } else if (mode === "reinscribe") {
             if (amt > 1)
               dispatch(
