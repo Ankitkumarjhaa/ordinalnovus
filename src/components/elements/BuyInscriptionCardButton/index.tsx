@@ -326,7 +326,7 @@ function BuyInscriptionCardButton({ data }: InscriptionProps) {
   return (
     <>
       <div className="w-full  pt-6 pb-2 bg-primary">
-        {!data.in_mempool && (
+        {!data.in_mempool ? (
           <div className="py-3">
             <p className="text-sm text-center ">
               Choose Transfer Speed (Fee Rate)
@@ -392,26 +392,36 @@ function BuyInscriptionCardButton({ data }: InscriptionProps) {
               <></>
             )}
           </div>
+        ) : (
+          <div className="py-16"></div>
         )}
         <CustomButton
           loading={loading}
-          disabled={!data.listed}
+          disabled={!data.listed || data.in_mempool}
           text={`${data.in_mempool ? `Sold. Tx in Progress...` : `Buy Now `}`}
           hoverBgColor="hover:bg-accent"
           hoverTextColor="text-white"
           bgColor="bg-accent_dark"
           textColor="text-white"
           className="transition-all w-full py-4 font-bold bg-opacity-40 rounded"
-          link={data.in_mempool}
-          href={`https://mempool.space/tx/${data.txid}`}
-          newTab={true}
+          // link={data.in_mempool}
+          // href={`https://mempool.space/tx/${data.txid}`}
+          // newTab={true}
+          icon={data.in_mempool ? PendingIcon : null}
           onClick={buy}
-          border="border" 
-          borderColor="border-[#9102F0]"// Add this line to make the button functional
+          border="border"
+          borderColor="border-[#9102F0]" // Add this line to make the button functional
         />
       </div>
     </>
   );
 }
 
+const PendingIcon = () => {
+  return (
+    <span className="mr-2 ">
+      <img width={30} src="/static-assets/images/pending.gif" />
+    </span>
+  );
+};
 export default BuyInscriptionCardButton;
