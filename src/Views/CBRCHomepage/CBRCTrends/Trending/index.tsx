@@ -37,10 +37,9 @@ const Trending = ({ data }: { data: IStats }) => {
       </div>
       {data.tokensTrend.map((item, index) => {
         return (
-          <div key={index} className=" p-3  flex justify-between items-center">
+          <div key={index} className=" py-3  flex justify-between items-center">
            <div>
-              <div className="pl-1 uppercase flex items-center  text-white font-medium">
-                <div className="text-light_gray text-md pr-2">{index + 1}. </div>
+              <div className=" uppercase flex items-center  text-white font-medium">
               <Link shallow href={`/cbrc-20/${item.tick}`}>
               <div className="flex items-center ">
                   {item.icon ? (

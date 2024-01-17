@@ -102,13 +102,13 @@ const TrendStats = ({ data }: { data: IStats }) => {
       <div>
         <p>24Hr Volume ( Ordinalnovus )</p>
       </div>
-      <div className="flex justify-between items-center">
+      <div className="flex pt-2 justify-between items-center">
         <div>
           <div className="flex items-center">
             <FaDollarSign className="text-green-500" />
             <p className="pl-1">{convertToUSD(data.dailyVolume)}</p>
           </div>
-          <div className="">
+          <div className="pt-1">
             <div className="flex items-center">
               <FaBitcoin className="text-bitcoin" />
               <p className="pl-1">
