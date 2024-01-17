@@ -5,7 +5,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { setBTCPrice } from "@/stores/reducers/generalReducer";
 import { RootState } from "@/stores";
 import { IStats } from "@/types";
-import { FaDollarSign } from "react-icons/fa6";
+import { FaDollarSign,FaBitcoin } from "react-icons/fa6";
 
 const CBRCStats = ({ stats }: { stats: IStats }) => {
   const dispatch = useDispatch();
@@ -27,6 +27,14 @@ const CBRCStats = ({ stats }: { stats: IStats }) => {
     [btcPrice]
   );
 
+  const convertSatsToBTC = useCallback(
+    (sats: number, decimalPlaces: number) => {
+      // Convert satoshis to BTC with variable decimal places
+      return (sats / 100_000_000).toFixed(decimalPlaces);
+    },
+    [] // No dependencies
+  );
+
   return (
     <div className="pb-2">
       {stats ? (
@@ -38,22 +46,22 @@ const CBRCStats = ({ stats }: { stats: IStats }) => {
           <div className="flex">
             <p className="text-gray">24Hr Vol :</p>
             <p className="pl-2 text-bitcoin flex items-center ">
-              <FaDollarSign className="text-green-500" />
-              {convertToUSD(stats.dailyVolume)}
+             <span className="pr-1"><FaBitcoin className="text-bitcoin " /></span> 
+              {convertSatsToBTC(stats.dailyVolume,2)}
             </p>
           </div>
           <div className="flex">
             <p className="text-gray">30 Days Vol :</p>
             <p className="pl-2 text-bitcoin flex items-center">
-              <FaDollarSign className="text-green-500" />
-              {convertToUSD(stats.monthlyVolume)}
+             <span className="pr-1"><FaBitcoin className="text-bitcoin " /></span> 
+              {convertSatsToBTC(stats.monthlyVolume,0)}
             </p>
           </div>
           <div className="flex">
             <p className="text-gray">All time Vol :</p>
             <p className="pl-2 text-bitcoin flex items-center">
-              <FaDollarSign className="text-green-500" />
-              {convertToUSD(stats.allTimeVolume)}
+             <span className="pr-1"><FaBitcoin className="text-bitcoin " /></span> 
+              {convertSatsToBTC(stats.allTimeVolume,0)}
             </p>
           </div>
           <div className="flex">

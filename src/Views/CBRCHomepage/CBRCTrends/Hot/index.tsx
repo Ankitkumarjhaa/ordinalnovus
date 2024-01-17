@@ -1,5 +1,6 @@
 import { IStats } from "@/types";
 import { ICbrcToken } from "@/types/CBRC";
+import Link from "next/link";
 import React from "react";
 
 const Hot = ({ data }: { data: IStats }) => {
@@ -23,7 +24,7 @@ const Hot = ({ data }: { data: IStats }) => {
   };
 
   return (
-    <div className="py-8 px-6 rounded-lg  bg-violet h-full">
+    <div className="py-8 px-6 rounded-lg  bg-primary h-full">
       <div className="pb-4 flex items-center justify-between">
         <div className="flex items-center ">
           <div>
@@ -41,15 +42,39 @@ const Hot = ({ data }: { data: IStats }) => {
         const { value, isPositive } = calculateVolumeChange(item);
         return (
           <div key={index} className=" p-3  flex justify-between items-center">
-            <div className="text-light_gray text-md">
-              {index + 1}.{" "}
-              <span className="pl-1 uppercase text-white font-medium">
-                {" "}
-                {item.tick}
-              </span>
+            <div>
+              <div className="pl-1 uppercase flex items-center  text-white font-medium">
+                <div className="text-light_gray text-md pr-2">{index + 1}. </div>
+              <Link href={`/cbrc-20/${item.tick}`}>
+              <div className="flex items-center ">
+                  {item.icon ? (
+                    <div className=" rounded-full w-7 h-7 border border-white">
+                      <img
+                        src={item.icon}
+                        alt="Icon"
+                        className=" object-cover w-full h-full overflow-none rounded-full " // Adjust width and height as needed
+                      />
+                    </div>
+                  ) : (
+                    <div className="">
+                      <div
+                        className="rounded-full w-7 h-7 border border-white flex justify-center items-center bg-accent" // Use your secondary color here
+                        style={{ lineHeight: "1.5rem" }} // Adjust line height to match your text size
+                      >
+                        {item.tick.charAt(0).toUpperCase()}
+                      </div>
+                    </div>
+                  )}
+                  <div className="pl-3"> {item.tick}</div>
+                </div>
+              </Link>
+              </div>
             </div>
-            <div className="">
+            <div className=" flex items-center">
               <span className="pl-2">{item.in_mempool}</span>
+              <div className="pl-2">
+                <img className="w-6 h-6" src="/static-assets/images/pending.gif"/>
+              </div>
             </div>
           </div>
         );

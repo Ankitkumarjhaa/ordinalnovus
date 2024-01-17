@@ -40,7 +40,21 @@ const TrendStats = ({ data }: { data: IStats }) => {
     const lightness = Math.floor(Math.random() * 21) + 40; // Adjusted Range: 40-60
     return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
   };
+  const baseHue = 276; // Hue for #9102F0
+  const themeColors = [
+    "#9102F0", // Base Purple
+    "#6A4BF0", // Blue-Violet
+    "#C42FF0", // Red-Violet
+    "#BDA6F8", // Lighter Purple
+    "#5E00A3", // Darker Purple
+    "#8C7DF7", // Lighter Blue-Violet
+    "#4A31C4", // Darker Blue-Violet
+    "#DA8CF7", // Lighter Red-Violet
+    "#9E1BC4", // Darker Red-Violet
+    // Additional colors can be added as needed
+  ];
   
+
   const pieChartData = useMemo(() => {
     const totalAmt = data.aggregateVolume.reduce(
       (acc, item) => acc + convertSatsToUSD(item.totalAmt),
@@ -49,17 +63,18 @@ const TrendStats = ({ data }: { data: IStats }) => {
 
     let othersValue = 0;
     const processedData: PieChartData[] = data.aggregateVolume.reduce(
-      (acc: PieChartData[], item) => {
+      (acc: PieChartData[], item, index) => {
         const itemValue = convertSatsToUSD(item.totalAmt);
         const percentage = (itemValue / totalAmt) * 100;
 
         if (percentage < 1) {
           othersValue += itemValue;
         } else {
+          const colorIndex = index % themeColors.length;
           acc.push({
             title: item._id,
             value: percentage,
-            color: getRandomLightColor(),
+            color: themeColors[colorIndex],
             percentage: percentage.toFixed(2) + "%",
           });
         }
@@ -80,10 +95,10 @@ const TrendStats = ({ data }: { data: IStats }) => {
     processedData.sort((a, b) => b.value - a.value);
 
     return processedData;
-  }, [data.aggregateVolume, btcPrice]);
+  }, [data.aggregateVolume, btcPrice, themeColors]);
 
   return (
-    <div className="py-8 px-6   rounded-lg bg-violet h-full">
+    <div className="py-8 px-6   rounded-lg h-full">
       <div>
         <p>24Hr Volume ( Ordinalnovus )</p>
       </div>

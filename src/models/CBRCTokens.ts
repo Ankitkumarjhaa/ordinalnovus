@@ -39,6 +39,18 @@ export const CBRCTokenSchema = new Schema(
         supply: Number,
       },
     ],
+    icon: {
+      type: String,
+    },
+    discord_url: {
+      type: String,
+    },
+    x_url: {
+      type: String,
+    },
+    website_url: {
+      type: String,
+    },
   },
   {
     timestamps: true, // Enable timestamps

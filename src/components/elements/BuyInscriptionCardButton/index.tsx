@@ -325,7 +325,7 @@ function BuyInscriptionCardButton({ data }: InscriptionProps) {
 
   return (
     <>
-      <div className="w-full  py-6 bg-secondary">
+      <div className="w-full  pt-6 pb-2 bg-primary">
         {!data.in_mempool && (
           <div className="py-3">
             <p className="text-sm text-center ">
@@ -361,7 +361,7 @@ function BuyInscriptionCardButton({ data }: InscriptionProps) {
                     }`}
                     key={idx}
                   >
-                    <p className="text-lg text-center">
+                    <p className="text-lg text-accent text-center">
                       {idx === 0 ? "Slow" : idx === 1 ? "Fast" : "Custom"}
                     </p>
                     <p className="text-xs text-center">{rate} s/vB</p>
@@ -397,15 +397,17 @@ function BuyInscriptionCardButton({ data }: InscriptionProps) {
           loading={loading}
           disabled={!data.listed}
           text={`${data.in_mempool ? `Sold. Tx in Progress...` : `Buy Now `}`}
-          hoverBgColor="hover:bg-accent_dark"
+          hoverBgColor="hover:bg-accent"
           hoverTextColor="text-white"
-          bgColor="bg-accent"
+          bgColor="bg-accent_dark"
           textColor="text-white"
-          className="transition-all w-full rounded"
+          className="transition-all w-full py-4 font-bold bg-opacity-40 rounded"
           link={data.in_mempool}
           href={`https://mempool.space/tx/${data.txid}`}
           newTab={true}
-          onClick={buy} // Add this line to make the button functional
+          onClick={buy}
+          border="border" 
+          borderColor="border-[#9102F0]"// Add this line to make the button functional
         />
       </div>
     </>
