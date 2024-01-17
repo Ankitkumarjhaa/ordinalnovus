@@ -1,7 +1,7 @@
 import { shortenString } from "@/utils";
 import React, { useState } from "react";
 
-const InscriptionImage = ({ inscriptionId }: { inscriptionId: string }) => {
+const SalesInscriptionImage = ({ inscriptionId }: { inscriptionId: string }) => {
   const [imageError, setImageError] = useState(false);
 
   const handleError = () => {
@@ -29,4 +29,4 @@ const InscriptionImage = ({ inscriptionId }: { inscriptionId: string }) => {
   );
 };
 
-export default InscriptionImage;
+export default SalesInscriptionImage;

@@ -345,6 +345,7 @@ function BuyInscriptionCardButton({ data }: InscriptionProps) {
 
                 return (
                   <div
+                    key={idx}
                     onClick={() => {
                       setFeeRate(rate);
 
@@ -354,14 +355,14 @@ function BuyInscriptionCardButton({ data }: InscriptionProps) {
                         setCustomFee(false);
                       }
                     }}
-                    className={`p-2 flex-1 ${
+                    className={`p-2 flex-1  ${
                       feeRate === rate
-                        ? "border border-white cursor-not-allowed"
+                        ? "border  border-white cursor-not-allowed"
                         : "cursor-pointer"
-                    }`}
-                    key={idx}
+                    }${idx === 0 ? "flex-grow-0" : "flex-grow"}`}
+                    style={{ width: idx === 2 ? "100%" : "auto" }}
                   >
-                    <p className="text-lg text-accent text-center">
+                    <p className="text-lg  text-white text-center">
                       {idx === 0 ? "Slow" : idx === 1 ? "Fast" : "Custom"}
                     </p>
                     <p className="text-xs text-center">{rate} s/vB</p>
