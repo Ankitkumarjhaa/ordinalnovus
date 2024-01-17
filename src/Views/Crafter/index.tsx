@@ -88,7 +88,7 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
     }
   }, [fees]);
 
-  const fetchCbrcBrc20 = useCallback(async () => {
+  const fetchCbrc20 = useCallback(async () => {
     try {
       if (!walletDetails?.ordinal_address) return;
       const params = {
@@ -116,11 +116,15 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
           console.log({ tickAmt });
           if (tickAmt?.includes("=")) {
             const [_tick, _amt] = tickAmt?.split("=");
+            // console.log({ _tick, _amt });
             if (_tick) {
               selectedTick = _tick;
+              // console.log("fetching coll by slug...");
               const isCbrcCollectionRes = await fetchCollectionBySlug(
                 _tick.trim().toLowerCase()
               );
+
+              // console.log("got it...");
               if (isCbrcCollectionRes?.collection) {
                 setAmt(1);
               } else {
@@ -141,12 +145,14 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
         setTick(selectedTick);
         setCbrcs(tick_options);
       }
-    } catch (e: any) {}
+    } catch (e: any) {
+      console.error(e, "Error in reinscribe, fetchCbrc20 func");
+    }
   }, [walletDetails, searchParams]);
 
   useEffect(() => {
     if (walletDetails?.connected && walletDetails.ordinal_address) {
-      fetchCbrcBrc20();
+      fetchCbrc20();
     }
   }, [walletDetails, searchParams]);
 
@@ -434,7 +440,7 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
         setorderresult(null);
         setRep(1);
         setAmt(1);
-        await fetchCbrcBrc20();
+        await fetchCbrc20();
         window.open(`https://mempool.space/tx/${broadcast_res.txid}`, "_blank");
       } else {
         setTxLink(`https://mempool.space/tx/${broadcast_res.txid}`);
@@ -538,24 +544,60 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
   }, [result, error]);
 
   const fetchToken = useCallback(async () => {
-    if (op === "mint") {
-      const fetchTokenRes = await fetchTokenByTick(tick);
-      if (fetchTokenRes && fetchTokenRes.success) {
-        setTokenInfo(fetchTokenRes.cbrc);
-        console.log({ token: fetchTokenRes });
-        if (fetchTokenRes.cbrc.supply !== fetchTokenRes.cbrc.max)
-          setAmt(fetchTokenRes.cbrc.lim);
-        else {
-          dispatch(
-            addNotification({
-              id: new Date().valueOf(),
-              message: `This token has been completely minted`,
-              open: true,
-              severity: "error",
-            })
-          );
+    try {
+      if (op === "mint") {
+        const fetchTokenRes = await fetchTokenByTick(tick);
+        if (fetchTokenRes && fetchTokenRes.success) {
+          setTokenInfo(fetchTokenRes.cbrc);
+          console.log({ token: fetchTokenRes });
+          if (fetchTokenRes.cbrc.supply !== fetchTokenRes.cbrc.max)
+            setAmt(fetchTokenRes.cbrc.lim);
+          else {
+            dispatch(
+              addNotification({
+                id: new Date().valueOf(),
+                message: `This token has been completely minted`,
+                open: true,
+                severity: "error",
+              })
+            );
+          }
+        }
+      } else if (op === "transfer") {
+        // console.log("fetching coll by slug...");
+        const isCbrcCollectionRes = await fetchCollectionBySlug(
+          tick.trim().toLowerCase()
+        );
+
+        // console.log("got it...");
+        if (isCbrcCollectionRes?.collection) {
+          if (mode === "cbrc") {
+            dispatch(
+              addNotification({
+                id: new Date().valueOf(),
+                message: `This token should be used only with reinscriber.`,
+                open: true,
+                severity: "error",
+              })
+            );
+            setTick("");
+            return;
+          } else if (mode === "reinscribe") {
+            if (amt > 1)
+              dispatch(
+                addNotification({
+                  id: new Date().valueOf(),
+                  message: `This token belongs to a collection. Should contain only 1 amt`,
+                  open: true,
+                  severity: "error",
+                })
+              );
+            setAmt(1);
+          }
         }
       }
+    } catch (e: any) {
+      console.log(e, "FETCHTOKEN");
     }
   }, [tick, op]);
 
@@ -818,6 +860,7 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
             ) : (
               <div className="w-full">
                 <CustomButton
+                  disabled={!tick || !amt}
                   loading={loading}
                   text={`Create ${op}`}
                   hoverBgColor="hover:bg-accent_dark"

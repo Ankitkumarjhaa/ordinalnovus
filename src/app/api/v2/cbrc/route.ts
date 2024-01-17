@@ -71,7 +71,7 @@ export async function GET(req: NextRequest) {
       },
     };
 
-    await setCache(cacheKey, result, 20); //20 seconds
+    await setCache(cacheKey, result, 30); //20 seconds
     return NextResponse.json(result);
   } catch (err) {
     console.error(err); // or use a more advanced error logging mechanism

@@ -27,7 +27,7 @@ async function fetchCollectionBySlug(slug: string) {
           message: "collection found",
           collection,
         },
-        5 * 60 // 5 minutes
+        60 * 60 // 60 minutes
       );
       return { success: true, message: "collection found", collection };
     } else return { success: false, message: "collection not found" };

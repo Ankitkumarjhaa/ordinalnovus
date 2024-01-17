@@ -15,7 +15,7 @@ function CBRCTokensList({ defaultData }: { defaultData: ICbrcToken[] }) {
   const [data, setData] = useState<ICbrcToken[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(15);
-  const [sort, setSort] = useState<string>("volume:-1");
+  const [sort, setSort] = useState<string>("on_volume:-1");
   const [loading, setLoading] = useState<boolean>(true);
   const [tick, setTick] = useState("");
 

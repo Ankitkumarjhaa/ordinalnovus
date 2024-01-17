@@ -39,7 +39,7 @@ async function updateTokenPrice(tick: string, action: string, _price?: number) {
         $match: {
           token: tokenLower,
           timestamp: { $gte: startOfDay, $lte: endOfDay },
-          // marketplace: "ordinalnovus",
+          marketplace: "ordinalnovus",
         },
       },
       {

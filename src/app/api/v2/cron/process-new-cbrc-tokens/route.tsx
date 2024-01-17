@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
               checksum: stringToHex(token.tick.trim().toLowerCase()),
               // price,
               volume: volumeInSats,
-              allowed: allowed.includes(token.checksum),
+              allowed: false,
             },
           },
         },
@@ -77,59 +77,4 @@ export async function GET(req: NextRequest) {
     tokens,
   });
 }
-const allowed = [
-  "626f7264",
-  "6a756e6b",
-  "63627263",
-  "66726f67",
-  "79756b69",
-  "73796d6d",
-  "246f7264",
-  "6f726469",
-  "6d6f746f",
-  "626f626f",
-  "6672656e",
-  "31393834",
-  "6e616b61",
-  "636c7472",
-  "68756d70",
-  "686f646c",
-  "776f6f66",
-  "6379626f",
-  "70726179",
-  "6e6f6465",
-  "65726c79",
-  "6d617869",
-  "626f7267",
-  "73617473",
-  "6f736869",
-  "6f737079",
-  "6379626f",
-  "39393939",
-  "70696e6f",
-  "64617461",
-  "63756265",
-  "70657065",
-  "6467656e",
-];
-
-// const resetInscription = async () => {
-//   try {
-//     // Update collections where supply is less than 1
-//     const result = await Inscription.updateMany(
-//       { domain_valid: true }, // Query filter
-//       {
-//         flagged: true,
-//         domain_valid: false,
-//       }
-//     );
-
-//     console.debug(
-//       `Successfully reset inscription. Updated count: ${result.modifiedCount}`
-//     );
-//   } catch (error) {
-//     console.error("Error resetting inscription:", error);
-//   }
-// };
-
 export const dynamic = "force-dynamic";

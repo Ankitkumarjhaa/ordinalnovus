@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCache, setCache } from "@/lib/cache";
 import fetchContentFromProviders from "@/utils/api/fetchContentFromProviders";
 
 function bufferToStream(base64String: string) {
@@ -25,19 +24,7 @@ export async function GET(
   const contentId = params.id;
 
   try {
-    const cacheKey = `content:${contentId}`;
-    let content = await getCache(cacheKey);
-
-    if (!content) {
-      const response = await fetchContentFromProviders(contentId);
-      content = {
-        data: response.data.toString("base64"),
-        contentType: response.headers["content-type"],
-      };
-
-      // Cache the content data in Redis for 5 hour
-      await setCache(cacheKey, content, 5 * 60);
-    }
+    const content = await fetchContentFromProviders(contentId);
 
     const stream = bufferToStream(content.data);
 
