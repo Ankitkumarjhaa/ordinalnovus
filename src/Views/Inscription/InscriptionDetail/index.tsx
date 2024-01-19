@@ -19,6 +19,7 @@ import DisplayAttributes from "./DisplayAttributes";
 import { RootState } from "@/stores";
 import { stringToHex } from "@/utils";
 import { cbrcListed, cbrcValid, myInscription } from "@/utils/validate";
+import DisplayMetadata from "./DisplayMetadata";
 type InscriptionProps = {
   data: IInscription;
 };
@@ -138,6 +139,11 @@ function InscriptionDetail({ data }: InscriptionProps) {
       {data?.attributes && data?.attributes?.length > 0 && (
         <div className="pt-2">
           <DisplayAttributes data={data} />
+        </div>
+      )}
+      {data?.metadata && (
+        <div className="pt-2">
+          <DisplayMetadata data={data} />
         </div>
       )}
     </div>

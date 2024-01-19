@@ -27,6 +27,10 @@
     format("truetype");
 }
 
+.slick-track {
+  margin-left: 0 !important;
+}
+
 /* Center alignment utility class */
 .center {
   @apply flex justify-center items-center;
@@ -119,18 +123,18 @@
 }
 
 .MuiTableRow-head {
-  border-top: 1px solid rgba(145, 2, 240, 0.50) !important; /* Apply border to the top */
-  border-bottom: 1px solid rgba(145, 2, 240, 0.50) !important; /* Apply border to the bottom */
+  border-top: 1px solid rgba(145, 2, 240, 0.5) !important; /* Apply border to the top */
+  border-bottom: 1px solid rgba(145, 2, 240, 0.5) !important; /* Apply border to the bottom */
 }
 
 .MuiTableCell-root {
-  border-top: 1px solid rgba(145, 2, 240, 0.50) !important; /* Apply border to the top */
-  border-bottom: 1px solid rgba(145, 2, 240, 0.50) !important; /* Apply border to the bottom */
+  border-top: 1px solid rgba(145, 2, 240, 0.5) !important; /* Apply border to the top */
+  border-bottom: 1px solid rgba(145, 2, 240, 0.5) !important; /* Apply border to the bottom */
 }
 
 .cbrc-sales .MuiTableCell-head {
-  border-top: 1px solid rgba(145, 2, 240, 0.50) !important;
-  border-bottom: 1px solid rgba(145, 2, 240, 0.50) !important;
+  border-top: 1px solid rgba(145, 2, 240, 0.5) !important;
+  border-bottom: 1px solid rgba(145, 2, 240, 0.5) !important;
   padding-top: 15px !important;
   padding-bottom: 15px !important;
 }
@@ -139,6 +143,6 @@
   padding-bottom: 15px !important;
 }
 
-.pixelated{
-  image-rendering:pixelated;
+.pixelated {
+  image-rendering: pixelated;
 }

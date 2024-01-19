@@ -3,6 +3,7 @@ import { CustomLeftArrow, CustomRightArrow } from "../Arrows";
 import Slider from "react-slick";
 import { IInscription } from "@/types";
 import CardContent from "../CustomCardSmall/CardContent";
+import Link from "next/link";
 
 function ReinscriptionCarousel({
   data,
@@ -29,12 +30,19 @@ function ReinscriptionCarousel({
     <div className="">
       <Slider {...settings}>
         {data?.map((item: IInscription, idx: number) => (
-          <div key={item.inscription_id} className="w-full relative">
+          <div
+            key={item.inscription_id}
+            className="w-full relative cursor-pointer"
+          >
             <CardContent
               inscriptionId={item.inscription_id}
               content_type={item.content_type}
               inscription={item}
             />
+            <Link
+              href={`/inscription/${item.inscription_id}`}
+              className="absolute top-0 bottom-0 right-0 left-0"
+            ></Link>
             {idx === 0 && latest ? (
               <>
                 <div className="absolute top-0 p-2 left-0 right-0">

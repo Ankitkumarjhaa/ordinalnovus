@@ -121,41 +121,36 @@ const CardContent: React.FC<CardContentProps> = ({
           <p className="text-3xl">{amt}</p>
           <hr />
           <p className="uppercase font-sourcecode">{token}</p>
-          {/* <div
-            className={`text-center py-2 font-sourcecode font-semibold ${
-              !allowed_cbrcs?.includes(checksum)
-                ? " bg-gray-900 text-white w-full p-2 my-2"
-                : inscription.cbrc_valid
-                ? "bg-green-600 text-white w-full p-2 my-2"
-                : "bg-red-400 text-red-800 w-full p-2 my-2"
-            }`}
-          >
-            <p>Checksum</p>
-            <p>{checksum}</p>
-          </div> */}
-          {/* <div>
-            <span
-              className={`absolute text-center ${
-                inscription?.cbrc_valid
-                  ? allowed_cbrcs?.includes(checksum)
-                    ? "bg-green-400 text-green-900 " // Condition 1
-                    : "bg-gray-400 text-gray-900 " // Condition 2
-                  : inscription?.cbrc_valid === false
-                  ? allowed_cbrcs?.includes(checksum)
-                    ? "bg-red-400 text-red-900 " // Condition 3
-                    : "bg-gray-400 text-gray-900 " // Condition 4
-                  : "bg-red-400 text-red-900 " // Condition 5
-              } rounded font-bold capitalize text-sm py-1 z-10 bottom-0 right-0 left-0`}
-            >
-              {inscription?.cbrc_valid !== undefined
-                ? inscription?.cbrc_valid
-                  ? allowed_cbrcs?.includes(checksum)
-                    ? "Valid Transfer Note"
-                    : "Token not listed"
-                  : "Token Used"
-                : "API down. Can't check validity."}
-            </span>
-          </div> */}
+        </div>
+      );
+    } else if (
+      !content_type &&
+      (inscription?.metaprotocol?.includes("cbrc-20:mint") ||
+        inscription?.metaprotocol?.includes("cbrc-20:transfer"))
+    ) {
+      const [_tag, mode, tokenAmt] = inscription.metaprotocol.split(":");
+      const [token, amt] = tokenAmt.split("=");
+
+      return (
+        <div
+          className={`w-full h-full flex flex-col justify-center items-center text-sm tracking-widest  py-12 font-sourcecode `}
+        >
+          <p className="uppercase">{mode}</p>
+          <p className="text-3xl">{amt}</p>
+          <hr />
+          <p className="uppercase font-sourcecode">{token}</p>
+        </div>
+      );
+    } else if (
+      !content_type &&
+      !inscription?.content &&
+      !inscription?.metaprotocol
+    ) {
+      return (
+        <div
+          className={`w-full h-full flex flex-col justify-center items-center text-sm tracking-widest  py-12 font-sourcecode `}
+        >
+          NO CONTENT
         </div>
       );
     }
@@ -382,7 +377,7 @@ const CardContent: React.FC<CardContentProps> = ({
       case "text/html;charset=utf-8":
       case "text/html":
         return (
-          <div className="w-full h-full">
+          <div className={`${className ? className : "w-full h-full"}`}>
             <iframe
               sandbox="allow-scripts"
               className={className || " no-scrollbar   w-[300px] h-[300px]"}
