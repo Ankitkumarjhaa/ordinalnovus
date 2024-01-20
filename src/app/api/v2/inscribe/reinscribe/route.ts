@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import mime from "mime-types";
 import { v4 as uuidv4 } from "uuid";
 import * as cryptoUtils from "@cmdcode/crypto-utils";
-import { Tap, Script, Address } from "@cmdcode/tapscript";
+import { Tap, Script, Address, Tx, Signer } from "@cmdcode/tapscript";
 import { ICreateInscription, IInscribeOrder } from "@/types";
 import { CreateInscription, Inscribe } from "@/models";
 import dbConnect from "@/lib/dbConnect";
@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
       webhook_url,
     });
 
-    const inscriptions: ICreateInscription[] = processInscriptions(
+    const inscriptions: ICreateInscription[] = await processInscriptions(
       order_id,
       fileInfoArray,
       network,
@@ -152,8 +152,62 @@ export async function POST(req: NextRequest) {
   }
 }
 
-function generatePrivateKey() {
-  return bytesToHex(cryptoUtils.Noble.utils.randomPrivateKey());
+async function generatePrivateKey() {
+  let isValid = false;
+  let privkey;
+
+  while (!isValid) {
+    privkey = bytesToHex(cryptoUtils.Noble.utils.randomPrivateKey());
+    const KeyPair = cryptoUtils.KeyPair;
+
+    let seckey = new KeyPair(privkey);
+    let pubkey = seckey.pub.rawX;
+    const init_script = [pubkey, "OP_CHECKSIG"];
+    let init_leaf = await Tap.tree.getLeaf(Script.encode(init_script));
+    let [init_tapkey, init_cblock] = await Tap.getPubKey(pubkey, {
+      target: init_leaf,
+    });
+
+    /**
+     * This is to test IF the tx COULD fail.
+     * This is most likely happening due to an incompatible key being generated.
+     */
+    const test_redeemtx = Tx.create({
+      vin: [
+        {
+          txid: "a99d1112bcb35845fd44e703ef2c611f0360dd2bb28927625dbc13eab58cd968",
+          vout: 0,
+          prevout: {
+            value: 10000,
+            scriptPubKey: ["OP_1", init_tapkey],
+          },
+        },
+      ],
+      vout: [
+        {
+          value: 8000,
+          scriptPubKey: ["OP_1", init_tapkey],
+        },
+      ],
+    });
+
+    const test_sig = await Signer.taproot.sign(seckey.raw, test_redeemtx, 0, {
+      extension: init_leaf,
+    });
+    test_redeemtx.vin[0].witness = [test_sig.hex, init_script, init_cblock];
+    isValid = await Signer.taproot.verify(test_redeemtx, 0, { pubkey });
+
+    if (!isValid) {
+      console.log("Invalid key generated, retrying...");
+    } else {
+      console.log({ privkey });
+    }
+  }
+
+  if (!privkey) {
+    throw Error("No privkey was generated");
+  }
+  return privkey;
 }
 
 async function processFiles({
@@ -222,7 +276,7 @@ async function processFiles({
   return Promise.all(fileInfoPromises);
 }
 
-function processInscriptions(
+async function processInscriptions(
   order_id: string,
   fileInfoArray: ICreateInscription[],
   network: "testnet" | "mainnet",
@@ -233,78 +287,83 @@ function processInscriptions(
 
   let total_fee = 0;
   // Loop through all files
-  fileInfoArray.map((file: any) => {
-    const privkey = generatePrivateKey();
-    // Generate pubkey and seckey from privkey
-    const KeyPair = cryptoUtils.KeyPair;
-    const seckey = new KeyPair(privkey);
-    const pubkey = seckey.pub.rawX;
-    console.log({
-      fee_rate,
-      data: file.base64_data,
-    });
+  await Promise.all(
+    fileInfoArray.map(async (file: any) => {
+      const privkey = await generatePrivateKey();
+      // Generate pubkey and seckey from privkey
+      const KeyPair = cryptoUtils.KeyPair;
+      const seckey = new KeyPair(privkey);
+      const pubkey = seckey.pub.rawX;
+      console.log({
+        fee_rate,
+        data: file.base64_data,
+      });
 
-    // generate mimetype, plain if not present
-    const mimetype = file.file_type || "text/plain;charset=utf-8";
+      // generate mimetype, plain if not present
+      const mimetype = file.file_type || "text/plain;charset=utf-8";
 
-    // generate metaprotocol as we are creating CBRC
-    const metaprotocol = `cbrc-20:${file.op.toLowerCase()}:${file.tick
-      .trim()
-      .toLowerCase()}=${file.amt}`;
+      // generate metaprotocol as we are creating CBRC
+      const metaprotocol = `cbrc-20:${file.op.toLowerCase()}:${file.tick
+        .trim()
+        .toLowerCase()}=${file.amt}`;
 
-    // data can be whats shared by the frontend as base64
-    const data = Buffer.from(file.base64_data, "base64");
-    console.log({ metaprotocol, mimetype });
+      // data can be whats shared by the frontend as base64
+      const data = Buffer.from(file.base64_data, "base64");
+      console.log({ metaprotocol, mimetype });
 
-    // create the script using our derived info
-    const script = [
-      pubkey,
-      "OP_CHECKSIG",
-      "OP_0",
-      "OP_IF",
-      ec.encode("ord"),
-      "01",
-      ec.encode(mimetype),
-      "07",
-      ec.encode(metaprotocol),
-      "OP_0",
-      data,
-      "OP_ENDIF",
-    ];
+      // create the script using our derived info
+      const script = [
+        pubkey,
+        "OP_CHECKSIG",
+        "OP_0",
+        "OP_IF",
+        ec.encode("ord"),
+        "01",
+        ec.encode(mimetype),
+        "07",
+        ec.encode(metaprotocol),
+        "OP_0",
+        data,
+        "OP_ENDIF",
+      ];
 
-    // create leaf and tapkey and cblock
-    const leaf = Tap.tree.getLeaf(Script.encode(script));
-    const [tapkey, cblock] = Tap.getPubKey(pubkey, { target: leaf });
+      // create leaf and tapkey and cblock
+      const leaf = Tap.tree.getLeaf(Script.encode(script));
+      const [tapkey, cblock] = Tap.getPubKey(pubkey, { target: leaf });
 
-    // Generated our Inscription Address
-    //@ts-ignore
-    let inscriptionAddress = Address.p2tr.encode(tapkey, network);
+      // Generated our Inscription Address
+      //@ts-ignore
+      let inscriptionAddress = Address.p2tr.encode(tapkey, network);
 
-    console.debug("Inscription address: ", inscriptionAddress);
-    console.debug("Tapkey:", tapkey);
+      console.debug("Inscription address: ", inscriptionAddress);
+      console.debug("Tapkey:", tapkey);
 
-    console.log(file.file_type);
-    let txsize = PREFIX + Math.floor(data.length / 4);
+      console.log(file.file_type);
+      let txsize = PREFIX + Math.floor(data.length / 4);
 
-    let inscription_fee = fee_rate * txsize;
-    file.inscription_fee = inscription_fee;
-    total_fee += inscription_fee;
+      let inscription_fee = fee_rate * txsize;
+      file.inscription_fee = inscription_fee;
+      total_fee += inscription_fee;
 
-    console.log({ txsize, fee_rate, inscription_fee });
+      console.log({ txsize, fee_rate, inscription_fee });
 
-    inscriptions.push({
-      ...file,
-      order_id,
-      privkey,
-      leaf: leaf,
-      tapkey: tapkey,
-      cblock: cblock,
-      inscription_address: inscriptionAddress,
-      txsize: txsize,
-      fee_rate: fee_rate,
-    });
-  });
+      if (!isPrivateKeyValid(privkey)) {
+        throw Error("Try Again");
+      }
 
+      inscriptions.push({
+        ...file,
+        order_id,
+        privkey,
+        leaf: leaf,
+        tapkey: tapkey,
+        cblock: cblock,
+        inscription_address: inscriptionAddress,
+        txsize: txsize,
+        fee_rate: fee_rate,
+      });
+    })
+  );
   return inscriptions;
 }
 
@@ -371,5 +430,106 @@ async function constructResponse(
     ),
     psbt,
     inputs,
+  };
+}
+
+async function isPrivateKeyValid(privkey: string) {
+  const KeyPair = cryptoUtils.KeyPair;
+
+  let seckey = new KeyPair(privkey);
+  let pubkey = seckey.pub.rawX;
+  const init_script = [pubkey, "OP_CHECKSIG"];
+  let init_leaf = await Tap.tree.getLeaf(Script.encode(init_script));
+  let [init_tapkey, init_cblock] = await Tap.getPubKey(pubkey, {
+    target: init_leaf,
+  });
+
+  /**
+   * This is to test IF the tx COULD fail.
+   * This is most likely happening due to an incompatible key being generated.
+   */
+  const test_redeemtx = Tx.create({
+    vin: [
+      {
+        txid: "a99d1112bcb35845fd44e703ef2c611f0360dd2bb28927625dbc13eab58cd968",
+        vout: 0,
+        prevout: {
+          value: 10000,
+          scriptPubKey: ["OP_1", init_tapkey],
+        },
+      },
+    ],
+    vout: [
+      {
+        value: 8000,
+        scriptPubKey: ["OP_1", init_tapkey],
+      },
+    ],
+  });
+  const test_sig = await Signer.taproot.sign(seckey.raw, test_redeemtx, 0, {
+    extension: init_leaf,
+  });
+  test_redeemtx.vin[0].witness = [test_sig.hex, init_script, init_cblock];
+  return await Signer.taproot.verify(test_redeemtx, 0, { pubkey });
+}
+
+async function testPrivateKeyValidity(iterations: number) {
+  let invalidKeys = [];
+  let validKeys = [];
+
+  for (let i = 0; i < iterations; i++) {
+    const privkey = bytesToHex(cryptoUtils.Noble.utils.randomPrivateKey());
+    const KeyPair = cryptoUtils.KeyPair;
+
+    let seckey = new KeyPair(privkey);
+    let pubkey = seckey.pub.rawX;
+    const init_script = [pubkey, "OP_CHECKSIG"];
+    let init_leaf = await Tap.tree.getLeaf(Script.encode(init_script));
+    let [init_tapkey, init_cblock] = await Tap.getPubKey(pubkey, {
+      target: init_leaf,
+    });
+
+    /**
+     * This is to test IF the tx COULD fail.
+     * This is most likely happening due to an incompatible key being generated.
+     */
+    const test_redeemtx = Tx.create({
+      vin: [
+        {
+          txid: "a99d1112bcb35845fd44e703ef2c611f0360dd2bb28927625dbc13eab58cd968",
+          vout: 0,
+          prevout: {
+            value: 10000,
+            scriptPubKey: ["OP_1", init_tapkey],
+          },
+        },
+      ],
+      vout: [
+        {
+          value: 8000,
+          scriptPubKey: ["OP_1", init_tapkey],
+        },
+      ],
+    });
+
+    const test_sig = await Signer.taproot.sign(seckey.raw, test_redeemtx, 0, {
+      extension: init_leaf,
+    });
+    test_redeemtx.vin[0].witness = [test_sig.hex, init_script, init_cblock];
+    const isValid = await Signer.taproot.verify(test_redeemtx, 0, { pubkey });
+
+    if (!isValid) {
+      invalidKeys.push(privkey);
+    } else {
+      validKeys.push(privkey);
+    }
+  }
+
+  return {
+    total: iterations,
+    invalidKeyCount: invalidKeys.length,
+    validKeyCount: validKeys.length,
+    invalidKeys: invalidKeys,
+    validKeys: validKeys,
   };
 }
