@@ -182,7 +182,7 @@ export interface IInscription {
   domain_valid?: boolean;
 
   // v12.1.3
-  metadata?: Map<string, string>;
+  metadata?: any;
   metaprotocol?: string;
   parsed_metaprotocol?: string[];
   charms?: number;
