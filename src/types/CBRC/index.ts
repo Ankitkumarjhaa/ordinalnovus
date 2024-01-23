@@ -52,6 +52,8 @@ export interface ICbrcToken {
   volume_in_sats: number;
   on_volume: number;
   on_volume_in_sats: number;
+  _24h_price_change: number;
+  _7d_price_change: number;
   historicalData: IHistoricalData[];
-  icon?:string;
+  icon?: string;
 }
