@@ -182,7 +182,7 @@ export interface IInscription {
   domain_valid?: boolean;
 
   // v12.1.3
-  metadata?: Map<string, string>;
+  metadata?: any;
   metaprotocol?: string;
   parsed_metaprotocol?: string[];
   charms?: number;
@@ -260,6 +260,7 @@ export interface ICollection extends ICollectionBase, Document {
   royalty_bp?: number;
   royalty_address?: string;
   metaprotocol?: string;
+  token_amount?: number;
 }
 
 export interface ISale extends Document {

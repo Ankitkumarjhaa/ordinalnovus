@@ -22,7 +22,6 @@ import {
 import { formatNumber } from "@/utils";
 import { useSelector } from "react-redux";
 import { RootState } from "@/stores";
-import { it } from "node:test";
 import { TiArrowSortedUp, TiArrowSortedDown } from "react-icons/ti";
 
 type HeroProps = {
@@ -204,69 +203,46 @@ function TokenList({ tokens, loading }: HeroProps) {
                         </p>
                       </TableCell>
                       <TableCell sx={{ color: "white", textAlign: "start" }}>
-                        {item.historicalData?.length ? (
-                          (price - item.historicalData[0].price) /
-                            item.historicalData[0].price >=
-                          0 ? (
-                            <div className="flex items-center justify-start text-green-400 ">
-                              {" "}
-                              <TiArrowSortedUp className="mr-2 text-lg" />
-                              {`${(
-                                ((price - item.historicalData[0].price) /
-                                  item.historicalData[0].price) *
-                                100
-                              ).toFixed(2)}%`}
-                            </div>
-                          ) : (
-                            <div className="flex items-center justify-start text-red-400">
-                              <TiArrowSortedDown className=" mr-2 text-lg" />
-                              {`${(
-                                ((price - item.historicalData[0].price) /
-                                  item.historicalData[0].price) *
-                                100
-                              ).toFixed(2)}%`}
-                            </div>
-                          )
-                        ) : (
+                        {item?._24h_price_change === 0 ? (
                           <> - </>
+                        ) : item._24h_price_change > 0 ? (
+                          <div className="flex items-center justify-start text-green-400">
+                            <TiArrowSortedUp className="mr-2 text-lg" />
+                            {`${item._24h_price_change}%`}
+                          </div>
+                        ) : item._24h_price_change < 0 ? (
+                          <div className="flex items-center justify-start text-red-400">
+                            <TiArrowSortedDown className="mr-2 text-lg" />
+                            {`${item._24h_price_change}%`}
+                          </div>
+                        ) : (
+                          <span style={{ color: "white" }}> - </span>
                         )}
                       </TableCell>
+
                       <TableCell
                         sx={{
                           textAlign: "start",
                           color: "white",
                         }}
                       >
-                        {item.historicalData?.length >= 7 ? (
-                          (price - item.historicalData[6].price) /
-                            item.historicalData[6].price >=
-                          0 ? (
+                        {item?._7d_price_change ? (
+                          item._7d_price_change >= 0 ? (
                             <div className="flex justify-start items-center text-green-400">
-                              <TiArrowSortedUp className="mr-2 text-lg" />{" "}
-                              {item.historicalData?.length >= 7
-                                ? `${(
-                                    ((price - item.historicalData[6].price) /
-                                      item.historicalData[6].price) *
-                                    100
-                                  ).toFixed(2)}%`
-                                : "-"}
+                              <TiArrowSortedUp className="mr-2 text-lg" />
+                              {`${item._7d_price_change}%`}
                             </div>
                           ) : (
                             <div className="flex justify-start items-center text-red-400">
-                              <TiArrowSortedDown className="mr-2 text-lg" />{" "}
-                              {item.historicalData?.length >= 7
-                                ? `${(
-                                    ((price - item.historicalData[6].price) /
-                                      item.historicalData[6].price) *
-                                    100
-                                  ).toFixed(2)}%`
-                                : "-"}
+                              <TiArrowSortedDown className="mr-2 text-lg" />
+                              {`${item._7d_price_change}%`}
                             </div>
                           )
                         ) : (
-                          <> - </>
+                          <span style={{ color: "white" }}> - </span>
                         )}
                       </TableCell>
+
                       <TableCell
                         sx={{
                           textAlign: "start",
@@ -279,7 +255,7 @@ function TokenList({ tokens, loading }: HeroProps) {
                             <FaDollarSign />
                           </div>
                           <p className="text-start">
-                            {item?.historicalData && item.historicalData?.length
+                            {item?.price
                               ? ` ${formatNumber(item.supply * price)}`
                               : "-"}
                           </p>

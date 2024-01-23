@@ -6,8 +6,8 @@ import path from "path";
 
 export async function GET() {
   try {
-    const name = "ORDF";
-    const slug = "ordf";
+    const name = "CYBR";
+    const slug = name.toLowerCase();
     const filePath = path.join(
       process.cwd(),
       "public/collections",
@@ -58,6 +58,7 @@ export async function GET() {
           official_collection: coll._id,
           collection_item_name: name,
           collection_item_number: item.item_number,
+          attributes: item?.attributes,
         },
       },
     }));
