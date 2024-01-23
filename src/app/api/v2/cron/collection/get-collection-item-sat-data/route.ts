@@ -1,5 +1,5 @@
 import dbConnect from "@/lib/dbConnect";
-import { Collection, Inscription, SatCollection } from "@/models";
+import { Inscription } from "@/models";
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
@@ -10,7 +10,7 @@ export async function GET() {
     const filePath = path.join(
       process.cwd(),
       "public/collections",
-      "ordf.json"
+      "cybr.json"
     );
     const fileContent = await fs.promises.readFile(filePath, "utf8");
     let jsonData = JSON.parse(fileContent);
@@ -29,10 +29,12 @@ export async function GET() {
           const doc = await Inscription.findOne({
             inscription_id: item.inscription_id,
           })
-            .select("sat inscription_id")
+            .select("sat inscription_id metadata")
             .lean();
           if (doc) {
             item.sat = doc.sat;
+            if (doc.metadata && doc.metadata.attributes)
+              item.attributes = doc.metadata.attributes;
             console.log({ sat: doc.sat, Inscription: doc.inscription_id });
           }
         }

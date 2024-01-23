@@ -43,7 +43,7 @@ const fetchInscriptions = async (query: any, projectionFields: string) => {
     .populate({
       path: "official_collection",
       select:
-        "name inscription_id inscription_icon supply slug description _id verified featured",
+        "name inscription_id inscription_icon supply slug description _id verified featured token_amount",
       populate: {
         path: "inscription_icon",
         select: "inscription_id content_type",

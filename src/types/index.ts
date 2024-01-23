@@ -260,6 +260,7 @@ export interface ICollection extends ICollectionBase, Document {
   royalty_bp?: number;
   royalty_address?: string;
   metaprotocol?: string;
+  token_amount?: number;
 }
 
 export interface ISale extends Document {

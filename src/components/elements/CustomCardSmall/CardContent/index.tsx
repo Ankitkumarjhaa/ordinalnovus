@@ -115,7 +115,7 @@ const CardContent: React.FC<CardContentProps> = ({
 
       return (
         <div
-          className={`w-full h-full flex flex-col justify-center items-center text-sm tracking-widest  py-12 font-sourcecode `}
+          className={`w-full h-full flex flex-col justify-center items-center text-sm tracking-widest py-12 xl:py-24`}
         >
           <p className="uppercase">{mode}</p>
           <p className="text-3xl">{amt}</p>

@@ -126,7 +126,7 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
 
               // console.log("got it...");
               if (isCbrcCollectionRes?.collection) {
-                setAmt(1);
+                setAmt(isCbrcCollectionRes?.collection?.token_amount || 1);
               } else {
                 if (!isNaN(Number(_amt))) {
                   setAmt(Number(_amt));
@@ -283,6 +283,24 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
           addNotification({
             id: new Date().valueOf(),
             message: "Missing Critical Info like Tick or Amt or Fee",
+            open: true,
+            severity: "error",
+          })
+        );
+        return;
+      }
+
+      if (
+        inscription &&
+        tick &&
+        inscription.official_collection &&
+        inscription.official_collection.metaprotocol === "cbrc" &&
+        tick !== inscription?.official_collection.slug
+      ) {
+        dispatch(
+          addNotification({
+            id: new Date().valueOf(),
+            message: "The inscription is not part of this collection",
             open: true,
             severity: "error",
           })
@@ -583,16 +601,7 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
             // setTick("");
             // return;
           } else if (mode === "reinscribe") {
-            if (amt > 1)
-              dispatch(
-                addNotification({
-                  id: new Date().valueOf(),
-                  message: `This token belongs to a collection. Should contain only 1 amt`,
-                  open: true,
-                  severity: "error",
-                })
-              );
-            setAmt(1);
+            setAmt(inscription?.official_collection?.token_amount || 1);
           }
         }
       }
