@@ -43,7 +43,7 @@ function ReinscriptionCarousel({
               href={`/inscription/${item.inscription_id}`}
               className="absolute top-0 bottom-0 right-0 left-0"
             ></Link>
-            {idx === 0 && latest ? (
+            {idx === 0 && latest && latest?.listed_amount ? (
               <>
                 <div className="absolute top-0 p-2 left-0 right-0">
                   <p className="bg-secondary px-2 py-1 text-center font-bold">
