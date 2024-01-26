@@ -55,6 +55,8 @@ function Sales({ collection }: { collection: ICollection }) {
       page_size,
       page,
       tag: "sale",
+
+      marketplace: "ordinalnovus",
       ...(collection.metaprotocol === "cbrc"
         ? { tick: collection.slug }
         : { metaprotocol: "transfer" }),
@@ -139,7 +141,7 @@ function Sales({ collection }: { collection: ICollection }) {
                       color: "#84848a",
                     }}
                   >
-                    INSCRIPTION 
+                    INSCRIPTION
                   </TableCell>
                   <TableCell
                     sx={{
