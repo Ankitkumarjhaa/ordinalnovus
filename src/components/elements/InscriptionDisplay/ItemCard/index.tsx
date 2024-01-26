@@ -11,6 +11,7 @@ import { useWalletAddress } from "bitcoin-wallet-adapter";
 import ListInscriptionCardButton from "../../ListInscriptionCardButton";
 import { cbrcValid, myInscription } from "@/utils/validate";
 import CreateReinscription from "../../CreateReinscription";
+import ReinscriptionCarousel from "../../ReinscriptionCarousel";
 interface CollectionCardProps {
   inscription: IInscription;
   refreshData?: any;
@@ -43,20 +44,29 @@ const ItemCard: React.FC<CollectionCardProps> = ({
       }`}
     >
       <div className="border xl:border-2 border-accent bg-secondary rounded-xl shadow-xl p-3">
-        <Link href={`/inscription/${inscription.inscription_id}`}>
-          <div className="content-div h-[60%] rounded overflow-hidden relative cursor-pointer">
-            {inscription?.version && inscription?.version > 0 && (
-              <p className="absolute bg-bitcoin rounded font-bold text-yellow-900 text-xs p-1 z-10 top-[5px] right-[5px] ">
-                V{inscription.version}
-              </p>
-            )}
-            <CardContent
-              inscriptionId={inscription.inscription_id}
-              content_type={inscription.content_type}
-              inscription={inscription}
+        {inscription.reinscriptions ? (
+          <>
+            <ReinscriptionCarousel
+              data={inscription.reinscriptions}
+              latest={inscription}
             />
-          </div>
-        </Link>
+          </>
+        ) : (
+          <Link href={`/inscription/${inscription.inscription_id}`}>
+            <div className="content-div h-[60%] rounded overflow-hidden relative cursor-pointer">
+              {inscription?.version && inscription?.version > 0 && (
+                <p className="absolute bg-bitcoin rounded font-bold text-yellow-900 text-xs p-1 z-10 top-[5px] right-[5px] ">
+                  V{inscription.version}
+                </p>
+              )}
+              <CardContent
+                inscriptionId={inscription.inscription_id}
+                content_type={inscription.content_type}
+                inscription={inscription}
+              />
+            </div>
+          </Link>
+        )}
 
         <div className={`h-[40%] flex flex-col justify-end `}>
           <div className="py-2 mb-2 center">
@@ -100,41 +110,39 @@ const ItemCard: React.FC<CollectionCardProps> = ({
               <></>
             )}
           </div>
-          {/* {inscription?.domain_valid && (
-            <span className="bg-yellow-500 rounded-md text-center text-xs py-1 px-3 font-bold text-yellow-900">
-              VALID
-            </span>
-          )} */}
           {inscription && inscription?.collection_item_name && (
             <span className="bg-yellow-500 mb-2 rounded-md text-center text-xs py-1 px-3 font-bold text-yellow-900">
               {inscription.collection_item_name}
             </span>
           )}
           {inscription.address === walletDetails?.ordinal_address &&
-            cbrcValid(inscription, allowed_cbrcs || []) &&
-            myInscription(
-              inscription,
-              walletDetails?.ordinal_address || ""
-            ) && (
-              <ListInscriptionCardButton
-                data={inscription}
-                refreshData={refreshData}
-              />
-            )}
-
-          {inscription.address === walletDetails?.ordinal_address &&
-            inscription.official_collection &&
-            availableCbrcsBalance &&
-            availableCbrcsBalance.filter(
-              (a: any) =>
-                a.tick ===
-                  inscription.official_collection?.name.toLowerCase() ||
-                a.tick === inscription.official_collection?.slug.toLowerCase()
-            ) &&
-            myInscription(
-              inscription,
-              walletDetails?.ordinal_address || ""
-            ) && <CreateReinscription data={inscription} />}
+          cbrcValid(inscription, allowed_cbrcs || []) &&
+          myInscription(inscription, walletDetails?.ordinal_address || "") ? (
+            <ListInscriptionCardButton
+              data={inscription}
+              refreshData={refreshData}
+            />
+          ) : (
+            <>
+              {inscription.address === walletDetails?.ordinal_address &&
+              inscription.official_collection &&
+              availableCbrcsBalance &&
+              availableCbrcsBalance.filter(
+                (a: any) =>
+                  a.tick ===
+                    inscription.official_collection?.name.toLowerCase() ||
+                  a.tick === inscription.official_collection?.slug.toLowerCase()
+              ) &&
+              myInscription(
+                inscription,
+                walletDetails?.ordinal_address || ""
+              ) ? (
+                <CreateReinscription data={inscription} />
+              ) : (
+                <div className="xl:py-8"></div>
+              )}
+            </>
+          )}
         </div>
       </div>
     </div>

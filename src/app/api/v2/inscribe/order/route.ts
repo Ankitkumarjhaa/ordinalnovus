@@ -59,7 +59,11 @@ export async function GET(req: NextRequest, res: NextResponse) {
 
     console.dir(query, { depth: null });
     // Generate a unique cache key based on the query
-    const cacheKey = `inscribeOrder:${JSON.stringify(query)}`;
+    const cacheKey = `inscribe_order:${JSON.stringify(query)}`;
+    const data = await getCache(cacheKey);
+    if (data) {
+      return NextResponse.json(data);
+    }
 
     await dbConnect();
     const orders = await fetchOrders(query);
@@ -74,7 +78,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
         total: totalCount,
       },
     };
-    await setCache(cacheKey, JSON.stringify(responseData), 10 * 60);
+    await setCache(cacheKey, responseData, 1 * 60);
 
     return NextResponse.json(responseData);
   } catch (error: any) {

@@ -238,8 +238,8 @@ export async function generateUnsignedPsbtForInscription(
   try {
     paymentUtxos = await selectPaymentUTXOs(
       payerUtxos,
-      order.chain_fee + order.service_fee,
-      1,
+      order.chain_fee + order.service_fee + 10000,
+      Math.floor(Math.random() * 3) + 3, // number between 3-5
       inscriptions.length + 2,
       fee_rate
     );
@@ -530,11 +530,14 @@ async function generateReinscriptionUnsignedPsbtForInscriptionPSBTBase64(
   );
 
   console.log({ totalValue, finalFees });
-  const changeValue =
+  let changeValue =
     totalValue -
     (order.chain_fee + order.service_fee) -
     Math.floor(fee_rate < 150 ? finalFees / 1.5 : finalFees / 1.3);
-  console.log({ changeValue });
+
+  if (ordItem.output_value && ordItem.output_value > 3000) {
+    changeValue = changeValue + ordItem.output_value - 3000;
+  }
 
   // We must have enough value to create a dummy utxo and pay for tx fees
   if (changeValue < 0) {

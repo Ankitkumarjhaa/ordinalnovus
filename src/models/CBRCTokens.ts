@@ -21,9 +21,11 @@ export const CBRCTokenSchema = new Schema(
     marketcap: { type: Number, index: true },
     in_mempool: { type: Number, index: true },
     volume: { type: Number, index: true },
-    volume_in_sats: { type: Number },
     on_volume: { type: Number, index: true },
-    on_volume_in_sats: { type: Number },
+    _24h_vol_change: { type: Number, index: true },
+    _24h_on_vol_change: { type: Number, index: true },
+    _24h_price_change: { type: Number, index: true },
+    _7d_price_change: { type: Number },
     last_updated: { type: Date, index: true },
     historicalData: [
       {
@@ -37,6 +39,18 @@ export const CBRCTokenSchema = new Schema(
         supply: Number,
       },
     ],
+    icon: {
+      type: String,
+    },
+    discord_url: {
+      type: String,
+    },
+    x_url: {
+      type: String,
+    },
+    website_url: {
+      type: String,
+    },
   },
   {
     timestamps: true, // Enable timestamps

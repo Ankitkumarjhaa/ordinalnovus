@@ -18,7 +18,9 @@ function CreateReinscription({ data }: InscriptionProps) {
         className="transition-all w-full rounded-xl"
         link={true}
         href={`/reinscribe?inscription=${data.inscription_id}&tickAmt=${
-          data?.parsed_metaprotocol ? data?.parsed_metaprotocol[2] : ""
+          data.collection_item_name?.toLowerCase() +
+          "=" +
+          (data?.official_collection?.token_amount || 1)
         }`}
       />
     </div>

@@ -3,14 +3,15 @@ import { Collection, Inscription, SatCollection } from "@/models";
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import mongoose from "mongoose";
 
 export async function GET() {
   try {
+    const name = "CYBR";
+    const slug = name.toLowerCase();
     const filePath = path.join(
       process.cwd(),
       "public/collections",
-      "cpnk.json"
+      `${slug}.json`
     );
 
     // Read the file content asynchronously
@@ -27,6 +28,7 @@ export async function GET() {
     const coll = await Collection.findOne({
       json_uploaded: true,
       metaprotocol: "cbrc",
+      slug,
     });
 
     if (!coll) {
@@ -41,7 +43,7 @@ export async function GET() {
           sat: item.sat,
           collection_item_number: item.item_number,
           inscription_id: item.inscription_id,
-          collection_item_name: "CPNK",
+          collection_item_name: name,
           official_collection: coll._id,
         },
         upsert: true,
@@ -54,8 +56,9 @@ export async function GET() {
         filter: { inscription_id: item.inscription_id },
         update: {
           official_collection: coll._id,
-          collection_item_name: "CPNK",
+          collection_item_name: name,
           collection_item_number: item.item_number,
+          attributes: item?.attributes,
         },
       },
     }));
@@ -72,7 +75,7 @@ export async function GET() {
     );
 
     // Perform bulk write
-    // await SatCollection.bulkWrite(bulkOps);
+    await SatCollection.bulkWrite(bulkOps);
 
     return NextResponse.json({ coll, jsonData });
   } catch (err: any) {

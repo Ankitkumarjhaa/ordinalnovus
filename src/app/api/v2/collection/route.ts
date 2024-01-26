@@ -225,7 +225,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
       // await resetInscription();
 
       // Store the result in Redis for 2 hours
-      await setCache(cacheKey, result, 60 * 120);
+      await setCache(cacheKey, result, 2 * 60 * 60);
 
       // Return the result
       return NextResponse.json(result);

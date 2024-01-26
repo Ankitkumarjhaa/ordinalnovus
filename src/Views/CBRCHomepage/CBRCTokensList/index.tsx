@@ -15,7 +15,7 @@ function CBRCTokensList({ defaultData }: { defaultData: ICbrcToken[] }) {
   const [data, setData] = useState<ICbrcToken[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(15);
-  const [sort, setSort] = useState<string>("volume:-1");
+  const [sort, setSort] = useState<string>("on_volume:-1");
   const [loading, setLoading] = useState<boolean>(true);
   const [tick, setTick] = useState("");
 
@@ -52,6 +52,17 @@ function CBRCTokensList({ defaultData }: { defaultData: ICbrcToken[] }) {
     setPage(value);
   };
 
+  const renderPagination = () =>
+    data?.length > 0 && (
+      <div className="w-full lg:w-auto center">
+        <CustomPaginationComponent
+          count={Math.ceil(totalCount / pageSize)}
+          onChange={handlePageChange}
+          page={page}
+        />
+      </div>
+    );
+
   return (
     <div>
       <div className="SortSearchPages py-6 flex flex-wrap justify-between">
@@ -73,15 +84,7 @@ function CBRCTokensList({ defaultData }: { defaultData: ICbrcToken[] }) {
             </div>
           </div> */}
         </div>
-        {data?.length > 0 && (
-          <div className="w-full lg:w-auto center">
-            <CustomPaginationComponent
-              count={Math.ceil(totalCount / pageSize)}
-              onChange={handlePageChange}
-              page={page}
-            />
-          </div>
-        )}
+        {renderPagination()}
       </div>
       {!data || !defaultData ? (
         <>
@@ -96,6 +99,7 @@ function CBRCTokensList({ defaultData }: { defaultData: ICbrcToken[] }) {
       ) : (
         <TokenList tokens={data || defaultData} loading={loading} />
       )}
+     <div className="flex justify-end w-full pt-6">{renderPagination()}</div>
     </div>
   );
 }

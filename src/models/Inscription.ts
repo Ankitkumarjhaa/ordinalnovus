@@ -249,7 +249,13 @@ inscriptionSchema.index(
   { sparse: true }
 );
 
+inscriptionSchema.index({ valid: 1 });
+
 inscriptionSchema.index(
-  { listed_token: 1, listed_amount: 1, listed_price_per_token: 1 },
+  { listed_token: 1, listed_amount: 1, listed_price_per_token: 1, valid: 1 },
+  { sparse: true }
+);
+inscriptionSchema.index(
+  { address: 1, inscription_number: 1, valid: 1, metaprotocol: 1, parsed_metaprotocol: 1 },
   { sparse: true }
 );
