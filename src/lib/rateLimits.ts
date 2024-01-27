@@ -13,7 +13,7 @@ const rateLimits: RateLimits = {
   silver: 5000,
   gold: 30000,
   bitcoin: 100000,
-  admin: 100000,
+  admin: 1000000,
 };
 
 export default rateLimits;

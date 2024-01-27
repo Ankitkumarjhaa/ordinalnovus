@@ -6,7 +6,7 @@ export async function GET() {
   try {
     await dbConnect();
     const coll = await Collection.findOne({
-      slug: "cpnk",
+      slug: "cybr",
     });
 
     if (!coll) {
