@@ -621,11 +621,11 @@ function Crafter({ mode }: { mode: "cbrc" | "reinscribe" }) {
       {walletDetails ? (
         <div className="w-full center flex-col">
           <div className="bg-secondary p-6 rounded-lg shadow-2xl min-w-xl w-5/12">
-            {walletDetails.wallet === "Unisat" && mode === "reinscribe" && (
+            {/* {walletDetails.wallet === "Unisat" && mode === "reinscribe" && (
               <p className="bg-red-500 text-white py-1 px-4 text-center uppercase tracking-wider font-bold mb-2">
                 DO NOT USE UNISAT FOR REINSCRIPTIONS
               </p>
-            )}
+            )} */}
             <h2 className="uppercase font-bold tracking-wider text-xl text-center">
               {mode === "cbrc" ? "Inscribe CBRC" : `Attach ${tick} CBRC Token`}
             </h2>
