@@ -45,11 +45,11 @@ function CBRCLatestListings() {
   useEffect(() => {
     fetchData(); // Fetch data on mount and when dependencies change
 
-    const interval = setInterval(() => {
-      fetchData(); // Fetch data every 10 seconds
-    }, 120000);
+    // const interval = setInterval(() => {
+    //   fetchData(); // Fetch data every 10 seconds
+    // }, 120000);
 
-    return () => clearInterval(interval); // Clear interval on unmount
+    // return () => clearInterval(interval); // Clear interval on unmount
   }, [sort, page, dispatch, pageSize]);
 
   const handlePageChange = (
