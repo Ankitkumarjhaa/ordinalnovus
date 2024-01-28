@@ -4,8 +4,14 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   await dbConnect();
+  const twentyFourHoursAgo = new Date(
+    new Date().getTime() - 24 * 60 * 60 * 1000
+  );
 
-  const inscriptions = await Inscription.find({ valid: false }).lean();
+  const inscriptions = await Inscription.find({
+    valid: false,
+    updated_at: { $gte: twentyFourHoursAgo },
+  }).lean();
 
   // Find the inscriptions that match your criteria
 

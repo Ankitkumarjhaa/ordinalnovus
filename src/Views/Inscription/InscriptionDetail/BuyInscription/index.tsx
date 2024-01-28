@@ -65,6 +65,7 @@ function BuyInscription({ data }: InscriptionProps) {
         publickey: walletDetails.cardinal_pubkey,
         wallet: walletDetails.wallet,
         fee_rate: feeRate,
+        price: data.listed_price || 0,
       });
 
       if (result.ok && result.unsigned_psbt_base64) {

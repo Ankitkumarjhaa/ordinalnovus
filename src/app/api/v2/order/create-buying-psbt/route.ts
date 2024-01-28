@@ -12,6 +12,7 @@ interface OrderInput {
   publickey: string;
   fee_rate: number;
   wallet: string;
+  price: number; //in_sats
 }
 
 // Validate the POST method and necessary fields in the request
@@ -23,6 +24,7 @@ function validateRequest(body: OrderInput): string[] {
     "receive_address",
     "wallet",
     "fee_rate",
+    "price",
   ];
   const missingFields = requiredFields.filter((field) => {
     //@ts-ignore
@@ -45,7 +47,8 @@ async function processOrdItem(
   pay_address: string,
   publickey: string,
   wallet: string,
-  fee_rate: number
+  fee_rate: number,
+  expected_price: number
 ) {
   const ordItem: any = await fetchLatestInscriptionData(inscription_id);
   await dbConnect();
@@ -88,6 +91,10 @@ async function processOrdItem(
     dbItem.tap_internal_key = "";
     dbItem.save();
     throw Error("PSBT Expired");
+  }
+  if (dbItem.listed_price !== expected_price) {
+    console.log({ price: dbItem.listed_price, expected_price });
+    throw Error("Item Price has been updated. Refresh Page.");
   }
   if (
     ordItem.address &&
@@ -147,7 +154,8 @@ export async function POST(
       body.pay_address,
       body.publickey,
       body.wallet,
-      body.fee_rate
+      body.fee_rate,
+      body.price
     );
 
     //buy psbt || dummy utxo psbt

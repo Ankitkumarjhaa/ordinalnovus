@@ -8,9 +8,10 @@ interface CreateBuyingPsbtData {
   publickey: string;
   wallet: string;
   fee_rate: number;
+  price: number;
 }
 
-async function getUnsignedPsbt(data: CreateBuyingPsbtData): Promise<{
+async function getUnsignedBuyPsbt(data: CreateBuyingPsbtData): Promise<{
   ok: boolean;
   message: string;
   for?: string;
@@ -49,4 +50,4 @@ async function getUnsignedPsbt(data: CreateBuyingPsbtData): Promise<{
   }
 }
 
-export default getUnsignedPsbt;
+export default getUnsignedBuyPsbt;
