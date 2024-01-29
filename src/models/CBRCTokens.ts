@@ -27,6 +27,11 @@ export const CBRCTokenSchema = new Schema(
     _24h_price_change: { type: Number, index: true },
     _7d_price_change: { type: Number },
     last_updated: { type: Date, index: true },
+    icon: { type: String },
+    x_link: { type: String },
+    discord_link: { type: String },
+    website_link: { type: String },
+    description: { type: String },
     historicalData: [
       {
         date: Date,
@@ -39,18 +44,6 @@ export const CBRCTokenSchema = new Schema(
         supply: Number,
       },
     ],
-    icon: {
-      type: String,
-    },
-    discord_url: {
-      type: String,
-    },
-    x_url: {
-      type: String,
-    },
-    website_url: {
-      type: String,
-    },
   },
   {
     timestamps: true, // Enable timestamps
