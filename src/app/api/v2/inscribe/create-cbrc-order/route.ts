@@ -234,8 +234,8 @@ async function processFiles({
       privkey: "",
       receive_address,
       file_type: type.includes("text")
-        ? mime.contentType(name)
-        : mime.lookup(name),
+        ? mime.contentType(name).split(" ").join("")
+        : mime.lookup(name).split(" ").join(""),
       file_name: name,
       base64_data,
       file_size: size,
