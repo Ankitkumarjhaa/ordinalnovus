@@ -174,6 +174,7 @@ async function processInscription(inscription: ICreateInscription) {
  */
 export async function GET(req: NextRequest) {
   try {
+    await dbConnect();
     const pendingOrders = await Inscribe.countDocuments({
       status: "payment pending",
     });
