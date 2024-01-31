@@ -38,7 +38,8 @@ export async function GET(req: NextRequest) {
     const tokens = await CBRCToken.find(query.find)
       .where(query.where)
       //@ts-ignore
-      .sort(query.sort)
+      .sort({ ...query.sort, marketcap: -1 })
+      .collation({ locale: "en_US", numericOrdering: true })
       .limit(query.limit)
       .skip(query.start)
       .lean()
