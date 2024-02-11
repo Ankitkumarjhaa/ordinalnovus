@@ -52,6 +52,12 @@ export interface IFeeInfo {
   lastChecked: Date;
 }
 
+export interface IBalanceData {
+  balance: number;
+  mempool_balance: number;
+  dummyUtxos: number;
+}
+
 export interface ICreateInscription {
   order: string;
   order_id: string;
