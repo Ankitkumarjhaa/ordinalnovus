@@ -16,6 +16,8 @@ const customColors = {
   bitcoin: "#eab308",
   dark_gray: "#A6A6A6",
   violet: "#0B071E",
+  dark_violet_700: "#0c082a",
+  dark_violet_600: "#161232",
 };
 
 module.exports = {

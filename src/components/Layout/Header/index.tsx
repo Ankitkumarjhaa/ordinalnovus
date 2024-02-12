@@ -28,10 +28,15 @@ import {
   FaFaceSadCry,
   FaFaceSmile,
   FaFaceSmileWink,
+  FaPowerOff,
   FaXTwitter,
 } from "react-icons/fa6";
+import { FiCopy } from "react-icons/fi";
 import { Popover } from "@mui/material";
 import { fetchBalance } from "@/apiHelper/fetchBalance";
+import { addNotification } from "@/stores/reducers/notificationReducer";
+import copy from "copy-to-clipboard";
+import { MdOutlineDashboard } from "react-icons/md";
 
 function Header() {
   const balanceData = useSelector(
@@ -224,7 +229,7 @@ const Face = ({ balance }: { balance: number }) => {
 
 const InnerMenu = ({ anchorEl, open, onClose, disconnect }: any) => {
   const walletDetails = useWalletAddress();
-
+  const dispatch = useDispatch();
   const balanceData = useSelector(
     (state: RootState) => state.general.balanceData
   );
@@ -243,7 +248,7 @@ const InnerMenu = ({ anchorEl, open, onClose, disconnect }: any) => {
           horizontal: "right",
         }}
       >
-        <div className="p-6 bg-primary-dark min-w-[300px] max-w-[400px] relative text-white">
+        <div className="p-6 bg-dark_violet_700 min-w-[300px] xl:min-w-[400px] max-w-[400px] relative text-white">
           <div className="intro flex items-center pb-6">
             <div className="mr-2 text-3xl">
               {balanceData ? (
@@ -258,87 +263,124 @@ const InnerMenu = ({ anchorEl, open, onClose, disconnect }: any) => {
           </div>
           <div className="BTCWallet flex items-center pb-6 w-full">
             <div className="mr-2">
-              <img
-                alt=""
-                src="https://pngimg.com/uploads/bitcoin/bitcoin_PNG48.png"
-                width={35}
-              />{" "}
+              <img alt="" src="/static-assets/images/btc.png" width={35} />{" "}
             </div>
             <div className="flex-1 flex justify-between items-center text-sm">
               <div>
                 <p className="font-bold tracking-wider text-white">
                   BTC Wallet
                 </p>
-                <p className="uppercase">
-                  {shortenString(walletDetails.cardinal_address, 5)}
-                </p>
+                <div className="flex items-center">
+                  <p className="uppercase">
+                    {shortenString(walletDetails.cardinal_address, 5)}
+                  </p>
+                  <div
+                    className="cursor-pointer"
+                    onClick={() => {
+                      copy(walletDetails?.cardinal_address + "");
+                      dispatch(
+                        addNotification({
+                          id: new Date().valueOf(),
+                          message: "Address Copied",
+                          open: true,
+                          severity: "success",
+                        })
+                      );
+                    }}
+                  >
+                    <FiCopy className="ml-2 hover:text-green-600 transition-all" />
+                  </div>
+                </div>
               </div>
               {balanceData && (
                 <div>
                   <p className="font-bold tracking-wider text-white">
-                    {(balanceData.balance / 100_000_000).toFixed(5)} BTC
+                    {(balanceData.balance / 100_000_000).toFixed(
+                      balanceData.balance / 100_000_000 < 0.001 ? 5 : 2
+                    )}{" "}
+                    BTC
                   </p>
-                  {/* <p className="uppercase font-bold text-sm">
-                {shortenString(walletDetails.cardinal_address, 5)}
-              </p> */}
                 </div>
               )}
             </div>
           </div>
           <div className="OrdinalsWallet flex items-center pb-6 w-full">
             <div className="mr-2">
-              <img
-                alt=""
-                src="https://pngimg.com/uploads/bitcoin/bitcoin_PNG48.png"
-                width={35}
-              />{" "}
+              <img alt="" src="/static-assets/images/ord.png" width={35} />{" "}
             </div>
             <div className="flex-1 flex justify-between items-center text-sm">
-              <div>
+              <div className="">
                 <p className="font-bold tracking-wider text-white">
                   Ordinals Wallet
                 </p>
-                <p className="uppercase">
-                  {shortenString(walletDetails.ordinal_address, 5)}
-                </p>
+                <div className="flex items-center">
+                  <p className="uppercase">
+                    {shortenString(walletDetails.ordinal_address, 5)}
+                  </p>
+                  <div
+                    className="cursor-pointer"
+                    onClick={() => {
+                      copy(walletDetails?.ordinal_address + "");
+                      dispatch(
+                        addNotification({
+                          id: new Date().valueOf(),
+                          message: "Address Copied",
+                          open: true,
+                          severity: "success",
+                        })
+                      );
+                    }}
+                  >
+                    <FiCopy className="ml-2 hover:text-green-600 transition-all" />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
           <div className="relative ">
-            <div className="bg-primary rounded cursor-pointer styled-button-wrapper my-2">
+            <div className="bg-dark_violet_600 rounded cursor-pointer styled-button-wrapper my-2">
               <button
                 className="accent_transition p-2 w-full"
                 onClick={onClose}
               >
-                <Link href="/dashboard">Dashboard</Link>
+                <Link href="/dashboard">
+                  <div className="center">
+                    <MdOutlineDashboard className="mr-2" />
+                    <span>Dashboard</span>
+                  </div>
+                </Link>
               </button>
             </div>
           </div>
           <div className="relative ">
-            <div className="bg-primary rounded cursor-pointer styled-button-wrapper my-2">
+            <div className="bg-dark_violet_600 rounded cursor-pointer styled-button-wrapper my-2">
               <button
-                className="red_transition p-2 w-full"
+                className="red_transition p-2 w-full center"
                 onClick={() => {
                   disconnect();
                   onClose();
                 }}
               >
-                Disconnect
+                <FaPowerOff className="mr-2" /> <span>Disconnect</span>
               </button>
             </div>
           </div>
           <div className="socials flex space-x-3 text-xl relative">
             <div className="relative ">
-              <div className="bg-primary rounded cursor-pointer styled-button-wrapper">
+              <div className="bg-dark_violet_600 rounded cursor-pointer styled-button-wrapper">
                 <button className="accent_transition p-2">
-                  <FaXTwitter />
+                  <Link href="https://x.com/ordinalNovus" target="_blank">
+                    <FaXTwitter />
+                  </Link>
                 </button>
               </div>
             </div>
             <div className="relative ">
-              <button className="bg-primary rounded cursor-pointer  styled-button-wrapper">
+              <button className="bg-dark_violet_600 rounded cursor-pointer  styled-button-wrapper">
                 <button className="accent_transition p-2">
-                  <FaDiscord />
+                  <Link href="https://discord.gg/Wuy45UfxsG" target="_blank">
+                    <FaDiscord />
+                  </Link>
                 </button>
               </button>
             </div>
