@@ -14,6 +14,7 @@ import { AllowedTokensSchema } from "./AllowedTokens";
 import { CBRCTokenSchema } from "./CBRCTokens";
 import { createInscriptionSchema } from "./createInscription";
 import { satsCollSchema } from "./SatCollection";
+import { CBRCCandleDataMSchema } from "./CBRCCandleDataM";
 
 const Inscription =
   models.Inscription || model("Inscription", inscriptionSchema);
@@ -37,6 +38,9 @@ const CBRCToken = models.CBRCToken || model("CBRCToken", CBRCTokenSchema);
 const CBRCStats = models.CBRCStats || model("CBRCStats", CbrcStatsSchema);
 const SatCollection =
   models.SatCollection || model("SatCollection", satsCollSchema);
+
+const CBRCCandleDataM =
+  models.CBRCCandleDataM || model("CBRCCandleDataM", CBRCCandleDataMSchema);
 export {
   Inscribe,
   CreateInscription,
@@ -52,4 +56,5 @@ export {
   CBRCToken,
   SatCollection,
   CBRCStats,
+  CBRCCandleDataM,
 };
