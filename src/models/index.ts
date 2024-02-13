@@ -15,19 +15,23 @@ import { CBRCTokenSchema } from "./CBRCTokens";
 import { createInscriptionSchema } from "./createInscription";
 import { satsCollSchema } from "./SatCollection";
 import { CBRCCandleDataMSchema } from "./CBRCCandleDataM";
-
+import { cbrcmarketDataSchema } from "./CbrcMarketdata";
+import { cbrcSalesSchema } from "./CBRCSales";
+import { CounterSchema } from "./Counter";
 const Inscription =
   models.Inscription || model("Inscription", inscriptionSchema);
 
 const Collection = models.Collection || model("Collection", collectionSchema);
 const APIKey = models.APIKey || model("APIKey", APIKeySchema);
 const Tx = models.Tx || model("Tx", TXCacheSchema);
+const Counter = models.Counter || model("Counter", CounterSchema);
 const Block = models.Block || model("Block", BlocksSchema);
 const Inscribe = models.Inscribe || model("Inscribe", InscribeOrderSchema);
 const CreateInscription =
   models.CreateInscription ||
   model("CreateInscription", createInscriptionSchema);
 const Sale = models.Sale || model("Sale", salesSchema);
+const CBRCSale = models.CBRCSale || model("CBRCSale", cbrcSalesSchema);
 const Wallet = models.Wallet || model("Wallet", WalletSchema);
 const AllowedCbrcs =
   models.AllowedCbrcs || model("AllowedCbrcs", AllowedTokensSchema);
@@ -38,9 +42,10 @@ const CBRCToken = models.CBRCToken || model("CBRCToken", CBRCTokenSchema);
 const CBRCStats = models.CBRCStats || model("CBRCStats", CbrcStatsSchema);
 const SatCollection =
   models.SatCollection || model("SatCollection", satsCollSchema);
-
 const CBRCCandleDataM =
   models.CBRCCandleDataM || model("CBRCCandleDataM", CBRCCandleDataMSchema);
+const CbrcMarketData =
+  models.CbrcMarketData || model("CbrcMarketData", cbrcmarketDataSchema);
 export {
   Inscribe,
   CreateInscription,
@@ -57,4 +62,7 @@ export {
   SatCollection,
   CBRCStats,
   CBRCCandleDataM,
+  CbrcMarketData,
+  CBRCSale,
+  Counter,
 };

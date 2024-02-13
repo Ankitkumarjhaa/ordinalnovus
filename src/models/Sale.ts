@@ -1,41 +1,54 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 // Define the main schema
 export const salesSchema = new mongoose.Schema(
   {
-    inscription: {
-      type: Schema.Types.ObjectId,
-      ref: "Inscription",
-      required: true,
-    },
-    inscription_id: {
-      type: String,
-      required: true,
-      validate: {
-        validator: (value: string) => /^[a-f0-9]+i\d+$/.test(value),
-        message: () =>
-          "inscription_id should be in the format: c17dd02a7f216f4b438ab1a303f518abfc4d4d01dcff8f023cf87c4403cb54cai0",
+    inscriptions: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Inscription",
+        required: true,
       },
-    },
-    output_value: { type: Number },
-    location: {
-      type: String,
-      required: true,
-      validate: {
-        validator: (value: string) => /^[\da-f]+:\d+:\d+$/.test(value),
-        message: () => "location should have two ':' followed by numbers.",
+    ],
+    inscription_ids: [
+      {
+        type: String,
+        required: true,
+        validate: {
+          validator: (value: string) => /^[a-f0-9]+i\d+$/.test(value),
+          message: () =>
+            "inscription_id should be in the format: hexadecimalStringiIndex",
+        },
       },
-    },
-
+    ],
     // Sale
-    sale_date: { type: Date, required: true },
-    fee: { type: Number, required: true },
-    price: { type: Number, required: true },
+    type: { type: String, required: true },
+    price: { type: mongoose.Schema.Types.Decimal128, required: true },
     from: { type: String, required: true },
-    seller_receive_address: { type: String },
     to: { type: String, required: true },
     txid: { type: String, required: true },
-    marketplace_fee: { type: Number, required: true },
+    trade_timestamp: { type: Date, required: true },
+    trade_id: { type: Number, required: true, unique: true },
+    official_collections: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Collection",
+        required: true,
+      },
+    ],
+    metaprotocol: { type: String },
+    parsed_metaprotocol: {
+      type: [String],
+      set: function (value: string) {
+        // Check if the value is a string and not empty
+        if (typeof value === "string" && value.trim().length > 0) {
+          // Split the string by a delimiter (e.g., comma), trim and convert each part to lowercase
+          return value.split(":").map((item) => item.trim().toLowerCase());
+        } else {
+          return [];
+        }
+      },
+    },
   },
   {
     timestamps: { createdAt: "created_at", updatedAt: "updated_at" },
