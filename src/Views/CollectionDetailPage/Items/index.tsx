@@ -122,9 +122,9 @@ function Items({ collection }: ItemProps) {
     if (sort.includes("listed_price") && collection.metaprotocol === "cbrc") {
       fetchCbrcListingData();
 
-      const interval = setInterval(() => {
-        fetchCbrcListingData(); // Fetch data every 10 seconds
-      }, 60000); // 10000 milliseconds = 10 seconds
+      // const interval = setInterval(() => {
+      //   fetchCbrcListingData(); // Fetch data every 10 seconds
+      // }, 60000); // 10000 milliseconds = 10 seconds
     } else {
       fetchData();
     }

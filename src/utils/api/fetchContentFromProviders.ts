@@ -6,9 +6,14 @@ import axios from "axios";
 export default async function fetchContentFromProviders(contentId: string) {
   const cacheKey = `on_content:${contentId}`;
   let content = await getCache(cacheKey);
+  // console.log({ content });
   if (content) {
-    // console.log("returning content from cache");
+    // console.log("returning content from cache for ID: ", contentId);
     return content;
+  }
+  if (content === false) {
+    console.log("returning null content from cache for ID: ", contentId);
+    return null;
   }
   const PROVIDERS = [process.env.NEXT_PUBLIC_PROVIDER, "https://ordinals.com"];
   // if (process.env.NODE_ENV === "production") {
@@ -45,12 +50,21 @@ export default async function fetchContentFromProviders(contentId: string) {
           contentType: response.headers["content-type"],
         };
 
+        console.log(`setting cache for: `, cacheKey);
         await setCache(cacheKey, content, 5 * 60 * 60);
 
         return content;
       }
       throw Error("API Call failed");
-    } catch (error) {
+    } catch (error: any) {
+      console.log(error.response.status, "error");
+      if (error.response.status === 404) {
+        // item has no content
+        console.log("item has no content");
+        await setCache("activeProvider", PROVIDERS[i], 600); // 600 seconds = 10 minutes
+        await setCache(cacheKey, false, 5 * 60 * 60);
+        return false;
+      }
       console.warn(`Provider ${PROVIDERS[i]} failed. Trying next.`);
 
       // If the current provider is the last in the list, check if the primary provider is also failing

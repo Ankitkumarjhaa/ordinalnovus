@@ -14,7 +14,7 @@ function CBRCTokensList({ defaultData }: { defaultData: ICbrcToken[] }) {
   const [page, setPage] = useState<number>(1);
   const [data, setData] = useState<ICbrcToken[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
-  const [pageSize, setPageSize] = useState<number>(15);
+  const [pageSize, setPageSize] = useState<number>(20);
   const [sort, setSort] = useState<string>("on_volume:-1");
   const [loading, setLoading] = useState<boolean>(true);
   const [tick, setTick] = useState("");
@@ -99,7 +99,7 @@ function CBRCTokensList({ defaultData }: { defaultData: ICbrcToken[] }) {
       ) : (
         <TokenList tokens={data || defaultData} loading={loading} />
       )}
-     <div className="flex justify-end w-full pt-6">{renderPagination()}</div>
+      <div className="flex justify-end w-full pt-6">{renderPagination()}</div>
     </div>
   );
 }
