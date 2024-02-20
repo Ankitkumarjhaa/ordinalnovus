@@ -13,12 +13,8 @@ import { APIUsageLogSchema } from "./APIUsageLog";
 import { CBRCTokenSchema } from "./CBRCTokens";
 import { createInscriptionSchema } from "./createInscription";
 import { satsCollSchema } from "./SatCollection";
-<<<<<<< HEAD
 import { cbrcSalesSchema } from "./CBRCSales";
 import { CounterSchema } from "./Counter";
-=======
-
->>>>>>> dev
 const Inscription =
   models.Inscription || model("Inscription", inscriptionSchema);
 
@@ -55,9 +51,6 @@ export {
   CBRCToken,
   SatCollection,
   CBRCStats,
-<<<<<<< HEAD
   CBRCSale,
   Counter,
-=======
->>>>>>> dev
 };
