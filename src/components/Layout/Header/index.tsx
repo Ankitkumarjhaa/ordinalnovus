@@ -295,10 +295,7 @@ const InnerMenu = ({ anchorEl, open, onClose, disconnect }: any) => {
               {balanceData && (
                 <div>
                   <p className="font-bold tracking-wider text-white">
-                    {(balanceData.balance / 100_000_000).toFixed(
-                      balanceData.balance / 100_000_000 < 0.001 ? 5 : 2
-                    )}{" "}
-                    BTC
+                    {(balanceData.balance / 100_000_000).toFixed(4)} BTC
                   </p>
                 </div>
               )}
@@ -388,5 +385,5 @@ const InnerMenu = ({ anchorEl, open, onClose, disconnect }: any) => {
         </div>
       </Popover>
     );
-  else <></>;
+  else null;
 };

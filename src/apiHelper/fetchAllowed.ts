@@ -1,7 +1,7 @@
 "use server";
 
 import dbConnect from "@/lib/dbConnect";
-import { AllowedCbrcs, CBRCToken } from "@/models";
+import { CBRCToken } from "@/models";
 
 export async function fetchAllowed() {
   await dbConnect();
@@ -9,5 +9,5 @@ export async function fetchAllowed() {
     "checksum"
   );
 
-  return allowedCbrcsDocs.map((doc) => doc.checksum);
+  return allowedCbrcsDocs.map((doc: { checksum: any }) => doc.checksum);
 }
