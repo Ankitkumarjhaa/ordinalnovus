@@ -70,17 +70,27 @@ export const TXCacheSchema = new mongoose.Schema(
         }
       },
     },
+    added_to_sales: { type: Boolean, default: false },
   },
   {
     timestamps: true,
   }
 );
 
+TXCacheSchema.index(
+  { added_to_sales: 1, marketplace: 1 },
+  {
+    partialFilterExpression: {
+      $or: [{ added_to_sales: false }, { added_to_sales: { $exists: false } }],
+      marketplace: "ordinalnovus",
+    },
+  }
+);
 TXCacheSchema.index({ txid: 1, height: 1 });
 TXCacheSchema.index({ tag: 1 });
 TXCacheSchema.index({ parsed: 1 });
 TXCacheSchema.index({ from: 1, to: 1, price: 1, marketplace: 1 });
 TXCacheSchema.index({ inscription: 1 });
 TXCacheSchema.index({ blockhash: 1 });
-TXCacheSchema.index({ timestamp: 1 });
+TXCacheSchema.index({ timestamp: -1 });
 TXCacheSchema.index({ parsed_metaprotocol: 1 }, { sparse: true });

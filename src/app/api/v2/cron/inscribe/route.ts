@@ -222,3 +222,43 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+// sign multiple inputs
+// const redeemtx = Tx.create({
+//   vin: [
+//     {
+//       txid,
+//       vout,
+//       prevout: {
+//         value,
+//         scriptPubKey: Address.toScriptPubKey(inscription.inscription_address),
+//       },
+//       witness: [],
+//     },
+//     {
+//       txid: "20feb51dcc136d8db2b2d34f83d347a9d503d9f8a78916d0e7cfe16ad3028e2b",
+//       vout: 0,
+//       prevout: {
+//         value: 14000,
+//         scriptPubKey: Address.toScriptPubKey(inscription.inscription_address),
+//       },
+//       witness: [],
+//     },
+//   ],
+//   vout: [
+//     {
+//       value: 5000,
+//       scriptPubKey: Address.toScriptPubKey(inscription.receive_address),
+//     },
+//   ],
+// });
+// const sig = Signer.taproot.sign(seckey.raw, redeemtx, 0, {
+//   extension: inscription.leaf,
+// });
+// redeemtx.vin[0].witness = [sig, script, inscription.cblock];
+// const sig2 = Signer.taproot.sign(seckey.raw, redeemtx, 1, {
+//   extension: inscription.leaf,
+// });
+// redeemtx.vin[1].witness = [sig2];
+// const rawtx = Tx.encode(redeemtx).hex;
+// console.log({ rawtx }, "INS TX");
