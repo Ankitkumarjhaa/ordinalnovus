@@ -283,6 +283,11 @@ export const checkCbrcValidity = async (id: string) => {
 
     throw new Error("No data received from the API");
   } catch (e: any) {
+    if (e.response.status === 404) {
+      {
+        await updateInscriptionDB(id, false);
+      }
+    }
     // Handle errors
     console.error("Error checking CBRC validity:", e.message);
     return false;

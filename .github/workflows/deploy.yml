@@ -1,4 +1,4 @@
-name: Ordinalnovus CI
+name: Build and Deploy to DigitalOcean Kubernetes
 
 on:
   push:
@@ -7,33 +7,48 @@ on:
       - dev
 
 jobs:
-  build-and-push-ordinalnovus:
+  build:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Determine build environment
-        id: set-env
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_TOKEN }}
+
+      - name: Determine tag
+        id: vars
         run: |
-          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-            echo "NEXT_PUBLIC_URL=https://ordinalnovus.com" >> $GITHUB_ENV
-            echo "TAG_NAME=latest" >> $GITHUB_ENV
-          elif [ "${{ github.ref }}" == "refs/heads/dev" ]; then
-            echo "NEXT_PUBLIC_URL=https://dev.ordinalnovus.com" >> $GITHUB_ENV
-            echo "TAG_NAME=dev" >> $GITHUB_ENV
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "::set-output name=tag::latest"
+          else
+            echo "::set-output name=tag::dev"
           fi
-          echo "MONGODB_STRING=mongodb://192.168.1.33:27017/ordinalnovus_dev" >> $GITHUB_ENV
 
-      - name: Build Ordinalnovus image
+      - name: Build container image
+        run: docker build -t registry.digitalocean.com/ordinalnovus/ordinalnovus:${{ steps.vars.outputs.tag }} .
+
+      - name: Log in to DigitalOcean Container Registry with short-lived credentials
+        run: doctl registry login --expiry-seconds 1200
+
+      - name: Push image to DigitalOcean Container Registry
+        run: docker push registry.digitalocean.com/ordinalnovus/ordinalnovus:${{ steps.vars.outputs.tag }}
+
+      - name: Update deployment file
         run: |
-          docker build -t crypticmetadev/ordinalnovus:${{ env.TAG_NAME }} . \
-            --build-arg MONGODB_URI=${{ env.MONGODB_STRING }} \
-            --build-arg NEXT_PUBLIC_URL=${{ env.NEXT_PUBLIC_URL }}
+          sed -i 's|<IMAGE>|registry.digitalocean.com/ordinalnovus/ordinalnovus:'"${{ steps.vars.outputs.tag }}"'|' $GITHUB_WORKSPACE/config/deployment.yml
 
-      - name: Log in to Docker registry
-        run: docker login -u crypticmetadev -p ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Save DigitalOcean kubeconfig with short-lived credentials
+        run: doctl kubernetes cluster kubeconfig save --expiry-seconds 600 ordinalnovus
 
-      - name: Push ordinalnovus image to Docker registry
-        run: docker push crypticmetadev/ordinalnovus:${{ env.TAG_NAME }}
+      - name: Deploy to DigitalOcean Kubernetes
+        run: kubectl apply -f $GITHUB_WORKSPACE/config/deployment.yml
+
+      - name: Verify deployment
+        run: kubectl rollout status deployment/ordinalnovus-app
