@@ -34,8 +34,8 @@ jobs:
       - name: Build container image
         run: |
           docker build -t registry.digitalocean.com/ordinalnovus/ordinalnovus:${{ steps.vars.outputs.tag }} \
-            --build-arg MONGODB_URI='${{ secrets.MONGODB_URI }}' \
-            --build-arg NEXT_PUBLIC_URL='https://localhost:3000' .
+            --build-arg MONGODB_URI='jjj' \
+            --build-arg NEXT_PUBLIC_URL='http://localhost:3000' .
 
       - name: Log in to DigitalOcean Container Registry with short-lived credentials
         run: doctl registry login --expiry-seconds 1200
