@@ -44,7 +44,7 @@ jobs:
 
       - name: Update deployment file
         run: |
-          sed -i 's|<IMAGE>|registry.digitalocean.com/ordinalnovus/ordinalnovus:'"${{ steps.vars.outputs.tag }}"'|' $GITHUB_WORKSPACE/config/deployment.yml
+          sed -i 's|<IMAGE>|registry.digitalocean.com/ordinalnovus/ordinalnovus:'"${{ steps.vars.outputs.tag }}"'|' $GITHUB_WORKSPACE/config/dev-deployment.yml
 
       - name: Save DigitalOcean kubeconfig with short-lived credentials
         run: doctl kubernetes cluster kubeconfig save --expiry-seconds 600 ordinalnovus
