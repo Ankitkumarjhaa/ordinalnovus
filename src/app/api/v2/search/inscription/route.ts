@@ -255,7 +255,7 @@ export const checkCbrcValidity = async (id: string) => {
     }
 
     const { data } = await axios.get(
-      `https://api-prod.cybord.org/transfer?q=${id}`
+      `${process.env.NEXT_PUBLIC_CBRC_API}/transfer?q=${id}`
     );
 
     if (data) {
@@ -283,6 +283,11 @@ export const checkCbrcValidity = async (id: string) => {
 
     throw new Error("No data received from the API");
   } catch (e: any) {
+    if (e.response.status === 404) {
+      {
+        await updateInscriptionDB(id, false);
+      }
+    }
     // Handle errors
     console.error("Error checking CBRC validity:", e.message);
     return false;

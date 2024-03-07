@@ -131,9 +131,12 @@ async function getInscriptionsRange(collection: ICollection) {
 
 async function updateTokenList() {
   const offset = await CBRCToken.countDocuments();
-  const { data } = await axios.get(`https://api-prod.cybord.org/deploy`, {
-    params: { offset },
-  });
+  const { data } = await axios.get(
+    `${process.env.NEXT_PUBLIC_CBRC_API}/deploy`,
+    {
+      params: { offset },
+    }
+  );
 
   if (data && data.items) {
     for (const token of data.items) {

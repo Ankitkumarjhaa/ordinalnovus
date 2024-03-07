@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ordinalnovus-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: ordinalnovus-app
+  template:
+    metadata:
+      labels:
+        app: ordinalnovus-app
+    spec:
+      containers:
+        - name: ordinalnovus-app
+          image: <IMAGE>
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - secretRef:
+                name: app-env
+          resources:
+            requests:
+              cpu: "1000m" # Request 1000 millicores of CPU
+            limits:
+              cpu: "5000m" # Limit to 5000 millicores of CPU

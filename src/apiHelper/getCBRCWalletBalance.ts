@@ -20,7 +20,7 @@ export async function FetchCBRCBalance(
   const { address } = params;
   console.debug({ params });
   try {
-    let url = `https://api-prod.cybord.org/balance/${address}`;
+    let url = `${process.env.NEXT_PUBLIC_CBRC_API}/balance/${address}`;
     const response = await axios.get(url);
 
     if (response.status === 200) {
