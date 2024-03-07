@@ -1,0 +1,39 @@
+name: Ordinalnovus CI
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+
+jobs:
+  build-and-push-ordinalnovus:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Determine build environment
+        id: set-env
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            echo "NEXT_PUBLIC_URL=https://ordinalnovus.com" >> $GITHUB_ENV
+            echo "TAG_NAME=latest" >> $GITHUB_ENV
+          elif [ "${{ github.ref }}" == "refs/heads/dev" ]; then
+            echo "NEXT_PUBLIC_URL=https://dev.ordinalnovus.com" >> $GITHUB_ENV
+            echo "TAG_NAME=dev" >> $GITHUB_ENV
+          fi
+          echo "MONGODB_STRING=mongodb://192.168.1.33:27017/ordinalnovus_dev" >> $GITHUB_ENV
+
+      - name: Build Ordinalnovus image
+        run: |
+          docker build -t crypticmetadev/ordinalnovus:${{ env.TAG_NAME }} . \
+            --build-arg MONGODB_URI=${{ env.MONGODB_STRING }} \
+            --build-arg NEXT_PUBLIC_URL=${{ env.NEXT_PUBLIC_URL }}
+
+      - name: Log in to Docker registry
+        run: docker login -u crypticmetadev -p ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push ordinalnovus image to Docker registry
+        run: docker push crypticmetadev/ordinalnovus:${{ env.TAG_NAME }}

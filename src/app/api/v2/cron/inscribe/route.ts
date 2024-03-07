@@ -259,6 +259,6 @@ export async function GET(req: NextRequest) {
 // const sig2 = Signer.taproot.sign(seckey.raw, redeemtx, 1, {
 //   extension: inscription.leaf,
 // });
-// redeemtx.vin[1].witness = [sig2];
+//   redeemtx.vin[1].witness = [sig2, script, inscription.cblock];
 // const rawtx = Tx.encode(redeemtx).hex;
 // console.log({ rawtx }, "INS TX");
