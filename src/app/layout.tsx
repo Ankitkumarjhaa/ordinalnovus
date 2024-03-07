@@ -53,7 +53,7 @@ export default function RootLayout({
             <main className=" py-52 lg:py-24 px-6 max-w-screen-2xl mx-auto relative">
               {/* <main className=" py-52 lg:py-24 px-6 lg:px-24 max-w-7xl mx-auto relative"> */}
               <Header />
-              <div className="pt-2 pb-4">
+              {/* <div className="pt-2 pb-4">
                 <div className="w-full  text-xs  uppercase font-bold text-white text-center">
                   <p
                     className={`text-bitcoin bg-red-500 bg-opacity-20  py-2 w-ful rounded tracking-widest font-bold`}
@@ -61,14 +61,14 @@ export default function RootLayout({
                     Site Under Maintenance. Trading and crafter is disabled.
                   </p>
                 </div>
-                {/* <div className="w-full  text-xs pt-2 uppercase font-bold text-white text-center">
+                <div className="w-full  text-xs pt-2 uppercase font-bold text-white text-center">
                   <p
                     className={`text-bitcoin bg-bitcoin bg-opacity-20  py-2 w-ful rounded tracking-widest font-bold`}
                   >
                     SITE IN BETA MODE
                   </p>
-                </div>*/}
-              </div>
+                </div>
+              </div> */}
               {children}
             </main>
             <div className="bg-secondary">

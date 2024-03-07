@@ -255,7 +255,7 @@ export const checkCbrcValidity = async (id: string) => {
     }
 
     const { data } = await axios.get(
-      `https://api-prod.cybord.org/transfer?q=${id}`
+      `${process.env.NEXT_PUBLIC_CBRC_API}/transfer?q=${id}`
     );
 
     if (data) {
